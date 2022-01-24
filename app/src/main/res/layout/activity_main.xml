@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.MainActivity"
+    tools:ignore="HardcodedText,UseCompoundDrawables,ContentDescription">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="0dp"
+        android:gravity="center|start"
+        android:paddingLeft="15dp"
+        android:paddingTop="13dp"
+        android:paddingRight="15dp"
+        android:paddingBottom="5dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:text="MIUI 原生通知图标"
+            android:textColor="#FF323B42"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/title_restart_icon"
+            style="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="5dp"
+            android:src="@mipmap/restart"
+            android:tint="#FF323B42" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_lin_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/dark_round"
+        android:elevation="0dp"
+        android:gravity="center">
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/main_img_status"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="5dp"
+            android:src="@mipmap/warn"
+            android:tint="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingTop="10dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/main_text_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="模块未激活"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/main_text_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:alpha="0.8"
+                android:text="当前版本：%1"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/main_text_miui_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:text="MIUI 版本：%1"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:fadingEdgeLength="10dp"
+        android:fillViewport="true"
+        android:requiresFadingEdge="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="15dp">
+
+                <androidx.constraintlayout.utils.widget.ImageFilterView
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="10dp"
+                    android:alpha="0.85"
+                    android:src="@mipmap/about"
+                    android:tint="#FF777777" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="5dp"
+                    android:text="修改设置或开启关闭模块请点击右上角重启系统界面才能生效。"
+                    android:textColor="#FF323B42"
+                    android:textSize="11sp"
+                    tools:ignore="SmallSp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/module_enable_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="启用模块"
+                    android:textColor="#FF323B42"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="关闭后模块将彻底停止工作，以下选项都将不再生效。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/color_icon_fix_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="修复彩色通知图标"
+                    android:textColor="#FF323B42"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="此选项默认开启，开启后将自动对应用通知图标进行判断，保持彩色图标不被着色为白色或黑色色块，包括高版本 API 仍然不遵守原生通知图标规范的种种 APP 都将进行修复。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/chat_icon_fix_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="优化社交应用通知图标"
+                    android:textColor="#FF323B42"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="此选项默认开启，开启后将对 QQ 和微信的消息图标进行色彩修复，使得它们的图标看起来更加美观。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/hide_icon_in_launcher_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="在桌面隐藏模块图标"
+                    android:textColor="#FF323B42"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="隐藏模块图标后，模块不会再在桌面显示，你可以在 EdXposed、太极、LsPosed 中找到模块设置并打开，对原生系统无效。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center|start">
+
+                    <androidx.constraintlayout.utils.widget.ImageFilterView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_marginEnd="5dp"
+                        android:alpha="0.85"
+                        android:src="@mipmap/about"
+                        android:tint="#FF323B42" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.85"
+                        android:singleLine="true"
+                        android:text="使用帮助与说明"
+                        android:textColor="#FF323B42"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.8"
+                    android:lineSpacingExtra="6dp"
+                    android:text="Q.这个模块是如何诞生的？\nA.这个模块诞生来源于 MIUI 的乱改和不规范，本来 MIUI 9 之后，官方给出了原生通知图标样式，后面由于用户反应通知栏经常出现黑白块，这当然不是系统的错，而是国内 APP 极其不规范的通知图标设计，于是 MIUI 选择直接忽略这个问题把全部图标都改成了 APP 的彩色图标，使得之前拥有自有样式的原生图标也被破坏，通知中“setSmallIcon”不再有效，这个模块就是为了修复被 MIUI 开发组忽略的图标问题，并完美地给 MIUI 修复了黑白块图标的问题。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.8"
+                    android:lineSpacingExtra="6dp"
+                    android:text="Q.如何使用？\nA.模块仅支持 EdXposed、LsPosed，由于涉及到修改系统应用，不支持太极(阴)框架，在 LsPosed 的作用域中，只需勾选“系统界面”即可，应用设置后需要重启系统界面。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.8"
+                    android:lineSpacingExtra="6dp"
+                    android:text="Q.哪些是已知问题？\nA.MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，暂时只能等官方修复。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.8"
+                    android:lineSpacingExtra="6dp"
+                    android:text="Q.如何反馈问题？\nA.酷安关注 @星夜不荟"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/link_with_project_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center|start">
+
+                    <androidx.constraintlayout.utils.widget.ImageFilterView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_marginEnd="5dp"
+                        android:alpha="0.85"
+                        android:src="@mipmap/about"
+                        android:tint="#FF323B42" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.85"
+                        android:singleLine="true"
+                        android:text="项目地址"
+                        android:textColor="#FF323B42"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.8"
+                    android:lineSpacingExtra="6dp"
+                    android:text="本软件是免费开源项目，遵循 GPL 协议，你可以点击这里前往 Github 查看源码以及获取模块更新。\n严禁以任何形式贩卖、商用本软件，否则开发者有权追究其法律责任。"
+                    android:textColor="#777777"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <TextView
+                    android:id="@+id/link_with_follow_me"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="6dp"
+                    android:text="恰饭时间\n点击前往酷安关注我，获取我的更多应用"
+                    android:textColor="#FF323B42"
+                    android:textSize="16sp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@mipmap/qr_pay" />
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="6dp"
+                    android:text="开发者 酷安 @星夜不荟\n未经允许不得转载、修改复制我的劳动成果"
+                    android:textColor="#FF323B42"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

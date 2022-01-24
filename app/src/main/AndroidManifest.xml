@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.fankes.miui.notify">
+
+    <application
+        android:name=".application.MNvApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MIUINativeNotifyIcon"
+        tools:ignore="AllowBackup">
+
+        <!-- 是否是xposed模块 -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+
+        <!-- 模块描述 -->
+        <meta-data
+            android:name="xposeddescription"
+            android:value="MIUI 状态栏原生图标，修复 12.5、13 后期被破坏的彩色图标。\n开发者：酷安 @星夜不荟" />
+
+        <!-- 最低xposed版本号 -->
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+
+        <activity
+            android:name="com.fankes.miui.notify.ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="behind">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <activity-alias
+            android:name="com.fankes.miui.notify.Home"
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="behind"
+            android:targetActivity="com.fankes.miui.notify.ui.MainActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>
