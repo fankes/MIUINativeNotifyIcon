@@ -4,6 +4,7 @@
 ![Eclipse Marketplace](https://img.shields.io/badge/license-GPL3.0-blue)
 ![Eclipse Marketplace](https://img.shields.io/badge/version-v1.0-green)
 <br/><br/>
+![banner](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png)<br/>
 Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
 修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 12.5、13 以及最新版本。
 
