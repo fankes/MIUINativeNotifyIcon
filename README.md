@@ -31,7 +31,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 - [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ```
-Copyright (C) 2020-2021  Fankes Studio(qzmmcn@163.com)
+Copyright (C) 2020-2022  Fankes Studio(qzmmcn@163.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
