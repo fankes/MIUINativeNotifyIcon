@@ -91,6 +91,27 @@ val isMIUI by lazy {
 inline val isNotMIUI get() = !isMIUI
 
 /**
+ * 获取 MIUI 版本
+ * @return [String]
+ */
+val miuiVersion
+    get() =
+        if (isMIUI)
+            findPropString(key = "ro.miui.ui.version.name", default = "V无法获取").let {
+                when (it) {
+                    "V110" -> "11"
+                    "V11" -> "11"
+                    "V120" -> "12"
+                    "V12" -> "12"
+                    "V125" -> "12.5"
+                    "V130" -> "13"
+                    "V13" -> "13"
+                    else -> it.replace(oldValue = "V", newValue = "")
+                }
+            } + " " + findPropString(key = "ro.system.build.version.incremental")
+        else "不是 MIUI 系统"
+
+/**
  * 得到安装包信息
  * @return [PackageInfo]
  */

@@ -49,14 +49,6 @@ class MainActivity : AppCompatActivity() {
 
         /** 模块版本 */
         private const val moduleVersion = BuildConfig.VERSION_NAME
-
-        /** MIUI 版本 */
-        private val miuiVersion by lazy {
-            if (isMIUI)
-                findPropString(key = "ro.miui.ui.version.code", default = "无法获取") +
-                        " " + findPropString(key = "ro.system.build.version.incremental")
-            else "不是 MIUI 系统"
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
