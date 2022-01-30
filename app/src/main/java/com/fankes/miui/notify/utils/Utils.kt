@@ -31,7 +31,7 @@ import android.graphics.Bitmap.createBitmap
 import android.os.Build
 import android.service.notification.StatusBarNotification
 import android.util.Base64
-import com.fankes.miui.notify.application.MNvApplication.Companion.appContext
+import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -176,6 +176,12 @@ val String.unbase64 get() = Base64.decode(this, Base64.DEFAULT) ?: ByteArray(0)
  * @return [Bitmap]
  */
 val ByteArray.bitmap: Bitmap get() = BitmapFactory.decodeByteArray(this, 0, size)
+
+/**
+ * 字符串解析为位图
+ * @return [Bitmap]
+ */
+val String.bitmap: Bitmap get() = unbase64.bitmap
 
 /**
  * 圆角图片

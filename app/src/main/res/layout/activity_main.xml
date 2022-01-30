@@ -210,9 +210,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginTop="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/permotion_round"
                 android:elevation="0dp"
                 android:gravity="center"
@@ -221,20 +221,37 @@
                 android:paddingRight="15dp">
 
                 <com.fankes.miui.notify.view.MaterialSwitch
-                    android:id="@+id/chat_icon_fix_switch"
+                    android:id="@+id/notify_icon_fix_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="优化社交应用通知图标"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="启用通知图标优化"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/config_notify_app_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/button_round"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:text="配置通知图标优化名单"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，开启后将对 QQ 和微信的消息图标进行色彩修复，使得它们的图标看起来更加美观。"
+                    android:text="此选项默认开启，开启后将对优化名单内 APP 通知小图标进行色彩修复，使得它们的图标看起来更加美观。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>

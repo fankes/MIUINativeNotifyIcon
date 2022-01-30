@@ -25,19 +25,24 @@ package com.fankes.miui.notify.application
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 
-class MNvApplication : Application() {
+class MNNApplication : Application() {
 
     companion object {
 
         /** 全局静态实例 */
-        private var context: MNvApplication? = null
+        private var context: MNNApplication? = null
 
         /** 调用全局静态实例 */
         val appContext get() = context ?: error("App is death")
+
+        /** 自身 APP 是否已启动 */
+        var isMineStarted = false
     }
 
     override fun onCreate() {
         super.onCreate()
+        /** 设置状态 */
+        isMineStarted = true
         /** 设置静态实例 */
         context = this
         /** 跟随系统夜间模式 */

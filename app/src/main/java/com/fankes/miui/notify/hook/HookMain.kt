@@ -23,6 +23,7 @@
 package com.fankes.miui.notify.hook
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
@@ -33,11 +34,10 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.annotation.Keep
-import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.fankes.miui.notify.hook.HookMedium.QQ_PACKAGE_NAME
 import com.fankes.miui.notify.hook.HookMedium.SELF_PACKAGE_NAME
 import com.fankes.miui.notify.hook.HookMedium.SYSTEMUI_PACKAGE_NAME
+import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.utils.*
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -143,6 +143,17 @@ class HookMain : IXposedHookLoadPackage {
         }
 
     /**
+     * 获取 [ExpandedNotificationClass] 的应用名称
+     * @param instance 通知实例
+     * @return [String]
+     */
+    private fun XC_LoadPackage.LoadPackageParam.findAppName(instance: Any?) =
+        findClass(ExpandedNotificationClass).getDeclaredMethod("getAppName").let {
+            it.isAccessible = true
+            it.invoke(instance) as? String ?: ""
+        }
+
+    /**
      * 获取全局上下文
      * @return [Context]
      */
@@ -162,15 +173,23 @@ class HookMain : IXposedHookLoadPackage {
             val iconDrawable = (param.result as Icon).loadDrawable(globalContext)
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             (param.args?.get(0) as? StatusBarNotification?)?.also { notifyInstance ->
-                /** 判断要设置的图标 */
+                /** 目标彩色通知 APP 图标 */
+                var customIcon: Icon? = null
+                run {
+                    IconPackParams.iconDatas.forEach {
+                        if ((notifyInstance.opPkgName == it.packageName ||
+                                    findAppName(notifyInstance) == it.appName) &&
+                            HookMedium.isAppNotifyHookOf(it.packageName)
+                        ) {
+                            customIcon = Icon.createWithBitmap(it.iconBitmap)
+                            return@run
+                        }
+                    }
+                }
                 when {
-                    /** 如果开启了修复聊天 APP 的图标 */
-                    notifyInstance.opPkgName == QQ_PACKAGE_NAME &&
-                            XPrefUtils.getBoolean(
-                                HookMedium.ENABLE_CHAT_ICON_HOOK,
-                                default = true
-                            ) ->
-                        param.result = Icon.createWithBitmap(IconPackParams.qqSmallIcon)
+                    /** 如果开启了修复 APP 的彩色图标 */
+                    customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true) ->
+                        param.result = customIcon
                     /** 若不是灰度图标自动处理为圆角 */
                     !isGrayscaleIcon(globalContext, iconDrawable) ->
                         param.result = Icon.createWithBitmap(
@@ -205,15 +224,24 @@ class HookMain : IXposedHookLoadPackage {
                 /** 获取通知小图标 */
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
-                /** 获取发送通知的 APP */
-                val packageName = notifyInstance.opPkgName
-                /** 如果开启了修复聊天 APP 的图标 */
-                if (packageName == QQ_PACKAGE_NAME &&
-                    XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
-                )
+                /** 自定义默认小图标 */
+                var customIcon: Bitmap? = null
+                run {
+                    IconPackParams.iconDatas.forEach {
+                        if ((notifyInstance.opPkgName == it.packageName ||
+                                    findAppName(notifyInstance) == it.appName) &&
+                            HookMedium.isAppNotifyHookOf(it.packageName)
+                        ) {
+                            customIcon = it.iconBitmap
+                            return@run
+                        }
+                    }
+                }
+                /** 如果开启了修复 APP 的彩色图标 */
+                if (customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true))
                     iconImageView.apply {
                         /** 设置自定义小图标 */
-                        setImageBitmap(IconPackParams.qqSmallIcon)
+                        setImageBitmap(customIcon)
                         /** 上色 */
                         setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
                     }
@@ -265,7 +293,7 @@ class HookMain : IXposedHookLoadPackage {
                 /** 系统版本过低直接停止 Hook */
                 if (isLowerAndroidP) return
                 /** 若没开启模块直接停止 Hook */
-                if (!XPrefUtils.getBoolean(HookMedium.ENABLE_MODULE, default = true)) return
+                if (!HookMedium.getBoolean(HookMedium.ENABLE_MODULE, default = true)) return
                 /** 强制回写系统的状态栏图标样式为原生 */
                 runWithoutError(error = "SubstituteSmallIcon") {
                     XposedHelpers.findAndHookMethod(
@@ -285,19 +313,30 @@ class HookMain : IXposedHookLoadPackage {
                         lpparam.findClass(ExpandedNotificationClass),
                         object : XC_MethodReplacement() {
                             override fun replaceHookedMethod(param: MethodHookParam) =
-                                if (XPrefUtils.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
+                                if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
                                     try {
                                         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
                                         (param.args?.get(0) as? StatusBarNotification?)?.let { notifyInstance ->
-                                            /** 获取发送通知的 APP */
-                                            val packageName = notifyInstance.opPkgName
-                                            NotificationCompat()
                                             /** 获取通知小图标 */
                                             val iconDrawable =
                                                 notifyInstance.notification.smallIcon.loadDrawable(lpparam.globalContext)
-                                            /** 如果开启了修复聊天 APP 的图标 */
-                                            if (packageName == QQ_PACKAGE_NAME &&
-                                                XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
+
+                                            /** 获取目标修复彩色图标的 APP */
+                                            var isTargetApp = false
+                                            run {
+                                                IconPackParams.iconDatas.forEach {
+                                                    if ((notifyInstance.opPkgName == it.packageName ||
+                                                                lpparam.findAppName(notifyInstance) == it.appName) &&
+                                                        HookMedium.isAppNotifyHookOf(it.packageName)
+                                                    ) {
+                                                        isTargetApp = true
+                                                        return@run
+                                                    }
+                                                }
+                                            }
+                                            /** 如果开启了修复 APP 的彩色图标 */
+                                            if (isTargetApp &&
+                                                HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
                                             ) false
                                             /** 只要不是灰度就返回彩色图标 */
                                             else !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)

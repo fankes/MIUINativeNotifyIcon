@@ -18,10 +18,20 @@
  *
  * This file is Created by fankes on 2022/1/24.
  */
+@file:Suppress("DEPRECATION", "SetWorldReadable")
+
 package com.fankes.miui.notify.hook
 
+import android.content.Context
+import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.Keep
+import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
+import com.fankes.miui.notify.application.MNNApplication.Companion.isMineStarted
+import com.fankes.miui.notify.utils.FileUtils
+import com.fankes.miui.notify.utils.XPrefUtils
+import java.io.File
 
 @Keep
 object HookMedium {
@@ -29,11 +39,10 @@ object HookMedium {
     const val ENABLE_MODULE = "_enable_module"
     const val ENABLE_HIDE_ICON = "_hide_icon"
     const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
-    const val ENABLE_CHAT_ICON_HOOK = "_chat_icon_hook"
+    const val ENABLE_NOTIFY_ICON_HOOK = "_notify_icon_hook"
 
     const val SELF_PACKAGE_NAME = "com.fankes.miui.notify"
     const val SYSTEMUI_PACKAGE_NAME = "com.android.systemui"
-    const val QQ_PACKAGE_NAME = "com.tencent.mobileqq"
 
     /**
      * 判断模块是否激活
@@ -43,5 +52,71 @@ object HookMedium {
     fun isHooked(): Boolean {
         Log.d("MIUINativeNotifyIcon", "isHooked: true")
         return false
+    }
+
+    /**
+     * 获取此 APP 的通知图标是否被 Hook
+     * @param packageName 包名
+     */
+    fun isAppNotifyHookOf(packageName: String) = getBoolean(key = "${packageName}_icon", default = true)
+
+    /**
+     * 设置 Hook 此 APP 的通知图标
+     * @param packageName 包名
+     * @param isHook 是否 Hook
+     */
+    fun putAppNotifyHookOf(packageName: String, isHook: Boolean) = putBoolean(key = "${packageName}_icon", bool = isHook)
+
+    /**
+     * 获取保存的值
+     * @param key 名称
+     * @param default 默认值
+     * @return [Boolean] 保存的值
+     */
+    fun getBoolean(key: String, default: Boolean = false) =
+        if (isMineStarted)
+            appContext.getSharedPreferences(
+                appContext.packageName + "_preferences",
+                Context.MODE_PRIVATE
+            ).getBoolean(key, default)
+        else XPrefUtils.getBoolean(key, default)
+
+    /**
+     * 保存值
+     * @param key 名称
+     * @param bool 值
+     */
+    fun putBoolean(key: String, bool: Boolean) {
+        appContext.getSharedPreferences(
+            appContext.packageName + "_preferences",
+            Context.MODE_PRIVATE
+        ).edit().putBoolean(key, bool).apply()
+        setWorldReadable(appContext)
+        /** 延迟继续设置强制允许 SP 可读可写 */
+        Handler().postDelayed({ setWorldReadable(appContext) }, 500)
+        Handler().postDelayed({ setWorldReadable(appContext) }, 1000)
+        Handler().postDelayed({ setWorldReadable(appContext) }, 1500)
+    }
+
+    /**
+     * 强制设置 Sp 存储为全局可读可写
+     * 以供模块使用
+     * @param context 实例
+     */
+    fun setWorldReadable(context: Context) {
+        try {
+            if (FileUtils.getDefaultPrefFile(context).exists()) {
+                for (file in arrayOf<File>(
+                    FileUtils.getDataDir(context),
+                    FileUtils.getPrefDir(context),
+                    FileUtils.getDefaultPrefFile(context)
+                )) {
+                    file.setReadable(true, false)
+                    file.setExecutable(true, false)
+                }
+            }
+        } catch (_: Exception) {
+            Toast.makeText(context, "无法写入模块设置，请检查权限\n如果此提示一直显示，请不要双开模块", Toast.LENGTH_SHORT).show()
+        }
     }
 }
