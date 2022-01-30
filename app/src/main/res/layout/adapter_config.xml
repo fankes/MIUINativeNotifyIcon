@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/permotion_round"
+    android:gravity="center|start"
+    android:orientation="horizontal"
+    android:padding="15dp"
+    tools:ignore="HardcodedText">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center|start"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:gravity="center|start">
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                android:id="@+id/adp_app_icon"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginEnd="8dp"
+                android:alpha="0.85"
+                android:src="@mipmap/about"
+                android:tint="@color/colorTextGray" />
+
+            <TextView
+                android:id="@+id/adp_app_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:singleLine="true"
+                android:text="APP 名称"
+                android:textColor="@color/colorTextGray"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/adp_app_pkg_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.75"
+            android:singleLine="true"
+            android:text="com.xxx.xxx"
+            android:textColor="@color/colorTextDark"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/adp_cbr_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="贡献者：noname"
+            android:textColor="@color/colorTextDark"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <com.fankes.miui.notify.view.MaterialSwitch
+        android:id="@+id/adp_app_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextGray"
+        android:textSize="15sp" />
+</LinearLayout>

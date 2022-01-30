@@ -18,12 +18,23 @@
  *
  * This file is Created by fankes on 2022/01/30.
  */
+@file:Suppress("SetTextI18n", "InflateParams")
+
 package com.fankes.miui.notify.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.ListView
+import android.widget.TextView
+import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.hook.HookMedium
+import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
+import com.fankes.miui.notify.view.MaterialSwitch
 
 class ConfigureActivity : BaseActivity() {
 
@@ -32,5 +43,54 @@ class ConfigureActivity : BaseActivity() {
         setContentView(R.layout.activity_config)
         /** 返回按钮点击事件 */
         findViewById<View>(R.id.title_back_icon).setOnClickListener { onBackPressed() }
+        /** 设置列表元素和 Adapter */
+        findViewById<ListView>(R.id.config_list_view).apply {
+            adapter = object : BaseAdapter() {
+
+                private val inflater = LayoutInflater.from(context)
+
+                override fun getCount() = IconPackParams.iconDatas.size
+
+                override fun getItem(position: Int) = IconPackParams.iconDatas[position]
+
+                override fun getItemId(position: Int) = position.toLong()
+
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+                    var cView = convertView
+                    val holder: ViewHolder
+                    if (convertView == null) {
+                        holder = ViewHolder()
+                        cView = inflater.inflate(R.layout.adapter_config, null).also {
+                            holder.appIcon = it.findViewById(R.id.adp_app_icon)
+                            holder.appName = it.findViewById(R.id.adp_app_name)
+                            holder.pkgName = it.findViewById(R.id.adp_app_pkg_name)
+                            holder.cbrName = it.findViewById(R.id.adp_cbr_name)
+                            holder.switch = it.findViewById(R.id.adp_app_switch)
+                        }
+                        cView.tag = holder
+                    } else holder = convertView.tag as ViewHolder
+                    getItem(position).also {
+                        holder.appIcon.setImageBitmap(it.iconBitmap)
+                        holder.appName.text = it.appName
+                        holder.pkgName.text = it.packageName
+                        holder.cbrName.text = "贡献者：" + it.contributorName
+                        holder.switch.isChecked = HookMedium.isAppNotifyHookOf(it.packageName)
+                        holder.switch.setOnCheckedChangeListener { btn, b ->
+                            if (!btn.isPressed) return@setOnCheckedChangeListener
+                            HookMedium.putAppNotifyHookOf(it.packageName, b)
+                        }
+                    }
+                    return cView!!
+                }
+
+                inner class ViewHolder {
+                    lateinit var appIcon: ImageFilterView
+                    lateinit var appName: TextView
+                    lateinit var pkgName: TextView
+                    lateinit var cbrName: TextView
+                    lateinit var switch: MaterialSwitch
+                }
+            }
+        }
     }
 }
