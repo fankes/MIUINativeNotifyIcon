@@ -88,17 +88,19 @@ class HookMain : IXposedHookLoadPackage {
 
     /**
      * 忽略异常运行
+     * @param error 错误信息
+     * @param ignored 忽略后出错将不输出到控制台
      * @param it 正常回调
      */
-    private fun runWithoutError(error: String, it: () -> Unit) {
+    private fun runWithoutError(error: String = "", ignored: Boolean = false, it: () -> Unit) {
         try {
             it()
         } catch (e: Error) {
-            logE("hookFailed: $error", e)
+            if (!ignored) logE("hookFailed: $error", e)
         } catch (e: Exception) {
-            logE("hookFailed: $error", e)
+            if (!ignored) logE("hookFailed: $error", e)
         } catch (e: Throwable) {
-            logE("hookFailed: $error", e)
+            if (!ignored) logE("hookFailed: $error", e)
         }
     }
 
@@ -153,6 +155,35 @@ class HookMain : IXposedHookLoadPackage {
             .getDeclaredMethod("getContext").apply { isAccessible = true }
             .invoke(null) as Context
 
+    /**
+     * Hook 通知栏小图标
+     * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
+     * @param param Hook Param
+     */
+    private fun XC_LoadPackage.LoadPackageParam.hookSmallIconOnSet(param: XC_MethodHook.MethodHookParam) =
+        runWithoutError(error = "GetSmallIconOnSet") {
+            /** 获取通知小图标 */
+            val iconDrawable = (param.result as Icon).loadDrawable(globalContext)
+            /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
+            (param.args?.get(0) as? StatusBarNotification?)?.also { notifyInstance ->
+                /** 判断要设置的图标 */
+                when {
+                    /** 如果开启了修复聊天 APP 的图标 */
+                    notifyInstance.opPkg == QQ_PACKAGE_NAME &&
+                            XPrefUtils.getBoolean(
+                                HookMedium.ENABLE_CHAT_ICON_HOOK,
+                                default = true
+                            ) ->
+                        param.result = Icon.createWithBitmap(IconPackParams.qqSmallIcon)
+                    /** 若不是灰度图标自动处理为圆角 */
+                    !isGrayscaleIcon(globalContext, iconDrawable) ->
+                        param.result = Icon.createWithBitmap(
+                            iconDrawable.toBitmap().round(15.dp(globalContext))
+                        )
+                }
+            }
+        }
+
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
         if (lpparam == null) return
         when (lpparam.packageName) {
@@ -171,7 +202,7 @@ class HookMain : IXposedHookLoadPackage {
                 /** 若没开启模块直接停止 Hook */
                 if (!XPrefUtils.getBoolean(HookMedium.ENABLE_MODULE, default = true)) return
                 /** 强制回写系统的状态栏图标样式为原生 */
-                runWithoutError("SubstituteSmallIcon") {
+                runWithoutError(error = "SubstituteSmallIcon") {
                     XposedHelpers.findAndHookMethod(
                         NotificationUtilClass,
                         lpparam.classLoader,
@@ -181,7 +212,7 @@ class HookMain : IXposedHookLoadPackage {
                     )
                 }
                 /** 修复通知图标为彩色 */
-                runWithoutError("IgnoreStatusBarIconColor") {
+                runWithoutError(error = "IgnoreStatusBarIconColor") {
                     XposedHelpers.findAndHookMethod(
                         NotificationUtilClass,
                         lpparam.classLoader,
@@ -191,18 +222,21 @@ class HookMain : IXposedHookLoadPackage {
                             override fun replaceHookedMethod(param: MethodHookParam) =
                                 if (XPrefUtils.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
                                     try {
-                                        /** 获取发送通知的 APP */
-                                        val packageName = (param.args[0] as StatusBarNotification).opPkg
+                                        /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
+                                        (param.args?.get(0) as? StatusBarNotification?)?.let { notifyInstance ->
+                                            /** 获取发送通知的 APP */
+                                            val packageName = notifyInstance.opPkg
 
-                                        /** 获取通知小图标 */
-                                        val iconDrawable = (param.args[0] as StatusBarNotification)
-                                            .notification.smallIcon.loadDrawable(lpparam.globalContext)
-                                        /** 如果开启了修复聊天 APP 的图标 */
-                                        if (packageName == QQ_PACKAGE_NAME &&
-                                            XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
-                                        ) false
-                                        /** 只要不是灰度就返回彩色图标 */
-                                        else !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)
+                                            /** 获取通知小图标 */
+                                            val iconDrawable =
+                                                notifyInstance.notification.smallIcon.loadDrawable(lpparam.globalContext)
+                                            /** 如果开启了修复聊天 APP 的图标 */
+                                            if (packageName == QQ_PACKAGE_NAME &&
+                                                XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
+                                            ) false
+                                            /** 只要不是灰度就返回彩色图标 */
+                                            else !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)
+                                        } ?: true // 否则不对颜色进行反色处理防止一些系统图标出现异常
                                     } catch (e: Exception) {
                                         logE("Failed to hook ignoreStatusBarIconColor", e)
                                         false
@@ -211,8 +245,8 @@ class HookMain : IXposedHookLoadPackage {
                         }
                     )
                 }
-                /** 强制回写系统的状态栏图标样式为原生 */
-                runWithoutError("GetSmallIcon") {
+                /** 强制回写系统的状态栏图标样式为原生 - 新版 */
+                runWithoutError(ignored = true) {
                     XposedHelpers.findAndHookMethod(
                         NotificationUtilClass,
                         lpparam.classLoader,
@@ -222,29 +256,29 @@ class HookMain : IXposedHookLoadPackage {
                         object : XC_MethodHook() {
 
                             override fun afterHookedMethod(param: MethodHookParam) {
-                                runWithoutError("GetSmallIconOnSet") {
-                                    /** 获取通知小图标 */
-                                    val iconDrawable = (param.result as Icon).loadDrawable(lpparam.globalContext)
-                                    /** 判断要设置的图标 */
-                                    when {
-                                        /** 如果开启了修复聊天 APP 的图标 */
-                                        (param.args[0] as StatusBarNotification).opPkg == QQ_PACKAGE_NAME &&
-                                                XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true) ->
-                                            param.result = Icon.createWithBitmap(IconPackParams.qqSmallIcon)
-                                        /** 若不是灰度图标自动处理为圆角 */
-                                        !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable) ->
-                                            param.result = Icon.createWithBitmap(
-                                                iconDrawable.toBitmap().round(15.dp(lpparam.globalContext))
-                                            )
-                                    }
-                                }
+                                lpparam.hookSmallIconOnSet(param)
+                            }
+                        }
+                    )
+                }
+                /** 强制回写系统的状态栏图标样式为原生 - 旧版 */
+                runWithoutError(ignored = true) {
+                    XposedHelpers.findAndHookMethod(
+                        NotificationUtilClass,
+                        lpparam.classLoader,
+                        "getSmallIcon",
+                        lpparam.findClass(ExpandedNotificationClass),
+                        object : XC_MethodHook() {
+
+                            override fun afterHookedMethod(param: MethodHookParam) {
+                                lpparam.hookSmallIconOnSet(param)
                             }
                         }
                     )
                 }
                 /** 干掉下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R)
-                    runWithoutError("ResetIconBgAndPaddings") {
+                    runWithoutError(error = "ResetIconBgAndPaddings") {
                         XposedHelpers.findAndHookMethod(
                             NotificationHeaderViewWrapperInjectorClass,
                             lpparam.classLoader,
@@ -256,7 +290,7 @@ class HookMain : IXposedHookLoadPackage {
                     }
                 /** 修复下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R)
-                    runWithoutError("AutoSetAppIcon") {
+                    runWithoutError(error = "AutoSetAppIcon") {
                         XposedHelpers.findAndHookMethod(
                             NotificationHeaderViewWrapperInjectorClass,
                             lpparam.classLoader,
@@ -266,7 +300,7 @@ class HookMain : IXposedHookLoadPackage {
                             lpparam.findClass(ExpandedNotificationClass),
                             object : XC_MethodReplacement() {
                                 override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                                    runWithoutError("AutoSetAppIconOnSet") {
+                                    runWithoutError(error = "AutoSetAppIconOnSet") {
                                         /** 获取 [Context] */
                                         val context = param.args[0] as Context
 
