@@ -40,7 +40,7 @@ import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookMedium
 import com.fankes.miui.notify.utils.*
-import com.gyf.immersionbar.ImmersionBar
+import com.gyf.immersionbar.ktx.immersionBar
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -65,14 +65,14 @@ class MainActivity : AppCompatActivity() {
         /** 隐藏系统的标题栏 */
         supportActionBar?.hide()
         /** 初始化沉浸状态栏 */
-        ImmersionBar.with(this)
-            .statusBarColor(R.color.white)
-            .autoDarkModeEnable(false)
-            .statusBarDarkFont(true)
-            .navigationBarColor(R.color.white)
-            .navigationBarDarkIcon(true)
-            .fitsSystemWindows(true)
-            .init()
+        immersionBar {
+            statusBarColor(R.color.colorThemeBackground)
+            autoDarkModeEnable(true)
+            statusBarDarkFont(isNotSystemInDarkMode)
+            navigationBarColor(R.color.colorThemeBackground)
+            navigationBarDarkIcon(isNotSystemInDarkMode)
+            fitsSystemWindows(true)
+        }
         /** 设置文本 */
         findViewById<TextView>(R.id.main_text_version).text = "当前版本：$moduleVersion"
         findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiVersion"
