@@ -4,7 +4,7 @@
     package="com.fankes.miui.notify">
 
     <application
-        android:name=".application.MNvApplication"
+        android:name=".application.MNNApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -31,7 +31,6 @@
         <activity
             android:name="com.fankes.miui.notify.ui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:screenOrientation="behind">
 
             <intent-filter>
@@ -53,5 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
+
+        <activity
+            android:name="com.fankes.miui.notify.ui.ConfigureActivity"
+            android:exported="false"
+            android:screenOrientation="behind" />
     </application>
 </manifest>

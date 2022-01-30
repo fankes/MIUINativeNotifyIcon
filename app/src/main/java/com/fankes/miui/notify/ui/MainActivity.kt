@@ -18,32 +18,28 @@
  *
  * This file is Created by fankes on 2022/01/24.
  */
-@file:Suppress("DEPRECATION", "SetWorldReadable", "SetTextI18n")
+@file:Suppress("SetTextI18n")
 
 package com.fankes.miui.notify.ui
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookMedium
+import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.*
-import com.gyf.immersionbar.ktx.immersionBar
-import java.io.File
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     companion object {
 
@@ -54,17 +50,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        /** 隐藏系统的标题栏 */
-        supportActionBar?.hide()
-        /** 初始化沉浸状态栏 */
-        immersionBar {
-            statusBarColor(R.color.colorThemeBackground)
-            autoDarkModeEnable(true)
-            statusBarDarkFont(isNotSystemInDarkMode)
-            navigationBarColor(R.color.colorThemeBackground)
-            navigationBarDarkIcon(isNotSystemInDarkMode)
-            fitsSystemWindows(true)
-        }
         /** 设置文本 */
         findViewById<TextView>(R.id.main_text_version).text = "当前版本：$moduleVersion"
         findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiVersion"
@@ -108,12 +93,12 @@ class MainActivity : AppCompatActivity() {
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
-        val chatIconHookSwitch = findViewById<SwitchCompat>(R.id.chat_icon_fix_switch)
+        val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         /** 获取 Sp 存储的信息 */
         moduleEnableSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE, default = true)
         hideIconInLauncherSwitch.isChecked = getBoolean(HookMedium.ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
-        chatIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
+        notifyIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_MODULE, b)
@@ -131,9 +116,9 @@ class MainActivity : AppCompatActivity() {
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, b)
         }
-        chatIconHookSwitch.setOnCheckedChangeListener { btn, b ->
+        notifyIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, b)
+            putBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, b)
         }
         /** 重启按钮点击事件 */
         findViewById<View>(R.id.title_restart_icon).setOnClickListener {
@@ -143,6 +128,10 @@ class MainActivity : AppCompatActivity() {
                 confirmButton { restartSystemUI() }
                 cancelButton()
             }
+        }
+        /** 通知图标优化名单按钮点击事件 */
+        findViewById<View>(R.id.config_notify_app_button).setOnClickListener {
+            startActivity(Intent(this, ConfigureActivity::class.java))
         }
         /** 恰饭！ */
         findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
@@ -187,73 +176,18 @@ class MainActivity : AppCompatActivity() {
             else Toast.makeText(this, "ROOT 权限获取失败", Toast.LENGTH_SHORT).show()
         }
 
-    override fun onResume() {
-        super.onResume()
-        setWorldReadable()
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        setWorldReadable()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setWorldReadable()
-    }
-
     /**
      * 获取保存的值
      * @param key 名称
      * @param default 默认值
      * @return [Boolean] 保存的值
      */
-    private fun getBoolean(key: String, default: Boolean = false) =
-        getSharedPreferences(
-            packageName + "_preferences",
-            Context.MODE_PRIVATE
-        ).getBoolean(key, default)
+    private fun getBoolean(key: String, default: Boolean = false) = HookMedium.getBoolean(key, default)
 
     /**
      * 保存值
      * @param key 名称
      * @param bool 值
      */
-    private fun putBoolean(key: String, bool: Boolean) {
-        getSharedPreferences(
-            packageName + "_preferences",
-            Context.MODE_PRIVATE
-        ).edit().putBoolean(key, bool).apply()
-        setWorldReadable()
-        /** 延迟继续设置强制允许 SP 可读可写 */
-        Handler().postDelayed({ setWorldReadable() }, 500)
-        Handler().postDelayed({ setWorldReadable() }, 1000)
-        Handler().postDelayed({ setWorldReadable() }, 1500)
-    }
-
-    /**
-     * 强制设置 Sp 存储为全局可读可写
-     * 以供模块使用
-     */
-    private fun setWorldReadable() {
-        try {
-            if (FileUtils.getDefaultPrefFile(this).exists()) {
-                for (file in arrayOf<File>(
-                    FileUtils.getDataDir(this),
-                    FileUtils.getPrefDir(this),
-                    FileUtils.getDefaultPrefFile(this)
-                )) {
-                    file.setReadable(true, false)
-                    file.setExecutable(true, false)
-                }
-            }
-        } catch (_: Exception) {
-            Toast.makeText(this, "无法写入模块设置，请检查权限\n如果此提示一直显示，请不要双开模块", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onBackPressed() {
-        setWorldReadable()
-        super.onBackPressed()
-    }
+    private fun putBoolean(key: String, bool: Boolean) = HookMedium.putBoolean(key, bool)
 }
