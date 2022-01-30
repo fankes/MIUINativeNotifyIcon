@@ -25,7 +25,6 @@ package com.fankes.miui.notify.hook
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Outline
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.service.notification.StatusBarNotification
@@ -34,6 +33,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.annotation.Keep
+import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.hook.HookMedium.QQ_PACKAGE_NAME
 import com.fankes.miui.notify.hook.HookMedium.SELF_PACKAGE_NAME
@@ -165,7 +165,7 @@ class HookMain : IXposedHookLoadPackage {
                 /** 判断要设置的图标 */
                 when {
                     /** 如果开启了修复聊天 APP 的图标 */
-                    notifyInstance.opPkg == QQ_PACKAGE_NAME &&
+                    notifyInstance.packageName == QQ_PACKAGE_NAME &&
                             XPrefUtils.getBoolean(
                                 HookMedium.ENABLE_CHAT_ICON_HOOK,
                                 default = true
@@ -206,14 +206,14 @@ class HookMain : IXposedHookLoadPackage {
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
                 /** 获取发送通知的 APP */
-                val packageName = notifyInstance.opPkg
+                val packageName = notifyInstance.packageName
                 /** 如果开启了修复聊天 APP 的图标 */
                 if (packageName == QQ_PACKAGE_NAME &&
                     XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
                 )
                     iconImageView.apply {
                         /** 设置自定义小图标 */
-                        setImageDrawable(BitmapDrawable(IconPackParams.qqSmallIcon))
+                        setImageBitmap(IconPackParams.qqSmallIcon)
                         /** 上色 */
                         setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
                     }
@@ -262,6 +262,8 @@ class HookMain : IXposedHookLoadPackage {
             SYSTEMUI_PACKAGE_NAME -> {
                 /** 若不是 MIUI 系统直接停止 Hook */
                 if (isNotMIUI) return
+                /** 系统版本过低直接停止 Hook */
+                if (isLowerAndroidP) return
                 /** 若没开启模块直接停止 Hook */
                 if (!XPrefUtils.getBoolean(HookMedium.ENABLE_MODULE, default = true)) return
                 /** 强制回写系统的状态栏图标样式为原生 */
@@ -288,8 +290,8 @@ class HookMain : IXposedHookLoadPackage {
                                         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
                                         (param.args?.get(0) as? StatusBarNotification?)?.let { notifyInstance ->
                                             /** 获取发送通知的 APP */
-                                            val packageName = notifyInstance.opPkg
-
+                                            val packageName = notifyInstance.packageName
+                                            NotificationCompat()
                                             /** 获取通知小图标 */
                                             val iconDrawable =
                                                 notifyInstance.notification.smallIcon.loadDrawable(lpparam.globalContext)
