@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:alpha="0.6"
             android:lineSpacingExtra="5dp"
-            android:text="开启或关闭指定 APP 的设置将在切换界面后生效。"
+            android:text="开启或关闭指定 APP 的设置将在重新启动系统界面后生效。"
             android:textColor="@color/colorTextGray"
             android:textSize="11sp"
             tools:ignore="SmallSp" />
