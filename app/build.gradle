@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         applicationId "com.fankes.miui.notify"
-        minSdk 29
+        minSdk 26
         targetSdk 26
         versionCode 1
         versionName "1.0"

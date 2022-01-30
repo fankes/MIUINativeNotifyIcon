@@ -76,32 +76,42 @@ class MainActivity : AppCompatActivity() {
         /** 设置文本 */
         findViewById<TextView>(R.id.main_text_version).text = "当前版本：$moduleVersion"
         findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiVersion"
-        /** 判断是否为 MIUI 系统 */
-        if (isNotMIUI) {
-            showDialog {
-                title = "不是 MIUI 系统"
-                msg = "此模块专为 MIUI 系统打造，当前无法识别你的系统为 MIUI，所以模块无法工作。\n" +
-                        "如有问题请联系 酷安 @星夜不荟"
-                confirmButton(text = "退出") { finish() }
-                noCancelable()
+        when {
+            /** 判断是否为 MIUI 系统 */
+            isNotMIUI ->
+                showDialog {
+                    title = "不是 MIUI 系统"
+                    msg = "此模块专为 MIUI 系统打造，当前无法识别你的系统为 MIUI，所以模块无法工作。\n" +
+                            "如有问题请联系 酷安 @星夜不荟"
+                    confirmButton(text = "退出") { finish() }
+                    noCancelable()
+                }
+            /** 判断最低系统版本 */
+            isLowerAndroidP ->
+                showDialog {
+                    title = "系统版本过低"
+                    msg = "此模块最低支持基于 Android 9 的 MIUI 系统，你的系统版本过低不再进行适配。\n" +
+                            "如有问题请联系 酷安 @星夜不荟"
+                    confirmButton(text = "退出") { finish() }
+                    noCancelable()
+                }
+            /** 判断是否 Hook */
+            isHooked() -> {
+                findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(R.drawable.green_round)
+                findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(R.mipmap.succcess)
+                findViewById<TextView>(R.id.main_text_status).text = "模块已激活"
             }
-            return
+            else ->
+                showDialog {
+                    title = "模块没有激活"
+                    msg = "检测到模块没有激活，模块需要 Xposed 环境依赖，" +
+                            "同时需要系统拥有 Root 权限，" +
+                            "请自行查看本页面使用帮助与说明第二条。\n" +
+                            "由于需要修改系统应用达到效果，模块不支持太极阴、应用转生。"
+                    confirmButton(text = "我知道了")
+                    noCancelable()
+                }
         }
-        /** 判断 Hook 状态 */
-        if (isHooked()) {
-            findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(R.drawable.green_round)
-            findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(R.mipmap.succcess)
-            findViewById<TextView>(R.id.main_text_status).text = "模块已激活"
-        } else
-            showDialog {
-                title = "模块没有激活"
-                msg = "检测到模块没有激活，模块需要 Xposed 环境依赖，" +
-                        "同时需要系统拥有 Root 权限，" +
-                        "请自行查看本页面使用帮助与说明第二条。\n" +
-                        "由于需要修改系统应用达到效果，模块不支持太极阴、应用转生。"
-                confirmButton(text = "我知道了")
-                noCancelable()
-            }
         /** 初始化 View */
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
