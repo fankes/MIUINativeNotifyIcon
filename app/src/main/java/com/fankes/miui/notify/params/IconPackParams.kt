@@ -371,7 +371,8 @@ object IconPackParams {
                         "GGzd5htw1ue37fcR4Ljq3zX6k59vy6gsPkqakfTIzLoxyVRUVFR0gf/L83vOF7040QAAAABJRU5E\n" +
                         "rkJggg==").bitmap,
                 contributorName = "fankes"
-            )
+            ),
+            // TODO 可继续在这里添加更多 APP
         )
     }
 }
