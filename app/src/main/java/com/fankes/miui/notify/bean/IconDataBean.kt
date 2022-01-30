@@ -21,6 +21,7 @@
 package com.fankes.miui.notify.bean
 
 import android.graphics.Bitmap
+import com.fankes.miui.notify.utils.base64
 import java.io.Serializable
 
 /**
@@ -35,4 +36,6 @@ data class IconDataBean(
     var packageName: String,
     var iconBitmap: Bitmap,
     var contributorName: String
-) : Serializable
+) : Serializable {
+    override fun toString() = ("$appName$packageName").base64
+}

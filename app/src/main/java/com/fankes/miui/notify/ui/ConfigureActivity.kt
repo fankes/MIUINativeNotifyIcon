@@ -74,10 +74,10 @@ class ConfigureActivity : BaseActivity() {
                         holder.appName.text = it.appName
                         holder.pkgName.text = it.packageName
                         holder.cbrName.text = "贡献者：" + it.contributorName
-                        holder.switch.isChecked = HookMedium.isAppNotifyHookOf(it.packageName)
+                        holder.switch.isChecked = HookMedium.isAppNotifyHookOf(it)
                         holder.switch.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
-                            HookMedium.putAppNotifyHookOf(it.packageName, b)
+                            HookMedium.putAppNotifyHookOf(it, b)
                         }
                     }
                     return cView!!

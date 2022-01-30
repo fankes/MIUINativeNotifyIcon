@@ -166,6 +166,12 @@ val Number.dp get() = (toFloat() * appContext.resources.displayMetrics.density).
 fun Number.dp(context: Context) = toFloat() * context.resources.displayMetrics.density
 
 /**
+ * Base64 加密
+ * @return [String]
+ */
+val String.base64: String get() = Base64.encodeToString(toByteArray(), Base64.DEFAULT)
+
+/**
  * Base64 解密为字节流
  * @return [ByteArray]
  */
