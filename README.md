@@ -2,7 +2,7 @@
 
 ![Eclipse Marketplace](https://img.shields.io/badge/build-passing-brightgreen)
 ![Eclipse Marketplace](https://img.shields.io/badge/license-GPL3.0-blue)
-![Eclipse Marketplace](https://img.shields.io/badge/version-v1.0-green)
+![Eclipse Marketplace](https://img.shields.io/badge/version-v1.1-green)
 <br/><br/>
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png" width = "100" height = "100"/>
 <br/>
@@ -12,16 +12,22 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 # 开始使用
 
 点击下载最新版本
-<a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v1.0-green)</a>
+<a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v1.1-green)</a>
 <br/><br/>
 ⚠️适配说明<br/>
 
 - 此模块仅支持 Lsposed(作用域“系统界面”)、EdXposed(不推荐)、不支持太极无极(阴)
-- 目前最低支持基于 Android 10 版本的 MIUI12 或 MIUI12.5(建议)
+- 目前最低支持基于 Android 9 版本的 MIUI12 或 MIUI12.5(建议)
 
 # 禁止任何商业用途
 
 本模块完全开源免费，如果好用你可以打赏支持开发，严禁未经许可进行二改贩卖，违者必惩必究。
+
+# 开始贡献
+
+欢迎为通知图标优化名单贡献宝贵资源！<br/>
+
+- [CONTRIBUTING](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md)
 
 # 历史背景
 
