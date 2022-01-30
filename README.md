@@ -25,6 +25,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 # 开始贡献
 
+由于国内厂商 APP 的不规范彩色图标影响整体图标的美观，现在开放第三方 APP 的通知图标适配。<br/>
 欢迎为通知图标优化名单贡献宝贵资源！<br/>
 
 - [CONTRIBUTING](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md)
