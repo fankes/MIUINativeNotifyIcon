@@ -22,6 +22,8 @@
 
 package com.fankes.miui.notify.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +31,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookMedium
@@ -90,6 +93,19 @@ class ConfigureActivity : BaseActivity() {
                     lateinit var cbrName: TextView
                     lateinit var switch: MaterialSwitch
                 }
+            }
+        }
+        /** 设置点击事件 */
+        findViewById<View>(R.id.config_cbr_button).setOnClickListener {
+            try {
+                startActivity(Intent().apply {
+                    action = "android.intent.action.VIEW"
+                    data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon")
+                    /** 防止顶栈一样重叠在自己的 APP 中 */
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            } catch (e: Exception) {
+                Toast.makeText(this, "无法启动系统默认浏览器", Toast.LENGTH_SHORT).show()
             }
         }
     }
