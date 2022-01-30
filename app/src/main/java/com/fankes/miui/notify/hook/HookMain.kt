@@ -28,7 +28,6 @@ import android.graphics.Outline
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.View
@@ -39,10 +38,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.hook.HookMedium.QQ_PACKAGE_NAME
 import com.fankes.miui.notify.hook.HookMedium.SELF_PACKAGE_NAME
 import com.fankes.miui.notify.hook.HookMedium.SYSTEMUI_PACKAGE_NAME
-import com.fankes.miui.notify.utils.XPrefUtils
-import com.fankes.miui.notify.utils.dp
-import com.fankes.miui.notify.utils.isNotMIUI
-import com.fankes.miui.notify.utils.round
+import com.fankes.miui.notify.utils.*
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
@@ -156,7 +152,7 @@ class HookMain : IXposedHookLoadPackage {
             .invoke(null) as Context
 
     /**
-     * Hook 通知栏小图标
+     * Hook 状态栏小图标
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
      * @param param Hook Param
      */
@@ -180,6 +176,73 @@ class HookMain : IXposedHookLoadPackage {
                         param.result = Icon.createWithBitmap(
                             iconDrawable.toBitmap().round(15.dp(globalContext))
                         )
+                }
+            }
+        }
+
+    /**
+     * Hook 通知栏小图标
+     * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
+     * @param param Hook Param
+     * @param isNew 是否为新版方式
+     */
+    private fun XC_LoadPackage.LoadPackageParam.hookNotifyIconOnSet(param: XC_MethodHook.MethodHookParam, isNew: Boolean) =
+        runWithoutError(error = "AutoSetAppIconOnSet") {
+            /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
+            (param.args?.get(if (isNew) 2 else 1) as? StatusBarNotification?)?.let { notifyInstance ->
+                /** 获取 [Context] */
+                val context = if (isNew) param.args[0] as Context else globalContext
+
+                /** 新版风格反色 */
+                val newStyle = if (context.isSystemInDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
+
+                /** 旧版风格反色 */
+                val oldStyle = if (context.isNotSystemInDarkMode) 0xFF515151.toInt() else Color.WHITE
+
+                /** 获取图标框 */
+                val iconImageView = param.args[if (isNew) 1 else 0] as ImageView
+
+                /** 获取通知小图标 */
+                val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
+
+                /** 获取发送通知的 APP */
+                val packageName = notifyInstance.opPkg
+                /** 如果开启了修复聊天 APP 的图标 */
+                if (packageName == QQ_PACKAGE_NAME &&
+                    XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
+                )
+                    iconImageView.apply {
+                        /** 设置自定义小图标 */
+                        setImageDrawable(BitmapDrawable(IconPackParams.qqSmallIcon))
+                        /** 上色 */
+                        setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
+                    }
+                else {
+                    /** 重新设置图标 - 防止系统更改它 */
+                    iconImageView.setImageDrawable(iconDrawable)
+                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
+                    if (isGrayscaleIcon(context, iconDrawable))
+                        iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
+                    else
+                        iconImageView.apply {
+                            clipToOutline = true
+                            /** 设置一个圆角轮廓裁切 */
+                            outlineProvider = object : ViewOutlineProvider() {
+                                override fun getOutline(view: View, out: Outline) {
+                                    out.setRoundRect(
+                                        0,
+                                        0,
+                                        view.width,
+                                        view.height,
+                                        5.dp(context)
+                                    )
+                                }
+                            }
+                            /** 清除原生的背景边距设置 */
+                            if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
+                            /** 清除原生的主题色背景圆圈颜色 */
+                            if (isUpperOfAndroidS) setBackgroundDrawable(null)
+                        }
                 }
             }
         }
@@ -276,8 +339,41 @@ class HookMain : IXposedHookLoadPackage {
                         }
                     )
                 }
+                /** 修复下拉通知图标自动设置回 APP 图标的方法 - 新版本 */
+                runWithoutError(ignored = true) {
+                    XposedHelpers.findAndHookMethod(
+                        NotificationHeaderViewWrapperInjectorClass,
+                        lpparam.classLoader,
+                        "setAppIcon",
+                        Context::class.java,
+                        ImageView::class.java,
+                        lpparam.findClass(ExpandedNotificationClass),
+                        object : XC_MethodReplacement() {
+                            override fun replaceHookedMethod(param: MethodHookParam): Any? {
+                                lpparam.hookNotifyIconOnSet(param, isNew = true)
+                                return null
+                            }
+                        }
+                    )
+                }
+                /** 修复下拉通知图标自动设置回 APP 图标的方法 - 旧版本 */
+                runWithoutError(ignored = true) {
+                    XposedHelpers.findAndHookMethod(
+                        NotificationHeaderViewWrapperInjectorClass,
+                        lpparam.classLoader,
+                        "setAppIcon",
+                        ImageView::class.java,
+                        lpparam.findClass(ExpandedNotificationClass),
+                        object : XC_MethodReplacement() {
+                            override fun replaceHookedMethod(param: MethodHookParam): Any? {
+                                lpparam.hookNotifyIconOnSet(param, isNew = false)
+                                return null
+                            }
+                        }
+                    )
+                }
                 /** 干掉下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R)
+                if (isUpperOfAndroidS)
                     runWithoutError(error = "ResetIconBgAndPaddings") {
                         XposedHelpers.findAndHookMethod(
                             NotificationHeaderViewWrapperInjectorClass,
@@ -286,68 +382,6 @@ class HookMain : IXposedHookLoadPackage {
                             ImageView::class.java,
                             lpparam.findClass(ExpandedNotificationClass),
                             replaceToNull
-                        )
-                    }
-                /** 修复下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R)
-                    runWithoutError(error = "AutoSetAppIcon") {
-                        XposedHelpers.findAndHookMethod(
-                            NotificationHeaderViewWrapperInjectorClass,
-                            lpparam.classLoader,
-                            "setAppIcon",
-                            Context::class.java,
-                            ImageView::class.java,
-                            lpparam.findClass(ExpandedNotificationClass),
-                            object : XC_MethodReplacement() {
-                                override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                                    runWithoutError(error = "AutoSetAppIconOnSet") {
-                                        /** 获取 [Context] */
-                                        val context = param.args[0] as Context
-
-                                        /** 获取图标框 */
-                                        val iconImageView = param.args[1] as ImageView
-
-                                        /** 获取通知小图标 */
-                                        val iconDrawable = (param.args[2] as StatusBarNotification)
-                                            .notification.smallIcon.loadDrawable(context)
-
-                                        /** 获取发送通知的 APP */
-                                        val packageName = (param.args[2] as StatusBarNotification).opPkg
-                                        /** 如果开启了修复聊天 APP 的图标 */
-                                        if (packageName == QQ_PACKAGE_NAME &&
-                                            XPrefUtils.getBoolean(HookMedium.ENABLE_CHAT_ICON_HOOK, default = true)
-                                        )
-                                            iconImageView.apply {
-                                                /** 设置自定义小图标 */
-                                                setImageDrawable(BitmapDrawable(IconPackParams.qqSmallIcon))
-                                                /** 上色 */
-                                                setColorFilter(Color.WHITE)
-                                            }
-                                        else {
-                                            /** 重新设置图标 - 防止系统更改它 */
-                                            iconImageView.setImageDrawable(iconDrawable)
-                                            /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                                            if (lpparam.isGrayscaleIcon(context, iconDrawable))
-                                                iconImageView.setColorFilter(Color.WHITE)
-                                            else
-                                                iconImageView.apply {
-                                                    clipToOutline = true
-                                                    /** 设置一个圆角轮廓裁切 */
-                                                    outlineProvider = object : ViewOutlineProvider() {
-                                                        override fun getOutline(view: View, out: Outline) {
-                                                            out.setRoundRect(0, 0, view.width, view.height, 5.dp(context))
-                                                        }
-                                                    }
-                                                    /** 清除原生的背景边距设置 */
-                                                    setPadding(0, 0, 0, 0)
-                                                    /** 清除原生的主题色背景圆圈颜色 */
-                                                    setBackgroundDrawable(null)
-                                                }
-                                        }
-                                    }
-                                    return null
-                                }
-                            }
                         )
                     }
                 logD("hook Completed!")

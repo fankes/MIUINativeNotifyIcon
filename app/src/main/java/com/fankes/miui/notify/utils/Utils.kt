@@ -28,6 +28,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.Bitmap.createBitmap
+import android.os.Build
 import android.util.Base64
 import com.fankes.miui.notify.application.MNvApplication.Companion.appContext
 import java.io.DataInputStream
@@ -45,6 +46,24 @@ val isSystemInDarkMode
  * @return [Boolean] 是否开启
  */
 inline val isNotSystemInDarkMode get() = !isSystemInDarkMode
+
+/**
+ * 系统深色模式是否开启
+ * @return [Boolean] 是否开启
+ */
+val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+/**
+ * 系统深色模式是否没开启
+ * @return [Boolean] 是否开启
+ */
+inline val Context.isNotSystemInDarkMode get() = !isSystemInDarkMode
+
+/**
+ * 系统版本是否高于或等于 Android 12
+ * @return [Boolean] 是否符合条件
+ */
+inline val isUpperOfAndroidS get() = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
 
 /**
  * 当前设备是否是 MIUI 定制 Android 系统
