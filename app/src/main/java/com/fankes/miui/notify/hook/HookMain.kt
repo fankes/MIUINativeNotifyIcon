@@ -175,17 +175,18 @@ class HookMain : IXposedHookLoadPackage {
             (param.args?.get(0) as? StatusBarNotification?)?.also { notifyInstance ->
                 /** 目标彩色通知 APP 图标 */
                 var customIcon: Icon? = null
-                run {
-                    IconPackParams.iconDatas.forEach {
-                        if ((notifyInstance.opPkgName == it.packageName ||
-                                    findAppName(notifyInstance) == it.appName) &&
-                            HookMedium.isAppNotifyHookOf(it.packageName)
-                        ) {
-                            customIcon = Icon.createWithBitmap(it.iconBitmap)
-                            return@run
+                if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
+                    run {
+                        IconPackParams.iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                HookMedium.isAppNotifyHookOf(it.packageName)
+                            ) {
+                                customIcon = Icon.createWithBitmap(it.iconBitmap)
+                                return@run
+                            }
                         }
                     }
-                }
                 when {
                     /** 如果开启了修复 APP 的彩色图标 */
                     customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true) ->
@@ -226,17 +227,18 @@ class HookMain : IXposedHookLoadPackage {
 
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
-                run {
-                    IconPackParams.iconDatas.forEach {
-                        if ((notifyInstance.opPkgName == it.packageName ||
-                                    findAppName(notifyInstance) == it.appName) &&
-                            HookMedium.isAppNotifyHookOf(it.packageName)
-                        ) {
-                            customIcon = it.iconBitmap
-                            return@run
+                if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
+                    run {
+                        IconPackParams.iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                HookMedium.isAppNotifyHookOf(it.packageName)
+                            ) {
+                                customIcon = it.iconBitmap
+                                return@run
+                            }
                         }
                     }
-                }
                 /** 如果开启了修复 APP 的彩色图标 */
                 if (customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true))
                     iconImageView.apply {

@@ -33,6 +33,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookMedium
@@ -90,11 +91,13 @@ class MainActivity : BaseActivity() {
                 }
         }
         /** 初始化 View */
+        val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
         val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         /** 获取 Sp 存储的信息 */
+        notifyIconConfigItem.isVisible = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE, default = true)
         hideIconInLauncherSwitch.isChecked = getBoolean(HookMedium.ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
@@ -115,6 +118,7 @@ class MainActivity : BaseActivity() {
         colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, b)
+            notifyIconConfigItem.isVisible = b
         }
         notifyIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
