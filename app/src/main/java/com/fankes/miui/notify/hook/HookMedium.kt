@@ -29,6 +29,7 @@ import android.widget.Toast
 import androidx.annotation.Keep
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.fankes.miui.notify.application.MNNApplication.Companion.isMineStarted
+import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.utils.FileUtils
 import com.fankes.miui.notify.utils.XPrefUtils
 import java.io.File
@@ -56,16 +57,16 @@ object HookMedium {
 
     /**
      * 获取此 APP 的通知图标是否被 Hook
-     * @param packageName 包名
+     * @param bean 图标 bean
      */
-    fun isAppNotifyHookOf(packageName: String) = getBoolean(key = "${packageName}_icon", default = true)
+    fun isAppNotifyHookOf(bean: IconDataBean) = getBoolean(key = bean.toString(), default = true)
 
     /**
      * 设置 Hook 此 APP 的通知图标
-     * @param packageName 包名
+     * @param bean 图标 bean
      * @param isHook 是否 Hook
      */
-    fun putAppNotifyHookOf(packageName: String, isHook: Boolean) = putBoolean(key = "${packageName}_icon", bool = isHook)
+    fun putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) = putBoolean(key = bean.toString(), bool = isHook)
 
     /**
      * 获取保存的值

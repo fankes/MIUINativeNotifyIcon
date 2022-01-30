@@ -180,7 +180,7 @@ class HookMain : IXposedHookLoadPackage {
                         IconPackParams.iconDatas.forEach {
                             if ((notifyInstance.opPkgName == it.packageName ||
                                         findAppName(notifyInstance) == it.appName) &&
-                                HookMedium.isAppNotifyHookOf(it.packageName)
+                                HookMedium.isAppNotifyHookOf(it)
                             ) {
                                 customIcon = Icon.createWithBitmap(it.iconBitmap)
                                 return@run
@@ -210,6 +210,9 @@ class HookMain : IXposedHookLoadPackage {
         runWithoutError(error = "AutoSetAppIconOnSet") {
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             (param.args?.get(if (isNew) 2 else 1) as? StatusBarNotification?)?.let { notifyInstance ->
+                /** 是否 Hook 彩色通知图标 */
+                val isHookColorIcon = HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
+
                 /** 获取 [Context] */
                 val context = if (isNew) param.args[0] as Context else globalContext
 
@@ -227,12 +230,12 @@ class HookMain : IXposedHookLoadPackage {
 
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
-                if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
+                if (isHookColorIcon)
                     run {
                         IconPackParams.iconDatas.forEach {
                             if ((notifyInstance.opPkgName == it.packageName ||
                                         findAppName(notifyInstance) == it.appName) &&
-                                HookMedium.isAppNotifyHookOf(it.packageName)
+                                HookMedium.isAppNotifyHookOf(it)
                             ) {
                                 customIcon = it.iconBitmap
                                 return@run
@@ -250,29 +253,33 @@ class HookMain : IXposedHookLoadPackage {
                 else {
                     /** 重新设置图标 - 防止系统更改它 */
                     iconImageView.setImageDrawable(iconDrawable)
-                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                    if (isGrayscaleIcon(context, iconDrawable))
-                        iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
-                    else
-                        iconImageView.apply {
-                            clipToOutline = true
-                            /** 设置一个圆角轮廓裁切 */
-                            outlineProvider = object : ViewOutlineProvider() {
-                                override fun getOutline(view: View, out: Outline) {
-                                    out.setRoundRect(
-                                        0,
-                                        0,
-                                        view.width,
-                                        view.height,
-                                        5.dp(context)
-                                    )
+                    /*判断是否开启 Hook 彩色图标*/
+                    if (isHookColorIcon) {
+                        /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
+                        if (isGrayscaleIcon(context, iconDrawable))
+                            iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
+                        else
+                            iconImageView.apply {
+                                clipToOutline = true
+                                /** 设置一个圆角轮廓裁切 */
+                                outlineProvider = object : ViewOutlineProvider() {
+                                    override fun getOutline(view: View, out: Outline) {
+                                        out.setRoundRect(
+                                            0,
+                                            0,
+                                            view.width,
+                                            view.height,
+                                            5.dp(context)
+                                        )
+                                    }
                                 }
+                                /** 清除原生的背景边距设置 */
+                                if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
+                                /** 清除原生的主题色背景圆圈颜色 */
+                                if (isUpperOfAndroidS) setBackgroundDrawable(null)
                             }
-                            /** 清除原生的背景边距设置 */
-                            if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
-                            /** 清除原生的主题色背景圆圈颜色 */
-                            if (isUpperOfAndroidS) setBackgroundDrawable(null)
-                        }
+                        /** 否则一律设置灰度图标 */
+                    } else iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
                 }
             }
         }
@@ -329,7 +336,7 @@ class HookMain : IXposedHookLoadPackage {
                                                 IconPackParams.iconDatas.forEach {
                                                     if ((notifyInstance.opPkgName == it.packageName ||
                                                                 lpparam.findAppName(notifyInstance) == it.appName) &&
-                                                        HookMedium.isAppNotifyHookOf(it.packageName)
+                                                        HookMedium.isAppNotifyHookOf(it)
                                                     ) {
                                                         isTargetApp = true
                                                         return@run
