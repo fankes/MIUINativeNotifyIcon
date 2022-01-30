@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:alpha="0.6"
             android:lineSpacingExtra="5dp"
-            android:text="开启或关闭指定 APP 的设置将在重新启动系统界面后生效。"
+            android:text="启用替换后 APP 的彩色通知图标将被替换为预设的小图标。\n启用完全替换将忽略 APP 非彩色图标，强制将全部通知图标替换为列表中预设的小图标。"
             android:textColor="@color/colorTextGray"
             android:textSize="11sp"
             tools:ignore="SmallSp" />
@@ -77,8 +77,10 @@
         android:layout_weight="1"
         android:divider="@color/trans"
         android:dividerHeight="15dp"
+        android:fadingEdgeLength="10dp"
         android:listSelector="@null"
         android:padding="15dp"
+        android:requiresFadingEdge="vertical"
         android:scrollbars="none" />
 
     <TextView

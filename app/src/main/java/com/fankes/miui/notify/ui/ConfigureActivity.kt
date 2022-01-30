@@ -68,7 +68,8 @@ class ConfigureActivity : BaseActivity() {
                             holder.appName = it.findViewById(R.id.adp_app_name)
                             holder.pkgName = it.findViewById(R.id.adp_app_pkg_name)
                             holder.cbrName = it.findViewById(R.id.adp_cbr_name)
-                            holder.switch = it.findViewById(R.id.adp_app_switch)
+                            holder.switchOpen = it.findViewById(R.id.adp_app_open_switch)
+                            holder.switchAll = it.findViewById(R.id.adp_app_all_switch)
                         }
                         cView.tag = holder
                     } else holder = convertView.tag as ViewHolder
@@ -77,10 +78,19 @@ class ConfigureActivity : BaseActivity() {
                         holder.appName.text = it.appName
                         holder.pkgName.text = it.packageName
                         holder.cbrName.text = "贡献者：" + it.contributorName
-                        holder.switch.isChecked = HookMedium.isAppNotifyHookOf(it)
-                        holder.switch.setOnCheckedChangeListener { btn, b ->
+                        HookMedium.isAppNotifyHookOf(it).also { e ->
+                            holder.switchOpen.isChecked = e
+                            holder.switchAll.isEnabled = e
+                        }
+                        holder.switchOpen.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
                             HookMedium.putAppNotifyHookOf(it, b)
+                            holder.switchAll.isEnabled = b
+                        }
+                        holder.switchAll.isChecked = HookMedium.isAppNotifyHookAllOf(it)
+                        holder.switchAll.setOnCheckedChangeListener { btn, b ->
+                            if (!btn.isPressed) return@setOnCheckedChangeListener
+                            HookMedium.putAppNotifyHookAllOf(it, b)
                         }
                     }
                     return cView!!
@@ -91,7 +101,8 @@ class ConfigureActivity : BaseActivity() {
                     lateinit var appName: TextView
                     lateinit var pkgName: TextView
                     lateinit var cbrName: TextView
-                    lateinit var switch: MaterialSwitch
+                    lateinit var switchOpen: MaterialSwitch
+                    lateinit var switchAll: MaterialSwitch
                 }
             }
         }

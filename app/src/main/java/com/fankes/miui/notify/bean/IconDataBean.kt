@@ -30,7 +30,8 @@ import java.io.Serializable
  * @param packageName 包名
  * @param iconBitmap 图标位图
  * @param contributorName 贡献者昵称
- * @param isEnabled 是否默认启用
+ * @param isEnabled 是否默认启用替换
+ * @param isEnabledAll 是否默认启用完全替换
  */
 data class IconDataBean(
     var appName: String,
@@ -38,6 +39,8 @@ data class IconDataBean(
     var iconBitmap: Bitmap,
     var contributorName: String,
     var isEnabled: Boolean,
+    var isEnabledAll: Boolean,
 ) : Serializable {
-    override fun toString() = ("$appName$packageName").base64
+    fun toEnabledName() = ("$appName$packageName").base64 + "_enable"
+    fun toEnabledAllName() = ("$appName$packageName").base64 + "_enable_all"
 }

@@ -59,14 +59,27 @@ object HookMedium {
      * 获取此 APP 的通知图标是否被 Hook
      * @param bean 图标 bean
      */
-    fun isAppNotifyHookOf(bean: IconDataBean) = getBoolean(key = bean.toString(), default = bean.isEnabled)
+    fun isAppNotifyHookOf(bean: IconDataBean) = getBoolean(key = bean.toEnabledName(), default = bean.isEnabled)
 
     /**
      * 设置 Hook 此 APP 的通知图标
      * @param bean 图标 bean
      * @param isHook 是否 Hook
      */
-    fun putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) = putBoolean(key = bean.toString(), bool = isHook)
+    fun putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) = putBoolean(key = bean.toEnabledName(), bool = isHook)
+
+    /**
+     * 获取此 APP 的通知图标是否被全部 Hook
+     * @param bean 图标 bean
+     */
+    fun isAppNotifyHookAllOf(bean: IconDataBean) = getBoolean(key = bean.toEnabledAllName(), default = bean.isEnabledAll)
+
+    /**
+     * 设置全部 Hook 此 APP 的通知图标
+     * @param bean 图标 bean
+     * @param isHook 是否 Hook
+     */
+    fun putAppNotifyHookAllOf(bean: IconDataBean, isHook: Boolean) = putBoolean(key = bean.toEnabledAllName(), bool = isHook)
 
     /**
      * 获取保存的值
