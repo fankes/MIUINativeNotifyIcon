@@ -18,7 +18,7 @@
  *
  * This file is Created by fankes on 2022/01/24.
  */
-@file:Suppress("DEPRECATION", "SameParameterValue")
+@file:Suppress("SameParameterValue")
 
 package com.fankes.miui.notify.hook
 
@@ -171,6 +171,9 @@ class HookMain : IXposedHookLoadPackage {
         runWithoutError(error = "GetSmallIconOnSet") {
             /** 获取通知小图标 */
             val iconDrawable = (param.result as Icon).loadDrawable(globalContext)
+
+            /** 判断是否不是灰度图标 */
+            val isNotGrayscaleIcon = !isGrayscaleIcon(globalContext, iconDrawable)
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             (param.args?.get(0) as? StatusBarNotification?)?.also { notifyInstance ->
                 /** 目标彩色通知 APP 图标 */
@@ -182,7 +185,8 @@ class HookMain : IXposedHookLoadPackage {
                                         findAppName(notifyInstance) == it.appName) &&
                                 HookMedium.isAppNotifyHookOf(it)
                             ) {
-                                customIcon = Icon.createWithBitmap(it.iconBitmap)
+                                if (isNotGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
+                                    customIcon = Icon.createWithBitmap(it.iconBitmap)
                                 return@run
                             }
                         }
@@ -192,7 +196,7 @@ class HookMain : IXposedHookLoadPackage {
                     customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true) ->
                         param.result = customIcon
                     /** 若不是灰度图标自动处理为圆角 */
-                    !isGrayscaleIcon(globalContext, iconDrawable) ->
+                    isNotGrayscaleIcon ->
                         param.result = Icon.createWithBitmap(
                             iconDrawable.toBitmap().round(15.dp(globalContext))
                         )
@@ -228,6 +232,9 @@ class HookMain : IXposedHookLoadPackage {
                 /** 获取通知小图标 */
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
+                /** 判断图标风格 */
+                val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
+
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
                 if (isHookColorIcon)
@@ -237,7 +244,8 @@ class HookMain : IXposedHookLoadPackage {
                                         findAppName(notifyInstance) == it.appName) &&
                                 HookMedium.isAppNotifyHookOf(it)
                             ) {
-                                customIcon = it.iconBitmap
+                                if (!isGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
+                                    customIcon = it.iconBitmap
                                 return@run
                             }
                         }
@@ -256,7 +264,7 @@ class HookMain : IXposedHookLoadPackage {
                     /*判断是否开启 Hook 彩色图标*/
                     if (isHookColorIcon) {
                         /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                        if (isGrayscaleIcon(context, iconDrawable))
+                        if (isGrayscaleIcon)
                             iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
                         else
                             iconImageView.apply {
@@ -276,7 +284,7 @@ class HookMain : IXposedHookLoadPackage {
                                 /** 清除原生的背景边距设置 */
                                 if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
                                 /** 清除原生的主题色背景圆圈颜色 */
-                                if (isUpperOfAndroidS) setBackgroundDrawable(null)
+                                if (isUpperOfAndroidS) background = null
                             }
                         /** 否则一律设置灰度图标 */
                     } else iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
@@ -330,6 +338,10 @@ class HookMain : IXposedHookLoadPackage {
                                             val iconDrawable =
                                                 notifyInstance.notification.smallIcon.loadDrawable(lpparam.globalContext)
 
+                                            /** 判断是否不是灰度图标 */
+                                            val isNotGrayscaleIcon =
+                                                !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)
+
                                             /** 获取目标修复彩色图标的 APP */
                                             var isTargetApp = false
                                             run {
@@ -338,7 +350,8 @@ class HookMain : IXposedHookLoadPackage {
                                                                 lpparam.findAppName(notifyInstance) == it.appName) &&
                                                         HookMedium.isAppNotifyHookOf(it)
                                                     ) {
-                                                        isTargetApp = true
+                                                        if (isNotGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
+                                                            isTargetApp = true
                                                         return@run
                                                     }
                                                 }
@@ -348,7 +361,7 @@ class HookMain : IXposedHookLoadPackage {
                                                 HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
                                             ) false
                                             /** 只要不是灰度就返回彩色图标 */
-                                            else !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)
+                                            else isNotGrayscaleIcon
                                         } ?: true // 否则不对颜色进行反色处理防止一些系统图标出现异常
                                     } catch (e: Exception) {
                                         logE("Failed to hook ignoreStatusBarIconColor", e)
