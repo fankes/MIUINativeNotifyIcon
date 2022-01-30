@@ -73,10 +73,26 @@
     <ListView
         android:id="@+id/config_list_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:divider="@color/trans"
         android:dividerHeight="15dp"
         android:listSelector="@null"
         android:padding="15dp"
         android:scrollbars="none" />
+
+    <TextView
+        android:id="@+id/config_cbr_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/button_round"
+        android:gravity="center"
+        android:padding="10dp"
+        android:singleLine="true"
+        android:text="贡献通知图标优化名单"
+        android:textColor="@color/colorTextGray"
+        android:textSize="15sp" />
 </LinearLayout>

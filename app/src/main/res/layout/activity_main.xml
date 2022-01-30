@@ -352,7 +352,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
-                    android:text="Q.哪些是已知问题？\nA.MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，可使用通知图标优化暂时修复其图标问题，后期只能等官方修复(基本上没什么可能性)。"
+                    android:text="Q.哪些是已知问题？\nA.MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，可使用通知图标优化暂时修复其图标问题，后期只能等官方修复(基本上没什么可能性)。动态小图标可能会在高版本系统中闪烁，这是 MIUI 的问题，后期仍在想解决办法。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
