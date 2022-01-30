@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorThemeBackground"
     android:orientation="vertical"
     tools:context=".ui.MainActivity"
     tools:ignore="HardcodedText,UseCompoundDrawables,ContentDescription">
@@ -11,7 +12,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:elevation="0dp"
         android:gravity="center|start"
         android:paddingLeft="15dp"
@@ -25,8 +25,8 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text="MIUI 原生通知图标"
-            android:textColor="#FF323B42"
-            android:textSize="30sp"
+            android:textColor="@color/colorTextGray"
+            android:textSize="25sp"
             android:textStyle="bold" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
@@ -36,7 +36,7 @@
             android:layout_height="25dp"
             android:layout_marginEnd="5dp"
             android:src="@mipmap/restart"
-            android:tint="#FF323B42" />
+            android:tint="@color/colorTextGray" />
     </LinearLayout>
 
     <LinearLayout
@@ -130,7 +130,7 @@
                     android:layout_marginEnd="10dp"
                     android:alpha="0.85"
                     android:src="@mipmap/about"
-                    android:tint="#FF777777" />
+                    android:tint="@color/colorTextDark" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -138,7 +138,7 @@
                     android:alpha="0.6"
                     android:lineSpacingExtra="5dp"
                     android:text="修改设置或开启关闭模块请点击右上角重启系统界面才能生效。"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="11sp"
                     tools:ignore="SmallSp" />
             </LinearLayout>
@@ -161,7 +161,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="启用模块"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
@@ -171,7 +171,7 @@
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
                     android:text="关闭后模块将彻底停止工作，以下选项都将不再生效。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -193,7 +193,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="修复彩色通知图标"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
@@ -203,7 +203,7 @@
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
                     android:text="此选项默认开启，开启后将自动对应用通知图标进行判断，保持彩色图标不被着色为白色或黑色色块，包括高版本 API 仍然不遵守原生通知图标规范的种种 APP 都将进行修复。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -225,7 +225,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="优化社交应用通知图标"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
@@ -235,7 +235,7 @@
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
                     android:text="此选项默认开启，开启后将对 QQ 和微信的消息图标进行色彩修复，使得它们的图标看起来更加美观。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -257,7 +257,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="在桌面隐藏模块图标"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
@@ -267,7 +267,7 @@
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
                     android:text="隐藏模块图标后，模块不会再在桌面显示，你可以在 EdXposed、太极、LsPosed 中找到模块设置并打开，对原生系统无效。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -295,7 +295,7 @@
                         android:layout_marginEnd="5dp"
                         android:alpha="0.85"
                         android:src="@mipmap/about"
-                        android:tint="#FF323B42" />
+                        android:tint="@color/colorTextGray" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -303,7 +303,7 @@
                         android:alpha="0.85"
                         android:singleLine="true"
                         android:text="使用帮助与说明"
-                        android:textColor="#FF323B42"
+                        android:textColor="@color/colorTextGray"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -314,7 +314,7 @@
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
                     android:text="Q.这个模块是如何诞生的？\nA.这个模块诞生来源于 MIUI 的乱改和不规范，本来 MIUI 9 之后，官方给出了原生通知图标样式，后面由于用户反应通知栏经常出现黑白块，这当然不是系统的错，而是国内 APP 极其不规范的通知图标设计，于是 MIUI 选择直接忽略这个问题把全部图标都改成了 APP 的彩色图标，使得之前拥有自有样式的原生图标也被破坏，通知中“setSmallIcon”不再有效，这个模块就是为了修复被 MIUI 开发组忽略的图标问题，并完美地给 MIUI 修复了黑白块图标的问题。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
                 <TextView
@@ -324,7 +324,7 @@
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
                     android:text="Q.如何使用？\nA.模块仅支持 EdXposed、LsPosed，由于涉及到修改系统应用，不支持太极(阴)框架，在 LsPosed 的作用域中，只需勾选“系统界面”即可，应用设置后需要重启系统界面。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
                 <TextView
@@ -334,7 +334,7 @@
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
                     android:text="Q.哪些是已知问题？\nA.MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，暂时只能等官方修复。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
                 <TextView
@@ -343,7 +343,7 @@
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
                     android:text="Q.如何反馈问题？\nA.酷安关注 @星夜不荟"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -372,7 +372,7 @@
                         android:layout_marginEnd="5dp"
                         android:alpha="0.85"
                         android:src="@mipmap/about"
-                        android:tint="#FF323B42" />
+                        android:tint="@color/colorTextGray" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -380,7 +380,7 @@
                         android:alpha="0.85"
                         android:singleLine="true"
                         android:text="项目地址"
-                        android:textColor="#FF323B42"
+                        android:textColor="@color/colorTextGray"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -390,7 +390,7 @@
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
                     android:text="本软件是免费开源项目，遵循 GPL 协议，你可以点击这里前往 Github 查看源码以及获取模块更新。\n严禁以任何形式贩卖、商用本软件，否则开发者有权追究其法律责任。"
-                    android:textColor="#777777"
+                    android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -417,7 +417,7 @@
                     android:gravity="center"
                     android:lineSpacingExtra="6dp"
                     android:text="恰饭时间\n点击前往酷安关注我，获取我的更多应用"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="16sp" />
 
                 <androidx.cardview.widget.CardView
@@ -440,7 +440,7 @@
                     android:gravity="center"
                     android:lineSpacingExtra="6dp"
                     android:text="开发者 酷安 @星夜不荟\n未经允许不得转载、修改复制我的劳动成果"
-                    android:textColor="#FF323B42"
+                    android:textColor="@color/colorTextGray"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
