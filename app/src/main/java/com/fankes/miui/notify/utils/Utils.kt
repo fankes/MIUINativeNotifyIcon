@@ -29,6 +29,7 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.Bitmap.createBitmap
 import android.os.Build
+import android.service.notification.StatusBarNotification
 import android.util.Base64
 import com.fankes.miui.notify.application.MNvApplication.Companion.appContext
 import java.io.DataInputStream
@@ -110,6 +111,12 @@ val miuiVersion
                 }
             } + " " + findPropString(key = "ro.system.build.version.incremental")
         else "不是 MIUI 系统"
+
+/**
+ * 获取推送通知的包名
+ * @return [String]
+ */
+val StatusBarNotification.opPkgName get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) opPkg else packageName ?: ""
 
 /**
  * 得到安装包信息
