@@ -37,7 +37,7 @@ object IconPackParams {
     val iconDatas by lazy {
         arrayOf(
             IconDataBean(
-                isEnabled = false,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "Android 系统",
                 packageName = "android",
