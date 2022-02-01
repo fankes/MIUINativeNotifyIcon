@@ -101,10 +101,10 @@ class HookMain : IXposedHookLoadPackage {
      * @param it 继续执行的方法
      */
     private fun logD(content: String, it: () -> Unit = {}) {
+        it()
         if (!HookMedium.getBoolean(HookMedium.ENABLE_MODULE_LOG, default = true)) return
         XposedBridge.log("[MIUINativeNotifyIcon][D]>$content")
         Log.d("MIUINativeNotifyIcon", content)
-        it()
     }
 
     /**
@@ -113,10 +113,10 @@ class HookMain : IXposedHookLoadPackage {
      * @param it 继续执行的方法
      */
     private fun logW(content: String, it: () -> Unit = {}) {
+        it()
         if (!HookMedium.getBoolean(HookMedium.ENABLE_MODULE_LOG, default = true)) return
         XposedBridge.log("[MIUINativeNotifyIcon][W]>$content")
         Log.d("MIUINativeNotifyIcon", content)
-        it()
     }
 
     /**
@@ -126,10 +126,10 @@ class HookMain : IXposedHookLoadPackage {
      * @param it 继续执行的方法
      */
     private fun logE(content: String, e: Throwable? = null, it: () -> Unit = {}) {
+        it()
         XposedBridge.log("[MIUINativeNotifyIcon][E]>$content")
         XposedBridge.log(e)
         Log.e("MIUINativeNotifyIcon", content, e)
-        it()
     }
 
     /**
