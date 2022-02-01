@@ -146,6 +146,32 @@ object IconPackParams {
             IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
+                appName = "浏览器",
+                packageName = "com.android.browser",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAPVSURBVGiB1ZpPaB1VFMZ/5/EWxcSFLqQJkrYQxeKyi9JdoSI0Fgu6FIm4UWMCKkgV\n" +
+                        "CknFRWqLCD4oWKrgqlCEJpSABUHclC5CRUVMN7po81wUhISuuvhczAtvOjl3/r07L8m3eXDOved8\n" +
+                        "37szc+eeM0YkSHoSOAUcAcaBsdQvQBdYT/2uAjfMbDMWh9qQNClpTtKK6mOlF2NyJwQcltQZgHwI\n" +
+                        "HUmHhyFgQtKipM0GRGxhs5djoikR05K6DQrIoitpOraIM0MUkMWZWCKuN0x0QdJ/BWOuF/FsFYgQ\n" +
+                        "cDrKP5KPk8DVHP/pHpfqkLTa8Eps4Xgq55uS7uSMXa0q4vJwNOi+ko00nXtU0nzOnMtlRcwMRUKC\n" +
+                        "d3N4nM+ZN1MkYkLDecSuSTpR4k/9OjC/q8w+087MnQH2FyUoiXMB+y3glpltFAUwszlJTwBvZ1z7\n" +
+                        "Sbh+sm2SkteOmDv2QkXhQUi66sTfVOp1Jv34fR8YjZU8Mr50bKMknPuQdCjiSkRfkR7H7wN5DkF/\n" +
+                        "RQpvvF2AbwP2E9AX8vJwuNSHmf0M/OC4Eu6SRhq4rO5LOhhbjKSpQL6RFjAVOd+vwAUz+ydyXMxs\n" +
+                        "BbjnuKbawFHHcQ6YLxHYBuRWB3eBZzO2oy2SAkEWD4CzjVOqh7uObbxNv8qRxgMz60h6BJxvlldl\n" +
+                        "/OXYxkIr8jeAmX0BfNQkqxr43bGNI2nDeQo8nR4ladZ7VAyJ+GOQ9IxDZSMkZJ8T4J2iZ25F3JH0\n" +
+                        "QQ0h+0JC1hyHd98g6b3IYirvN5LGnDhrLZLyZRZPeUHM7BIwVyVxAcaBqiUfj9t6i6QWW2YwAGbW\n" +
+                        "AT6smDwPVfcij1s3tCLHHVs/s9lXwMcVCcTCq45tvQXcdhwvFUUzs4vAp4OyqoHXHNvt0Evjo9AN\n" +
+                        "n4WkswPe8KXPLZJOBmKMtMzsIXAtM6dNycKcmX1O+HweG95ldc3MHm6dR246A2Yl7Zqjr6QXgLcc\n" +
+                        "103oH6x+cga8CMw2xKsOpoFtGzVZ7vIbN/ckHSjKIOmNAe+TLfwraVnSqUz8Sfn1to5HJlQO+qaE\n" +
+                        "kOcjCUljPhV/yfE/Vg7KEloMBPWuzezc5QbEHJP0WcC3mEcmr2T6egkxf0QW8mPAvq1k6pHJK2IX\n" +
+                        "Hn+VNG6WlbwQNoX8InaKTF5boVBMSlATKNdWSBHJa/TckHRsB4QEGz3B1puZHcnh+Qrwi5KGzHPF\n" +
+                        "f0sc5HHK7SH2yj1LAXcbWAB+k3RFJfodA2ApSulJ5dvTf0r6TslJMtalFac9nRKz9z8YSInZ+59w\n" +
+                        "ZATt7Y9qHEG75jOnaEVo7fCHZ/8DGEL3uplW+PsAAAAASUVORK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
                 appName = "QQ",
                 packageName = "com.tencent.mobileqq",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAYAAADHl1ErAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
@@ -417,6 +443,31 @@ object IconPackParams {
                         "ruGHQoJCCzkTYSQW32vPL68COOCZIaC+ax50dooA6KP+LcZH02o2vfmwWdlP1yVJs5J+F2+9Bf9z\n" +
                         "QpKZNXnvSR38CTyTdNSjXy/pUJS9YniQbnCNkbtdMBLLw3RDSyFm9lzSxa7YycdVM3sZHE19KVrL\n" +
                         "GGzd5htw1ue37fcR4Ljq3zX6k59vy6gsPkqakfTIzLoxyVRUVFR0gf/L83vOF7040QAAAABJRU5E\n" +
+                        "rkJggg==").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "知乎",
+                packageName = "com.zhihu.android",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAN3SURBVGiB7ZpLiBRXFIa/X5QYjAnIDIFBiIK6SMhCAgoK0iNiRFyoqCiCRCUGXLhx\n" +
+                        "52rwsU0cRBRxIROCoCARRBAce5JFHgYSyEMRDC5iFjJRXMS4/F10Vbosu6vqVlVPj+IHDbfqnHvu\n" +
+                        "+bvurXuqukUOthcC7+X59ZhHkn7NclCnk7b3AKuBlcCCHiRWhgdAE/hG0ulcb9tfe/pzx/bHybyV\n" +
+                        "EuFav8Pe86Gk3wFmxGdsj/Qvn9KceO7I9s6+TpRq7Ib2FVkz1V9ljWyAtpAP+phIVVZBW8j7JYP8\n" +
+                        "A1ysJZ3yDNheOjM6mFMiwDZJF20/rTOrkrwzI9+nI7GIjcDsOjMqSxkh5yXF02lTnclUYWa+ywuM\n" +
+                        "AtieQ6uMCWWiRB+ARpZRELSjj0taE/VZDywr2G8L7TvjsKRgMTk5DodekRtxQ9JV4GrBJKDHt/hQ\n" +
+                        "IeMlx7nZ6aTzy6KJoKtXsBT4LeG/L2lInF9bIE4jYNyivo2Qu1byauzr4vNmQLxaKSpkEjgOYPsC\n" +
+                        "8FEXv77tKUWFjABDtseArRl+b1RPqRxFF/vJgn59E1K2ROnGayFVeWWEhGyIu4C/cny+A4a72JoB\n" +
+                        "YwVTVMiYpC/znLJ2Ydt/0MMypaiQa8ldNk3BMuIHpoGQrzJsl4hKc9tNcsrtXlHHYr9bQ4zK1CHk\n" +
+                        "dqLdt/fEdQi5CWB7gNYU21VDzGDKPOom+UnSrai9UtJuANsLgMMVYwdR9Yok32ntsD0XQNIR4EzF\n" +
+                        "2EFUEfIncA7A9ipgM3AhNkr6DLhcKbsAqgj5XNJk1N4GzALW2R5N+OyltX90o9P+M5H4hFHgkTNN\n" +
+                        "M9F3yPbfKfuBhH1Ft8fXyH4vOv+LWy/8yuTYKLvYv0i0twNDKfuo7ceSxoDM3/5oPevMk3SoZC5A\n" +
+                        "+HstgP2STkX93gK+BZZ28HsC7JR0ORX//ykjadj2u5IeRPE2AAe7jJtVMbQK1YApdT3Z2/axHP+f\n" +
+                        "bTcy7IOJWEcD8kjTCBFyMiXik4L9mhm2/bbn2x4vGKsbhYV8Gvktsr3D9vmKA8c0bf9XQ5xGvEYm\n" +
+                        "gYGMOTjdWRzvI3f6mkY17ku6+yoI+R7aO/uNDMfpzpXnjmyP1LDoppp2bZcS87L9hWNA0kNIFY2S\n" +
+                        "xBRWrBWYAN6ORUD235yWA0tovfkY7OQ3hfxLq2a7Bfwo6Wyf8+kdzwC8NyXjf0uu9wAAAABJRU5E\n" +
                         "rkJggg==").bitmap,
                 contributorName = "fankes"
             ),
