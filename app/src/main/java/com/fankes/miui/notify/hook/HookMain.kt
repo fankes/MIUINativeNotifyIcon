@@ -459,8 +459,7 @@ class HookMain : IXposedHookLoadPackage {
                                         "getSmallIcon",
                                         lpparam.findClass(ExpandedNotificationClass),
                                         Int::class.java
-                                    )
-                                    .apply { isAccessible = true }
+                                    ).apply { isAccessible = true }
                             } catch (_: Throwable) {
                                 /** 旧版方法 */
                                 lpparam.findClass(NotificationUtilClass)
@@ -477,6 +476,7 @@ class HookMain : IXposedHookLoadPackage {
                         }
                         /** 修复下拉通知图标自动设置回 APP 图标的方法 */
                         runWithoutError(error = "AutoSetAppIcon") {
+                            var isNewWay = true
                             try {
                                 /** 新版方法 */
                                 lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
@@ -487,6 +487,7 @@ class HookMain : IXposedHookLoadPackage {
                                         lpparam.findClass(ExpandedNotificationClass)
                                     ).apply { isAccessible = true }
                             } catch (_: Throwable) {
+                                isNewWay = false
                                 /** 旧版方法 */
                                 lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
                                     .getDeclaredMethod(
@@ -497,7 +498,7 @@ class HookMain : IXposedHookLoadPackage {
                             }.also {
                                 XposedBridge.hookMethod(it, object : XC_MethodReplacement() {
                                     override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                                        lpparam.hookNotifyIconOnSet(param, isNew = true)
+                                        lpparam.hookNotifyIconOnSet(param, isNew = isNewWay)
                                         return null
                                     }
                                 })
