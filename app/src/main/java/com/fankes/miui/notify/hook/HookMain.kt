@@ -90,12 +90,8 @@ class HookMain : IXposedHookLoadPackage {
     private fun runWithoutError(error: String = "", it: () -> Unit) {
         try {
             it()
-        } catch (e: Error) {
-            logE("hookFailed: $error", e)
-        } catch (e: Exception) {
-            logE("hookFailed: $error", e)
         } catch (e: Throwable) {
-            logE("hookFailed: $error", e)
+            logE(content = "hookFailed: $error", e)
         }
     }
 
