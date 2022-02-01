@@ -150,6 +150,7 @@
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginRight="15dp"
+                android:animateLayoutChanges="true"
                 android:background="@drawable/permotion_round"
                 android:elevation="0dp"
                 android:gravity="center"
@@ -160,8 +161,18 @@
                 <com.fankes.miui.notify.view.MaterialSwitch
                     android:id="@+id/module_enable_switch"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
                     android:text="启用模块"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/module_enable_log_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="启用调试日志"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
@@ -171,7 +182,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="关闭后模块将彻底停止工作，以下选项都将不再生效。"
+                    android:text="模块关闭后功能都将彻底停止工作，以下选项都将不再生效。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
             </LinearLayout>

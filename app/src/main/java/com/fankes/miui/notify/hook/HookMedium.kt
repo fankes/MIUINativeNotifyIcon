@@ -38,6 +38,7 @@ import java.io.File
 object HookMedium {
 
     const val ENABLE_MODULE = "_enable_module"
+    const val ENABLE_MODULE_LOG = "_enable_module_log"
     const val ENABLE_HIDE_ICON = "_hide_icon"
     const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
     const val ENABLE_NOTIFY_ICON_HOOK = "_notify_icon_hook"

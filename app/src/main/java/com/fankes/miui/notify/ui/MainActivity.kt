@@ -91,20 +91,28 @@ class MainActivity : BaseActivity() {
                 }
         }
         /** 初始化 View */
-        val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
+        val moduleEnableLogSwitch = findViewById<SwitchCompat>(R.id.module_enable_log_switch)
+        val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
         val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         /** 获取 Sp 存储的信息 */
         notifyIconConfigItem.isVisible = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
+        moduleEnableLogSwitch.isVisible = getBoolean(HookMedium.ENABLE_MODULE, default = true)
         moduleEnableSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE, default = true)
+        moduleEnableLogSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE_LOG, default = true)
         hideIconInLauncherSwitch.isChecked = getBoolean(HookMedium.ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
         notifyIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_MODULE, b)
+            moduleEnableLogSwitch.isVisible = b
+        }
+        moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
+            if (!btn.isPressed) return@setOnCheckedChangeListener
+            putBoolean(HookMedium.ENABLE_MODULE_LOG, b)
         }
         hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
