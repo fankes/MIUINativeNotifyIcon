@@ -120,6 +120,30 @@ object IconPackParams {
             ),
             IconDataBean(
                 isEnabled = true,
+                isEnabledAll = true,
+                appName = "智能服务",
+                packageName = "com.miui.systemAdSolution",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAANKSURBVGiB7ZlNSBVRGIbfrwJdhJQQQRjYIio3BtkiFxepZb9I0lVJWkWLFhHtWigR\n" +
+                        "tBC6tZH+yIIgyYUZFVSQbkQoQyKXEkEW5qIfAqVFvC5mbhzGOWfOzJy5V2geOHC85/vO975z7p0z\n" +
+                        "cwRycnL+C8TlZCRrABwEsBfABqUBwE+lvQXwTET+uKyfGpJdJAdJLtKeRT+nq9r6QbKT5EQM8Tqm\n" +
+                        "SJ6uhoFWks8dGAgzVJkVItlD8ncGJlQuZm3iQsYGVPqyMtFdQRNlul2bKFTBRJmCjcY1FiaaAYyk\n" +
+                        "vhrJGfE1GIk0AuAKgPr0ehJT72tIDr19YrXQadIatSJnU10Jtxi1aI2QPAmg1bmc5LT6mkIxrchh\n" +
+                        "ywIlUTDEjUsIAOoA7AJwFMBERC1bTR4ka0kuWX53GwK5jzRxY5a1TxlqLZGsDctbp5nvGIDQhACT\n" +
+                        "IjIX+KwEoCNCbHDXXhCRAQAQkXsk2xF+9Wt9bUMW2gCSJcvV6FBy9in9z6YVIdkXMv5AGT9kqFkK\n" +
+                        "06z7jTTaGBaRYb/wEQBFZeiqTX6AbpIH/HmfAvgaR1saI+qVOQFAvc/ft8gPY4vS/6iJcW7kLgCQ\n" +
+                        "XA/PyCaSxwFARL4DGLaYI8hmpT8bR5vNI0oYkyIy4/eLANb6fXVV7iSY96/SX4iTqLtrfQKw25B3\n" +
+                        "W+lvBXCp/AfJjSLyQ0RekpwD0LAiW8+80t9h0LaCpEb+3f5EpNcQdwPAZcN4kG9Kf6cmJrYRHQMi\n" +
+                        "sgQAJNvCAkRk3O8Owd7IrIi89uctIOaKhEKy3XAfLyhxHzQx+5WYx5p9ZMxvDxnYIEm+MNRvj2Ok\n" +
+                        "huFnVG+UmG2GYqNKXDFoJKJ2j2HeRXqHgPbQOzwLcl4Zv2YoyMBcX3RGSNaRbKK3mz8xzUlyMJYJ\n" +
+                        "v0BXxKTVQHvmZTz7JTkFYE/sq5AN70SkRTcYtSHeciwmDUYtkafxq2RVjKsB2D2iXHckJg1uNJDs\n" +
+                        "r+IPvN+JCcXMaBVMjEYrS2bmZgVNJH2nsTZjenxxxZlMTShmWki+ysDADMlitAL3hs6RnHdg4BfJ\n" +
+                        "XpJ1FTehmNlO79RlOoGBaT+3Ka0O1/+ebgTQBqAZ3rt1uQHee0S5vYd38mj/bpGTk5MDAMvK9kAP\n" +
+                        "2+2jfwAAAABJRU5ErkJggg==").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "QQ",
                 packageName = "com.tencent.mobileqq",
