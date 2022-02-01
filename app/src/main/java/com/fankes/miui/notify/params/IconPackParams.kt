@@ -521,6 +521,154 @@ object IconPackParams {
                         "vgT/nyS//xs0aqw318jIyEj//AXLwAqzwAEk3wAAAABJRU5ErkJggg==").bitmap,
                 contributorName = "fankes"
             ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "小米商城",
+                packageName = "com.xiaomi.shop",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAIVBMVEVHcEz/////////////////\n" +
+                        "//////////////////////+PBM77AAAACnRSTlMA8GLRtA4sgz/7P2EvMAAAAQJJREFUOMtjYKAy\n" +
+                        "YFMxFIQCYacEhDiH16pZq6Bg5awlDTBx1qpVKGB5AFQiZBUacIVqsEKXWAzRwrIKAziAJbowJVaA\n" +
+                        "JbwwJZaA/bAKCwD5hQmbhAJ2uyG2M2OTMABKMILCARJOUmAWiC8Ak1BLawPCJK9Vi9vSQTrgEtAQ\n" +
+                        "ZVo1GeIYuAQsQKsWB6BJsJaXlxcFMHRiSIC9acYQjCkBdNGqRVgljJS8lmOVcGDQwiVRNdgkElhB\n" +
+                        "zl3EwLwYLRCL1GcBPbhESXGxkjqKxMyZs1bNnAWiVq6CSWCL2pUG+BIDzuSDM8HhTKK4EzWm7Ssd\n" +
+                        "8GccnFkNd+YEZWdkJzUQLgCoAwBn17ML819iyAAAAABJRU5ErkJggg==").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "饿了么",
+                packageName = "me.ele",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAIVBMVEX///9HcEz/////////////\n" +
+                        "//////////////////////+jWTucAAAAC3RSTlP/AFx+orvSEDwf6OtwJuIAAAGHSURBVDjLxZQ7\n" +
+                        "U8JAEMdviKZId0EnSYf4YOxQomasfCAjVog6Y5lxkKFNaLBER6wj2jMSLfiU7t6LI0Cr23C7v9zt\n" +
+                        "f/f2IHSJkT8FPf+u3dp/mwPPFyNCyM9NkgHDBmFmnSUzoCfiYJc68A5VnJh9DXyw0GTCfh6mwDkB\n" +
+                        "P60Ui5s1TLOhQBfc1RLLdQXLjgIF8O55zhhUrEQCeOhI/a/wUV8AG9Z1WeiOcBB8Qga5YRgCyAlQ\n" +
+                        "kBJ5Cu4B8EDsKY97xxhPRQ63IavlDfguCbl2yAVSZ5u1ZFdWnh8Rg623sPFmoJq4xmXQGONWk+rg\n" +
+                        "C5dlPKiJh0YzOxxUOsZ63EABQ7R43Geaxxysc0AHJEWhrs8ax3cwuXaVFeCGxNrLFMgNRFwzAIfj\n" +
+                        "J8oGcgc2saOBPGkm07ZrwKnqF3W0aHbxao1o0VCXp8NAn3TQVV2N/VZEMwNnwsBVaiqbPqIE+86v\n" +
+                        "QAJHG+rcsmdQzzycUDyCzMOhzksNMliPQTT3ON8P2rfnwT/9M2TsFzbLcF810OUOAAAAAElFTkSu\n" +
+                        "QmCC").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "小米有品",
+                packageName = "com.xiaomi.youpin",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEX///9HcEz/////////////\n" +
+                        "//84chYNAAAABnRSTlP+AER3uyg2chHOAAAA2UlEQVQ4y+XTvRKCMAwA4CC4U2p3CboXInsF3IX3\n" +
+                        "fxgT/uTXOwcnM+TKfW3a9AqonYD/gOref0bESecjgNeDDhDxfBjAwLBCg8QIEaTjCk5hDzCEvwDE\n" +
+                        "C6DEdQE88tVWKaWexx2wcqgmXgOUROS8VR8aKo62yXkfIUgV661K2TfM7sr4IzS1wi4JnDLZ4yHg\n" +
+                        "0gg4KZ7JQJGcKm8hqKBNAoZnDaVceWMoqVuhJjAr9Qm2N2fIEOPvSv0Cpp33YOQJuSJhKHAKVh7E\n" +
+                        "opShWumk5hHFfOMU/8Vf+wLcIFzU2xlxJwAAAABJRU5ErkJggg==").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "携程",
+                packageName = "ctrip.android.view",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAIVBMVEVHcEz/////////////////\n" +
+                        "//////////////////////+PBM77AAAAC3RSTlMA/9IUnbsufklg552EPzYAAAILSURBVDjLpVTN\n" +
+                        "b9owFLcwJOT4rGS0OdX9ortFaB/dTtCVSu2pEajVdkJTYRUnmKapx6RS6XqDlVXtMQJpWv/KPtux\n" +
+                        "E+hOmy883rPf7+PZIeS/1m5zfeviL/m3HHAdPM8nIg9+tJQvJ8AuejcNWFkqDMGNZJ0FC/lXukcf\n" +
+                        "xln2utkO4YOKHWCmciVAKyKiI0ITFeIqSjZym/0yINMQIg37sddTwgoDRLbhJG26asBskbLSQjdP\n" +
+                        "YyR3tmTc8PK0zzpkkmJw97qdM2B/D9KdIVLK/Dk/AthQ4SUaZ1z4hbuq6T9rj2tFiAuwnfXlL4jR\n" +
+                        "Or/LPCxDXYcF6OQY2jCQvz8IiRc8LylSNu4OK+RNVqopUg0/sGHWfZybynumDqygnQ9Iq6ULfak0\n" +
+                        "hupXcGPYAtec8LQB0EKQvrlBNSY5zwH+0GQNufgp54IIilCF74GFkj5/gh0tdyw4f0NyWKC3lLta\n" +
+                        "YF1ovsKONDm2AjJh2pKZKFwyMdVjTOgC4Tj0kt/FVkVpW0MTHnoC6AydUVMNf2shiO7ADdS/SHE0\n" +
+                        "2TH2zgjlA+6DhHCMKZRjr8laDMqNWnafYpxIqeI8bkrJQ5YbVQWPRWoUZXOpBUGk+Tq9qX0JZI6w\n" +
+                        "iPw8UE9xYbwT8G7Jw518otv5K2vhOE7vR+fTBNzFN+jIR46LLT/nd0cy742ffQCsaXO9fdj55w/O\n" +
+                        "E6UPYaN29WsKAAAAAElFTkSuQmCC").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "App分享",
+                packageName = "info.muge.appshare",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAIVBMVEVHcEz/////////////////\n" +
+                        "//////////////////////+PBM77AAAACnRSTlMASSy/Em7v2KaRY7oCgwAAAXJJREFUOMvNUztL\n" +
+                        "w1AUTmqK6RZELHaqQkU6FV9gpopiHfvCIZN2CJhJqIJkChQUM3VwyqaheXy/0qQ35yY3zeTkmc49\n" +
+                        "3z2v735Xkv5uysFOZbzzYYbtivgEiQ034800XpFxBwSXo92NeM1GOK5qvIdgSr48LSRYOOGHlt/n\n" +
+                        "/gBRfsvAC/ddOOTeHDYRUooMn2pOTFjg17Yxy7x7rO2BV802bqRRE1hmgE5FDfijpAeNVcOKnEAr\n" +
+                        "TlWnFg08Cnuo6NE6jrD5gJp1oQlEHdFQRigy2KKLHt9zrgmAG4ldOaDHGbDFgG4F4AjN9WxR6ZbN\n" +
+                        "eU1sHn9JNPeQLfxcemkDbfYc3yVAZ6wodlTSDLHqQRSaih/q1StRsSS6V4Lq7SCroFgCrSriPHdW\n" +
+                        "ANy8ciICraDvMJeih5iLzF4/cJ7yyhDZFX+JAbwlv0Pp6MBZcUQ5CQTzxUUiuCeRhrrO1Im4/N2u\n" +
+                        "3tNwcL75DZX9xennuC/9C/sFYJSEEykCAlEAAAAASUVORK5CYII=").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "小米社区",
+                packageName = "com.xiaomi.vipaccount",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAHlBMVEX///9HcEz/////////////\n" +
+                        "//////////////////8EIMeDAAAACnRSTlP+ACiLrkoQ4chpI4Y6bQAAAcBJREFUOMvNk01v2kAQ\n" +
+                        "hkcQy/g4a7yBmx0lRb2tixQpNxu5EUcchZAebQSUm3EUJUdAScXRroho/m1nd50GVcmdOc3ss+98\n" +
+                        "7NiAnxgcLphcIbJXj7z0RJunwe0zov0Qk/cnUtb3NRA1xCZIRQDaVgpEWaOHLTMhd2lulJUSMLpR\n" +
+                        "w1aDznlG2ukUuSrONhFJO0co7yw4CVOv6sqBEt26AqvRHTrZrwrMzMmLqA9/043wJ8Su+aYIDFe2\n" +
+                        "YmAbfAbrpVEN2IawANWBDT4GJiXWoIB8PlxaP25omBg7UK+exAagGYIFRS0CTWpRASYoS84zGc5o\n" +
+                        "/BHca0CCusgZhBS5ZkLjmpXicWDZiUNlEQcNEl2/FfcGhuxMRsURX1qM2tNdBTUJ5KsLq0UphXxP\n" +
+                        "BVayNU+B8UWC40hPzjOq21QV1cz/VsvAT086Ddonzyy92y8KUHqh1hbyrFqgpQAtVR+EWFTA0Iou\n" +
+                        "dpXF6Gine34QHzVLUs6HyGI8czy+B+z1/W27f7nrzx+f8k7yDrjwi3Rr5Mfb3qI72AMoyp37aqxn\n" +
+                        "/wN7/Tw6fbrcbZrfVhf7qdrly1cWeePvzk15NU8O/D//yP4ChmCIUjvSgi8AAAAASUVORK5CYII=").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "网易云音乐",
+                packageName = "com.netease.cloudmusic",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAIVBMVEVHcEz/////////////////\n" +
+                        "//////////////////////+PBM77AAAACnRSTlMA580VXSp6krJEn4RcnAAAAY1JREFUOMvNVE1L\n" +
+                        "AlEUvThquQtSiVkJitGsVFrUrk8QVw6EQauiFuLKIpBcBQWCq0nCRbsZSu38yu59zozzXv4A32Jm\n" +
+                        "uGfeveecd2aINmd1Rudr61kbQXsdMARQMGrWJVGa61gYwCnatI3FFHO9PgH6VMcuTd70qdzjhFy8\n" +
+                        "mlN7QIWo8W8ybyiq27cBfCn61hn8kadRtVHmq6hAkES24NeIPgBTxw1+iXIIVznpBNN0gYMW3u3E\n" +
+                        "Fsth1TRGnhWWjoDbCMghUJ08SnHPIX4i4BozYp/mImTGYOxWV2an2CfetqAM/OhInqTmoiSCghoP\n" +
+                        "i07xURguDRzz20wtCdSxEwIuqnGrgsxgAzPCr4H9EGgKwazMVNRWQEfospHFT0f41eNWx8qFljKq\n" +
+                        "L85VNUuykbU9vGgmSh58scmBp9lONB2IsrQw0w4qXK5QCVfGxipNTvKkWqssNwBPi09++ZS2E52W\n" +
+                        "Ma/ImENHSdEjuvdw0bWhb4izw1I8I4x3Yf3ejLXVtKXduk/wajB4bm/GP+IPfIGteESLrbIAAAAA\n" +
+                        "SUVORK5CYII=").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "什么值得买",
+                packageName = "com.smzdm.client.android",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAHlBMVEVHcEz82tj/+Pj82NX+9PP9\n" +
+                        "4N7+7+395uT+6uj///8VE/3hAAAACXRSTlMANOkYz1eudZBHYIOYAAABi0lEQVQ4y9VTu07DQBA8\n" +
+                        "63Cc8iACyV3ACXCdCUi0QSAl1xlFiqCzaIK78IqUziBeLm0ck/lb1iTCr9DDFmtp5zw7s3fL2F8P\n" +
+                        "Y2SvBjporwZqSMol7V1Q1vHJWKPInpYYlyG/33HygI447avaT4BfAtI/FIBdu0K1+QzEL0XFdVja\n" +
+                        "FR3fEyVVa3AN2XqTftWaww5tJn399a4AXH6L0jBSC3k/Ecy/bVIXRPk2XG1Tnjyjvykju2DDouxF\n" +
+                        "N5Ti6vTMT3YgpgXABIi5lgzlh1mg8lokl1xi3zHzzXWcw+f0eVw4ylokXLq3Jxrx2TWMc/ZOmeoG\n" +
+                        "MZc3T/M63MyFFMxrrkHQ1HsGuhlTSNZDHY6XDJaWlhdOOqYzDeOgy/g9wsIUpzMu/Uvr2EMZmDPl\n" +
+                        "mrGMRlOL/OeEJczrdtAfMG19ouLMixkzz6rNqOEFsaGZB4KQC20i0ys5y0zS7EjYkMrx9UMjN8dO\n" +
+                        "RAMng7sPpQe/AeFVXxXFEZwAPVHdgDrGxsuq1eDK/2XNtgT7D/EF1Zp562KcU6YAAAAASUVORK5C\n" +
+                        "YII=").bitmap,
+                contributorName = "lamprose"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "王者荣耀",
+                packageName = "com.tencent.tmgp.sgame",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAANlBMVEVHcEzt7e3m5ubq6uq7u7vz\n" +
+                        "8/Po6Oi+vr6xsbHJycn29vbX19fb29vIyMirq6vi4uL////7+/vErKdeAAAAEHRSTlMA35bNJep1\n" +
+                        "PBVR+bZgmnjI9QKVlAAAAcZJREFUSMftVcuShDAINE/yNOH/f3YNCY6rTNXUHvY0HLUbmgZx277x\n" +
+                        "x7DRa+9j+BQPJRulmo72+vQdPZTm+gpn4vl832V8VNgvgQbmc6+smD73e2AdyIJFxKsuxAGNqES8\n" +
+                        "4ayqGdOmOPSHC65ricB4XUhviHXmB9VFRXXCG1wMbp7wHUGY1rQnL7+zZ9JwOQkeTYPycte2nglk\n" +
+                        "U5cJQHhF+YtC74+5jbFZ6kyQNDugyeZD3CD0BJwJd9midlKJMAvmi9SLIpI68sT+IvQ6tuil9bpD\n" +
+                        "iZWOUqiDbcM1F1Yud2/C02u7Xle2LcW1MCneCaOuCWNt2JO6FmNra6OeFRQTyoOA9woFl9Cp2M6N\n" +
+                        "IJx17PCzaVZ8zGyaRU1ze89PAes5Qa87PyBbjbxKI2FwrzkQTPFAfoc+B0USiGAsF+jwhtAHJB41\n" +
+                        "ikanx3Sp5bkzEmGnDbB70rA+O/WmwKZx7hKQ4bBsB9XF1VtN7yMj+tNB69M8Cla+AHV9Lk4XCMGW\n" +
+                        "ylcHpPtLlwTWlUSnnOMT+NiKOWm6PDE971gS8ZuZfYG54zOI+J2NDvvlGiO2+ObIX38eRRuXEJMz\n" +
+                        "Gj78AYHXRxxWfX/G/xU/m58lqtOwzHkAAAAASUVORK5CYII=").bitmap,
+                contributorName = "lamprose"
+            ),
             // TODO 可继续在这里添加更多 APP
         )
     }
