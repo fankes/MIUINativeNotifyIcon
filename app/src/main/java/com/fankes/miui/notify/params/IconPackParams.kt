@@ -124,22 +124,23 @@ object IconPackParams {
                 appName = "智能服务",
                 packageName = "com.miui.systemAdSolution",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
-                        "CHwIZIgAAANKSURBVGiB7ZlNSBVRGIbfrwJdhJQQQRjYIio3BtkiFxepZb9I0lVJWkWLFhHtWigR\n" +
-                        "tBC6tZH+yIIgyYUZFVSQbkQoQyKXEkEW5qIfAqVFvC5mbhzGOWfOzJy5V2geOHC85/vO975z7p0z\n" +
-                        "cwRycnL+C8TlZCRrABwEsBfABqUBwE+lvQXwTET+uKyfGpJdJAdJLtKeRT+nq9r6QbKT5EQM8Tqm\n" +
-                        "SJ6uhoFWks8dGAgzVJkVItlD8ncGJlQuZm3iQsYGVPqyMtFdQRNlul2bKFTBRJmCjcY1FiaaAYyk\n" +
-                        "vhrJGfE1GIk0AuAKgPr0ehJT72tIDr19YrXQadIatSJnU10Jtxi1aI2QPAmg1bmc5LT6mkIxrchh\n" +
-                        "ywIlUTDEjUsIAOoA7AJwFMBERC1bTR4ka0kuWX53GwK5jzRxY5a1TxlqLZGsDctbp5nvGIDQhACT\n" +
-                        "IjIX+KwEoCNCbHDXXhCRAQAQkXsk2xF+9Wt9bUMW2gCSJcvV6FBy9in9z6YVIdkXMv5AGT9kqFkK\n" +
-                        "06z7jTTaGBaRYb/wEQBFZeiqTX6AbpIH/HmfAvgaR1saI+qVOQFAvc/ft8gPY4vS/6iJcW7kLgCQ\n" +
-                        "XA/PyCaSxwFARL4DGLaYI8hmpT8bR5vNI0oYkyIy4/eLANb6fXVV7iSY96/SX4iTqLtrfQKw25B3\n" +
-                        "W+lvBXCp/AfJjSLyQ0RekpwD0LAiW8+80t9h0LaCpEb+3f5EpNcQdwPAZcN4kG9Kf6cmJrYRHQMi\n" +
-                        "sgQAJNvCAkRk3O8Owd7IrIi89uctIOaKhEKy3XAfLyhxHzQx+5WYx5p9ZMxvDxnYIEm+MNRvj2Ok\n" +
-                        "huFnVG+UmG2GYqNKXDFoJKJ2j2HeRXqHgPbQOzwLcl4Zv2YoyMBcX3RGSNaRbKK3mz8xzUlyMJYJ\n" +
-                        "v0BXxKTVQHvmZTz7JTkFYE/sq5AN70SkRTcYtSHeciwmDUYtkafxq2RVjKsB2D2iXHckJg1uNJDs\n" +
-                        "r+IPvN+JCcXMaBVMjEYrS2bmZgVNJH2nsTZjenxxxZlMTShmWki+ysDADMlitAL3hs6RnHdg4BfJ\n" +
-                        "XpJ1FTehmNlO79RlOoGBaT+3Ka0O1/+ebgTQBqAZ3rt1uQHee0S5vYd38mj/bpGTk5MDAMvK9kAP\n" +
-                        "2+2jfwAAAABJRU5ErkJggg==").bitmap,
+                        "CHwIZIgAAAOiSURBVGiB3ZrNa1RXGMZ/7xioVYhdG4tWF4FUSxXrBzVtXBn8G7LpJlAC2Qgu7EI3\n" +
+                        "+ie4Ebrof+DGldD4hWnKTDItLRFBXGQQN6UJpaGgfbq493bunDlz55w7k5lMHrgM9z1fzzPvec95\n" +
+                        "77nX6CMkfQScAyacC6DhXCtm9me/xrZeGqfEv8pdX0R28TPwOLv6KSwIkg5JuiFpQ/3DRtrnoUEI\n" +
+                        "2CdpUdJ6HwW4WE/H2LdTIk5Lqu6gABdVSaf7LWJa0uYARWTYlDTdLxGzQxDgYrZXETeHrSCHW2VF\n" +
+                        "LA6buQeLsSLmhs24AHM+zm0boqQZ4AHwYSlX7jy2gatmtpQ3tghRsnavAGcGSKwMasA5M3ufGSpO\n" +
+                        "hQV2vwhIOC7kDf97RElq8BMwOWBSZfECOG9mm9DqkQVGRwQkXFu8gqRxxSWA9zr1Lmne16AbK0lH\n" +
+                        "JF2UdF3hudyGpPF8J1ciREjSQgGhs2WEOH18GcHlCjSn1sWYgYDVgrJql/KuMLNnwLeB1ZvcJT2J\n" +
+                        "+AfWJR3I9yTpc+f+XohHJM0oyaoPdChfDeDzBKCiZI5dClQPsGZmfzu2U859LbCvm2ndFUlTnvIl\n" +
+                        "j83FJUnjFeBC4KAZ1jw2l0Q1ss9P8e9f9wPbX6jQPBwIRYsQSZMpkTxqQD2y3yOuwU1DCjARK6RB\n" +
+                        "eyBP4XjEzN4RPr0y7I+sn0e0kLqZvXVsU8AJT93Y6dULooX44uMzAE+wxnqkF0y4SWM3+IRkK54b\n" +
+                        "rDXg12hKJVEhmfch2MQv5HD623LiYWb/MDivNGKE1M3sZd4g6TjJWr+Ef/kcmJAxwoW0ecPMXgGX\n" +
+                        "C9oMKuDjPFJigBrwe2Dd165B0rHAto0KsBxQ8T3++CiEmW0TNr3+6FBvJnCo5TEz25L0lOJ8q077\n" +
+                        "jr4fT3rj2Y2rgPfkA3hEkob8Zma/eMrPFnDK8NTMtsbSm4cUC1kzs38d2zHgR8f2jadtR4+YWcdD\n" +
+                        "N0mfAF8XcMrwEJrPI92mly8+fPPXZ6uRPF8HQ9JB4HvgZED1ZWgKeU5x0Pviw0f6qGsws7+IWL2U\n" +
+                        "nKv9QFh8NEi4t5yi3ABueyq/AN506MgdLDRb9eFjkgz4g4g235nZHdiLx0Gp4e6wWJXA3UwE7NUj\n" +
+                        "07TgGslB8W7FNnAtLwLaz36zDW1+UKxKYD7iEXiPvOjJibk1bOY5lHv1lhMz+i9Dc2JG//V0Tszo\n" +
+                        "fzCQEzP6n3A4gnbdRzV75jOnnoS40BA/PPsPeu6w84nPwM8AAAAASUVORK5CYII=").bitmap,
                 contributorName = "fankes"
             ),
             IconDataBean(
