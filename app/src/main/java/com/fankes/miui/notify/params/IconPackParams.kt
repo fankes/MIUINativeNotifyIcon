@@ -98,6 +98,29 @@ object IconPackParams {
             IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
+                appName = "音质音效",
+                packageName = "com.miui.misound",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAMeSURBVGiB7Zg9bE5RHMaf4yMddChNidZSNVBvozSxlKRpJ2IQSYMQMVikaVh8bK2B\n" +
+                        "xCISQ0mMRCIGMRCDdECEBB0QTQhKoww0UaHTz/De8jrv/3613t5K7m+7//Occ57nnnvvufdKOTk5\n" +
+                        "OTn/G0AV0AR0AFVZ+5kWQDPwjD/8AK4BtVl7SwywhGjas/aYCOBhTJBJYHnWPiMBjsWEmOJ61l5D\n" +
+                        "AWqB94bpmyFhVs2Wt3kp9fskrfBqbyQdlXTF0G+ZjqmKAwwZZ/1Q0HbAWqmsPZcBFEIun0LQ3mi0\n" +
+                        "fczadxnATsPoA0/zxNA0z4a/BSm0G4zaPe94SNJ6r1aQ9CJq4CBsh6Qfkkacc3dS+EoHMGic7a2e\n" +
+                        "5qChOR0z7oDR53glg4x5k00YmhbD1GDEmCcN/RRtlQhhvZLcDtFOerrnIboCMBER5EIaj0n3kTVG\n" +
+                        "LeyJ9Mk7Xhai2ytpUcScXXGmSkkaZLVRGwvR+kFqgfmGbmXMnE1AfayzgNlYEUlaatTigkhSSwKN\n" +
+                        "pMoEsVZqzgSxljjppSVJDaUHwFJJiz3NCaPfunhrRZIGqTNqaVbEX9FGQ/PaqLVGmSolaRDr0phJ\n" +
+                        "kGFDYz3BCoB1EsuIDULxS2+hV/7gnCvbEANigzjnxiVd8mrnJb00+nbEeUwE0G1sVlcj9KsM/ZcQ\n" +
+                        "7XZgW3CyBJyK2CAtbgD7JcmVDFonaW3JPDWSOiX1Gh76nXPWzSmgWtI3o6neORf5Wg+0ShoM5k7K\n" +
+                        "uKT2qQEGKP7OScIoMT8WgHdGv05P0wBsNPoeTrkqAH0CWlN3igG4bPTrKWk/U1I/Z/TvS+HnK9As\n" +
+                        "YHeKTmfjQgRGeo2+F4O2NqNthzHGLuAu8DnCz+97REAN8DRBiB5/soggm43+j4zVmOJI0rHDcMHg\n" +
+                        "HZK6JZV+lv6U9FbFr7tbzrlXKYJUSxrR37v3d+dcNTCm8jfiTc65+9PwX3ko/gf26TdqiU9QJmB/\n" +
+                        "9lokuu8yg+JX5WiCILP2N3LaAHtiQlib7dwE6AKGvQDDFB8w/wwXL5k5QI2KL39Nkh5Leuycs15j\n" +
+                        "cnJycnJyMuEXxX+pSnClwogAAAAASUVORK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
                 appName = "QQ",
                 packageName = "com.tencent.mobileqq",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAYAAADHl1ErAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
