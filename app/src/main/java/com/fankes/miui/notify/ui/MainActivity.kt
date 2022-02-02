@@ -101,7 +101,7 @@ class MainActivity : BaseActivity() {
         notifyIconConfigItem.isVisible = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = getBoolean(HookMedium.ENABLE_MODULE, default = true)
         moduleEnableSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE, default = true)
-        moduleEnableLogSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE_LOG, default = true)
+        moduleEnableLogSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE_LOG, default = false)
         hideIconInLauncherSwitch.isChecked = getBoolean(HookMedium.ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
         notifyIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
