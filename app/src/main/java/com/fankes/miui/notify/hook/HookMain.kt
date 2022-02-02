@@ -516,7 +516,7 @@ class HookMain : IXposedHookLoadPackage {
                                     replaceToNull
                                 )
                             }
-                        logD("hook Completed!")
+                        logD(content = "hook Completed!")
                     }
                 }
         }
