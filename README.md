@@ -14,10 +14,11 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 点击下载最新版本
 <a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v1.15-green)</a>
 <br/><br/>
-⚠️适配说明<br/>
+⚠️ 适配说明<br/>
 
 - 此模块仅支持 Lsposed(作用域“系统界面”)、EdXposed(不推荐)、不支持太极无极(阴)
 - 目前最低支持基于 Android 9 版本的 MIUI12 或 MIUI12.5(建议)
+- 使用 Zygisk 方式运行的 Lsposed 可能会发生 Hook 不生效的问题，若出现问题请使用 Ramdisk 版本的 Lsposed
 
 # 禁止任何商业用途
 
@@ -59,7 +60,7 @@ com.android.internal.util.ContrastColorUtil
 
 - 这个类中有一个方法可以拿出来判断图标的灰度效果
 
-```java
+```
 ContrastColorUtil.getInstance().isGrayscaleIcon(drawable);
 ```
 
