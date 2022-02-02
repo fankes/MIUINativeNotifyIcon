@@ -1,6 +1,6 @@
 # MIUI 原生通知图标
 
-![Eclipse Marketplace](https://img.shields.io/badge/build-passing-brightgreen)
+![Eclipse Marketplace](https://img.shields.io/badge/build-pending-dbab09)
 ![Eclipse Marketplace](https://img.shields.io/badge/license-GPL3.0-blue)
 ![Eclipse Marketplace](https://img.shields.io/badge/version-v1.15-green)
 <br/><br/>
