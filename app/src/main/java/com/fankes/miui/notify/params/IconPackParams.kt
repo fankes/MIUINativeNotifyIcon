@@ -1001,6 +1001,32 @@ object IconPackParams {
                         "mSSfgDHX2QoTk3kKnAe2uc5UGmC/6wwej8fj+Sv4BUjRcEDGSSFRAAAAAElFTkSuQmCC").bitmap,
                 contributorName = "fankes"
             ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "QQ邮箱",
+                packageName = "com.tencent.androidqqmail",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAO0SURBVGiB3ZpNiBRHHMVfGY/iQXaVFRUxeolLQEKi4kKE+BkHQcVDUCEEXYgeJES9\n" +
+                        "eNgJXkJiUAgJrO4tJAfBwC4KK/iN4vp1iiAEiYckCh48eBACwi+H6Rn+3dvbVf0xs7M+GIauevWv\n" +
+                        "97qqu7r/XU4VAlgg6UNJC6NfX/STpOeSnpn/h86551X2XwrACuAocJP8mACGgA+m08BmYKyA+CxT\n" +
+                        "+zppYB3wW4UGkrgAbGingTnAmTYaSOIsMKdqE8uBqx000cRVYHmIRhdgYp2kW6XPRjkMOOduZxFm\n" +
+                        "ZVUCdU2/CUm6FWnJD2DPNEwlH/ZMpTd1agGrJU0UOgPtxxrn3N1k4aSpBcyTNNIRScUwEmmMIe0a\n" +
+                        "+VZSf/v1FEa/GhpjiE0tuuMOFYrYnSw5Ioc6LKYMYlpbIwJsljTecTnlsMU5d0mSZpvCIqNxvRo9\n" +
+                        "kqRlkpbkbHNI0qXWEbA04B7+GDgJPDVl56pwALwHjJq4T4F64Nqy1AY64CG/orG2NJ+7Lpq6K8Da\n" +
+                        "EiY2An+aeL8D70Z1fQFGDthg4x7y1ykCTpn618BXBUzsB/4zcSY9hgDHPNrGm8SeANerpxDypU9I\n" +
+                        "hokTpt0TYEcG14ceATUfyyPoE+APQ/8VWJTBnwv8YvitqVTCSE3AYBkjUUeLgfOmyWNgewrvfeLv\n" +
+                        "9id9sQONDIrGy38pI6bDc4mmQ6ZuJ/CPqXuQI64PQ7PVSNtUhWWJ4zqwXlKvpJWJur8q7HehCMiE\n" +
+                        "hEQCjgScuSS810cU24exzDfEUAA/Sfo+OhyVNCBphaTThvaNGqMyEHEkaYekJzQSe6VFDBcdEaAX\n" +
+                        "eGCod1I4nwGfp5T/mOhmU0Y/PgyLgEeBKYLXgH8N7YfQk2diHE90tbugkXqh2y9wMEHZn9eEifUF\n" +
+                        "8CYmKr+RwdwLIvCdqXoB7CpqwsT8FPjbxB3OaaQmYH4AsTf62XXiIfBRWRNG7Crgvol/M4eR+U3i\n" +
+                        "NQ+xDtwzx6NAT1UmjOA+4svBGP4F+5oNcDjAdROnM7RUZejnHHoO24b9gY3G2m3CaPLNkib6pSj5\n" +
+                        "4Jx7pLCE3DvA1nYakCQaL2ohKamJSHus8b4cw9ktaH0YSua1LkjaVsVZ7QAuOudqzYPks1bbL+QK\n" +
+                        "EdMaM+Kcu6zuzvs2MRJpbWFSNp5GgviGujf/+0jSx865l7bw7f2sIEkRcW/bJeXH3jQTXhCe7esE\n" +
+                        "MlNNb83H0CAwAz5P5zEz8zcMJAzN7C0cKYZm9qaaFENdsc3Je9fKA6Zx49n/f00ONq9Pe30AAAAA\n" +
+                        "SUVORK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
             // TODO 可继续在这里添加更多 APP
         )
     }
