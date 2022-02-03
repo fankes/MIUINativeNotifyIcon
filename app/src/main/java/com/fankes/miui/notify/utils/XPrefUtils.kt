@@ -25,7 +25,15 @@ import de.robv.android.xposed.XSharedPreferences
 
 object XPrefUtils {
 
-    fun getBoolean(key: String, default: Boolean = false) = pref.getBoolean(key, default)
+    private var xPrefCacheKeyValueBooleans = HashMap<String, Boolean>()
+
+    fun getBoolean(key: String, default: Boolean = false) =
+        xPrefCacheKeyValueBooleans[key].let {
+            it ?: pref.getBoolean(key, default).let { e ->
+                xPrefCacheKeyValueBooleans[key] = e
+                e
+            }
+        }
 
     private val pref: XSharedPreferences
         get() {
