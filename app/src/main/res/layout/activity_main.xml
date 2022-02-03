@@ -363,7 +363,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
-                    android:text="Q.哪些是已知问题？\nA.MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，可使用通知图标优化暂时修复其图标问题，后期只能等官方修复(基本上没什么可能性)。动态小图标可能会在高版本系统中闪烁，这是 MIUI 的问题，后期仍在想解决办法。"
+                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) MIUI 自己的系统应用的通知图标仍然可能出现黑白块的情况，可使用通知图标优化暂时修复其图标问题，后期只能等官方修复(基本上没什么可能性)。\n(2) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 的问题，后期仍在想解决办法。\n(3) 使用 Zygisk 方式运行的 Lsposed 可能会发生通知优化图标 Hook 不生效的问题(出现黑白块)，仅在最新版本的 MIUI 13 开发内测版中遇到，若出现问题请使用 Ramdisk 版本的 Lsposed。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
