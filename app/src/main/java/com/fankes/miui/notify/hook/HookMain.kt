@@ -309,11 +309,8 @@ class HookMain : IXposedHookLoadPackage {
                                 outlineProvider = object : ViewOutlineProvider() {
                                     override fun getOutline(view: View, out: Outline) {
                                         out.setRoundRect(
-                                            0,
-                                            0,
-                                            view.width,
-                                            view.height,
-                                            5.dp(context)
+                                            0, 0,
+                                            view.width, view.height, 5.dp(context)
                                         )
                                     }
                                 }
