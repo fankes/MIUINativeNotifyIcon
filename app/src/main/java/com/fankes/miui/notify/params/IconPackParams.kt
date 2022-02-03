@@ -201,8 +201,8 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabled = false,
-                isEnabledAll = false,
+                isEnabled = true,
+                isEnabledAll = true,
                 appName = "微信",
                 packageName = "com.tencent.mm",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
