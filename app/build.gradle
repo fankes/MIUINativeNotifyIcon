@@ -21,8 +21,8 @@ android {
         applicationId "com.fankes.miui.notify"
         minSdk 26
         targetSdk 26
-        versionCode 3
-        versionName "1.15"
+        versionCode 4
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
