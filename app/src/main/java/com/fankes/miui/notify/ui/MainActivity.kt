@@ -53,7 +53,7 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         /** 设置文本 */
         findViewById<TextView>(R.id.main_text_version).text = "当前版本：$moduleVersion"
-        findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiVersion"
+        findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiFullVersion"
         when {
             /** 判断是否为 MIUI 系统 */
             isNotMIUI ->
@@ -64,11 +64,20 @@ class MainActivity : BaseActivity() {
                     confirmButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断最低系统版本 */
+            /** 判断最低 Android 系统版本 */
             isLowerAndroidP ->
                 showDialog {
-                    title = "系统版本过低"
+                    title = "Android 系统版本过低"
                     msg = "此模块最低支持基于 Android 9 的 MIUI 系统，你的系统版本过低不再进行适配。\n" +
+                            "如有问题请联系 酷安 @星夜不荟"
+                    confirmButton(text = "退出") { finish() }
+                    noCancelable()
+                }
+            /** 判断最低 MIUI 版本 */
+            isNotSupportMiuiVersion ->
+                showDialog {
+                    title = "MIUI 版本过低"
+                    msg = "此模块最低支持 MIUI 12 系统，你的 MIUI 版本为 ${miuiVersion}，不再进行适配。\n" +
                             "如有问题请联系 酷安 @星夜不荟"
                     confirmButton(text = "退出") { finish() }
                     noCancelable()
