@@ -92,6 +92,24 @@ val isMIUI by lazy {
 inline val isNotMIUI get() = !isMIUI
 
 /**
+ * 是否为支持的 MIUI 版本
+ * @return [Boolean]
+ */
+val isSupportMiuiVersion
+    get() = when (miuiVersion) {
+        "12" -> true
+        "12.5" -> true
+        "13" -> true
+        else -> false
+    }
+
+/**
+ * 是否不为支持的 MIUI 版本
+ * @return [Boolean]
+ */
+inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
+
+/**
  * 获取 MIUI 版本
  * @return [String]
  */
@@ -109,8 +127,16 @@ val miuiVersion
                     "V13" -> "13"
                     else -> it.replace(oldValue = "V", newValue = "")
                 }
-            } + " " + findPropString(key = "ro.system.build.version.incremental")
-        else "不是 MIUI 系统"
+            }.trim()
+        else "NULL"
+
+/**
+ * 获取 MIUI 完全版本
+ * @return [String]
+ */
+val miuiFullVersion
+    get() = if (isMIUI) (miuiVersion + " " + findPropString(key = "ro.system.build.version.incremental"))
+    else "不是 MIUI 系统"
 
 /**
  * 获取推送通知的包名

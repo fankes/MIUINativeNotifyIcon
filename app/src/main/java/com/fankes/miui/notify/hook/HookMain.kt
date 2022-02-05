@@ -18,7 +18,7 @@
  *
  * This file is Created by fankes on 2022/01/24.
  */
-@file:Suppress("SameParameterValue")
+@file:Suppress("SameParameterValue", "DEPRECATION")
 
 package com.fankes.miui.notify.hook
 
@@ -47,18 +47,24 @@ class HookMain : IXposedHookLoadPackage {
 
     companion object {
 
-        private const val NotificationUtilClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil"
+        private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
 
         private const val NotificationHeaderViewWrapperInjectorClass =
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
-        private const val ExpandedNotificationClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification"
-
-        private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
+        private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
 
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
+
+        private val NotificationUtilClass = Pair(
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
+            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.notification.NotificationUtil"
+        )
+
+        private val ExpandedNotificationClass = Pair(
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification",
+            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
+        )
     }
 
     /** 仅作用于替换的 Hook 方法体 */
@@ -133,12 +139,102 @@ class HookMain : IXposedHookLoadPackage {
     }
 
     /**
+     * 目标类是否存在
+     * @param name 类名
+     * @return [Boolean]
+     */
+    private fun XC_LoadPackage.LoadPackageParam.isClassExist(name: String) = try {
+        classLoader.loadClass(name)
+        true
+    } catch (_: Throwable) {
+        false
+    }
+
+    /**
+     * 目标方法是否存在
+     * @param classPair 类数组
+     * @param name 方法名
+     * @param param 方法参数类型数组
+     * @return [Boolean]
+     */
+    private fun XC_LoadPackage.LoadPackageParam.isMethodExist(
+        classPair: Pair<String, String>,
+        name: String, vararg param: Class<*>
+    ) = try {
+        (try {
+            classLoader.loadClass(classPair.first)
+        } catch (_: Throwable) {
+            try {
+                classLoader.loadClass(classPair.second)
+            } catch (_: Throwable) {
+                null
+            }
+        })?.getDeclaredMethod(name, *param)
+        true
+    } catch (_: Throwable) {
+        false
+    }
+
+    /**
+     * 目标方法是否存在
+     * @param className 类名
+     * @param name 方法名
+     * @param param 方法参数类型数组
+     * @return [Boolean]
+     */
+    private fun XC_LoadPackage.LoadPackageParam.isMethodExist(className: String, name: String, vararg param: Class<*>) =
+        try {
+            (try {
+                classLoader.loadClass(className)
+            } catch (_: Throwable) {
+                null
+            })?.getDeclaredMethod(name, *param)
+            true
+        } catch (_: Throwable) {
+            false
+        }
+
+    /**
      * 查找目标类
      * @param name 类名
      * @return [Class]
      */
     private fun XC_LoadPackage.LoadPackageParam.findClass(name: String) =
         classLoader.loadClass(name)
+
+    /**
+     * 查找目标类 - 两个类都没找到才会报错
+     * @param pair 类名数组
+     * @return [Class]
+     */
+    private fun XC_LoadPackage.LoadPackageParam.findClass(pair: Pair<String, String>) = try {
+        classLoader.loadClass(pair.first)
+    } catch (_: Throwable) {
+        try {
+            classLoader.loadClass(pair.second)
+        } catch (e: Throwable) {
+            logE(content = "Cannot find Class ${pair.first} and ${pair.second}", e)
+            error("[Throwable] Cannot find Class ${pair.first} and ${pair.second}")
+        }
+    }
+
+    /**
+     * 存在目标类的类名 - 两个类都没找到会抛出异常
+     * @param pair 类名数组
+     * @return [String] 目标类名
+     */
+    private fun XC_LoadPackage.LoadPackageParam.existClass(pair: Pair<String, String>) = try {
+        classLoader.loadClass(pair.first)
+        pair.first
+    } catch (_: Throwable) {
+        try {
+            classLoader.loadClass(pair.second)
+            pair.second
+        } catch (_: Throwable) {
+            logE(content = "Cannot find Class ${pair.first} and ${pair.second}")
+            error("[Throwable] Cannot find Class ${pair.first} and ${pair.second}")
+        }
+    }
 
     /**
      * ⚠️ 这个是修复彩色图标的关键核心代码判断
@@ -336,6 +432,70 @@ class HookMain : IXposedHookLoadPackage {
             } ?: logW(content = "AutoSetAppIconOnSet -> StatusBarNotification got null")
         }
 
+    /**
+     * Hook 通知栏小图标颜色
+     * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
+     * @param expandedNf 状态栏实例
+     * @return [Boolean] 是否忽略通知图标颜色
+     */
+    private fun XC_LoadPackage.LoadPackageParam.hookIgnoreStatusBarIconColor(expandedNf: StatusBarNotification?) =
+        if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
+            try {
+                /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
+                expandedNf?.let { notifyInstance ->
+                    /** 获取通知小图标 */
+                    val iconDrawable =
+                        notifyInstance.notification.smallIcon.loadDrawable(globalContext)
+
+                    /** 判断是否不是灰度图标 */
+                    val isNotGrayscaleIcon = !isGrayscaleIcon(globalContext, iconDrawable)
+
+                    /** 获取目标修复彩色图标的 APP */
+                    var isTargetApp = false
+                    run {
+                        IconPackParams.iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                HookMedium.isAppNotifyHookOf(it)
+                            ) {
+                                if (isNotGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it)) isTargetApp = true
+                                return@run
+                            }
+                        }
+                    }
+                    /** 如果开启了修复 APP 的彩色图标 */
+                    if (isTargetApp && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)) let {
+                        logD(
+                            content = "IgnoreStatusBarIconColor -> " +
+                                    "hook Color AppIcon [pkgName] ${notifyInstance.opPkgName} " +
+                                    "[appName] ${findAppName(notifyInstance)}"
+                        )
+                        false
+                    }
+                    else let {
+                        logD(
+                            content = "IgnoreStatusBarIconColor -> " +
+                                    "hook Grayscale[${!isNotGrayscaleIcon}] AppIcon " +
+                                    "[pkgName] ${notifyInstance.opPkgName} " +
+                                    "[appName] ${findAppName(notifyInstance)}"
+                        )
+                        /** 只要不是灰度就返回彩色图标 */
+                        isNotGrayscaleIcon
+                    }
+                } ?: let {
+                    logW(content = "IgnoreStatusBarIconColor -> StatusBarNotification got null")
+                    /** 否则不对颜色进行反色处理防止一些系统图标出现异常 */
+                    true
+                }
+            } catch (e: Exception) {
+                logE("Failed to hook ignoreStatusBarIconColor", e)
+                false
+            }
+        else let {
+            logD(content = "IgnoreStatusBarIconColor -> hook NonColor AppIcon")
+            false
+        }
+
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
         if (lpparam == null) return
         when (lpparam.packageName) {
@@ -358,6 +518,9 @@ class HookMain : IXposedHookLoadPackage {
                     /** 系统版本低于 Android P 停止 Hook */
                     isLowerAndroidP ->
                         logW(content = "Aborted Hook -> This System is lower than Android P")
+                    /** 不是支持的 MIUI 系统停止 Hook */
+                    isNotSupportMiuiVersion ->
+                        logW(content = "Aborted Hook -> This MIUI Version $miuiVersion not supported")
                     /** Hook 被手动关闭停止 Hook */
                     !HookMedium.getBoolean(HookMedium.ENABLE_MODULE, default = true) ->
                         logW(content = "Aborted Hook -> Hook Closed")
@@ -365,7 +528,7 @@ class HookMain : IXposedHookLoadPackage {
                         /** 强制回写系统的状态栏图标样式为原生 */
                         runWithoutError(error = "SubstituteSmallIcon") {
                             XposedHelpers.findAndHookMethod(
-                                NotificationUtilClass,
+                                lpparam.existClass(NotificationUtilClass),
                                 lpparam.classLoader,
                                 "shouldSubstituteSmallIcon",
                                 lpparam.findClass(ExpandedNotificationClass),
@@ -373,80 +536,48 @@ class HookMain : IXposedHookLoadPackage {
                             )
                         }
                         /** 修复通知图标为彩色 */
-                        runWithoutError(error = "IgnoreStatusBarIconColor") {
-                            XposedHelpers.findAndHookMethod(
-                                NotificationUtilClass,
-                                lpparam.classLoader,
-                                "ignoreStatusBarIconColor",
-                                lpparam.findClass(ExpandedNotificationClass),
-                                object : XC_MethodReplacement() {
-                                    override fun replaceHookedMethod(param: MethodHookParam) =
-                                        if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
-                                            try {
-                                                /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
-                                                (param.args?.get(0) as? StatusBarNotification?)?.let { notifyInstance ->
-                                                    /** 获取通知小图标 */
-                                                    val iconDrawable =
-                                                        notifyInstance.notification.smallIcon.loadDrawable(lpparam.globalContext)
+                        if (lpparam.isMethodExist(NotificationUtilClass, name = "ignoreStatusBarIconColor"))
+                            runWithoutError(error = "IgnoreStatusBarIconColor") {
+                                XposedHelpers.findAndHookMethod(
+                                    lpparam.existClass(NotificationUtilClass),
+                                    lpparam.classLoader,
+                                    "ignoreStatusBarIconColor",
+                                    lpparam.findClass(ExpandedNotificationClass),
+                                    object : XC_MethodReplacement() {
+                                        override fun replaceHookedMethod(param: MethodHookParam) =
+                                            lpparam.hookIgnoreStatusBarIconColor(param.args?.get(0) as? StatusBarNotification?)
+                                    }
+                                )
+                            }
+                        else
+                            runWithoutError(error = "UpdateIconColor") {
+                                XposedHelpers.findAndHookMethod(
+                                    StatusBarIconViewClass,
+                                    lpparam.classLoader, "updateIconColor",
+                                    object : XC_MethodHook() {
+                                        override fun afterHookedMethod(param: MethodHookParam) =
+                                            runWithoutError(error = "UpdateIconColorOnSet") {
+                                                /** 是否忽略图标颜色 */
+                                                val isIgnoredColor = lpparam.hookIgnoreStatusBarIconColor(
+                                                    param.thisObject.javaClass.getDeclaredField("mNotification").apply {
+                                                        isAccessible = true
+                                                    }[param.thisObject] as? StatusBarNotification?
+                                                )
 
-                                                    /** 判断是否不是灰度图标 */
-                                                    val isNotGrayscaleIcon =
-                                                        !lpparam.isGrayscaleIcon(lpparam.globalContext, iconDrawable)
-
-                                                    /** 获取目标修复彩色图标的 APP */
-                                                    var isTargetApp = false
-                                                    run {
-                                                        IconPackParams.iconDatas.forEach {
-                                                            if ((notifyInstance.opPkgName == it.packageName ||
-                                                                        lpparam.findAppName(notifyInstance) == it.appName) &&
-                                                                HookMedium.isAppNotifyHookOf(it)
-                                                            ) {
-                                                                if (isNotGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
-                                                                    isTargetApp = true
-                                                                return@run
-                                                            }
-                                                        }
-                                                    }
-                                                    /** 如果开启了修复 APP 的彩色图标 */
-                                                    if (isTargetApp &&
-                                                        HookMedium.getBoolean(
-                                                            HookMedium.ENABLE_NOTIFY_ICON_HOOK,
-                                                            default = true
-                                                        )
-                                                    ) let {
-                                                        logD(
-                                                            content = "IgnoreStatusBarIconColor -> " +
-                                                                    "hook Color AppIcon [pkgName] ${notifyInstance.opPkgName} " +
-                                                                    "[appName] ${lpparam.findAppName(notifyInstance)}"
-                                                        )
-                                                        false
-                                                    }
-                                                    else let {
-                                                        logD(
-                                                            content = "IgnoreStatusBarIconColor -> " +
-                                                                    "hook Grayscale[${!isNotGrayscaleIcon}] AppIcon " +
-                                                                    "[pkgName] ${notifyInstance.opPkgName} " +
-                                                                    "[appName] ${lpparam.findAppName(notifyInstance)}"
-                                                        )
-                                                        /** 只要不是灰度就返回彩色图标 */
-                                                        isNotGrayscaleIcon
-                                                    }
-                                                } ?: let {
-                                                    logW(content = "IgnoreStatusBarIconColor -> StatusBarNotification got null")
-                                                    /** 否则不对颜色进行反色处理防止一些系统图标出现异常 */
-                                                    true
-                                                }
-                                            } catch (e: Exception) {
-                                                logE("Failed to hook ignoreStatusBarIconColor", e)
-                                                false
+                                                /** 当前着色颜色 */
+                                                val currentColor =
+                                                    param.thisObject.javaClass.getDeclaredField("mCurrentSetColor").apply {
+                                                        isAccessible = true
+                                                    }[param.thisObject] as? Int ?: Color.WHITE
+                                                /** 判断并设置颜色 */
+                                                if (isIgnoredColor)
+                                                    (param.thisObject as? ImageView?)?.colorFilter = null
+                                                else (param.thisObject as? ImageView?)?.setColorFilter(currentColor)
+                                                logD(content = "IgnoreStatusBarIconColor[UseOldWay] -> isIgnored[$isIgnoredColor]")
                                             }
-                                        else let {
-                                            logD(content = "IgnoreStatusBarIconColor -> hook NonColor AppIcon")
-                                            false
-                                        }
-                                }
-                            )
-                        }
+                                    }
+                                )
+                            }
                         /** 强制回写系统的状态栏图标样式为原生 */
                         runWithoutError(error = "GetSmallIcon") {
                             try {
@@ -458,13 +589,22 @@ class HookMain : IXposedHookLoadPackage {
                                         Int::class.java
                                     ).apply { isAccessible = true }
                             } catch (_: Throwable) {
-                                /** 旧版方法 */
-                                lpparam.findClass(NotificationUtilClass)
-                                    .getDeclaredMethod("getSmallIcon", lpparam.findClass(ExpandedNotificationClass))
-                                    .apply { isAccessible = true }
+                                try {
+                                    /** 旧版方法 */
+                                    lpparam.findClass(NotificationUtilClass)
+                                        .getDeclaredMethod("getSmallIcon", lpparam.findClass(ExpandedNotificationClass))
+                                        .apply { isAccessible = true }
+                                } catch (_: Throwable) {
+                                    /** 超旧版方法 */
+                                    lpparam.findClass(NotificationUtilClass)
+                                        .getDeclaredMethod(
+                                            "getSmallIcon",
+                                            Context::class.java,
+                                            lpparam.findClass(ExpandedNotificationClass)
+                                        ).apply { isAccessible = true }
+                                }
                             }.also {
                                 XposedBridge.hookMethod(it, object : XC_MethodHook() {
-
                                     override fun afterHookedMethod(param: MethodHookParam) {
                                         lpparam.hookSmallIconOnSet(param)
                                     }
@@ -472,47 +612,53 @@ class HookMain : IXposedHookLoadPackage {
                             }
                         }
                         /** 修复下拉通知图标自动设置回 APP 图标的方法 */
-                        runWithoutError(error = "AutoSetAppIcon") {
-                            var isNewWay = true
-                            try {
-                                /** 新版方法 */
-                                lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
-                                    .getDeclaredMethod(
-                                        "setAppIcon",
-                                        Context::class.java,
-                                        ImageView::class.java,
-                                        lpparam.findClass(ExpandedNotificationClass)
-                                    ).apply { isAccessible = true }
-                            } catch (_: Throwable) {
-                                isNewWay = false
-                                /** 旧版方法 */
-                                lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
-                                    .getDeclaredMethod(
-                                        "setAppIcon",
-                                        ImageView::class.java,
-                                        lpparam.findClass(ExpandedNotificationClass)
-                                    ).apply { isAccessible = true }
-                            }.also {
-                                XposedBridge.hookMethod(it, object : XC_MethodReplacement() {
-                                    override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                                        lpparam.hookNotifyIconOnSet(param, isNew = isNewWay)
-                                        return null
-                                    }
-                                })
+                        if (lpparam.isClassExist(NotificationHeaderViewWrapperInjectorClass))
+                            runWithoutError(error = "AutoSetAppIcon") {
+                                var isNewWay = true
+                                try {
+                                    /** 新版方法 */
+                                    lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
+                                        .getDeclaredMethod(
+                                            "setAppIcon",
+                                            Context::class.java,
+                                            ImageView::class.java,
+                                            lpparam.findClass(ExpandedNotificationClass)
+                                        ).apply { isAccessible = true }
+                                } catch (_: Throwable) {
+                                    isNewWay = false
+                                    /** 旧版方法 */
+                                    lpparam.findClass(NotificationHeaderViewWrapperInjectorClass)
+                                        .getDeclaredMethod(
+                                            "setAppIcon",
+                                            ImageView::class.java,
+                                            lpparam.findClass(ExpandedNotificationClass)
+                                        ).apply { isAccessible = true }
+                                }.also {
+                                    XposedBridge.hookMethod(it, object : XC_MethodReplacement() {
+                                        override fun replaceHookedMethod(param: MethodHookParam): Any? {
+                                            lpparam.hookNotifyIconOnSet(param, isNew = isNewWay)
+                                            return null
+                                        }
+                                    })
+                                }
                             }
-                        }
+                        else logW(content = "Your MIUI Version $miuiVersion is too old and not support for RowsIcon")
                         /** 干掉下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
-                        if (isUpperOfAndroidS)
-                            runWithoutError(error = "ResetIconBgAndPaddings") {
-                                XposedHelpers.findAndHookMethod(
-                                    NotificationHeaderViewWrapperInjectorClass,
-                                    lpparam.classLoader,
-                                    "resetIconBgAndPaddings",
-                                    ImageView::class.java,
-                                    lpparam.findClass(ExpandedNotificationClass),
-                                    replaceToNull
-                                )
-                            }
+                        if (isUpperOfAndroidS &&
+                            lpparam.isMethodExist(
+                                NotificationHeaderViewWrapperInjectorClass,
+                                name = "resetIconBgAndPaddings"
+                            )
+                        ) runWithoutError(error = "ResetIconBgAndPaddings") {
+                            XposedHelpers.findAndHookMethod(
+                                NotificationHeaderViewWrapperInjectorClass,
+                                lpparam.classLoader,
+                                "resetIconBgAndPaddings",
+                                ImageView::class.java,
+                                lpparam.findClass(ExpandedNotificationClass),
+                                replaceToNull
+                            )
+                        }
                         logD(content = "hook Completed!")
                     }
                 }
