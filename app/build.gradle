@@ -21,15 +21,15 @@ android {
         applicationId "com.fankes.miui.notify"
         minSdk 26
         targetSdk 26
-        versionCode 4
-        versionName "1.2"
+        versionCode 5
+        versionName "1.25"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
