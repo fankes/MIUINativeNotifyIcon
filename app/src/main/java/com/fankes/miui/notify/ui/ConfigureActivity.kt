@@ -46,6 +46,8 @@ class ConfigureActivity : BaseActivity() {
         setContentView(R.layout.activity_config)
         /** 返回按钮点击事件 */
         findViewById<View>(R.id.title_back_icon).setOnClickListener { onBackPressed() }
+        /** 设置标题个数文本 */
+        findViewById<TextView>(R.id.config_title_count_text).text = "已适配 ${IconPackParams.iconDatas.size} 个 APP 的通知图标"
         /** 设置列表元素和 Adapter */
         findViewById<ListView>(R.id.config_list_view).apply {
             adapter = object : BaseAdapter() {
