@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:alpha="0.6"
             android:lineSpacingExtra="5dp"
-            android:text="启用替换后 APP 的彩色通知图标将被替换为预设的小图标。\n启用完全替换将忽略 APP 非彩色图标，强制将全部通知图标替换为列表中预设的小图标。"
+            android:text="替换彩色后 APP 的彩色通知图标将被替换为预设的小图标。\n替换全部将忽略 APP 非彩色图标，强制将全部通知图标替换为列表中预设的小图标。"
             android:textColor="@color/colorTextGray"
             android:textSize="11sp"
             tools:ignore="SmallSp" />
