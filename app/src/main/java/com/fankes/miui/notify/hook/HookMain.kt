@@ -261,8 +261,6 @@ class HookMain : IXposedHookLoadPackage {
 
     /**
      * 获取当前通知栏的样式
-     *
-     * 判断是否为灰度图标 - 反射执行系统方法
      * @return [Boolean]
      */
     private fun XC_LoadPackage.LoadPackageParam.isShowMiuiStyle() = try {
