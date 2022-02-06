@@ -21,8 +21,8 @@
 
 ```kotlin
 IconDataBean(
-    isEnabled = true, // 是否默认启用替换
-    isEnabledAll = false, // 是否默认启用完全替换
+    isEnabledColor = true, // 是否默认启用替换彩色图标
+    isEnabledAll = false, // 是否默认启用替换全部图标
     appName = "", // APP 名称
     packageName = "", // APP 包名
     iconBitmap = ("").bitmap, // 位图数据 Base64

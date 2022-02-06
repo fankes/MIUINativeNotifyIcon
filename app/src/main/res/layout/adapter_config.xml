@@ -72,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginBottom="5dp"
-            android:text="启用替换  "
+            android:text="替换彩色  "
             android:textColor="@color/colorTextGray"
             android:textSize="13sp" />
 
@@ -80,7 +80,7 @@
             android:id="@+id/adp_app_all_switch"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
-            android:text="完全替换  "
+            android:text="替换全部  "
             android:textColor="@color/colorTextGray"
             android:textSize="13sp" />
     </LinearLayout>
