@@ -29,6 +29,7 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.Bitmap.createBitmap
 import android.os.Build
+import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
@@ -53,6 +54,12 @@ inline val isNotSystemInDarkMode get() = !isSystemInDarkMode
  * @return [Boolean] 是否开启
  */
 val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+/**
+ * 通知栏是否为 MIUI 样式
+ * @return [Boolean] 是否符合条件
+ */
+val Context.isMiuiNotifyStyle get() = Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0
 
 /**
  * 系统深色模式是否没开启

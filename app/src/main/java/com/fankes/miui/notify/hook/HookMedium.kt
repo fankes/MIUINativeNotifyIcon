@@ -48,6 +48,7 @@ object HookMedium {
 
     /**
      * 判断模块是否激活
+     *
      * 在 [HookMain] 中 Hook 掉此方法
      * @return [Boolean] 激活状态
      */
@@ -115,6 +116,7 @@ object HookMedium {
 
     /**
      * 强制设置 Sp 存储为全局可读可写
+     *
      * 以供模块使用
      * @param context 实例
      */

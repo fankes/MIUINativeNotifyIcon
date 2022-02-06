@@ -99,6 +99,15 @@ class MainActivity : BaseActivity() {
                     noCancelable()
                 }
         }
+        /** MIUI 12 的版本特殊 - 所以给出提示 */
+        if (miuiVersion == "12" && isMiuiNotifyStyle)
+            showDialog {
+                title = "经典通知栏样式已启用"
+                msg = "在 MIUI 12 中启用了经典通知栏样式后状态栏图标将不再做原生处理，模块停止工作，" +
+                        "这取决于系统设置，你应当在 设置>通知管理>通知显示设置 中将样式设置为“原生样式”。"
+                confirmButton(text = "我知道了")
+                noCancelable()
+            }
         /** 初始化 View */
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val moduleEnableLogSwitch = findViewById<SwitchCompat>(R.id.module_enable_log_switch)
