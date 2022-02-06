@@ -61,7 +61,7 @@ object HookMedium {
      * 获取此 APP 的通知图标是否被 Hook
      * @param bean 图标 bean
      */
-    fun isAppNotifyHookOf(bean: IconDataBean) = getBoolean(key = bean.toEnabledName(), default = bean.isEnabledColor)
+    fun isAppNotifyHookOf(bean: IconDataBean) = getBoolean(key = bean.toEnabledName(), default = bean.isEnabled)
 
     /**
      * 设置 Hook 此 APP 的通知图标

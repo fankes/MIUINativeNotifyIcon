@@ -21,7 +21,7 @@
 
 ```kotlin
 IconDataBean(
-    isEnabledColor = true, // 是否默认启用替换彩色图标
+    isEnabled = true, // 是否默认启用替换彩色图标 - 关闭后将全部停止替换
     isEnabledAll = false, // 是否默认启用替换全部图标
     appName = "", // APP 名称
     packageName = "", // APP 包名
