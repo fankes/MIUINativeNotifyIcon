@@ -98,6 +98,24 @@ object IconPackParams {
             IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
+                appName = "小米SIM卡激活服务",
+                packageName = "com.xiaomi.simactivate.service",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAHpSURBVGiB7Zg/TgJBFId/z9haegITC0KMCZ2Frr0tBYXxKMAZCAcwseISUNGtwcRw\n" +
+                        "AS9gY/2zcI2blRlm3sz+hS8hkMy8N+9bZndnBnCA5APJOck147JwGT8KJF8iF1+9DMnHkiXKlyF5\n" +
+                        "VZFEFJkTS9ttSGIFwxAZm8i1NmkAahmbyIWymFBUMjaROvGWaaoI4CnTZBHAQ6bpIoCjTBtEAAeZ\n" +
+                        "togAe2TaJAIA56aGtokYOYo0jc6InAbEfgHYZt+/JLnfK0tsYugzAHAWUNN/SC4te4d3kr1C/yTf\n" +
+                        "wTFvUmjrZblNLE15NVMrFZG+iGwVsVZEZCsifQCpb6xG5E0RU/oYGpEPRUzpY3TmqdUZETE1ZE+I\n" +
+                        "xNReEysRud/V0Jl/pDMimjf7FPa3dgwSAGOfANUSRURKFSm+8V3ozNQ6ijSNzoiobnaSk9iFhKIR\n" +
+                        "8XosVsVBT62ppS3/b5n63eFvDeeaS49lq7vz/oix1c31mVSx1W0kBy1yGb2KCGNoREYkh4o4J7Lc\n" +
+                        "I9847QHdguQUwAbAp6EgpxVsoZ/38t1lgLnloKwu5qZ6bVNrE/XKxMFYk03ktYRCQjHWZBQRkRTA\n" +
+                        "rJRydMyymnSQHNd9Y9BhtW081yrI3AB4ws+x/0B9VfxIs8+ziKz3df4G2ybTnqI5trQAAAAASUVO\n" +
+                        "RK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
                 appName = "音质音效",
                 packageName = "com.miui.misound",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
@@ -141,6 +159,24 @@ object IconPackParams {
                         "nKv9QFh8NEi4t5yi3ABueyq/AN506MgdLDRb9eFjkgz4g4g235nZHdiLx0Gp4e6wWJXA3UwE7NUj\n" +
                         "07TgGslB8W7FNnAtLwLaz36zDW1+UKxKYD7iEXiPvOjJibk1bOY5lHv1lhMz+i9Dc2JG//V0Tszo\n" +
                         "fzCQEzP6n3A4gnbdRzV75jOnnoS40BA/PPsPeu6w84nPwM8AAAAASUVORK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "小爱同学",
+                packageName = "com.miui.voiceassist",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADYAAAAyCAYAAAAX1CjLAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAIDSURBVGiB7ZoxaBRBFIb/t1xpo41VICAqItgkjam0N4W1hWKRPqB9mthE7BNIHwhi\n" +
+                        "oWCR4rSIaDAEVAgELKyjVjFNis/idrnL3ezi7u3sOst8cLD7eDvv/5m7N3s7K3kGuA6sA7+Al8AD\n" +
+                        "3zUbAegzycW2dU2NwxTAqu+6ie8COSz4LtCWMe9EY6ERjYVGr8pF6SJ7VdKOpD0zO6tTFLCSHr41\n" +
+                        "s091jl1UdGlsTdoHbhfku+gX5D8Zy/3ox8lk4V2H0GcF+f9sDLick/+orM4qvzHX4po7YyW5kRN/\n" +
+                        "WHagzjaPzhrrSRJwS9IlSd/M7Ge7ksoD3EkPd7MOnQCLkvrp5xjYBK61JbIswH0N9R8BL6TBV3FJ\n" +
+                        "g9nKeCxpsXGFFQAuSFobCc1KWgZmEkn3HNe4Yv8j85KuOOI3O9s8orHQiMZCIxoLjWgsNKKx0IjG\n" +
+                        "QiOR9MYRf9+0kIp8lvTdEf+RSNqQ9HskeCBpvQlV02JmJ5KejoW3zOywZ2avgbsa/tncM7PTZiVW\n" +
+                        "x8xepfqz83dS+szDzL60JawOMjOjdLp5dJIqxj44Yl+nFZJymBOva/x8HJsSAHMF+dNuSlBFZ+lt\n" +
+                        "JDPbAP5osI0kSTtmtl+leM74z9PHatn5SlF+a5SdsbqIzSM0orHQiMZq5th3gSaMTdygStpuoK5f\n" +
+                        "OP8i5gHDdzi88hdIU5D64hVJLwAAAABJRU5ErkJggg==").bitmap,
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1304,6 +1340,36 @@ object IconPackParams {
                         "kn5ETP1se3WMZqmlFbusDsUK9lKQy7avZneSArA1sC/ep2r2SkV2pwr2QpBTtl+kCrYd5KXt4zkE\n" +
                         "SwVpelevfVEKpc2KjNj+nkuwrSAPbJ/PKdjK0rK9LbdgqSAL/T4YLiFYKkjd77UJ26H/HNsDWAXc\n" +
                         "n3f3Hi2pWeTpdxZ+/wLYKOmm7bBPnYH8AqH34VsrgGUmAAAAAElFTkSuQmCC").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "京东",
+                packageName = "com.jingdong.app.mall",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADkAAAAyCAYAAADm33NGAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAASgSURBVGiB7ZpbqFVFGMd/Y2EahbdEC7MjJZrlhcRuJPiipaGpdKILkm8hIlYa3Sws\n" +
+                        "CEKkrAd7yDQikgoStEyL0qyQfKgO0Y0THLUUrykkoSX8elhjZ7Xcl7X3Xvt4DvSHYfaa+eb7/v89\n" +
+                        "i9mzv5lAN4E6BRgWy+WxHgT0AfpmSp84bD+wL1XagR0hhB/SvkMX8C8JdSxwE3AbMJ1O4vXic2Ar\n" +
+                        "cAQ4nKoPdZlIdRAwC7g5ljEFuD0JPA1sDCH8XM6oqSLVW4GpMc4cYETBIeaGEDZUiD8ZWNar4KCo\n" +
+                        "rerr6h5gC3A4hLAEeKPoWMACdbLaEmMPUcep96mbgR1A7/OLiKSOBOYBdwJXZ7o7Yj2siFgZTI0F\n" +
+                        "tZzNupKt6joTrFNnlhutzlY3WBkzo+3HVeyagW3liF9ZwniTnWT7q0+ov+QMdEg9WgznmjG3nMj5\n" +
+                        "FQa1dxW7ArDyjKZSC09rudcTuKpCX3fCOyGEpWce/vMTok4CdnU5pWLxFTA1hPDHmYbs6lppFhvB\n" +
+                        "QWBIwT6PAnuAvbHsA34D2tICISVSHUB5kQeAoXWSeQZ4D7gdmAtcnCkngVOxPlni+UBKSFpUL5LN\n" +
+                        "RUusRwD7QwjfZwmkZ3J2HFAKQ4HlsdSDhyLBx4DTwHHgWKxPABeQ7F3L1cOBkcAk4IrIc3gmxooQ\n" +
+                        "wpsVWagfVFmtWkx2M980e1msA5urfs0mW6NqGBttL1FfbC7nmrBXHZ1H5As5nA3KjJmlbm8q/Xy4\n" +
+                        "K4/AS9WOKo62Vhi/SN3ddCml8WxVgZHkghzO5lXxcZm6srl6zsK7uQRGgh9VcfZqDb5GqovVrU0W\n" +
+                        "uEntXYvImXFQFl+rC3M7OtvvaPVh9dOCBX6i9quX1EB1jDpRvbBecWV8X6s+ou5qUOBOtd5NSddB\n" +
+                        "Ha8+pf5Yo8BvjRmAHgX1OnWF+msVgevVuhNf5ywlmYVJ0mkGyZatP7Ab+A7Yns2j/o/uDPWGc82h\n" +
+                        "qVCvV/+Mpc1kFe5QT6jLGvVfSEqyEaiDgbUkZxwA4zImpxqNUXhyuQ68BlxTob9ni1RXAWXzuhE9\n" +
+                        "V6S6CFicw7RnilTvAF7Oaf5Xo/G6XKQ6Acj9z4YkmdUQChWpZg97sv0DgFeAwTW47Xav64wq/auB\n" +
+                        "G2v02b1mkniMVgrq88DddfhseH9dtMhRpRrVBcCjdfrsW92kMooWedZBq8mtjtU5x68Fstm3hkUW\n" +
+                        "CvVL9Z74uUVdru7L+ae4NeVnTar9/nOnqAxMckO1ojXjY3aq74FzpaUiTLLs49Up6ukSotKJs1Ul\n" +
+                        "xvdXj8X+Bxvl05TNQAjhSAihDXgcOC82v5Uy2RvrQ8BLJcYfB7bHx2638PwLdQkwLT4upHN13Unn\n" +
+                        "fZ63Qwgd2bERn8X6ouYwbBBqP3VPfN3Wp9o1ycX+FD9Pr+BjQrRZ0zWsa4SdRw/t6sBUu+ot6im1\n" +
+                        "PYefL9T3G+XTrNf13lgvDSH8DsnBEsmlvoNAb+DDHH42UvwxfONQZ8QZey7TPtHkoHdatVc1NWaU\n" +
+                        "yfW1htCMmZwDbAkhPJlp/5vkZskIkssLVWcy3nxsK55ig1C3qRNLtPc1OQSar9Z796Au/APG6bvw\n" +
+                        "wfS6pQAAAABJRU5ErkJggg==").bitmap,
                 contributorName = "fankes"
             ),
             // TODO 可继续在这里添加更多 APP
