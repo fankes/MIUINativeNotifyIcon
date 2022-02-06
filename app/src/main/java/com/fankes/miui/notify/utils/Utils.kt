@@ -59,7 +59,12 @@ val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Confi
  * 通知栏是否为 MIUI 样式
  * @return [Boolean] 是否符合条件
  */
-val Context.isMiuiNotifyStyle get() = Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0
+val Context.isMiuiNotifyStyle
+    get() = try {
+        Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0
+    } catch (_: Throwable) {
+        false
+    }
 
 /**
  * 系统深色模式是否没开启
