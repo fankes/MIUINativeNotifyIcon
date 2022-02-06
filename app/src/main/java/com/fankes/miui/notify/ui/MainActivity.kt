@@ -48,6 +48,8 @@ class MainActivity : BaseActivity() {
         private const val moduleVersion = BuildConfig.VERSION_NAME
     }
 
+    private var isWarnDialogShowing = false // 警告对话框是否显示
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -187,12 +189,13 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         /** MIUI 12 的版本特殊 - 所以给出提示 */
-        if (isHooked() && miuiVersion == "12" && isMiuiNotifyStyle)
+        if (!isWarnDialogShowing && isHooked() && miuiVersion == "12" && isMiuiNotifyStyle)
             showDialog {
+                isWarnDialogShowing = true
                 title = "经典通知栏样式已启用"
                 msg = "在 MIUI 12 中启用了经典通知栏样式后状态栏图标将不再做原生处理，模块停止工作，" +
                         "这取决于系统设置，你应当在 设置>通知管理>通知显示设置 中将样式设置为“原生样式”。"
-                confirmButton(text = "我知道了")
+                confirmButton(text = "我知道了") { isWarnDialogShowing = false }
                 noCancelable()
             }
     }
