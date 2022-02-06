@@ -37,7 +37,7 @@ object IconPackParams {
     val iconDatas by lazy {
         arrayOf(
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "Android 系统",
                 packageName = "android",
@@ -60,7 +60,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = true,
                 appName = "手机管家",
                 packageName = "com.miui.securitycenter",
@@ -96,7 +96,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米SIM卡激活服务",
                 packageName = "com.xiaomi.simactivate.service",
@@ -114,7 +114,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "音质音效",
                 packageName = "com.miui.misound",
@@ -137,7 +137,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = true,
                 appName = "智能服务",
                 packageName = "com.miui.systemAdSolution",
@@ -162,7 +162,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小爱同学",
                 packageName = "com.miui.voiceassist",
@@ -180,7 +180,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = true,
                 appName = "下载管理程序",
                 packageName = "com.android.providers.downloads",
@@ -197,7 +197,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "天气",
                 packageName = "com.miui.weather2",
@@ -219,7 +219,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "浏览器",
                 packageName = "com.android.browser",
@@ -245,7 +245,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "QQ",
                 packageName = "com.tencent.mobileqq",
@@ -276,7 +276,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = true,
                 appName = "微信",
                 packageName = "com.tencent.mm",
@@ -314,7 +314,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "酷安",
                 packageName = "com.coolapk.market",
@@ -344,7 +344,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "支付宝",
                 packageName = "com.eg.android.AlipayGphone",
@@ -365,7 +365,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "淘宝",
                 packageName = "com.taobao.taobao",
@@ -395,7 +395,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米穿戴",
                 packageName = "com.xiaomi.wearable",
@@ -414,7 +414,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "微博",
                 packageName = "com.sina.weibo",
@@ -442,7 +442,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "抖音",
                 packageName = "com.ss.android.ugc.aweme",
@@ -462,7 +462,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "快手",
                 packageName = "com.smile.gifmaker",
@@ -492,7 +492,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "哔哩哔哩",
                 packageName = "tv.danmaku.bili",
@@ -514,7 +514,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "知乎",
                 packageName = "com.zhihu.android",
@@ -539,7 +539,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小红书",
                 packageName = "com.xingin.xhs",
@@ -559,7 +559,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米商城",
                 packageName = "com.xiaomi.shop",
@@ -577,7 +577,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "饿了么",
                 packageName = "me.ele",
@@ -604,7 +604,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米有品",
                 packageName = "com.xiaomi.youpin",
@@ -627,7 +627,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "携程",
                 packageName = "ctrip.android.view",
@@ -656,7 +656,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "App分享",
                 packageName = "info.muge.appshare",
@@ -672,7 +672,7 @@ object IconPackParams {
                 contributorName = "lamprose"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米社区",
                 packageName = "com.xiaomi.vipaccount",
@@ -707,7 +707,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "网易云音乐",
                 packageName = "com.netease.cloudmusic",
@@ -736,7 +736,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "什么值得买",
                 packageName = "com.smzdm.client.android",
@@ -782,7 +782,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "王者荣耀",
                 packageName = "com.tencent.tmgp.sgame",
@@ -814,7 +814,7 @@ object IconPackParams {
                 contributorName = "lamprose、fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "大众点评",
                 packageName = "com.dianping.v1",
@@ -841,7 +841,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米视频",
                 packageName = "com.miui.video",
@@ -862,7 +862,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "腾讯视频",
                 packageName = "com.tencent.qqlive",
@@ -890,7 +890,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "QQ音乐",
                 packageName = "com.tencent.qqmusic",
@@ -915,7 +915,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "酷狗音乐",
                 packageName = "com.kugou.android",
@@ -948,7 +948,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "滴滴出行",
                 packageName = "com.sdu.didi.psnger",
@@ -967,7 +967,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "菜鸟",
                 packageName = "com.cainiao.wireless",
@@ -990,7 +990,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "阅读",
                 packageName = "com.duokan.reader",
@@ -1013,7 +1013,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "闲鱼",
                 packageName = "com.taobao.idlefish",
@@ -1039,7 +1039,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "美团",
                 packageName = "com.sankuai.meituan",
@@ -1058,7 +1058,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "美团外卖",
                 packageName = "com.sankuai.meituan.takeoutnew",
@@ -1077,7 +1077,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "QQ邮箱",
                 packageName = "com.tencent.androidqqmail",
@@ -1103,7 +1103,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "米家",
                 packageName = "com.xiaomi.smarthome",
@@ -1126,7 +1126,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "和平精英",
                 packageName = "com.tencent.tmgp.pubgmhd",
@@ -1173,7 +1173,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "起点读书",
                 packageName = "com.qidian.QDReader",
@@ -1199,7 +1199,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "高德地图",
                 packageName = "com.autonavi.minimap",
@@ -1230,7 +1230,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "百度地图",
                 packageName = "com.baidu.BaiduMap",
@@ -1261,7 +1261,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "招商银行",
                 packageName = "cmb.pb",
@@ -1293,7 +1293,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "人民日报",
                 packageName = "com.peopledailychina.activity",
@@ -1323,7 +1323,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "即刻",
                 packageName = "com.ruguoapp.jike",
@@ -1343,7 +1343,7 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
-                isEnabledColor = true,
+                isEnabled = true,
                 isEnabledAll = false,
                 appName = "京东",
                 packageName = "com.jingdong.app.mall",

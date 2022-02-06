@@ -30,7 +30,7 @@ import java.io.Serializable
  * @param packageName 包名
  * @param iconBitmap 图标位图
  * @param contributorName 贡献者昵称
- * @param isEnabledColor 是否默认启用替换彩色图标
+ * @param isEnabled 是否默认启用替换彩色图标 - 关闭后将全部停止替换
  * @param isEnabledAll 是否默认启用替换全部图标
  */
 data class IconDataBean(
@@ -38,7 +38,7 @@ data class IconDataBean(
     var packageName: String,
     var iconBitmap: Bitmap,
     var contributorName: String,
-    var isEnabledColor: Boolean,
+    var isEnabled: Boolean,
     var isEnabledAll: Boolean,
 ) : Serializable {
     fun toEnabledName() = ("$appName$packageName").base64 + "_enable"
