@@ -675,10 +675,12 @@ class HookMain : IXposedHookLoadPackage {
                                     override fun afterHookedMethod(param: MethodHookParam) {
                                         /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
                                         if (!lpparam.hasIgnoreStatusBarIconColor() && lpparam.isShowMiuiStyle()) return
-                                        lpparam.hookSmallIconOnSet(
-                                            context = lpparam.globalContext ?: param.args[0] as Context,
-                                            param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?, param
-                                        )
+                                        runWithoutError(error = "GetSmallIconDoing") {
+                                            lpparam.hookSmallIconOnSet(
+                                                context = lpparam.globalContext ?: param.args[0] as Context,
+                                                param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?, param
+                                            )
+                                        }
                                     }
                                 })
                             }
@@ -708,19 +710,21 @@ class HookMain : IXposedHookLoadPackage {
                                 }.also {
                                     XposedBridge.hookMethod(it, object : XC_MethodReplacement() {
                                         override fun replaceHookedMethod(param: MethodHookParam): Any? {
-                                            if (isNewWay)
-                                                lpparam.hookNotifyIconOnSet(
-                                                    context = param.args?.get(0) as? Context ?: lpparam.globalContext
-                                                    ?: error("GlobalContext got null"),
-                                                    param.args?.get(2) as? StatusBarNotification?,
-                                                    param.args?.get(1) as ImageView
-                                                )
-                                            else
-                                                lpparam.hookNotifyIconOnSet(
-                                                    context = lpparam.globalContext ?: error("GlobalContext got null"),
-                                                    param.args?.get(1) as? StatusBarNotification?,
-                                                    param.args?.get(0) as ImageView
-                                                )
+                                            runWithoutError(error = "AutoSetAppIconDoing") {
+                                                if (isNewWay)
+                                                    lpparam.hookNotifyIconOnSet(
+                                                        context = param.args?.get(0) as? Context ?: lpparam.globalContext
+                                                        ?: error("GlobalContext got null"),
+                                                        param.args?.get(2) as? StatusBarNotification?,
+                                                        param.args?.get(1) as ImageView
+                                                    )
+                                                else
+                                                    lpparam.hookNotifyIconOnSet(
+                                                        context = lpparam.globalContext ?: error("GlobalContext got null"),
+                                                        param.args?.get(1) as? StatusBarNotification?,
+                                                        param.args?.get(0) as ImageView
+                                                    )
+                                            }
                                             return null
                                         }
                                     })
