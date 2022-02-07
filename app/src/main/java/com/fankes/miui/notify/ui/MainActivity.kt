@@ -208,9 +208,9 @@ class MainActivity : BaseActivity() {
 
     /** 重启系统界面 */
     private fun restartSystemUI() =
-        execShellCmd(cmd = "pgrep systemui").also { pid ->
+        execShellSu(cmd = "pgrep systemui").also { pid ->
             if (pid.isNotBlank())
-                execShellCmd(cmd = "kill -9 $pid")
+                execShellSu(cmd = "kill -9 $pid")
             else Toast.makeText(this, "ROOT 权限获取失败", Toast.LENGTH_SHORT).show()
         }
 
