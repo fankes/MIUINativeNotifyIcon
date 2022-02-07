@@ -643,12 +643,13 @@ class HookMain : IXposedHookLoadPackage {
                                                 }[param.thisObject] as? StatusBarNotification?
 
                                             /** 强制设置图标 - 防止 MIPUSH 不生效 */
-                                            lpparam.hookSmallIconOnSet(
-                                                context = iconImageView.context,
-                                                expandedNf,
-                                                iconImageView.drawable,
-                                                isLegacyWay = true
-                                            ) { icon -> iconImageView.setImageBitmap(icon) }
+                                            if (lpparam.hasIgnoreStatusBarIconColor() || !lpparam.isShowMiuiStyle())
+                                                lpparam.hookSmallIconOnSet(
+                                                    context = iconImageView.context,
+                                                    expandedNf,
+                                                    iconImageView.drawable,
+                                                    isLegacyWay = true
+                                                ) { icon -> iconImageView.setImageBitmap(icon) }
 
                                             /**
                                              * 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook
