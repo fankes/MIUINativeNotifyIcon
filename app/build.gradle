@@ -22,7 +22,7 @@ android {
         minSdk 26
         targetSdk 26
         versionCode 6
-        versionName "1.3"
+        versionName "1.3(pending)"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
