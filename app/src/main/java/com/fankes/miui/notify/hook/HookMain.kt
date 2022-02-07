@@ -352,7 +352,7 @@ class HookMain : IXposedHookLoadPackage {
                         logD(
                             content = "GetSmallIconOnSet -> " +
                                     "hook Custom AppIcon [pkgName] ${notifyInstance.opPkgName} " +
-                                    "[appName] ${findAppName(notifyInstance)}\n" +
+                                    "[appName] ${findAppName(notifyInstance)} " +
                                     "[legacyWay] $isLegacyWay"
                         ) { param.result = customIcon }
                     /** 若不是灰度图标自动处理为圆角 */
@@ -360,7 +360,7 @@ class HookMain : IXposedHookLoadPackage {
                         logD(
                             content = "GetSmallIconOnSet -> " +
                                     "hook Color AppIcon [pkgName] ${notifyInstance.opPkgName} " +
-                                    "[appName] ${findAppName(notifyInstance)}\n" +
+                                    "[appName] ${findAppName(notifyInstance)} " +
                                     "[legacyWay] $isLegacyWay"
                         ) {
                             param.result = Icon.createWithBitmap(
