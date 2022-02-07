@@ -315,11 +315,13 @@ class HookMain : IXposedHookLoadPackage {
      * @param context 实例
      * @param expandedNf 通知实例
      * @param param Hook Param
+     * @param isLegacyWay 旧版本 Hook 方式
      */
     private fun XC_LoadPackage.LoadPackageParam.hookSmallIconOnSet(
         context: Context,
         expandedNf: StatusBarNotification?,
-        param: XC_MethodHook.MethodHookParam
+        param: XC_MethodHook.MethodHookParam,
+        isLegacyWay: Boolean,
     ) {
         runWithoutError(error = "GetSmallIconOnSet") {
             /** 获取通知小图标 */
@@ -350,21 +352,23 @@ class HookMain : IXposedHookLoadPackage {
                         logD(
                             content = "GetSmallIconOnSet -> " +
                                     "hook Custom AppIcon [pkgName] ${notifyInstance.opPkgName} " +
-                                    "[appName] ${findAppName(notifyInstance)}"
+                                    "[appName] ${findAppName(notifyInstance)}\n" +
+                                    "[legacyWay] $isLegacyWay"
                         ) { param.result = customIcon }
                     /** 若不是灰度图标自动处理为圆角 */
                     isNotGrayscaleIcon ->
                         logD(
                             content = "GetSmallIconOnSet -> " +
                                     "hook Color AppIcon [pkgName] ${notifyInstance.opPkgName} " +
-                                    "[appName] ${findAppName(notifyInstance)}"
+                                    "[appName] ${findAppName(notifyInstance)}\n" +
+                                    "[legacyWay] $isLegacyWay"
                         ) {
                             param.result = Icon.createWithBitmap(
                                 iconDrawable.toBitmap().round(15.dp(context))
                             )
                         }
                 }
-            } ?: logW(content = "GetSmallIconOnSet -> StatusBarNotification got null")
+            } ?: logW(content = "GetSmallIconOnSet -> StatusBarNotification got null [legacyWay] $isLegacyWay")
         }
     }
 
@@ -678,7 +682,8 @@ class HookMain : IXposedHookLoadPackage {
                                         runWithoutError(error = "GetSmallIconDoing") {
                                             lpparam.hookSmallIconOnSet(
                                                 context = lpparam.globalContext ?: param.args[0] as Context,
-                                                param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?, param
+                                                param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?, param,
+                                                isLegacyWay = isTooOld
                                             )
                                         }
                                     }
