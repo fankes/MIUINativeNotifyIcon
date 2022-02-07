@@ -339,8 +339,10 @@ class HookMain : IXposedHookLoadPackage {
                 if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
                     run {
                         if (findAppName(notifyInstance).startsWith("Android") &&
-                            notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-                                ?.startsWith("Xposed 模块") == true
+                            (notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                                ?.startsWith("Xposed 模块") == true ||
+                                    notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                                        ?.startsWith("Xposed Module") == true)
                         ) customIcon = IconPackParams.lsposedIcon
                         else IconPackParams.iconDatas.forEach {
                             if ((notifyInstance.opPkgName == it.packageName ||
@@ -412,8 +414,10 @@ class HookMain : IXposedHookLoadPackage {
                 var customIcon: Bitmap? = null
                 if (isHookColorIcon) run {
                     if (findAppName(notifyInstance).startsWith("Android") &&
-                        notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-                            ?.startsWith("Xposed 模块") == true
+                        (notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                            ?.startsWith("Xposed 模块") == true ||
+                                notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                                    ?.startsWith("Xposed Module") == true)
                     ) customIcon = IconPackParams.lsposedIcon
                     else IconPackParams.iconDatas.forEach {
                         if ((notifyInstance.opPkgName == it.packageName ||
