@@ -363,7 +363,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
-                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 在 MIUI 12 上无法对状态栏图标的 MIPUSH 图标进行通知优化适配，下拉通知栏图标无异常，由于 MIUI 乱改导致无法找到方案，考虑到系统过老，本人精力有限，不再做修复，系统 ≥ MIUI 12.5 无此问题。\n(2) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 自身就存在的问题，后期只能等官方修复。\n(3) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题。"
+                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 自身就存在的问题，后期只能等官方修复。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
