@@ -289,10 +289,10 @@ class HookMain : IXposedHookLoadPackage {
     private fun XC_LoadPackage.LoadPackageParam.findAppName(instance: Any?) = try {
         findClass(ExpandedNotificationClass).getDeclaredMethod("getAppName").let {
             it.isAccessible = true
-            it.invoke(instance) as? String ?: "unknown"
+            it.invoke(instance) as? String ?: "<empty>"
         }
-    } catch (_: Throwable) {
-        "unknown"
+    } catch (e: Throwable) {
+        "<unknown>"
     }
 
     /**
