@@ -68,6 +68,9 @@ class HookMain : IXposedHookLoadPackage {
         /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
+        /** 未确定是否只有旧版本存在的类 */
+        private const val ExpandableNotificationRowClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
+
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationUtilClass = Pair(
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
@@ -314,25 +317,24 @@ class HookMain : IXposedHookLoadPackage {
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
      * @param context 实例
      * @param expandedNf 通知实例
-     * @param param Hook Param
+     * @param iconDrawable 小图标 [Drawable]
      * @param isLegacyWay 旧版本 Hook 方式
+     * @param it 回调小图标 - ([Bitmap] 小图标)
      */
     private fun XC_LoadPackage.LoadPackageParam.hookSmallIconOnSet(
         context: Context,
         expandedNf: StatusBarNotification?,
-        param: XC_MethodHook.MethodHookParam,
+        iconDrawable: Drawable,
         isLegacyWay: Boolean,
+        it: (Bitmap) -> Unit
     ) {
         runWithoutError(error = "GetSmallIconOnSet") {
-            /** 获取通知小图标 */
-            val iconDrawable = (param.result as Icon).loadDrawable(context)
-
             /** 判断是否不是灰度图标 */
             val isNotGrayscaleIcon = !isGrayscaleIcon(context, iconDrawable)
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             expandedNf?.also { notifyInstance ->
                 /** 目标彩色通知 APP 图标 */
-                var customIcon: Icon? = null
+                var customIcon: Bitmap? = null
                 if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
                     run {
                         IconPackParams.iconDatas.forEach {
@@ -341,7 +343,7 @@ class HookMain : IXposedHookLoadPackage {
                                 HookMedium.isAppNotifyHookOf(it)
                             ) {
                                 if (isNotGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
-                                    customIcon = Icon.createWithBitmap(it.iconBitmap)
+                                    customIcon = it.iconBitmap
                                 return@run
                             }
                         }
@@ -354,7 +356,7 @@ class HookMain : IXposedHookLoadPackage {
                                     "hook Custom AppIcon [pkgName] ${notifyInstance.opPkgName} " +
                                     "[appName] ${findAppName(notifyInstance)} " +
                                     "[legacyWay] $isLegacyWay"
-                        ) { param.result = customIcon }
+                        ) { it(customIcon!!) }
                     /** 若不是灰度图标自动处理为圆角 */
                     isNotGrayscaleIcon ->
                         logD(
@@ -363,9 +365,7 @@ class HookMain : IXposedHookLoadPackage {
                                     "[appName] ${findAppName(notifyInstance)} " +
                                     "[legacyWay] $isLegacyWay"
                         ) {
-                            param.result = Icon.createWithBitmap(
-                                iconDrawable.toBitmap().round(15.dp(context))
-                            )
+                            it(iconDrawable.toBitmap().round(15.dp(context)))
                         }
                 }
             } ?: logW(content = "GetSmallIconOnSet -> StatusBarNotification got null [legacyWay] $isLegacyWay")
@@ -680,11 +680,14 @@ class HookMain : IXposedHookLoadPackage {
                                         /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
                                         if (!lpparam.hasIgnoreStatusBarIconColor() && lpparam.isShowMiuiStyle()) return
                                         runWithoutError(error = "GetSmallIconDoing") {
-                                            lpparam.hookSmallIconOnSet(
-                                                context = lpparam.globalContext ?: param.args[0] as Context,
-                                                param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?, param,
-                                                isLegacyWay = isTooOld
-                                            )
+                                            (lpparam.globalContext ?: param.args[0] as Context).also { context ->
+                                                lpparam.hookSmallIconOnSet(
+                                                    context = context,
+                                                    param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?,
+                                                    (param.result as Icon).loadDrawable(context),
+                                                    isLegacyWay = isTooOld
+                                                ) { icon -> param.result = icon }
+                                            }
                                         }
                                     }
                                 })
@@ -745,7 +748,7 @@ class HookMain : IXposedHookLoadPackage {
                                         runWithoutError(error = "AutoSetAppIconOldWayOnSet") hook@{
                                             /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
                                             if (!lpparam.hasIgnoreStatusBarIconColor() && lpparam.isShowMiuiStyle()) return@hook
-                                            /** 从父类中得到 mRow 变量 */
+                                            /** 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass] */
                                             lpparam.findClass(NotificationViewWrapperClass).getDeclaredField("mRow")
                                                 .apply {
                                                     isAccessible = true

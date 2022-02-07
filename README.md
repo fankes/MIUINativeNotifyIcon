@@ -19,6 +19,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 - 此模块仅支持 LSPosed(作用域“系统界面”)、~~EdXposed(随时停止支持)~~、不支持太极无极
 - 目前最低支持基于 Android 9 版本的 MIUI 12 或 MIUI 12.5(最低建议)
 - 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题
+- 在 MIUI 12 上无法对状态栏图标的 MIPUSH 图标进行通知优化适配，下拉通知栏图标无异常，由于 MIUI 乱改导致无法找到方案，考虑到系统过老，本人精力有限，不再做修复，系统 ≥ MIUI 12.5 无此问题
 
 # 禁止任何商业用途
 
