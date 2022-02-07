@@ -282,8 +282,11 @@ class HookMain : IXposedHookLoadPackage {
      * 拥有状态栏图标颜色检查功能
      * @return [Boolean]
      */
-    private fun XC_LoadPackage.LoadPackageParam.hasIgnoreStatusBarIconColor() =
-        isMethodExist(NotificationUtilClass, name = "ignoreStatusBarIconColor")
+    private fun XC_LoadPackage.LoadPackageParam.hasIgnoreStatusBarIconColor() = try {
+        isMethodExist(NotificationUtilClass, name = "ignoreStatusBarIconColor", findClass(ExpandedNotificationClass))
+    } catch (_: Throwable) {
+        false
+    }
 
     /**
      * 获取 [ExpandedNotificationClass] 的应用名称
@@ -622,16 +625,14 @@ class HookMain : IXposedHookLoadPackage {
                                     }
                                 )
                             }
-                        /** 之前的版本解决方案 */
-                        else runWithoutError(error = "UpdateIconColor") {
+                        /** 修复通知图标为彩色 - MIPUSH 修复 */
+                        runWithoutError(error = "UpdateIconColor") {
                             XposedHelpers.findAndHookMethod(
                                 StatusBarIconViewClass,
                                 lpparam.classLoader, "updateIconColor",
                                 object : XC_MethodHook() {
                                     override fun afterHookedMethod(param: MethodHookParam) =
                                         runWithoutError(error = "UpdateIconColorOnSet") hook@{
-                                            /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                            if (lpparam.isShowMiuiStyle()) return@hook
                                             /** 获取自身 */
                                             val iconImageView = param.thisObject as ImageView
 
@@ -641,9 +642,6 @@ class HookMain : IXposedHookLoadPackage {
                                                     isAccessible = true
                                                 }[param.thisObject] as? StatusBarNotification?
 
-                                            /** 是否忽略图标颜色 */
-                                            val isIgnoredColor =
-                                                lpparam.hookIgnoreStatusBarIconColor(iconImageView.context, expandedNf)
                                             /** 强制设置图标 - 防止 MIPUSH 不生效 */
                                             lpparam.hookSmallIconOnSet(
                                                 context = iconImageView.context,
@@ -651,6 +649,17 @@ class HookMain : IXposedHookLoadPackage {
                                                 iconImageView.drawable,
                                                 isLegacyWay = true
                                             ) { icon -> iconImageView.setImageBitmap(icon) }
+
+                                            /**
+                                             * 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook
+                                             * 新版本不需要下面的代码设置颜色 - 同样停止 Hook
+                                             */
+                                            if (lpparam.hasIgnoreStatusBarIconColor() || lpparam.isShowMiuiStyle()) return@hook
+
+                                            /** 是否忽略图标颜色 */
+                                            val isIgnoredColor =
+                                                lpparam.hookIgnoreStatusBarIconColor(iconImageView.context, expandedNf)
+
                                             /** 当前着色颜色 */
                                             val currentColor =
                                                 param.thisObject.javaClass.getDeclaredField("mCurrentSetColor").apply {
