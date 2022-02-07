@@ -54,6 +54,14 @@
                 android:textColor="@color/colorTextDark"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/config_title_search"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="10dp"
+            android:src="@mipmap/icon_search"
+            android:tint="@color/colorTextGray" />
     </LinearLayout>
 
     <LinearLayout
