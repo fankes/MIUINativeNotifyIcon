@@ -33,8 +33,7 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
-import java.io.DataInputStream
-import java.io.DataOutputStream
+import com.topjohnwu.superuser.Shell
 
 /**
  * 系统深色模式是否开启
@@ -268,28 +267,10 @@ fun findPropString(key: String, default: String = "") =
  * @param cmd 命令
  * @return [String] 执行结果
  */
-fun execShellCmd(cmd: String): String {
-    var result = ""
-    var dos: DataOutputStream? = null
-    var dis: DataInputStream? = null
-    try {
-        val p = Runtime.getRuntime().exec("su")
-        dos = DataOutputStream(p.outputStream)
-        dis = DataInputStream(p.inputStream)
-        dos.writeBytes("$cmd\n")
-        dos.flush()
-        dos.writeBytes("exit\n")
-        dos.flush()
-        var line: String
-        while (dis.readLine().also { line = it } != null) result += line
-        p.waitFor()
-    } catch (_: Exception) {
-    } finally {
-        try {
-            dos?.close()
-            dis?.close()
-        } catch (_: Exception) {
-        }
+fun execShellSu(cmd: String) = try {
+    Shell.su(cmd).exec().out.let {
+        if (it.isNotEmpty()) it[0].trim() else ""
     }
-    return result.trim()
+} catch (_: Throwable) {
+    ""
 }
