@@ -623,14 +623,22 @@ class HookMain : IXposedHookLoadPackage {
                                             /** 获取自身 */
                                             val iconImageView = param.thisObject as ImageView
 
-                                            /** 是否忽略图标颜色 */
-                                            val isIgnoredColor = lpparam.hookIgnoreStatusBarIconColor(
-                                                iconImageView.context,
+                                            /** 获取通知实例 */
+                                            val expandedNf =
                                                 param.thisObject.javaClass.getDeclaredField("mNotification").apply {
                                                     isAccessible = true
                                                 }[param.thisObject] as? StatusBarNotification?
-                                            )
 
+                                            /** 是否忽略图标颜色 */
+                                            val isIgnoredColor =
+                                                lpparam.hookIgnoreStatusBarIconColor(iconImageView.context, expandedNf)
+                                            /** 强制设置图标 - 防止 MIPUSH 不生效 */
+                                            lpparam.hookSmallIconOnSet(
+                                                context = iconImageView.context,
+                                                expandedNf,
+                                                iconImageView.drawable,
+                                                isLegacyWay = true
+                                            ) { icon -> iconImageView.setImageBitmap(icon) }
                                             /** 当前着色颜色 */
                                             val currentColor =
                                                 param.thisObject.javaClass.getDeclaredField("mCurrentSetColor").apply {
@@ -686,7 +694,7 @@ class HookMain : IXposedHookLoadPackage {
                                                     param.args?.get(if (isTooOld) 1 else 0) as? StatusBarNotification?,
                                                     (param.result as Icon).loadDrawable(context),
                                                     isLegacyWay = isTooOld
-                                                ) { icon -> param.result = icon }
+                                                ) { icon -> param.result = Icon.createWithBitmap(icon) }
                                             }
                                         }
                                     }
