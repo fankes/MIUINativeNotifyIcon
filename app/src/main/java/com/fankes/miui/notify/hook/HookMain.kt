@@ -22,6 +22,7 @@
 
 package com.fankes.miui.notify.hook
 
+import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -337,7 +338,11 @@ class HookMain : IXposedHookLoadPackage {
                 var customIcon: Bitmap? = null
                 if (HookMedium.getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true))
                     run {
-                        IconPackParams.iconDatas.forEach {
+                        if (findAppName(notifyInstance).startsWith("Android") &&
+                            notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                                ?.startsWith("Xposed 模块") == true
+                        ) customIcon = IconPackParams.lsposedIcon
+                        else IconPackParams.iconDatas.forEach {
                             if ((notifyInstance.opPkgName == it.packageName ||
                                         findAppName(notifyInstance) == it.appName) &&
                                 HookMedium.isAppNotifyHookOf(it)
@@ -405,19 +410,22 @@ class HookMain : IXposedHookLoadPackage {
 
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
-                if (isHookColorIcon)
-                    run {
-                        IconPackParams.iconDatas.forEach {
-                            if ((notifyInstance.opPkgName == it.packageName ||
-                                        findAppName(notifyInstance) == it.appName) &&
-                                HookMedium.isAppNotifyHookOf(it)
-                            ) {
-                                if (!isGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
-                                    customIcon = it.iconBitmap
-                                return@run
-                            }
+                if (isHookColorIcon) run {
+                    if (findAppName(notifyInstance).startsWith("Android") &&
+                        notifyInstance.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                            ?.startsWith("Xposed 模块") == true
+                    ) customIcon = IconPackParams.lsposedIcon
+                    else IconPackParams.iconDatas.forEach {
+                        if ((notifyInstance.opPkgName == it.packageName ||
+                                    findAppName(notifyInstance) == it.appName) &&
+                            HookMedium.isAppNotifyHookOf(it)
+                        ) {
+                            if (!isGrayscaleIcon || HookMedium.isAppNotifyHookAllOf(it))
+                                customIcon = it.iconBitmap
+                            return@run
                         }
                     }
+                }
                 /** 如果开启了修复 APP 的彩色图标 */
                 if (customIcon != null && HookMedium.getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true))
                     iconImageView.apply {

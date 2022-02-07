@@ -20,6 +20,7 @@
  */
 package com.fankes.miui.notify.params
 
+import android.graphics.Bitmap
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.utils.bitmap
 
@@ -28,6 +29,53 @@ import com.fankes.miui.notify.utils.bitmap
  * 国内 APP 不规范的图标将由这里完成其自定义黑白小图标绘制
  */
 object IconPackParams {
+
+    /**
+     * 通知栏 LSPosed 激活模块的图标
+     * @return [Bitmap]
+     */
+    val lsposedIcon by lazy {
+        ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABJGlDQ1BTa2lhAAAokX2RO0vDUBiG\n" +
+                "H4uLN1B0cHDI2EXxAuqgSxWCThIrtDqlaVKFNoYkpTq7+iPcnB2LQ9eOguAk+BfEwTW+aYcESnwP\n" +
+                "3znPefnO5TsHSqtIpUXo+HFomRWjVr80yMl2ooBiTcHvR9rD+/o/eUWaabqRo/FbEYc6XFs2xSut\n" +
+                "Md+l3BjzY8ph1ToSP4nLrRw3ctyLg1g8TPOdIEz5U3zQaXed7N7Mu/7FucaaYo0IC5MKBlVCbHw5\n" +
+                "Hq7YoMcNMdeiY1FEQFsZ95qfsaPe1KxDVzkTyt7z4QsOB0mSvGbe6QBe9mC2n3nlfViag2E/sEN7\n" +
+                "ZE0rSp4HP8+wUIflN625mjwj+4uCWo1RrSa3ai1V4co5Ua0OG6JtNtli9w+Fy016JV7k6AAAAARz\n" +
+                "QklUCAgICHwIZIgAAAdRSURBVGiB5Zl7TFNXHMevoqxKCxU6MpeySluD0FjLKhmUYGEtoCBBnuWh\n" +
+                "rFGmIJGMCKwaDC3NmIM5sYgONx4BpjNWYCI6RqtsUZAx4gsU6WhWN+qU4KY4M+e2s3+4rD29t719\n" +
+                "jGXZN/klcM/vfH/nwzn39ncLgvxfBQAgp6SkVIWGhtbpdDqOC32Xpqen7xcIBEdGRkbWuMoXV9XV\n" +
+                "71V4enoCEokEpFLpadf5VsupVCogkUggOzv7M1f5Yqq8vPwAgiDANBI2JvQ566tQKKpg38jIyH5n\n" +
+                "fTG1b9++g3AxNOLj4r5y1LdcXl6N5ysWi684u24z7dmz5xBeMTQ2bNhwyV5frB2GQywWXwEALPxH\n" +
+                "IGpqamQajWYTfH39+vWEj4NcLn/fFgQaIpHoawDAAochZDJZLWwqk8kOoePqdvUbFjCxtmGsHVO8\n" +
+                "iIqMGnJoZ0pKSo7AZmVlZR/AeR0dHZvhvNjYWFwYRyDQEAqFwwAAN8IQxcXFH8Im5eXl1Xj5nZ2d\n" +
+                "WXB+TEyMxdkuKyurcRQCjXXr1l0FACx2CKKiogIXAlVHR0cmPC86OnoQHXdmJ+AQCoXXrMIUFRUd\n" +
+                "gycplcr9Nuln1d3dnQ7Pz8rK6lQqlYRvbKIRERFxHQDgjgVRDydXVla+QxQC1dmzZ9NcvWi8CA8P\n" +
+                "vwkA8JgrrlAodpsmeHl5/VJbW1tqLwSq3t7e+BUrVkzOB0xubu5Hc4XZbHaX6SCPx9M7CoEqKyPj\n" +
+                "3HyAMJnM63NFezSaaDghLi7O4R6qoKCgZT4gEAQBLS0teWbFtVptEpwkEokG7IXIz8//ZL4gZrsD\n" +
+                "S2HBREUJBzGT/32IKquL6enpSYUniUSiAVu9Tl5ensVx8vPz+6mxsTG/q6tLEh8Xf8FVELPNpm31\n" +
+                "9vYmw5OFQiFur7Njx442OJ9MJj/T6XRBpnmRkVHfOAshl8uJQaC6cOFCImwSERFh0ets3br1BFbB\n" +
+                "0LDQW7BnXV1dkTMQsy9g9quvry8BNhMIBFfR8W3btn2KV9Tb2/vpzMzMi6Z+SUlJGkchKioq3nUI\n" +
+                "AhXWzqSmpp6VyWR1WAWDgoKm0J9DQkLGtFptzODgYFhhYeHH6HUmk/mQSqX+ShRCoVAQbpOsCmtn\n" +
+                "4AgMDDQODw+HAgDcL1++/Lq/P/MBVp7qsGovAGCJ0WikSaXSDlu+SqWy0iUQqAYGBsRsNvsuXkGN\n" +
+                "RiM2zT99+rRFa5+Wnn4G9mUymT9i+VEoXk9VKtVuousj/MYVFhamCQ5+9Q7eOJ1ON7u5GQzGGJyz\n" +
+                "wo9h0frQ6fQpLD9vb+qTwsJC+55QRGTtxkYQBBQXFzea5ufm5lrkr1y5cvLx48c0NOfixYvr3d3d\n" +
+                "cT35fP44AIDqMgipVKq2BoFGSkrKuQMHDshjY2O/RK9t2rTpi+3bt6spZMpzBEEAg8GYrqqqUspk\n" +
+                "skOLFy+28FiwYIHZ71wu97tHjx55Ow2Rk5PTTgQCK5qbmwtRn4mJiZV0Ov2htXy1Wr1Zp9MFL1y4\n" +
+                "0Ow6h8O5a7qTdis7O7vTUQgej/ct7FdZWanEy1epVG+jef39/UIYZlXAqh9mZmZ87YbYsmWLzUej\n" +
+                "tWCxWEbYE++zp6amZi+cOzAwEOnm5maWFxAQ8P2TJ09eIgyRmZl5xhkINEpLS+vRlub8+fPJZDL5\n" +
+                "dzjn4MFDe/DW0d/fL4Rh2Gz2vQcPCMBIJBKXvtmxWKzJ8PDwMawx0+OEp8HBwQj4oeDv739/amrq\n" +
+                "ZdxJycnJn7sSwlrU1tYW24JANTQ0FL5o0SKz+QwGY2p6eppulggAcE+XpHfPF4RKpSohCoHq0qVL\n" +
+                "EfBnDoPBuD89Pe03l7Rz586K+QCg0Wg/t7S0bLMXAtXo6Ggwl8sdN/VMSEjonEvgcDiEPvCcjaCg\n" +
+                "IIOjEKgkEonZ8Wez2dfmBm/evLl2yZIl83KseDzeBACA7AhEVlaW2ddWCIIAtVqdaZZ048aNsBdI\n" +
+                "pH9k8STIl8vlTtjbQ2VkZFhAHD58GPupd/3WrdClLt6Znp6eVMM9A4fi6fnc9Prq1av1RNsOiURi\n" +
+                "8SBS1dh4YIyOjr7m4eHxhysgmpqadqG+Y2Nja728vH4zHQ8MDDTYajvS0tLOw751dXXE3lNGRu6E\n" +
+                "eHh4/OkMRNvx4zth3/HxcR6FQjH7I8GtvamSkpJ6YN+jR48WEYL4G2YkBC5KNJoaGvIwTWdhPD09\n" +
+                "zVoVFos1Ce9MYmKixU7U19e/ZRcEqtu3b/PhoraitbV1uy3f8fFx3jLvZc8gGCP6/47ExESLnTh2\n" +
+                "7NguXEMi0ul0wfDZxou2trY3ifrq9fo1NJrPU9P5AoFgGOvVoaGhocApCJOiXArF+s6cOHHC7k9s\n" +
+                "g8HA8fHxsfq1UFNTk8W95pT0ev0aKpWKuTMnT57c6qivwWAIotFomDDNzc35zq8cQ3q9nuvr62t2\n" +
+                "HNrb23Oc9TUajauWL18+Y+rb2tq6w1lfqzIYDEyxWNzC5/NPabXaGFf5Go3GV6JjYpr5fP6p7u7u\n" +
+                "ja7y/c/pL9mciVUiPOsiAAAAAElFTkSuQmCC").bitmap
+    }
 
     /**
      * 通知栏小图标数组
