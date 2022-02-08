@@ -37,6 +37,7 @@ import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookMedium
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
+import com.fankes.miui.notify.utils.SystemUITool
 import com.fankes.miui.notify.view.MaterialSwitch
 
 class ConfigureActivity : BaseActivity() {
@@ -92,11 +93,13 @@ class ConfigureActivity : BaseActivity() {
                             if (!btn.isPressed) return@setOnCheckedChangeListener
                             HookMedium.putAppNotifyHookOf(it, b)
                             holder.switchAll.isEnabled = b
+                            SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
                         }
                         holder.switchAll.isChecked = HookMedium.isAppNotifyHookAllOf(it)
                         holder.switchAll.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
                             HookMedium.putAppNotifyHookAllOf(it, b)
+                            SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
                         }
                     }
                     return cView!!

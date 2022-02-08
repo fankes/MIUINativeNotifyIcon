@@ -108,6 +108,8 @@ class MainActivity : BaseActivity() {
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
         val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
+        /** 设置旧版本警告 */
+        findViewById<View>(R.id.config_notify_app_icon_warn).isVisible = miuiVersion == "12"
         /** 获取 Sp 存储的信息 */
         notifyIconConfigItem.isVisible = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = getBoolean(HookMedium.ENABLE_MODULE, default = true)
@@ -120,10 +122,12 @@ class MainActivity : BaseActivity() {
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_MODULE, b)
             moduleEnableLogSwitch.isVisible = b
+            SystemUITool.showNeedRestartSnake(context = this)
         }
         moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_MODULE_LOG, b)
+            SystemUITool.showNeedRestartSnake(context = this)
         }
         hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
@@ -138,21 +142,15 @@ class MainActivity : BaseActivity() {
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, b)
             notifyIconConfigItem.isVisible = b
+            SystemUITool.showNeedRestartSnake(context = this)
         }
         notifyIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             putBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, b)
+            SystemUITool.showNeedRestartSnake(context = this)
         }
         /** 重启按钮点击事件 */
-        findViewById<View>(R.id.title_restart_icon).setOnClickListener {
-            showDialog {
-                title = "重启系统界面"
-                msg = "你确定要立即重启系统界面吗？\n\n" +
-                        "部分 MIUI 系统使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。"
-                confirmButton { restartSystemUI() }
-                cancelButton()
-            }
-        }
+        findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 通知图标优化名单按钮点击事件 */
         findViewById<View>(R.id.config_notify_app_button).setOnClickListener {
             startActivity(Intent(this, ConfigureActivity::class.java))
@@ -205,14 +203,6 @@ class MainActivity : BaseActivity() {
      * @return [Boolean] 激活状态
      */
     private fun isHooked() = HookMedium.isHooked()
-
-    /** 重启系统界面 */
-    private fun restartSystemUI() =
-        execShellSu(cmd = "pgrep systemui").also { pid ->
-            if (pid.isNotBlank())
-                execShellSu(cmd = "kill -9 $pid")
-            else Toast.makeText(this, "ROOT 权限获取失败", Toast.LENGTH_SHORT).show()
-        }
 
     /**
      * 获取保存的值

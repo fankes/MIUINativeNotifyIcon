@@ -99,6 +99,14 @@ class HookMain : IXposedHookLoadPackage {
         }
     }
 
+    /** 仅作用于替换的 Hook 方法体 */
+    @Suppress("unused")
+    private val replaceToFalse = object : XC_MethodReplacement() {
+        override fun replaceHookedMethod(param: MethodHookParam?): Any {
+            return false
+        }
+    }
+
     /**
      * 忽略异常运行
      * @param error 错误信息
@@ -248,7 +256,7 @@ class HookMain : IXposedHookLoadPackage {
     }
 
     /**
-     * - 这个是修复彩色图标的关键核心代码判断
+     * - ⚡这个是修复彩色图标的关键核心代码判断
      *
      * 判断是否为灰度图标 - 反射执行系统方法
      * @param context 实例
@@ -642,8 +650,12 @@ class HookMain : IXposedHookLoadPackage {
                                                     isAccessible = true
                                                 }[param.thisObject] as? StatusBarNotification?
 
-                                            /** 强制设置图标 - 防止 MIPUSH 不生效 */
-                                            if (lpparam.hasIgnoreStatusBarIconColor() || !lpparam.isShowMiuiStyle())
+                                            /**
+                                             * 强制设置图标 - 防止 MIPUSH 不生效
+                                             * 由于之前版本没有 [hasIgnoreStatusBarIconColor] 判断 - MIPUSH 的图标颜色也是白色的
+                                             * 所以之前的版本取消这个 Hook - 实在找不到设置图标的地方 - 状态栏图标就彩色吧
+                                             */
+                                            if (lpparam.hasIgnoreStatusBarIconColor())
                                                 lpparam.hookSmallIconOnSet(
                                                     context = iconImageView.context,
                                                     expandedNf,
