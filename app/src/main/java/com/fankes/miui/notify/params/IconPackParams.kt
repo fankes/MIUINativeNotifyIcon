@@ -2074,6 +2074,61 @@ object IconPackParams {
                 contributorName = "fankes"
             ),
             IconDataBean(
+                isEnabled = false,
+                isEnabledAll = false,
+                appName = "原神",
+                packageName = "com.miHoYo.ys.mi",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAKcUlEQVR42u2caXAVVRbHfwlLCCRs\n" +
+                        "CakgaIiRRRZlL8RRGAdBURAZUMoRESit0hFxQccaUUdHGAVFGdQpdUAl5ViKMow6KEFlgoqCBndx\n" +
+                        "WKMgEhZBCDEs4T8fctOvu1/3e/02ccqc/pDu2+fce/6373LuOeclTfx/Uzr1AOoB1AOoB1AP4JcM\n" +
+                        "oGHKWziJzvSnLVk0J4tG1FDNfvbwOf9kZ+LVp6VsJ+7CMM6gNx19OQ4ymed/jgDOZBQXUxTw+2z9\n" +
+                        "OQ2hfEZyNX1sJV+yji1s5iuqOUgNabTkPG6jgXk/gscSbFPJuk7UbFUpRGW6Raf58G60uG5ItN3k\n" +
+                        "KH+qHtYRS6ndmqczI/LvtniHH38ATTTX1u+bdZ2aR5EYb+PPOd4AJmurpcwmjVd6AJkZlsSyxL9+\n" +
+                        "YuILLFWqdYen8gN1u05xlXXQYSPV/XgC6KB3LfVf1Yk+XO9IOqqLXKVfSJIeSMb8i3cZHc4impr7\n" +
+                        "G3nYl68SaMAS/kQ5LYDVrAa+B7YyLSlLd1y477T6fqf6RuR8Xk6aI4S2S+qTnOU7HqEnLHXWqm0U\n" +
+                        "3r861N+hVkInSJqXrP0ndpEnLXU+VMOo3B84AFwihHpoatK2z5gBhHq0JAD3Ww71K5WRPMXjAzDB\n" +
+                        "UmZDVN40zXaN/91qdHwB9LD1ZfQdtJnCqUPyAQRfRhtRYt2fz56o/D8yijM4wDY6cC15AORQnnTj\n" +
+                        "PY5d928x91OBjkpSFBMvpUOoo234tPTlytR0LdN0jzf9dEjSycdvCN1v3RWzz5OjgEu5kXxgKKO5\n" +
+                        "l6VU295+wGn0ZzNNuYA8WpGN2MNO1rHmpxhC+baJ+FLY29N1ld5QjWvCVmit1piVP3RNCZvY5XpB\n" +
+                        "V6lbar/AJNv9aH7Paxwjizb0pAtn0MNTJo88XudL89SR35DFRm71+HIFjAWW8BArU/UF3lXstFgD\n" +
+                        "jfQAvRxQZlHssyQY28sxqX5UxZaJ11BzYpI9HKuZEYxtTGAFPtDVtrPBddoSx7d7LhXL6PtRm92o\n" +
+                        "OdagQWi4PlK89IoaJBtAmkp8m3tTt7scKGP1oRKjkqAAYvHMjWc8vckBYB/bKWcD77OaLTaeroxg\n" +
+                        "Ep2SYCIMowQ4na84lEzXYiYnk8suvqHS9aaI8xjLoKTZOB/TC3iRw1yWWt9oHmfSnbMZknQzrTPr\n" +
+                        "GcJyurIuVa7Fc/WRflSq6A4htEdVyvPXIZEAxxhK6EmTlEUWaofj42TyCX2TH6EZw6IUh0baAVAB\n" +
+                        "5LPGYc4kAcC5KVcfskgHWtTOVeazmfmMTE58oJPtdJY6yiQN6Gw9F1LIZ8n5Aiti5K+Oq5X91IAj\n" +
+                        "RLUp3AcYD4AHOCEm/vWcxo442vkSaEEvW8mqZMyBdtwco0QxG3g8MPcx6+4tYIhjkG9Kxj6wIub1\n" +
+                        "vI1QK3Osj047NNK0USSUo36aokrzbnrinrk+Mau/0Ei+EJB/qxB6VtKdVqvt9Zkk6bHEATwbM4BO\n" +
+                        "RnJIQP7X1UijhBZKWqsJRrqpPpFUliiARjEbDmtsBvnhQBLXC0kPC71pANV6AbN1VFJ2YgAujbn/\n" +
+                        "a6MA8zRNaHEgiUI1tuKX641/42whdIGkyxMD8GicxxLp04DwDwqdZe7TbO6cQULo83CnTl2oNDsQ\n" +
+                        "gNVRFTjieOpq+YLWCTUL8x15zQB0kxUqR9OsN6cKtVE/od52N33tn6e1IoD6raMuhaP1lO2pts4W\n" +
+                        "qpH0rdKE1kQFcLlQsfU0UlhugQrlGj2esodn6z6xAgQfukZpfK3QG2Hrz+uSpBrlCd0VpYYqpTvi\n" +
+                        "+LuFellPXxg9HpR0lh3AZEnSQ1EBjI3SfE9hGySzhNAwS7WmQt2i1PAvoQGOkksdYaol1lb6vRqH\n" +
+                        "AKy37ZjBA0Zu+lRooPW0Tgg11yHz/JqpI7KfaKDQIpuTa4P2CRXYOJ7UZeZuQR2APraXkY+PkekC\n" +
+                        "oWusp3whVG5bHLupldAjEWp4x3Ijf6qdKlWunpc01NoR3NSrFoA9ktUlAoAdEdXfJoQeN09DrdF/\n" +
+                        "k67QbI0S+kRjowzDLkLLJU0SyrRCWst8Z19JLYB/24o2+ar/RpT+/6MQKrXWDjRTUkdbjEZ6Rqiz\n" +
+                        "bw1/FyqUdKvLI1ulJnJqGaLuAr3tKJrpmQ30ZtTlr5cQ2quDOl8IXSjpL7Y62kvaL4S2SSoOM+1q\n" +
+                        "lCH0vuGpvX5t3v1WqL9nq4+IumUuRAMcyrfT3QH2z13Gl3mh2gmz2hxydcPHJjtlqaSWmuWq4UKh\n" +
+                        "wQ4LNPTdi4Uw9qiTvhOhcVtHP9hCqFMCmgxLXNO9StKDLgBzJf1B6Bl9LHe33SCUqR8k9XPI3FKn\n" +
+                        "piNG7djr0TjPBbEuNBGM7JkP55iy81wAJkl6UahQ2UL/DXNgLTMbl/263GZGpOuAR8vXoCyX/WI/\n" +
+                        "hKACMzGD+NAQGm2V9XApc5GkjeY+z2ZaX2nLf1nlkqk7Q0wUQo95tPxkOpUs8PBDzzJ3XzOIq1nJ\n" +
+                        "N6znz77OlO/M3wm8ZO6OUuHiaQwUkQ/AQBoBUM5ZPA3cxt0A/OBzPi4EYLFHyycglOtppD3qig8g\n" +
+                        "VObzBYaFxTKPhCUjTJWsA8lCSZWaYZLUFtgyv5wyE015sTnShB+JVqUDu7neA9u1vECG7ewPOfT0\n" +
+                        "TSsAHN6KhqbX7NFIqGEiHYHtzKY1t3OM/pQx0eJp4JLpbv62BuAAb9veTeV+oEkd1pc8e3aLLrb1\n" +
+                        "R5HvHDhHyL2j3OzqzTJJNZItiDckbDfY6JDI0B5TXmpK7rHxzheq1F57LkS1p3Ivqr3h6O4L4Hce\n" +
+                        "ANY6lBlhM4qf0Cw9pW88a7Inwr5qM+umWYfKEKGp2o5QlkaY3KtmGuPKsZKk/WohhE7xBXCv8DC5\n" +
+                        "/qFMj1TXyPSjrlCG0GCtdL25Quh0R8kYocFpggzeoxtlrOI9KrmJoWFjfAbTgSx2+UQDnuFKYH6Y\n" +
+                        "C3wHZYhCujlWrH604Hy60pZs0qniexozysZRQTUFYW1UkE9btttKFjC5zjMX7aCx36wXH0Y4i6FB\n" +
+                        "gfp4roe1NSyQJGrqeF4ZitB8EcXfmc0Uk3PiTb3IA0qtzIhIVOVRNjOA3NfWahSKoTUIOXfnMIG9\n" +
+                        "PqK7WGK2qlLf6k8F4JIAigwOKxlI7wByDwG5rm1OTudujq7Rcm3WAdXooNZrqe7SOPW1piJqrH0+\n" +
+                        "n/c+h/kVmca5knW+CyDzH8tIlzN13Nt90k6to2aeO2mflfq9MIA6N5r6m2lCIK/1e8Zn4vRq3BqP\n" +
+                        "c7e5byOh48sNOhZVpQNaoxU2B0okuseqeamjvGV8mbu3+TbU3uLprFeSFCsuMX7R2v3KbjdfFX/u\n" +
+                        "tN9iutrB9auEQSw3HtHwnG2bqRkPgFzt9WnyWhdnf83W13Go/pHuc6Tu2A83kjQj0R9AdPaNE4T/\n" +
+                        "qCddfXWHFmtbAMV36xXd6zpWOgfuYS1yJu7Hm+zRieWc5PlmAKs9yxtQRD655NCcE2lLKzJI4whH\n" +
+                        "2cHnVLCNb9nGQZ/2xlHALspZZx2eEk72aOUTbqo2Lpaf6EpMfJCes7yfkeZCCq/EfopYSiltGc45\n" +
+                        "FNGGDNIQe9luTmg/CaXV/1+JegD1AOoB1AP4RQP4H9xe1V4syHa6AAAAAElFTkSuQmCC").bitmap,
+                contributorName = "YifePlayte"
+            ),
+            IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
                 appName = "崩坏3",
@@ -2107,6 +2162,27 @@ object IconPackParams {
                         "3CxGckR1B5XZKgA/Yuwn9/Bx8h38+WPV/7j8J0AsSdtbjAerAX5PWb9XAPgHzHgdCObysAoAAAAA\n" +
                         "SUVORK5CYII=").bitmap,
                 contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "钉钉",
+                packageName = "com.alibaba.android.rimet",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAABGdBTUEAALGPC/xhBQAAAAFzUkdC\n" +
+                        "AK7OHOkAAAAwUExURUxpcf//////////////////////////////////////////////////////\n" +
+                        "//////rDiYQAAAAPdFJOUwDgKsxyPLrvGQqrToVelcv/Wv8AAAJjSURBVFjDrVjXcsMwDDO1t/7/\n" +
+                        "b+smaTxEUpSveMzlYIoDhLRtNIKtLWkN3oPWqVQbtgewJkG/AZpRayzBaN9ReFejmEYV6AzAyI4Y\n" +
+                        "je8TQBXwVOgCaDsLp3UhCp8d3cVwTKaq7wsA8nimr8Hn/+HZkf+JB2WqT3i6H/Kk/COiDrfaBegP\n" +
+                        "4a5ERx/qthibOfPk4/e6D9taeCdliXD9QMz62eHMOEM2PeiBcM5KEqrSWQr+pK5c6nkIYKjCE1Yk\n" +
+                        "oN4vLWaTpIYanY1yl283Z3p//BY/jAulzMJ6JVYJBjFWx3K9EmuIEw8bKk06YExBIzaXoqvYhpp9\n" +
+                        "Ek6pqGpAtZIlKlqo5YxOoleYMGZV05sLPWMsaAM0fJyjMg7AlYxxVay5E6MwobZmqh25HLIvkUJc\n" +
+                        "WlJZpYZVmJCWhPluiENIgIiSpxqVQe5CokOUcGhMAPy618iokhAy6BgDBKhwk3oKu5d1Lv26WTXf\n" +
+                        "7Wlj1BRcM1mFcK1a9PjUJlasEDQiqWWRSFH6X2W7mJmOz9DavsREfNcH1oe0U4rR1XVZ25wU69fU\n" +
+                        "RWucoab1aGDe8uliiv5uLsuJf5DsUh8/Fy+1g1q1Et/h+M4u5AwyBcyk14oC+6LYhkxyh/2bm0Bp\n" +
+                        "0dfARJmjKtSkuUWznql/WlY7R+xHC7PpVkJbpqfe34hS1AT3GidIUZWsifllJAbBVeTx9UgH2baa\n" +
+                        "zjJqovJyTECYMbt4adPki4taYuIu/mHhTtR4o2GEiYI8ffMRBdUkLz952uXJbjKwVF5M8+qEpleN\n" +
+                        "PB1Wud+IIBm7PUKw1bTkdqTdKfGvhz+iS8H8hh218gAAAABJRU5ErkJggg==").bitmap,
+                contributorName = "YifePlayte"
             ),
             // TODO 可继续在这里添加更多 APP
         )
