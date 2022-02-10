@@ -87,7 +87,7 @@ ContrastColorUtil.getInstance().isGrayscaleIcon(drawable)
 - [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)
 
 ```
-Copyright (C) 2019-2022 qzmmcn@163.com
+Copyright (C) 2019-2022 Fankes Studio(qzmmcn@163.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -103,4 +103,4 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
 
-版权所有 © 2019-2022 qzmmcn@163.com
+版权所有 © 2019-2022 Fankes Studio(qzmmcn@163.com)
