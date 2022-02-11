@@ -313,6 +313,14 @@ class HookMain : IXposedHookLoadPackage {
     }
 
     /**
+     * 判断通知是否来自 MIPUSH
+     * @return [Boolean]
+     */
+    @Suppress("unused")
+    private val StatusBarNotification.isXmsf
+        get() = opPkgName == "com.xiaomi.xmsf"
+
+    /**
      * 获取全局上下文
      * @return [Context] or null
      */
