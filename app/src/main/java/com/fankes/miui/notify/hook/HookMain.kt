@@ -315,9 +315,7 @@ class HookMain : IXposedHookLoadPackage {
      * 判断通知是否来自 MIPUSH
      * @return [Boolean]
      */
-    @Suppress("unused")
-    private val StatusBarNotification.isXmsf
-        get() = opPkgName == "com.xiaomi.xmsf"
+    private val StatusBarNotification.isXmsf get() = opPkgName == "com.xiaomi.xmsf"
 
     /**
      * 获取全局上下文
@@ -345,11 +343,15 @@ class HookMain : IXposedHookLoadPackage {
     private fun XC_LoadPackage.LoadPackageParam.hookSmallIconOnSet(
         context: Context,
         expandedNf: StatusBarNotification?,
-        iconDrawable: Drawable,
+        iconDrawable: Drawable?,
         isLegacyWay: Boolean,
         it: (Bitmap) -> Unit
     ) {
         runWithoutError(error = "GetSmallIconOnSet") {
+            if (iconDrawable == null) {
+                logD(content = "GetSmallIconOnSet -> icon is null")
+                return@runWithoutError
+            }
             /** 判断是否不是灰度图标 */
             val isNotGrayscaleIcon = !isGrayscaleIcon(context, iconDrawable)
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
@@ -639,7 +641,7 @@ class HookMain : IXposedHookLoadPackage {
                                     override fun afterHookedMethod(param: MethodHookParam) =
                                         runWithoutError(error = "UpdateIconColorOnSet") hook@{
                                             /** 获取自身 */
-                                            val iconImageView = param.thisObject as ImageView
+                                            val iconImageView = param.thisObject as? ImageView ?: return@hook
 
                                             /** 获取通知实例 */
                                             val expandedNf =
@@ -652,11 +654,11 @@ class HookMain : IXposedHookLoadPackage {
                                              * 由于之前版本没有 [hasIgnoreStatusBarIconColor] 判断 - MIPUSH 的图标颜色也是白色的
                                              * 所以之前的版本取消这个 Hook - 实在找不到设置图标的地方 - 状态栏图标就彩色吧
                                              */
-                                            if (lpparam.hasIgnoreStatusBarIconColor())
+                                            if (lpparam.hasIgnoreStatusBarIconColor() && expandedNf?.isXmsf == true)
                                                 lpparam.hookSmallIconOnSet(
                                                     context = iconImageView.context,
                                                     expandedNf,
-                                                    iconImageView.drawable,
+                                                    expandedNf.notification?.smallIcon?.loadDrawable(iconImageView.context),
                                                     isLegacyWay = true
                                                 ) { icon -> iconImageView.setImageBitmap(icon) }
 
