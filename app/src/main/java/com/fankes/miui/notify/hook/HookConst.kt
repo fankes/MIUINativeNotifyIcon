@@ -18,30 +18,19 @@
  * and eula along with this software.  If not, see
  * <https://www.gnu.org/licenses/>
  *
- * This file is Created by zpp0196 on 2018/4/11.
+ * This file is Created by fankes on 2022/1/24.
  */
-package com.fankes.miui.notify.utils
+@file:Suppress("DEPRECATION", "SetWorldReadable")
 
-import com.fankes.miui.notify.BuildConfig
-import de.robv.android.xposed.XSharedPreferences
+package com.fankes.miui.notify.hook
 
-object XPrefUtils {
+object HookConst {
 
-    private var xPrefCacheKeyValueBooleans = HashMap<String, Boolean>()
+    const val ENABLE_MODULE = "_enable_module"
+    const val ENABLE_MODULE_LOG = "_enable_module_log"
+    const val ENABLE_HIDE_ICON = "_hide_icon"
+    const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
+    const val ENABLE_NOTIFY_ICON_HOOK = "_notify_icon_hook"
 
-    fun getBoolean(key: String, default: Boolean = false) =
-        xPrefCacheKeyValueBooleans[key].let {
-            it ?: pref.getBoolean(key, default).let { e ->
-                xPrefCacheKeyValueBooleans[key] = e
-                e
-            }
-        }
-
-    private val pref: XSharedPreferences
-        get() {
-            val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID)
-            preferences.makeWorldReadable()
-            preferences.reload()
-            return preferences
-        }
+    const val SYSTEMUI_PACKAGE_NAME = "com.android.systemui"
 }

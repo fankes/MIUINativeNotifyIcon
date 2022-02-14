@@ -38,9 +38,15 @@ import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.hook.HookMedium
+import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
+import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
+import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
+import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
+import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_HOOK
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.*
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class MainActivity : BaseActivity() {
 
@@ -113,27 +119,27 @@ class MainActivity : BaseActivity() {
         /** 设置旧版本警告 */
         findViewById<View>(R.id.config_notify_app_icon_warn).isVisible = miuiVersion == "12"
         /** 获取 Sp 存储的信息 */
-        notifyIconConfigItem.isVisible = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
-        moduleEnableLogSwitch.isVisible = getBoolean(HookMedium.ENABLE_MODULE, default = true)
-        moduleEnableSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE, default = true)
-        moduleEnableLogSwitch.isChecked = getBoolean(HookMedium.ENABLE_MODULE_LOG, default = false)
-        hideIconInLauncherSwitch.isChecked = getBoolean(HookMedium.ENABLE_HIDE_ICON)
-        colorIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, default = true)
-        notifyIconHookSwitch.isChecked = getBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, default = true)
+        notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
+        hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
+        colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        notifyIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true)
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_MODULE, b)
+            modulePrefs.putBoolean(ENABLE_MODULE, b)
             moduleEnableLogSwitch.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
         moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_MODULE_LOG, b)
+            modulePrefs.putBoolean(ENABLE_MODULE_LOG, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
         hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_HIDE_ICON, b)
+            modulePrefs.putBoolean(ENABLE_HIDE_ICON, b)
             packageManager.setComponentEnabledSetting(
                 ComponentName(this@MainActivity, "com.fankes.miui.notify.Home"),
                 if (b) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -142,13 +148,13 @@ class MainActivity : BaseActivity() {
         }
         colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_COLOR_ICON_HOOK, b)
+            modulePrefs.putBoolean(ENABLE_COLOR_ICON_HOOK, b)
             notifyIconConfigItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
         notifyIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            putBoolean(HookMedium.ENABLE_NOTIFY_ICON_HOOK, b)
+            modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_HOOK, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
         /** 重启按钮点击事件 */
@@ -159,7 +165,7 @@ class MainActivity : BaseActivity() {
         }
         /** 恰饭！ */
         findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
-            try {
+            runCatching {
                 startActivity(Intent().apply {
                     setPackage("com.coolapk.market")
                     action = "android.intent.action.VIEW"
@@ -167,20 +173,20 @@ class MainActivity : BaseActivity() {
                     /** 防止顶栈一样重叠在自己的 APP 中 */
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
-            } catch (e: Exception) {
+            }.onFailure {
                 Toast.makeText(this, "你可能没有安装酷安", Toast.LENGTH_SHORT).show()
             }
         }
         /** 项目地址点击事件 */
         findViewById<View>(R.id.link_with_project_address).setOnClickListener {
-            try {
+            runCatching {
                 startActivity(Intent().apply {
                     action = "android.intent.action.VIEW"
                     data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon")
                     /** 防止顶栈一样重叠在自己的 APP 中 */
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
-            } catch (e: Exception) {
+            }.onFailure {
                 Toast.makeText(this, "无法启动系统默认浏览器", Toast.LENGTH_SHORT).show()
             }
         }
@@ -204,20 +210,5 @@ class MainActivity : BaseActivity() {
      * 判断模块是否激活
      * @return [Boolean] 激活状态
      */
-    private fun isHooked() = HookMedium.isHooked()
-
-    /**
-     * 获取保存的值
-     * @param key 名称
-     * @param default 默认值
-     * @return [Boolean] 保存的值
-     */
-    private fun getBoolean(key: String, default: Boolean = false) = HookMedium.getBoolean(key, default)
-
-    /**
-     * 保存值
-     * @param key 名称
-     * @param bool 值
-     */
-    private fun putBoolean(key: String, bool: Boolean) = HookMedium.putBoolean(key, bool)
+    private fun isHooked() = YukiHookModuleStatus.isActive()
 }
