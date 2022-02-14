@@ -415,25 +415,6 @@ class HookEntry : YukiHookXposedInitProxy {
                                         expandedNf,
                                         expandedNf.notification?.smallIcon?.loadDrawable(iconImageView.context)
                                     ) { icon -> iconImageView.setImageBitmap(icon) }
-
-                                /**
-                                 * 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook
-                                 * 新版本不需要下面的代码设置颜色 - 同样停止 Hook
-                                 */
-                                if (hasIgnoreStatusBarIconColor() || isShowMiuiStyle()) return@afterHook
-
-                                /** 是否忽略图标颜色 */
-                                val isIgnoredColor = hookIgnoreStatusBarIconColor(iconImageView.context, expandedNf)
-
-                                /** 当前着色颜色 */
-                                val currentColor = field {
-                                    name = "mCurrentSetColor"
-                                    type = IntType
-                                }.of(instance) ?: Color.WHITE
-                                /** 判断并设置颜色 */
-                                if (isIgnoredColor)
-                                    iconImageView.colorFilter = null
-                                else iconImageView.setColorFilter(currentColor)
                             }
                         }
                     }
