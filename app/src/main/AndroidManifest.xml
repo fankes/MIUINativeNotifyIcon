@@ -13,20 +13,17 @@
         android:theme="@style/Theme.MIUINativeNotifyIcon"
         tools:ignore="AllowBackup">
 
-        <!-- 是否是xposed模块 -->
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
 
-        <!-- 模块描述 -->
         <meta-data
             android:name="xposeddescription"
             android:value="MIUI 状态栏原生图标，修复 12.5、13 后期被破坏的彩色图标。\n开发者：酷安 @星夜不荟" />
 
-        <!-- 最低xposed版本号 -->
         <meta-data
             android:name="xposedminversion"
-            android:value="82" />
+            android:value="93" />
 
         <activity
             android:name="com.fankes.miui.notify.ui.MainActivity"

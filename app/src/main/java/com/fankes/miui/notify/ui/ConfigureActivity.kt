@@ -36,7 +36,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.hook.HookMedium
+import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
+import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
+import com.fankes.miui.notify.hook.factory.putAppNotifyHookAllOf
+import com.fankes.miui.notify.hook.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.SystemUITool
@@ -87,20 +90,20 @@ class ConfigureActivity : BaseActivity() {
                         holder.appName.text = it.appName
                         holder.pkgName.text = it.packageName
                         holder.cbrName.text = "贡献者：" + it.contributorName
-                        HookMedium.isAppNotifyHookOf(it).also { e ->
+                        isAppNotifyHookOf(it).also { e ->
                             holder.switchOpen.isChecked = e
                             holder.switchAll.isEnabled = e
                         }
                         holder.switchOpen.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
-                            HookMedium.putAppNotifyHookOf(it, b)
+                            putAppNotifyHookOf(it, b)
                             holder.switchAll.isEnabled = b
                             SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
                         }
-                        holder.switchAll.isChecked = HookMedium.isAppNotifyHookAllOf(it)
+                        holder.switchAll.isChecked = isAppNotifyHookAllOf(it)
                         holder.switchAll.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
-                            HookMedium.putAppNotifyHookAllOf(it, b)
+                            putAppNotifyHookAllOf(it, b)
                             SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
                         }
                     }
@@ -119,14 +122,14 @@ class ConfigureActivity : BaseActivity() {
         }
         /** 设置点击事件 */
         findViewById<View>(R.id.config_cbr_button).setOnClickListener {
-            try {
+            runCatching {
                 startActivity(Intent().apply {
                     action = "android.intent.action.VIEW"
                     data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon")
                     /** 防止顶栈一样重叠在自己的 APP 中 */
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
-            } catch (e: Exception) {
+            }.onFailure {
                 Toast.makeText(this, "无法启动系统默认浏览器", Toast.LENGTH_SHORT).show()
             }
         }

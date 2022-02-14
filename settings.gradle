@@ -1,2 +1,18 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        maven { url "https://api.xposed.info/" }
+        maven { url 'https://www.jitpack.io' }
+        mavenCentral()
+    }
+}
 rootProject.name = "MIUINativeNotifyIcon"
 include ':app'

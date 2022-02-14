@@ -25,7 +25,6 @@ package com.fankes.miui.notify.ui.base
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.hook.HookMedium
 import com.fankes.miui.notify.utils.isNotSystemInDarkMode
 import com.gyf.immersionbar.ktx.immersionBar
 
@@ -44,25 +43,5 @@ abstract class BaseActivity : AppCompatActivity() {
             navigationBarDarkIcon(isNotSystemInDarkMode)
             fitsSystemWindows(true)
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        HookMedium.setWorldReadable(this)
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        HookMedium.setWorldReadable(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        HookMedium.setWorldReadable(this)
-    }
-
-    override fun onBackPressed() {
-        HookMedium.setWorldReadable(this)
-        super.onBackPressed()
     }
 }

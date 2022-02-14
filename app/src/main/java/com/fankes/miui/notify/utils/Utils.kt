@@ -35,6 +35,12 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
+import com.highcapable.yukihookapi.hook.factory.classOf
+import com.highcapable.yukihookapi.hook.factory.hasClass
+import com.highcapable.yukihookapi.hook.factory.invokeStatic
+import com.highcapable.yukihookapi.hook.factory.obtainMethod
+import com.highcapable.yukihookapi.hook.log.loggerE
+import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
 
 /**
@@ -60,12 +66,7 @@ val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Confi
  * 通知栏是否为 MIUI 样式
  * @return [Boolean] 是否符合条件
  */
-val Context.isMiuiNotifyStyle
-    get() = try {
-        Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0
-    } catch (_: Throwable) {
-        false
-    }
+val Context.isMiuiNotifyStyle get() = safeOfFalse { Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0 }
 
 /**
  * 系统深色模式是否没开启
@@ -89,14 +90,7 @@ inline val isLowerAndroidP get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */
-val isMIUI by lazy {
-    try {
-        Class.forName("android.miui.R")
-        true
-    } catch (_: Exception) {
-        false
-    }
-}
+val isMIUI by lazy { ("android.miui.R").hasClass }
 
 /**
  * 当前设备是否不是 MIUI 定制 Android 系统
@@ -168,16 +162,13 @@ val Context.packageInfo get() = packageManager?.getPackageInfo(packageName, 0) ?
  * @return [Boolean]
  */
 val String.isInstall
-    get() =
-        try {
-            appContext.packageManager.getPackageInfo(
-                this,
-                PackageManager.GET_UNINSTALLED_PACKAGES
-            )
-            true
-        } catch (e: Exception) {
-            false
-        }
+    get() = safeOfFalse {
+        appContext.packageManager.getPackageInfo(
+            this,
+            PackageManager.GET_UNINSTALLED_PACKAGES
+        )
+        true
+    }
 
 /**
  * 得到版本信息
@@ -253,26 +244,116 @@ fun Bitmap.round(radius: Float): Bitmap =
  * @param default 默认值
  * @return [String]
  */
-fun findPropString(key: String, default: String = "") =
-    try {
-        (Class.forName("android.os.SystemProperties").getDeclaredMethod(
-            "get",
-            String::class.java,
-            String::class.java
-        ).apply { isAccessible = true }.invoke(null, key, default)) as? String? ?: default
-    } catch (_: Exception) {
-        default
-    }
+fun findPropString(key: String, default: String = "") = safeOf(default) {
+    (classOf(name = "android.os.SystemProperties").obtainMethod(
+        name = "get", StringType, StringType
+    )?.invokeStatic(key, default)) ?: default
+}
 
 /**
  * 执行命令 - su
  * @param cmd 命令
  * @return [String] 执行结果
  */
-fun execShellSu(cmd: String) = try {
+fun execShellSu(cmd: String) = safeOfNothing {
     Shell.su(cmd).exec().out.let {
         if (it.isNotEmpty()) it[0].trim() else ""
     }
-} catch (_: Throwable) {
-    ""
+}
+
+/**
+ * 忽略异常返回值
+ * @param it 回调 - 如果异常为空
+ * @return [T] 发生异常时返回设定值否则返回正常值
+ */
+inline fun <T> safeOfNull(it: () -> T): T? = safeOf(null, it)
+
+/**
+ * 忽略异常返回值
+ * @param it 回调 - 如果异常为 false
+ * @return [Boolean] 发生异常时返回设定值否则返回正常值
+ */
+inline fun safeOfFalse(it: () -> Boolean) = safeOf(default = false, it)
+
+/**
+ * 忽略异常返回值
+ * @param it 回调 - 如果异常为 true
+ * @return [Boolean] 发生异常时返回设定值否则返回正常值
+ */
+inline fun safeOfTrue(it: () -> Boolean) = safeOf(default = true, it)
+
+/**
+ * 忽略异常返回值
+ * @param it 回调 - 如果异常为 false
+ * @return [String] 发生异常时返回设定值否则返回正常值
+ */
+inline fun safeOfNothing(it: () -> String) = safeOf(default = "", it)
+
+/**
+ * 忽略异常返回值
+ * @param it 回调 - 如果异常为 false
+ * @return [Int] 发生异常时返回设定值否则返回正常值
+ */
+inline fun safeOfNan(it: () -> Int) = safeOf(default = 0, it)
+
+/**
+ * 忽略异常返回值
+ * @param default 异常返回值
+ * @param it 正常回调值
+ * @return [T] 发生异常时返回设定值否则返回正常值
+ */
+inline fun <T> safeOf(default: T, it: () -> T): T {
+    return try {
+        it()
+    } catch (t: NullPointerException) {
+        default
+    } catch (t: UnsatisfiedLinkError) {
+        default
+    } catch (t: UnsupportedOperationException) {
+        default
+    } catch (t: ClassNotFoundException) {
+        default
+    } catch (t: IllegalStateException) {
+        default
+    } catch (t: NoSuchMethodError) {
+        default
+    } catch (t: NoSuchFieldError) {
+        default
+    } catch (t: Error) {
+        default
+    } catch (t: Exception) {
+        default
+    } catch (t: Throwable) {
+        default
+    }
+}
+
+/**
+ * 忽略异常运行
+ * @param msg 出错输出的消息 - 默认为空
+ * @param it 正常回调
+ */
+inline fun safeRun(msg: String = "", it: () -> Unit) {
+    try {
+        it()
+    } catch (e: NullPointerException) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: UnsatisfiedLinkError) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: UnsupportedOperationException) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: ClassNotFoundException) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: IllegalStateException) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: NoSuchMethodError) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: NoSuchFieldError) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: Error) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: Exception) {
+        if (msg.isNotBlank()) loggerE(msg = msg, e = e)
+    } catch (e: Throwable) {
+    }
 }
