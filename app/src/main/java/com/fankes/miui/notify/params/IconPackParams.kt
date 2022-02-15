@@ -2646,6 +2646,36 @@ object IconPackParams {
                         "u0QikUgkEonENv4AQa58WnCHXkoAAAAASUVORK5CYII=").bitmap,
                 contributorName = "fankes"
             ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "中国大学MOOC",
+                packageName = "com.netease.edu.ucmooc",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAASnSURBVGiB7Zl9aFZlGMavO1wjNmNWpmLgaAoVBCvRGhaMIguKGhhYGiSOKal/iDFE\n" +
+                        "ixr0BZLIgohqmRVUjKyobK2iYYTrAykzKvGjj5VmbhHUQEP59cdz3nF2POc557wfeyO84GXnPc99\n" +
+                        "X/d97Tnv89zPfaQz+G/BKh0AaJTUKmlU0qCZ/VLpmGUFMBvo5nRsAi6odn6pAKYADwDDMSIK2Ae0\n" +
+                        "VzvXRACrgySz4i3g2mrnPQbgDmBXDgFRPA5Mq6aAG4C3MyQ5CagDXvTY7QdWTLSAK4FtKQJ6gKkx\n" +
+                        "vi3AVx6/HUBrpQXMAjYD/3gS2Q7MycC1Ejjl4dkCzCi3gHpgI3DEE/hDYH5O3jrgSQ/nIeCecolY\n" +
+                        "AXzjCfY5sLDEGPOAjz0x3gOuK5Z8EbDTQ/49sLgUATExlwF/emJ2AxdlJWsFXveQHQZWllNAJH4d\n" +
+                        "bvdPwo/A6jSSZz0EfwOdlRIQk8s83AqWhPdxddxpjr0ep4eAiheYccA9bkMeMWeHjVsSDLuBKdUQ\n" +
+                        "EAb+x+3RsOGDkcHnY6etyiD+cTsO1BYM4mbkOLChyIBzcPvDENBfjn8K0Ay8kTArjWHDpN/IHqAt\n" +
+                        "Y7B64H7cwhBGTwkCZgLPJOQG8Gmc01aPQy+eChVoB35N8H2tCAE1wCOefMBt1JclEbQBez3OGyL2\n" +
+                        "twHfeux3AxfmFLEWGE0R0UVaLRYQ+XAAt3EOemyOAOuAmhwCluA2vDTcmpXw5wxkPjxGjoMS7lzz\n" +
+                        "hYfvaOT7QBbS5ojTftzhKAteAS7NIaAZeNfDdxBYAzwRMzY5jbwn4tAV3J8LfOAJuoOMZTxuJXrB\n" +
+                        "wzWCa2BMDuwXxNjcmxbkRMj4JNAUGuvyBC9gs4e7Bv/snsIdqGbF+B6M2B7wibgpYvxSZDyLEHDL\n" +
+                        "8NKI7/oUn21Asye3h2N84o/EuHZOGDenCOkCvvQk1w8sx9/jepMMhybiq4/lhfGzIvZNke/J0xfA\n" +
+                        "zK6QtFjS7zHDCyU9J+n8mLGdkm43szYz+ygtjqShmHtj+aYJydSnNbNeM5smaX0G8z2SOsys1cy2\n" +
+                        "Z+EPYsTlkijk4tD1b2Y2mjVQEGyTpEskbY0Z/klSp6T5ZlZs7RUVMyZkUtKApMPFRDKzfZLacfXV\n" +
+                        "QkkzJfVLesfMjhbDGcKQpPCZPVHICUnnBNezgQWS/pI0IumPPBHNrE9SX+5UAwDnSZouaUbwd3qQ\n" +
+                        "Xxi1hYuokGOSGoLrcyV9UmwixQC3od4paYmkLIXmscJFVMiwpNQuYQjXAFeZ2Wc5fMYB965kmaRF\n" +
+                        "kq7O6T6cRBo98mbFy8DcIkR0kO81RBRbfOSdwEDw2QX8wPiyxYenswgCrgf6ShAArq/QkBYrGrgW\n" +
+                        "aMKdQbJgqYcry6yfxPXY1uA6ni1AI+HWTymIETLgSaajCBG7cc3y+rIknFNIG8n11tqMIr4mY4Oj\n" +
+                        "YkKC+w248jsOG1NEPEXMC6GqCAmNtwHfeZIO4xBw14QKyCoksGkhfZUbAS4vZ27RorFkmNmgpLtT\n" +
+                        "zG4xs73ljFt2IZJkZq9KWpUwfGMgtrpg/JLblWJ7X+SRWjdReaYCmAqsCn4v/paMxo7HA2miz+D/\n" +
+                        "hn8B/6EvMiR/OQcAAAAASUVORK5CYII=").bitmap,
+                contributorName = "fankes"
+            ),
             // TODO 可继续在这里添加更多 APP
         )
     }
