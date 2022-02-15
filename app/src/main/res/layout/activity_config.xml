@@ -25,7 +25,7 @@
             android:layout_height="20dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="25dp"
-            android:src="@mipmap/back"
+            android:src="@mipmap/ic_back"
             android:tint="@color/colorTextGray"
             android:tooltipText="返回" />
 
@@ -62,7 +62,7 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:layout_marginEnd="10dp"
-            android:src="@mipmap/icon_filter"
+            android:src="@mipmap/ic_filter"
             android:tint="@color/colorTextGray"
             android:tooltipText="按条件过滤" />
     </LinearLayout>
@@ -73,7 +73,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginTop="10dp"
         android:layout_marginRight="15dp"
-        android:background="@drawable/permotion_round"
+        android:background="@drawable/bg_permotion_round"
         android:elevation="0dp"
         android:gravity="center"
         android:orientation="horizontal"
@@ -84,7 +84,7 @@
             android:layout_height="15dp"
             android:layout_marginEnd="10dp"
             android:alpha="0.85"
-            android:src="@mipmap/about"
+            android:src="@mipmap/ic_about"
             android:tint="@color/colorTextDark" />
 
         <TextView
@@ -133,7 +133,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="15dp"
-        android:background="@drawable/button_round"
+        android:background="@drawable/bg_button_round"
         android:gravity="center"
         android:padding="10dp"
         android:singleLine="true"
