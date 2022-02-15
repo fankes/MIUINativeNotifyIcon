@@ -244,6 +244,7 @@ class HookEntry : YukiHookXposedInitProxy {
 
                 /** 自定义默认小图标颜色 */
                 var customIconColor = 0
+
                 if (isHookColorIcon) run {
                     IconPackParams.iconDatas.forEach {
                         if ((notifyInstance.opPkgName == it.packageName ||
