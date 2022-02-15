@@ -35,10 +35,10 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
+import com.highcapable.yukihookapi.hook.factory.callStatic
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.hasClass
-import com.highcapable.yukihookapi.hook.factory.invokeStatic
-import com.highcapable.yukihookapi.hook.factory.obtainMethod
+import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
@@ -245,9 +245,9 @@ fun Bitmap.round(radius: Float): Bitmap =
  * @return [String]
  */
 fun findPropString(key: String, default: String = "") = safeOf(default) {
-    (classOf(name = "android.os.SystemProperties").obtainMethod(
+    (classOf(name = "android.os.SystemProperties").method(
         name = "get", StringType, StringType
-    )?.invokeStatic(key, default)) ?: default
+    )?.callStatic(key, default)) ?: default
 }
 
 /**
