@@ -42,6 +42,7 @@ import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.utils.*
+import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.factory.*
@@ -217,6 +218,21 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 旧版风格反色 */
                 val oldStyle = if (context.isNotSystemInDarkMode) 0xFF707070.toInt() else Color.WHITE
 
+                /** 通知图标原始颜色 */
+                val iconColor = notifyInstance.notification.color
+
+                /** 是否有通知栏图标颜色 */
+                val hasIconColor = iconColor != 0
+
+                /** 通知图标适配颜色颜色 */
+                val supportColor = iconColor.let {
+                    when {
+                        isUpperOfAndroidS -> newStyle
+                        it == 0 -> oldStyle
+                        else -> it
+                    }
+                }
+
                 /** 获取通知小图标 */
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
@@ -225,15 +241,20 @@ class HookEntry : YukiHookXposedInitProxy {
 
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
+
+                /** 自定义默认小图标颜色 */
+                var customIconColor = 0
                 if (isHookColorIcon) run {
                     IconPackParams.iconDatas.forEach {
                         if ((notifyInstance.opPkgName == it.packageName ||
                                     findAppName(notifyInstance) == it.appName) &&
                             isAppNotifyHookOf(it)
                         ) {
-                            if (!isGrayscaleIcon || isAppNotifyHookAllOf(it))
+                            if (!isGrayscaleIcon || isAppNotifyHookAllOf(it)) {
                                 customIcon = it.iconBitmap
-                            return@run
+                                customIconColor = it.iconColor
+                                return@run
+                            }
                         }
                     }
                 }
@@ -243,7 +264,10 @@ class HookEntry : YukiHookXposedInitProxy {
                         /** 设置自定义小图标 */
                         setImageBitmap(customIcon)
                         /** 上色 */
-                        setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
+                        setColorFilter(if (isUpperOfAndroidS || customIconColor == 0) supportColor else customIconColor)
+                        /** Android 12 设置图标外圈颜色 */
+                        if (isUpperOfAndroidS && customIconColor != 0)
+                            background = DrawableBuilder().rounded().solidColor(customIconColor).build()
                     }
                 else {
                     /** 重新设置图标 - 防止系统更改它 */
@@ -251,27 +275,30 @@ class HookEntry : YukiHookXposedInitProxy {
                     /** 判断是否开启 Hook 彩色图标 */
                     if (isHookColorIcon) {
                         /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                        if (isGrayscaleIcon)
-                            iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
-                        else
-                            iconImageView.apply {
-                                clipToOutline = true
-                                /** 设置一个圆角轮廓裁切 */
-                                outlineProvider = object : ViewOutlineProvider() {
-                                    override fun getOutline(view: View, out: Outline) {
-                                        out.setRoundRect(
-                                            0, 0,
-                                            view.width, view.height, 5.dp(context)
-                                        )
-                                    }
+                        if (isGrayscaleIcon) iconImageView.apply {
+                            /** 设置图标着色 */
+                            setColorFilter(supportColor)
+                            /** Android 12 设置图标外圈颜色 */
+                            if (isUpperOfAndroidS && hasIconColor)
+                                background = DrawableBuilder().rounded().solidColor(iconColor).build()
+                        } else iconImageView.apply {
+                            clipToOutline = true
+                            /** 设置一个圆角轮廓裁切 */
+                            outlineProvider = object : ViewOutlineProvider() {
+                                override fun getOutline(view: View, out: Outline) {
+                                    out.setRoundRect(
+                                        0, 0,
+                                        view.width, view.height, 5.dp(context)
+                                    )
                                 }
-                                /** 清除原生的背景边距设置 */
-                                if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
-                                /** 清除原生的主题色背景圆圈颜色 */
-                                if (isUpperOfAndroidS) background = null
                             }
+                            /** 清除原生的背景边距设置 */
+                            if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
+                            /** 清除原生的主题色背景圆圈颜色 */
+                            if (isUpperOfAndroidS) background = null
+                        }
                         /** 否则一律设置灰度图标 */
-                    } else iconImageView.setColorFilter(if (isUpperOfAndroidS) newStyle else oldStyle)
+                    } else iconImageView.setColorFilter(supportColor)
                 }
             }
         }

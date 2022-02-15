@@ -26,6 +26,7 @@ IconDataBean(
     appName = "", // APP 名称
     packageName = "", // APP 包名
     iconBitmap = ("").bitmap, // 位图数据 Base64
+    iconColor = 0, // 通知栏中显示的图标颜色 - 设置为 0 使用系统默认颜色 (不设置颜色可不写)
     contributorName = "" // 贡献者昵称
 )
 ```

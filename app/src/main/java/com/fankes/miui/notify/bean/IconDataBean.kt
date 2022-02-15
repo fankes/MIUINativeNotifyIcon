@@ -31,6 +31,7 @@ import java.io.Serializable
  * @param appName APP 名称 - 仅限默认语言区域
  * @param packageName 包名
  * @param iconBitmap 图标位图
+ * @param iconColor 通知栏中显示的图标颜色 - 设置为 0 使用系统默认颜色
  * @param contributorName 贡献者昵称
  * @param isEnabled 是否默认启用替换彩色图标 - 关闭后将全部停止替换
  * @param isEnabledAll 是否默认启用替换全部图标
@@ -39,6 +40,7 @@ data class IconDataBean(
     var appName: String,
     var packageName: String,
     var iconBitmap: Bitmap,
+    var iconColor: Int = 0,
     var contributorName: String,
     var isEnabled: Boolean,
     var isEnabledAll: Boolean,

@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/30.
  */
-@file:Suppress("SetTextI18n", "InflateParams")
+@file:Suppress("SetTextI18n", "InflateParams", "DEPRECATION")
 
 package com.fankes.miui.notify.ui
 
@@ -126,6 +126,10 @@ class ConfigureActivity : BaseActivity() {
                     } else holder = convertView.tag as ViewHolder
                     getItem(position).also {
                         holder.appIcon.setImageBitmap(it.iconBitmap)
+                        (if (it.iconColor != 0) it.iconColor else resources.getColor(R.color.colorTextGray)).also { color ->
+                            holder.appIcon.setColorFilter(color)
+                            holder.appName.setTextColor(color)
+                        }
                         holder.appName.text = it.appName
                         holder.pkgName.text = it.packageName
                         holder.cbrName.text = "贡献者：" + it.contributorName
