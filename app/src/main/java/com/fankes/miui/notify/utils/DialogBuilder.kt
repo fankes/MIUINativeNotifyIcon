@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/7.
  */
-@file:Suppress("unused")
+@file:Suppress("unused", "DEPRECATION")
 
 package com.fankes.miui.notify.utils
 
@@ -28,7 +28,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-
+import android.util.DisplayMetrics
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
+import kotlin.math.round
 
 /**
  * 构造对话框
@@ -43,6 +47,8 @@ fun Context.showDialog(it: DialogBuilder.() -> Unit) = DialogBuilder(this).apply
 class DialogBuilder(private val context: Context) {
 
     private var instance: AlertDialog.Builder? = null // 实例对象
+
+    private var customLayoutView: View? = null // 自定义布局
 
     init {
         instance = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog)
@@ -64,6 +70,16 @@ class DialogBuilder(private val context: Context) {
         set(value) {
             instance?.setMessage(value)
         }
+
+    /**
+     * 设置对话框自定义布局
+     * @param resId 属性资源 Id
+     * @return [View]
+     */
+    fun addView(resId: Int): View {
+        customLayoutView = LayoutInflater.from(context).inflate(resId, null)
+        return customLayoutView ?: error("Inflate $resId failed")
+    }
 
     /**
      * 设置对话框确定按钮
@@ -91,6 +107,9 @@ class DialogBuilder(private val context: Context) {
 
     /** 显示对话框 */
     internal fun show() = instance?.create()?.apply {
+        val dm = DisplayMetrics()
+        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getMetrics(dm)
+        customLayoutView?.let { setView(it.apply { minimumWidth = round(dm.widthPixels / 1.3).toInt() }) }
         window?.setBackgroundDrawable(GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
             intArrayOf(Color.WHITE, Color.WHITE)

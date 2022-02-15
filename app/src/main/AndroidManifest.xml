@@ -16,43 +16,42 @@
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
-
         <meta-data
             android:name="xposeddescription"
             android:value="MIUI 状态栏原生图标，修复 12.5、13 后期被破坏的彩色图标。\n开发者：酷安 @星夜不荟" />
-
         <meta-data
             android:name="xposedminversion"
             android:value="93" />
 
         <activity
-            android:name="com.fankes.miui.notify.ui.MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:screenOrientation="behind">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
             </intent-filter>
         </activity>
 
         <activity-alias
-            android:name="com.fankes.miui.notify.Home"
+            android:name=".Home"
             android:enabled="true"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="behind"
-            android:targetActivity="com.fankes.miui.notify.ui.MainActivity">
-
+            android:targetActivity=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
 
         <activity
-            android:name="com.fankes.miui.notify.ui.ConfigureActivity"
+            android:name=".ui.ConfigureActivity"
             android:exported="false"
             android:screenOrientation="behind" />
     </application>
+
 </manifest>
