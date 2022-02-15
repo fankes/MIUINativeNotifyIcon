@@ -374,10 +374,9 @@ class HookEntry : YukiHookXposedInitProxy {
                                     param(ExpandedNotificationClass.clazz)
                                 }
                                 method {
-                                    isUseLegacy = true
                                     name = "getSmallIcon"
                                     param(ContextClass, ExpandedNotificationClass.clazz)
-                                }
+                                }.onFind { isUseLegacy = true }
                             }
                             afterHook {
                                 /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
@@ -427,10 +426,9 @@ class HookEntry : YukiHookXposedInitProxy {
                                     param(ContextClass, ImageViewClass, ExpandedNotificationClass.clazz)
                                 }.remedys {
                                     method {
-                                        isUseLegacy = true
                                         name = "setAppIcon"
                                         param(ImageViewClass, ExpandedNotificationClass.clazz)
-                                    }
+                                    }.onFind { isUseLegacy = true }
                                 }
                                 replaceUnit {
                                     if (isUseLegacy)
