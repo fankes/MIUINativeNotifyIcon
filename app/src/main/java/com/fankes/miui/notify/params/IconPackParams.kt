@@ -2745,7 +2745,148 @@ object IconPackParams {
                         "YkKC+w248jsOG1NEPEXMC6GqCAmNtwHfeZIO4xBw14QKyCoksGkhfZUbAS4vZ27RorFkmNmgpLtT\n" +
                         "zG4xs73ljFt2IZJkZq9KWpUwfGMgtrpg/JLblWJ7X+SRWjdReaYCmAqsCn4v/paMxo7HA2miz+D/\n" +
                         "hn8B/6EvMiR/OQcAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xff27af50.toInt(),
                 contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "AcFun",
+                packageName = "tv.acfundanmaku.video",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAdmSURBVGiB7Zl7kNZVGcc/593lsu5iNEkKGkqON0SJLogX1NBoskmGspjRQuyClplN\n" +
+                        "RtbEdGHMyREdrRxzmkqszJpRK8scwxvaRVGEDFPSkLiIIqAsyy6w+3764zlv+9t332V3cWmaZr8z\n" +
+                        "7+z7/s75nXOec57n+3yfszCIQQxiEIP4f4Rarx6wr+dJAz2gWge8ERgJTATqclMbsBJoBramlHYP\n" +
+                        "5Lx7NEQtAaXcz7yo9pRSR6FPZYwRwCnATGAKMA5orBqyBVgHLAV+BTwANPdklDqkMGd7vw1Rm/Ki\n" +
+                        "3gkcDQwHdgHP5cmfAHbk9xuAjwIXAscAQ/Y0YQFlYDnwXeBOYFse7wDgdOAkYAyxGa8CzwD3Ao+l\n" +
+                        "lOx1dLWkvk39nLrO2nhQbVBPUh9W23vo1xeU1UfVyWqT+kwP/TapHyyss+9hoc6pMelydaz6BbXl\n" +
+                        "dRhQjR3qperhNYwpq58orGumusBwvZoLn6neoZ6afx+hbiwM9hd1nHqzumsAjahgt/oj9TD174Xn\n" +
+                        "D6n75zWdq27Lfa+vZcTc3MFsTEkdXRjwSfUQ9d5s1L5Ch7pQPU5dn59dktd4mPpsoW+rOrtoxDR1\n" +
+                        "S6HDXWqdepD6tBEr71Cv2MdGVLBTvUCdZbjc9LzOcwxDi1itNpWyLQcTrFTBToJVhhMs9E1gPDCP\n" +
+                        "fZB7amAocBWwBriDTiZsINJBEW8BZtSro4BbgRXAOQT1LU4pqY4laO9PwO/yBP8tjALmA1cSyRWC\n" +
+                        "/l8t/IYw7H2oS9UP2RlMTWp9/n6++n71lj66xFZfHxVXo91wp8nqMHWousju7r0Mwx/bDGb4ohFk\n" +
+                        "Kb90pnq6faPZFvVie84De4sH1fHqW/PmHqL+Qt1e6LOqntA+bwJOzZ+TgVmENPhbPtr9+uAKDwO3\n" +
+                        "ENn9qL33qG6YQmi396iLUkqr1TnANCIM6oA1GCdRQVm9MFs+Qj3GnrN7EVvV96pTjBPc0UO/DQb/\n" +
+                        "9xdXqJ8yqH+CIUy7oEQEcTn/XgvcU2ibROidPaFMkMVO4GdAPXAbITKrcRnwc7oyZF9wMqGcJwL3\n" +
+                        "AVcbsTteHaMOQT0476jqTUb+2D93urGXnSqrj6nHqo/kZ3erR6r/rNF/ltqozlObrZ2TyoVPBS+q\n" +
+                        "7zLkURFt6l/NeeRF4BqgA5gOfBY4j1ChE3vZqeeB2cCledcAzgDOAj6ZxyxCQiUvA2bkXa7Gy8Av\n" +
+                        "6XqiBwHDgBdq9F9AlAeh+9XbjaxZVteoJxjUXL1by9WX1ZfUqepX7K67mtUZ6uyqtoUGpTer3zYk\n" +
+                        "0DxD2Vbw6/xuNY3PUa8r/N6lLqhYUwLIhc35wA+B3cB2oAk4tMYO3Ehk3Y8QJ/ZVutcgjcDNQCvw\n" +
+                        "buDpvMMTgPVAO6ES/gBsAk4k4mdFXlN19obI4Fvz9xbga4Ti6DQkG7OdcKvZwCNE8NbCscD3gOMJ\n" +
+                        "aq6uAiFkzEjgx4SrfQC4PBu2Oi++lMe6iXClNqJA+zi1ZVAZ2AL8lnDdq4uVaheoh+ZjbTCC/SW7\n" +
+                        "4zb1DDuVcm/YbbjjZ4yAbVB/2kO/DUZNMrOGa81X98trnKt2yW2lghFNwHeAI/JO1RH1dTXaCc1V\n" +
+                        "0V1PAYuAV2ruTtDxROB64DfA/cDU3NYG3E1ouXpgNFFa16LuDuBsIjmeB3xLHV59EiX1SiP5Ha3e\n" +
+                        "o55lJ6UWscTQPi3qZkPe1xmlcX911u0GHY8zyoWy+nX1S3an5unqrXmec42ke406tHgis4BLgD8C\n" +
+                        "bwCOyzv0XI2dGUcEXZmQMKuyr95P+HBfIXBXSqmFoNX78rMtBPUX46RMENBoIoaXAk/mNX8DoGRI\n" +
+                        "9YqeWgScmV+YAjxO92MuEzce7cRxV9o76J43ekMLQL4Vacljbad7sG/KbaMIkpkOXEcwYJ2aSoRv\n" +
+                        "f5mg1KeAD+eBTsiGNFcNeiCRnLYS8mVEfj4G2L8fRiRgkqG0Gwk51AFszgsu4lmC4g/Mf+cCDwHT\n" +
+                        "UkqXd7keygOebafg22Bc9yyp4dtHqk9kP16onmbteOoN69WPGUmxNc99inHJUcT3jeRaKXN3WrhV\n" +
+                        "6Qb1J4WXy4bivMzugTdVvbOq70Bgm3EdtKzwrMMgnosKhpTVxy1QcH3BiCFETbwKGJvb6glF+2ng\n" +
+                        "8ILNRxH1dNFNBgKvEQp8QuHZowQJtRNl7vOEyz9AQUX/x5CU0m61Eh+NeeFrU0qb1RuAawuDDwM2\n" +
+                        "EgE4kJcRrxCKoEgw16aUXlMXEzKlrbLkYr8umialZEqpnFJqTiktTyltzk0/AH5f6Ho8sIH+s1Rv\n" +
+                        "2Ai8nU7ttoRcH+V17ch/yymljpRSpY6qKc5qoRW4mE53ejOwmCio2np6qZ9YS4jWkcRurwMuoCLR\n" +
+                        "BxLqRPUFdaWRkYepJ6o3qP+w/5l9Zw7s+YaGKqlXqf9Sp/a+ok7027/VScDngYtSSq35WR3B/eOB\n" +
+                        "ycQFxFgixzQSJ99B7O52ImBXAn8myGVrJReopxFBv6JP/z7YW0PyZA0VI3poLxFKYRghLkuEIthF\n" +
+                        "uGIrYE8LVet6lOiDGMQgBjGI/yX8GxoKNGogGi8MAAAAAElFTkSuQmCC").bitmap,
+                iconColor = 0xffc92330.toInt(),
+                contributorName = "scrpr、fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "今日校园",
+                packageName = "com.wisedu.cpdaily",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAnqSURBVGiB1Zp5jF11Fcc/Z/atr6ULROgCCAgIlkoEwaBFQlACJiJIgKjEBcQFW0RA\n" +
+                        "BIyiAlaFRowYiCFEBDEKREFBRQKUEhUQIkSQUoG2NC3TdtbXebN8/eOcX+/t7Z2ZN4MbJ7n5zfvd\n" +
+                        "33L27Y7xPwJJjUAb0Ap0AJV4ZgKzgVnAnPjdDnTG/B7AJuAUMxtJ5zVNE4l2YEYg0AkMmtnaOvc2\n" +
+                        "Ab8Ejoj9jYDF01AYLbZZ4ZjVeSKmRYikfYA7gYW5S/slfc7M7qzjiHbgIJyzE14FDAFVoDfGNwPN\n" +
+                        "wPbi4ikRImk/nIi34kT0Al24SvxAUs3M7pnkmDZcCgAbgdtwVdkGbAW2AH2BbH8QMAwsAO4C5gMD\n" +
+                        "U8G7SMRbJD2lDB6Q9G5JT+bmXpJ0/CTnLJD0cqy/W1JRbcbbd7CkDbHvtukScUiBiIckzY93h0t6\n" +
+                        "JvdujaSlE5x1QA6hm6eAw2GSNse+G4rvG+o4YDEu/rfhevsIcA6wv6TTgBbgPGBNbNkXuFHSUeMc\n" +
+                        "WcE9Fbhq1gstZKawZQr7dnDhb8GFMUmrJO0p6UhJgzF3r6Q2SSdIWp+TzPOS3l5y5lJJvbHma1PA\n" +
+                        "ZWncKUmXFN+PK5FA4lbcsMeA1cBpZrYBWIt7FAP2B+aY2X3AMtxgifnbJR1UOLoL5y64UY93f6Ok\n" +
+                        "Zkmtcne/V27fLEkH5NeXei1JS4Cf4G4yEXF6EIGZbZK0FlgCLIpnPfALPIitiLP3BG6TdJKZrYvj\n" +
+                        "U+wAmC/pRDzozcBj0qzc04W72xZcZdO+i3FVP3FcQiQdDfw4kKsCjwNnmNn6wtI7gGdxNzkYBI5J\n" +
+                        "ugn4eyDVj0utmts3g0wTvhDPVEDASJy9A8ok0gJchKtIFXgR2BpuMh9pV8TYBHRIWohzcW6MFWCe\n" +
+                        "mRU9U2eOkLFATDkkR4EaHld6gW48zhyCa8gIcDmeHYxPiJk9CCDpQOCTeABrw8WfcqGkBp3xrp1M\n" +
+                        "7AlGgW+UMGpGjMM4wx7FuduHM247UDOzWn6TpBVBSA14zMz+MSEhOXgHcAG75jn1wgvAtSXzlRir\n" +
+                        "wMNm9nid53XGOMwUU5RW3DNtwzk2EJfnn0FgM+7XR4HzgTfFvqvMrKfk3CSRWjz1Qn7flAi5A/hd\n" +
+                        "IDuC6/NojDv9bWaSdD4wL/Y+Ctw+zrlpzUg89UJHjEOU5FrjEmJmvdQZeSUdjMeQJlzXrzGzoXGW\n" +
+                        "z4qxhqtJvZCXSLX4ctIUZTKQ1xcXAHvH1D3AAxNsyRNSl2pJasWLKnAp7sKAaRVWBTgOOBV3CpuB\n" +
+                        "68yslNNBdGduam9Js3HPlyrCDtwLduABMXnL/XKETMW2JgdJFUmPRP4zKmmlvIQdb32HpLWxfljS\n" +
+                        "JklbIocaUX3wlKTO4tmvVyKfwktW8PzrejMbnWB9K55ypLvnkjmO5FaT6gyRBccq7jlrwBOU2Mi0\n" +
+                        "CZFXi5/JIXBjMUiVwAjuzRpwl91DFsET8smt98bvHVWimankTGD6wS7V7kcGQtuBv5jZ4HTPq/PO\n" +
+                        "RsJBFe1w2oS8DkSKXRLD87su3MXOJkuD2uOpALvhDYuZwHNmdmn+7H+H10LSbrj7rQBPm9nWkjXH\n" +
+                        "AMsDoUog2kWWy7VRP2PvmiqCcyR9R9Ktkt41wbozwwuNSboy5hrDS82O31+K9/XCmKRqeLV1kl6M\n" +
+                        "OyQvFXaCySQylywDvqOA/NnAoThnF8S0AcslnYXHgVagRdK+ZIFwFOfoGrxU6MNTjmTYPWSOoB+3\n" +
+                        "PwEHA/fi6rVtUkIkNQdi7cDhgdAYsFhSG64WN+FV2oElxHcC++R+pwbbzCC0H/hyjAtx+2iPsQ0v\n" +
+                        "refhtpLaqD8FXiJz3bs0H8okshj4WVyc/L6Ay+L9euAWvOB5IpDsC2JrOJeTS+0FNphZVVKSyBDu\n" +
+                        "ai8EPoEbfvJGDYFTMXX6I97MS4TsklWXEdKJi68YPauB6D/xeHBKEHtgXLw23n0Q7wY2A7fkUvmu\n" +
+                        "GFPQ2yvmhuPckXiX4kgKgFXgqcCnJRj2Wj2EvIAngdtw1booOHAasA4YMLNRSd3At4Az4sKz8Br+\n" +
+                        "UOCLuC204moErj4EgsPA1cAP43eK4omoGq4FjTGOBeOa4+/5khaa2csTEbIZuD/+TlKp4aJdHO9f\n" +
+                        "AU4CTsdt6HbgD2Y2ImklnkgeBpwn6Tdm9hBZPdEXCM/BE8HkilPZnOLJvCC+OQiaSxZ/roz1X5+I\n" +
+                        "kCXAzXjBf3fMDQEfAL4J3C9pNfBxvDGxDbg21R9m9oqkZcBSXAWSJFI9MYCryHeDMdOBBtxGd0AZ\n" +
+                        "IfvizbV0IbjRpjxnDOfS1WStmefSZnm3pYK7S3BvA25P4PrfgOv+RlzaQ2SfDvaI+4eAG3FmbAJO\n" +
+                        "Bt6PS/QrwM8nI2QRLsoeMt/fw66e5Dq8QTEIfJSsPXMA8H3ctT4JrJIXRsnYBwO5j+F2sT09ZjYg\n" +
+                        "aTnwPeBV4BIzGwgG7R+E9ONqvCmPTFmFOD/GjXg6QWzO96L68dJ2G6GrkhZJmgl8O5jRByyPdKVC\n" +
+                        "ZiM9eCb7PN6rugF39+eENBfGuq1xV4LEiFowYycoI2RujK+RlZfdubUCMLPVeLtnFA9iX8W79CfH\n" +
+                        "3HVh5AQhaf9ANCv2A1biTmN3vM/cQMa8FJvKCKmri5IIeRX/1AUeSVPll68JVgLvA44Gzo45Ax7D\n" +
+                        "JZOgQpYQ9kvqwlVzEW4bF0Y/uZnMlpqAY2LtvTlCSkvdnSQSKcju8XMDmbH35IjeQUh0Wpbh0ksp\n" +
+                        "eTdwQdLtgI4cIT3AucAJcdaPzCy5eyNz+UcBv8XjUKrd6yOE7HMwuI62xd8DFFQrB3/FjTrBM8DT\n" +
+                        "hTX5FH0BHnCb8I9GKwr4JEJGcWmtib3J8fThHm0nKKrWXNzvp+orEVIl091iTX4mzr0ERwAfwV1n\n" +
+                        "grxEPo27727gcjPbnFtXw7OCBlzKPbhhN5F95eovfpouIyR9hBnM/Rbupcoy5cV4lO3CudeIc/QK\n" +
+                        "SavM7NlY2pkjJKnrXcCYpPfiDKvEOe2BdCceRGfgmpK8aVkbdhfkZsUh3bguphS+H3fHT+BqpDDC\n" +
+                        "q+KCYTzqt+Mt/72AayR92MyqZCl8Hk4FPoRLp4ks652sSuwumywSsjAO3oLrYcpO+4Hr8TqkJ9zn\n" +
+                        "RcDxcfF9eDxoAY4F3oMb87m4d5pTgmAlzh4mK6xSGzX1hdP71G2pAb+vhxABq4A/43bRittENbxQ\n" +
+                        "irLHAZ+P/euBK8KDIekyPEebDVwq6eEgjkDuetxBVINhg2TRPWW+iZD0u1ZmF+OCJIvoiqQlkv4k\n" +
+                        "6UFJhxTWnSvpYkmflXSsch/9JTVJulzeeRyT9EKuVv91qOR/D4KoaTW5Jc2W9GihmbBR/hXsjQWS\n" +
+                        "3impL4gYkXSe6vx3jf8rkNQg6YpQq1/JO/FvTJDUGSq253/6rn8BYPRdwj2JTVQAAAAASUVORK5C\n" +
+                        "YII=").bitmap,
+                iconColor = 0xffdc4748.toInt(),
+                contributorName = "scrpr、fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "中国银行",
+                packageName = "com.chinamworld.bocmbci",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAc6SURBVGiB1ZpdiF1XFcf/+9wzmWkV09DaJjP5mEmbJmkKpRaalLRQsVptxSIRFEV9\n" +
+                        "0GJFQStaEcGH6kMxKGqpiMXig1ixFaoxWLC1UhBDYlo0ZJqYmJimaYrWfM2duR/n7PXz4dxJ7pyz\n" +
+                        "z51779wZ9A8HLnvvtfb673P32mutfZwGACBSo3GthodvldmtiqKNQqMSV8m5IUmRpIak/whOy7nD\n" +
+                        "kvZJ2ivpiHPOL9QGt0ACmyXtkPRBSZskDSszej69SDJJTeCIc+7Xkp5yzh1YiD09A9jmvX8SOAN4\n" +
+                        "Fg4PnMXsaeD2pSAwjvdPAOcAGwCBPAw4773/GXDdYhCI0zT9OGb/WATjy3CCNP0UMDQYEufOrQB2\n" +
+                        "YjbdxeRNMzuB2R7gbL7TzKYw+zNwHLNGF/pmvPePMsXbF/omxoCngbTDZClwzHv/Y+C+er1+HbDK\n" +
+                        "zPYFxk4Cq4H1wL3AD4EjQFKq3TAz+y0w3h+JmZkxM9vdgYABh7z3D1GvrweitgVYDvwlIPMKcGXb\n" +
+                        "OAes9d5/EbODdHAcZvZcrVbrjQxwBdmbKEMV7x8F1pbId0UkJzPmvf82cKHDvLugy78ZEAM7S1bH\n" +
+                        "gFfTNN1B2xsYBJGWnCNN32dmxwh7RcP7H9GNAwA+AlRLSBwENnShoy8is6jVahPAyyEyZlZL0/TT\n" +
+                        "8xmwDrPjQRJmk8CaeVdiAEQkaXp6ehVmQTLAKeD6cgO8fzwgBPBaN29ikERaesaBYyGDvPdPBoWa\n" +
+                        "zeZWAr4fqJKm93U7+SCJSFKSJO8m5ADMppIkuXN2XDz7o1KpfEHS8rwiM/tpVKns6mD0kKRrJbV7\n" +
+                        "k8uBy5wrxI7DkrYCU21tZzQ5ecRt2dIM6Y/j+DmZPaYoekhZQJrBubfEcfwlSX+8ZEy9fj1ZAJjH\n" +
+                        "UUpcbIvEhyw7xc8AU21PlfAh6lt9l8aanQX2kaYfpcQTUq2utOycyeN8s9m8+dJA779G0d16vP9q\n" +
+                        "GQnv/YPA+YDyflH13n+jw6J9juLimPf+kdkBDrP9AcXHqdfXh5QmSXIbWQQ8aEyRJHeVEBkDDucF\n" +
+                        "zOwQUIkkjcu5zQHZ5zU8fDykNI7iz0h6W9nq9Q/eqkrlgVCPc+6UmT0baB+XmpsiSdskLcv1p/J+\n" +
+                        "l3OO4HSObSpmgSap3uNjObMk524roxlF0W8EjVzzkCzeHku6Re3eIMNpVSqTZQqdc3nikvSs0vR7\n" +
+                        "ytLYi0glxXEspenc0XEswQNybkdOzzDgQotYr9ePjoyMnJTUnnQ5RdE7YsENKvrJk5JeLyOSN7aF\n" +
+                        "/W5o6PcdZIpK4CZlOf98uiVJIyMjb0g6oTwRdEOEtKogYfaqc266F6MkVXocL7WdY93AOdeQdLTY\n" +
+                        "w2gk6ap8s0lv9GHU0sDsX4U255ZHKm50RVH076WwqS9E0blCGwxHLhBH/N/BORdRdGeS1FNgt8Qo\n" +
+                        "xIOS6pGkNwvNZkUH8D8CM7sm0Hw+UmhjR9Fa4PIe5+inftuTDLAsiqJC2AScjp1zk5Lu1tyTeo2k\n" +
+                        "UQVdnaRwbffmVpxUeg4ELNuq4hbttGdXAhO5bY1z7mAs7/erUjHNPQdWSdqsciKh3OEeKpW7ysKa\n" +
+                        "EgznG4BmFEVlOjYoW+Q5IjJ7OWqk6Z6AYUOSPgAEV8fM9qq48pFzbkTSZT08c0MjJCftKSEhSe93\n" +
+                        "zuXJJ4qiP2XyWZKfxzFKqntJkmxnsLnILKokyXtCcwKjwKGAzCFeeCGLEPB8nUBi5b3/StnSeO+/\n" +
+                        "TOdiWq+YBh4umw/vP0uxtGrMJlYtthstSznz+DuwulQ5fBjYS1a06C/VzWRfStP0E0AwXgOuBg4E\n" +
+                        "9F2gPdVtrfAvKNaQDPg+nauKy2g0tgC3A3e0nruDOXZWQbynbdwdwI1AYdO36XfAtyj+Ywyz3SGB\n" +
+                        "bYTT1yng3rKJSiYfWDkIuBOz0H6cAt5ZJvSTgADASXq4QRoUEWAdWSWnADP7ZSfBceCfYTk7AIwt\n" +
+                        "FRGq1WvI7lhCJdPXG43GpvmM+BiZBykjE6ysDJJIrVZbB5SRqAH3z78SEOP9dyi/VjhOdtu0KNcK\n" +
+                        "SZK8y8yOhEiYGcDjdHuvCKwAfoWVXtxeAHYyE3bN/RABVgLfpMNB27pBu7orEhcVz8ysxux3ZUoB\n" +
+                        "b2aT3vsHW3+Fi+FMt0QAx8zMGu/9583sb3S+q/wDMNETibaJ1gDP0PmjgITsQvMxsjNiolqtriQ7\n" +
+                        "KPOYBMZqtdo48F7v/Q/Iqofll6HZX2x33yQukrnAlcB3CTuA/IwNMztmZi9i9mah3+ycmb1I5lLr\n" +
+                        "8+kDaq2rtlAy1debidM0/SQlly6LATN7DbifQX0wkCM0ATxBtiEX6xOOC8DPgY0DJ5BHkiTbzewp\n" +
+                        "soBvEB/VGFl49Ez7LdSSodFo3Ag8jNlfyQ6qlO7elLXG1oEDeP9Is9m8aSG2DKSmRRZ+b5C0VdIt\n" +
+                        "gi1ybhRY0coaI2BG0nlJpxy84uGlSqWyR9Jh51zaQX1X+C/UcmKzpBKEUwAAAABJRU5ErkJggg==").bitmap,
+                iconColor = 0xffb62934.toInt(),
+                contributorName = "scrpr、fankes"
             ),
             // TODO 可继续在这里添加更多 APP
         )
