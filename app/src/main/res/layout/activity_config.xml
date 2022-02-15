@@ -26,11 +26,13 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="25dp"
             android:src="@mipmap/back"
-            android:tint="@color/colorTextGray" />
+            android:tint="@color/colorTextGray"
+            android:tooltipText="返回" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:gravity="center|start"
             android:orientation="vertical">
@@ -56,12 +58,13 @@
         </LinearLayout>
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
-            android:id="@+id/config_title_search"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:id="@+id/config_title_filter"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_marginEnd="10dp"
-            android:src="@mipmap/icon_search"
-            android:tint="@color/colorTextGray" />
+            android:src="@mipmap/icon_filter"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="按条件过滤" />
     </LinearLayout>
 
     <LinearLayout
@@ -95,18 +98,33 @@
             tools:ignore="SmallSp" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/config_list_view"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@color/trans"
-        android:dividerHeight="15dp"
-        android:fadingEdgeLength="10dp"
-        android:listSelector="@null"
-        android:padding="15dp"
-        android:requiresFadingEdge="vertical"
-        android:scrollbars="none" />
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/config_list_no_data_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="噫，竟然什么都没找到~"
+            android:textColor="@color/colorTextDark"
+            android:textSize="17sp"
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@+id/config_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/trans"
+            android:dividerHeight="15dp"
+            android:fadingEdgeLength="10dp"
+            android:listSelector="@null"
+            android:padding="15dp"
+            android:requiresFadingEdge="vertical"
+            android:scrollbars="none" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/config_cbr_button"

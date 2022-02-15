@@ -35,6 +35,7 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
@@ -43,20 +44,58 @@ import com.fankes.miui.notify.hook.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.SystemUITool
+import com.fankes.miui.notify.utils.showDialog
 import com.fankes.miui.notify.view.MaterialSwitch
+import com.google.android.material.textfield.TextInputEditText
 
 class ConfigureActivity : BaseActivity() {
+
+    /** 当前筛选条件 */
+    private var filterText = ""
+
+    /** 回调适配器改变 */
+    private var onChanged: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_config)
         /** 返回按钮点击事件 */
         findViewById<View>(R.id.title_back_icon).setOnClickListener { onBackPressed() }
-        /** 设置标题个数文本 */
-        findViewById<TextView>(R.id.config_title_count_text).text = "已适配 ${IconPackParams.iconDatas.size} 个 APP 的通知图标"
-        /** 设置搜索按钮点击事件 */
-        findViewById<View>(R.id.config_title_search).setOnClickListener {
-            Toast.makeText(this, "后期开放", Toast.LENGTH_SHORT).show()
+        /** 刷新适配器结果相关 */
+        refreshAdapterResult()
+        /** 设置过滤按钮点击事件 */
+        findViewById<View>(R.id.config_title_filter).setOnClickListener {
+            showDialog {
+                title = "按条件过滤"
+                var editText: TextInputEditText
+                addView(R.layout.dia_icon_filter).apply {
+                    editText = findViewById<TextInputEditText>(R.id.dia_icon_filter_input_edit).apply {
+                        requestFocus()
+                        invalidate()
+                        if (filterText.isNotBlank()) {
+                            setText(filterText)
+                            setSelection(filterText.length)
+                        }
+                    }
+                }
+                confirmButton {
+                    if (editText.text.toString().isNotBlank()) {
+                        filterText = editText.text.toString().trim()
+                        onChanged?.invoke()
+                        refreshAdapterResult()
+                    } else {
+                        Toast.makeText(applicationContext, "条件不能为空", Toast.LENGTH_SHORT).show()
+                        it.performClick()
+                    }
+                }
+                cancelButton()
+                if (filterText.isNotBlank())
+                    neutralButton(text = "清除条件") {
+                        filterText = ""
+                        onChanged?.invoke()
+                        refreshAdapterResult()
+                    }
+            }
         }
         /** 设置列表元素和 Adapter */
         findViewById<ListView>(R.id.config_list_view).apply {
@@ -64,9 +103,9 @@ class ConfigureActivity : BaseActivity() {
 
                 private val inflater = LayoutInflater.from(context)
 
-                override fun getCount() = IconPackParams.iconDatas.size
+                override fun getCount() = iconDatas.size
 
-                override fun getItem(position: Int) = IconPackParams.iconDatas[position]
+                override fun getItem(position: Int) = iconDatas[position]
 
                 override fun getItemId(position: Int) = position.toLong()
 
@@ -118,7 +157,7 @@ class ConfigureActivity : BaseActivity() {
                     lateinit var switchOpen: MaterialSwitch
                     lateinit var switchAll: MaterialSwitch
                 }
-            }
+            }.apply { onChanged = { notifyDataSetChanged() } }
         }
         /** 设置点击事件 */
         findViewById<View>(R.id.config_cbr_button).setOnClickListener {
@@ -134,4 +173,22 @@ class ConfigureActivity : BaseActivity() {
             }
         }
     }
+
+    /** 刷新适配器结果相关 */
+    private fun refreshAdapterResult() {
+        findViewById<TextView>(R.id.config_title_count_text).text =
+            if (filterText.isBlank()) "已适配 ${iconDatas.size} 个 APP 的通知图标"
+            else "“${filterText}” 匹配到 ${iconDatas.size} 个结果"
+        findViewById<View>(R.id.config_list_no_data_view).isVisible = iconDatas.isEmpty()
+    }
+
+    /**
+     * 当前结果下的图标数组
+     * @return [Array]
+     */
+    private val iconDatas
+        get() = if (filterText.isBlank()) IconPackParams.iconDatas
+        else IconPackParams.iconDatas.filter {
+            it.appName.lowercase().contains(filterText.lowercase()) || it.packageName.lowercase().contains(filterText.lowercase())
+        }.toTypedArray()
 }
