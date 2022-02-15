@@ -224,7 +224,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 是否有通知栏图标颜色 */
                 val hasIconColor = iconColor != 0
 
-                /** 通知图标适配颜色颜色 */
+                /** 通知图标适配颜色 */
                 val supportColor = iconColor.let {
                     when {
                         isUpperOfAndroidS -> newStyle
