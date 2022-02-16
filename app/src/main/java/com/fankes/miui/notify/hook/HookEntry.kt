@@ -46,6 +46,7 @@ import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.factory.*
+import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.type.android.ContextClass
@@ -188,6 +189,9 @@ class HookEntry : YukiHookXposedInitProxy {
                         }
                     }
                 }
+            /** 打印日志 */
+            if (prefs.getBoolean(ENABLE_MODULE_LOG))
+                loggerD(msg = "hook Icon [${findAppName(notifyInstance)}][${notifyInstance.opPkgName}] custom [${customIcon != null}] grayscale [${!isNotGrayscaleIcon}]")
             when {
                 /** 如果开启了修复 APP 的彩色图标 */
                 customIcon != null && prefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true) -> it(customIcon!!)
@@ -350,7 +354,7 @@ class HookEntry : YukiHookXposedInitProxy {
     override fun onHook() = encase {
         configs {
             debugTag = "MIUINativeNotifyIcon"
-            isDebug = prefs.getBoolean(ENABLE_MODULE_LOG)
+            isDebug = false
         }
         loadApp(SYSTEMUI_PACKAGE_NAME) {
             when {
