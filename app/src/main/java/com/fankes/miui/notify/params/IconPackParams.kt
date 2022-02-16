@@ -59,7 +59,7 @@ object IconPackParams {
                         "6hjwnGqds8tgBlgVQpiem+rb+P5DAywCtkJzjY8PzkvfGYdm8IkBGuk3E9AMvnGARvrNJmgGL/bn\n" +
                         "2v+TFdAMnvX4+T2wDJrBRwdopN9kfhMbiUQikUgkEolEIpGy+QJozXWVnxEugwAAAABJRU5ErkJg\n" +
                         "gg==").bitmap,
-                iconColor = 0xff85db88.toInt(),
+                iconColor = 0xff72c476.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -139,6 +139,7 @@ object IconPackParams {
                         "HZK6JZV+lv6U9FbFr7tbzrlXKYJUSxrR37v3d+dcNTCm8jfiTc65+9PwX3ko/gf26TdqiU9QJmB/\n" +
                         "9lokuu8yg+JX5WiCILP2N3LaAHtiQlib7dwE6AKGvQDDFB8w/wwXL5k5QI2KL39Nkh5Leuycs15j\n" +
                         "cnJycnJyMuEXxX+pSnClwogAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xff82529d.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -220,6 +221,7 @@ object IconPackParams {
                         "2qsWwFEh4ii1jxeMfgIF+ZmT+Zd49y4MzEvqSvocX8eJO0kXZvanOFgKAZYkXUpajShWh4GkLTMb\n" +
                         "vg5UPz7sq/0R0shxvzhQDVmL5+JNybUa8hhRxJeSazXkV0QRX0qu4+5aG5K+S1qJZTQjD5J+mNnP\n" +
                         "1CKZ/4K/9OOkaYhf6uEAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xff72c476.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -242,7 +244,7 @@ object IconPackParams {
                         "agKcAD4qzycXt4HZj5OeEfEI+AK4XJpSPnZGxJ2sTNPrwHHSI+XzxhlgaUQMjUgzR8RV4EPgVMe1\n" +
                         "ns0fwMpc1yzqWnWwXZ9ABfhRfaXQY6oz1M3mT3q2ksvqOjOSp0XTzItJbwneARYDrb6jEbgCXAC+\n" +
                         "B36oLBpjjNEo/wOVy3FIguSj2QAAAABJRU5ErkJggg==").bitmap,
-                iconColor = 0xffa1c1f8.toInt(),
+                iconColor = 0xff5f94e2.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -300,7 +302,7 @@ object IconPackParams {
                         "OpgjkLRV0sfpXq8KmVAddrCTNChpLLEYVRhXNoMymOB7mLIX1p3U76lYRAsYDt2/wvOUXEnzxAIY\n" +
                         "wLH02nPT30O2ccYoWVf2mYR/Hh0m23dsP9myltlXk9PJlhkuB052+v8F+AL4CGjWln9N5l/CCEZS\n" +
                         "HWRiiAAAAABJRU5ErkJggg==").bitmap,
-                iconColor = 0xff73aee6.toInt(),
+                iconColor = 0xff6bb8f1.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -443,7 +445,6 @@ object IconPackParams {
                         "AUp2ybcMlUzSadEXzrnfko4kPRjyLHmQdORjiziVZQgbeyjZx1pI9EViSZKvbpDwy/JSPrntiXWS\n" +
                         "2xBap7MtuLa2mTe+6fl/f3zTZJJmXUvUYJZJuuvaogZ3maSzri1qcJbsD7SZcw5JJ77huXMl6cQ7\n" +
                         "55DYnxD+AevUWpo12Yg8AAAAAElFTkSuQmCC").bitmap,
-                iconColor = 0xfff4b700.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -472,7 +473,7 @@ object IconPackParams {
                         "8WQ2/vs8R8yPtbzrGP4qLCKZ8uQDM89Pj3VK7xTpN7v3ab5kgCZ4Hygd6s56lOQHP9aSjFYc4c8+\n" +
                         "2VfYlJq0hF7XGuybTcBhjayij9UTtwBmnercUFCSgCWZ9EXjPTb6v5Y6/QnBGzCFeMMip3K4h3h8\n" +
                         "45wzya4+GPQvC0oCqCGSLReCbSjvIH3TXm97/+M//kH8BEhmToz+KexyAAAAAElFTkSuQmCC").bitmap,
-                iconColor = 0xffe80000.toInt(),
+                iconColor = 0xffe89b26.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -959,7 +960,7 @@ object IconPackParams {
                         "XJeAll4JkTEwEPid8h/M3cBkYECu3zfAJGqL0qol0GGgNzZ3pYEmAHuAdyWG/gP+SEy/qDCe4jTw\n" +
                         "U58FKAg0EthI7T5xxRPgGLAg1IeJESYFMFK1F/75PwxI0vPM8Ui19+s9MfWbaKKJcnwCIC7Ye698\n" +
                         "lvkAAAAASUVORK5CYII=").bitmap,
-                iconColor = 0xffecc833.toInt(),
+                iconColor = 0xff63ad59.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1013,7 +1014,7 @@ object IconPackParams {
                         "23Sr8S+B4+Rmkt/Ugz1AjisVmqaZvUj6MPWEaGam3hSpmqW0EG6AdxVOp3LvV8DzfR+iL8xd4P0Y\n" +
                         "ArwErgQJMRDoAfApQIC3QOZf0SECzdPb5O0UMP8VeArcKuLF9buqI9ARSbOS5iWdkTQl6Vj8PCVp\n" +
                         "V9KOpD99jw+SNszsSxkeampq0vkLMZsS+4iBecAAAAAASUVORK5CYII=").bitmap,
-                iconColor = 0xffe2c430.toInt(),
+                iconColor = 0xffeaa833.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1067,6 +1068,30 @@ object IconPackParams {
             IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
+                appName = "多看阅读",
+                packageName = "com.duokan.reader",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAMYSURBVGiB7ZrPq1RlGMc/z7gR8se2gshUyrJFdMlcRFx0YwsthBZhiEElIiX2D+RC\n" +
+                        "ECJqU6AXFSIkcKUFZRCMkvYD0ZWLCqmNGWpBCtoPF58WM9Iw3jnnPe85d8696AfOZu7zPOf7mZn3\n" +
+                        "nHdmbjCEugB4GXgaeApYOVzTEj8BZ4EfgKmI+G1kpbpLPe/s51f17VESW9tOl8HUsMSGthPVYDdA\n" +
+                        "9EW+AtY28k4eP/8CT8xTXwV2tJ2mBvOAqx1gRdtJGuD5DjDRdooGWBnqNWBhQvGfwHHge+BC/9hE\n" +
+                        "b209NGMRU0m8MnTVBwpm7Gz4StRVJweObllDisi5xCekyUt4d2h2qUinJN8/wOYUkYj4FNifUjsT\n" +
+                        "lIm8FxFnU4dFxGv01tHYKRM5mDHzRE6QuhSKRMT5jJmz8hWZMxSKqE+OK0hdyl6RNRkzX88JUpcy\n" +
+                        "kUo7YnUCeCk/Tj5lIuvUvRXmfVQnTB1SFvtWdVdRgbpIPUmbn++rbBvUyaHeJeoO9UrVPUjThGpF\n" +
+                        "99+BK8AlYLKkdmzkiMxK7owb4lzirshsYy6IXEspKhP5JQpoIGQZr0TEYuBMaWXCvWZDQe+RGbzH\n" +
+                        "He2f45GU4pS31vqCvx1K6M/l/YTz/0+C7CV1cUH/6TpP+wg+HJh/IqUhda/1ZoHIhHohN/E0XFaX\n" +
+                        "9WevSm1KFbmsPlogs0a9UT3zbVxUnxuY+0VqY5Xdb+F6UDeq5yoGH+SU+vjAvN1VmquIqG4pkVlk\n" +
+                        "7+e7qxVm/qF+4MA6VF+smKuyiOr2Ipl+kMfUd9TP+0Gn4zt1s7pwqLeyRK6I6p4ymaFwy9XV6gr1\n" +
+                        "XnX+iLosiToiqofsfdlQG/U+9d0aWWqJ3GJfrpC6QN2u/lw3RJOfEKeAL4FjEXGjROBZYGP/GPm7\n" +
+                        "SxVC/RF4uIlhff4Gvga+GXr8QWA5sBS4v8HzAT2Rj+n9y8acpgOcajtEA3wW6j3AMeCZttNk8hew\n" +
+                        "thMR14G3gJstB8rljYj4tgMQEaeBbS0HymFvRBy47VF1nfpJ3Wv6GOhasu+7JbRaPdxy2Onoqi9M\n" +
+                        "l/k/quraov1V/EcAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xfff28b3f.toInt(),
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
                 appName = "闲鱼",
                 packageName = "com.taobao.idlefish",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
@@ -1088,7 +1113,7 @@ object IconPackParams {
                         "vim8Aogzj0ytwPXRp4hh1j3JAajc4AnCezYWurGaIz8GaxsLEfFGwKF8ZIDypyRN4glGJy8yidg1\n" +
                         "2EM4HW0LCwC9QnYRAo9rM7WcF2syA/pPNprClnV/MKDIRGwnlJmwqU84HEJxQ4QmPNJXQjHJK+Yf\n" +
                         "PIewtmNUIpB7/lSGFIyX0x+eucnaBocfns2lpg/P/gI89K2h8DX3SQAAAABJRU5ErkJggg==").bitmap,
-                iconColor = 0xfff5d952.toInt(),
+                iconColor = 0xffd6bc49.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1108,7 +1133,7 @@ object IconPackParams {
                         "oUEVZoHLAxOIibyuIXwITFFgn9aEyJmKEi+BYWcCcYDPJSUeus7+B0Tb8KLccZ07FfIP2eL8dJ03\n" +
                         "q4uPSrIN6FwkE+B2gVm55jpvJth3+wA45ipn7gbRGHNS0n2LWtslnaqcqGmAyZwZ+QCcdp3TCqIj\n" +
                         "mSSfgDHX2QoTk3kKnAe2uc5UGmC/6wwej8fj+Sv4BUjRcEDGSSFRAAAAAElFTkSuQmCC").bitmap,
-                iconColor = 0xfff1c12d.toInt(),
+                iconColor = 0xffecc34a.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1128,7 +1153,7 @@ object IconPackParams {
                         "oUEVZoHLAxOIibyuIXwITFFgn9aEyJmKEi+BYWcCcYDPJSUeus7+B0Tb8KLccZ07FfIP2eL8dJ03\n" +
                         "q4uPSrIN6FwkE+B2gVm55jpvJth3+wA45ipn7gbRGHNS0n2LWtslnaqcqGmAyZwZ+QCcdp3TCqIj\n" +
                         "mSSfgDHX2QoTk3kKnAe2uc5UGmC/6wwej8fj+Sv4BUjRcEDGSSFRAAAAAElFTkSuQmCC").bitmap,
-                iconColor = 0xfff1c12d.toInt(),
+                iconColor = 0xffecc34a.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1400,7 +1425,6 @@ object IconPackParams {
                         "kn5ETP1se3WMZqmlFbusDsUK9lKQy7avZneSArA1sC/ep2r2SkV2pwr2QpBTtl+kCrYd5KXt4zkE\n" +
                         "SwVpelevfVEKpc2KjNj+nkuwrSAPbJ/PKdjK0rK9LbdgqSAL/T4YLiFYKkjd77UJ26H/HNsDWAXc\n" +
                         "n3f3Hi2pWeTpdxZ+/wLYKOmm7bBPnYH8AqH34VsrgGUmAAAAAElFTkSuQmCC").bitmap,
-                iconColor = 0xfffbdc00.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -1907,7 +1931,7 @@ object IconPackParams {
                         "JrSJ1wg+mtEQTphvCgyRb4O6hDCDBYTY3tQQVRANp/ViW7P9TwHh9ylp6G2270QAPTlCZH890AyQ\n" +
                         "vMHto773gTONGmHeaba/XAiE6Wm2r7rghdnabD8NIQ7zetk6/wGsJc5dvdleEwAAAABJRU5ErkJg\n" +
                         "gg==").bitmap,
-                iconColor = 0xff02cbf4.toInt(),
+                iconColor = 0xff3e6deb.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -2130,7 +2154,7 @@ object IconPackParams {
                         "7/t/T5a8zbX4crn8jKSjkup9A2gqMr9ed849R/J2kt1Ipst8RFH08WUrS4lGcmD2YeS6RVutEDIb\n" +
                         "WLVq1XFJVUk7SqXSW/KdeS4yGxgYGHgDySiMj4/f2HRFGdFQMSfpqeR4e3PlZEejBkYAOEkfabKe\n" +
                         "zPgfrqzeQT35+oQAAAAASUVORK5CYII=").bitmap,
-                iconColor = 0xff7fe3ff.toInt(),
+                iconColor = 0xff6ba8e8.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -2541,7 +2565,7 @@ object IconPackParams {
                         "2SCekiREW0lRkwc982M4sq+K2J8+bZzZb3SAFeBNC8aawhtgpZPe7bg8ajY1cNnMuv2gTdvj6sYg\n" +
                         "+lc53r8rHJmKK60zKo8rjhSgv5PY1GlvHfQUONKLZWfTJLcipkjO4qdo/4bEC+AB8DD9vW9meVtQ\n" +
                         "/AOiEUtV2iHH4AAAAABJRU5ErkJggg==").bitmap,
-                iconColor = 0xffee0000.toInt(),
+                iconColor = 0xffdd5333.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -2597,7 +2621,7 @@ object IconPackParams {
                         "XnmuH4eY9cSfDE4C32KGihaiyn3E+0CIp0DmW56QBGYCjwNfGse7gFvG7bjoXz/briyXX1fQOuLz\n" +
                         "+xDxe+JSv2gl/vROA2B3uXINSSIR9SRwcQn2j2bMh50u2wn7PA3Uichh30/RxG9MGvIoURQ9XZbk\n" +
                         "Kqiggv8u/gGVZUO4tuzkNQAAAABJRU5ErkJggg==").bitmap,
-                iconColor = 0xfff9d084.toInt(),
+                iconColor = 0xffb71c21.toInt(),
                 contributorName = "fankes"
             ),
             IconDataBean(
@@ -3103,8 +3127,8 @@ object IconPackParams {
                         "XJeAll4JkTEwEPid8h/M3cBkYECu3zfAJGqL0qol0GGgNzZ3pYEmAHuAdyWG/gP+SEy/qDCe4jTw\n" +
                         "U58FKAg0EthI7T5xxRPgGLAg1IeJESYFMFK1F/75PwxI0vPM8Ui19+s9MfWbaKKJcnwCIC7Ye698\n" +
                         "lvkAAAAASUVORK5CYII=").bitmap,
-                iconColor = 0xffecc833.toInt(),
-                contributorName = "naicfeng"
+                iconColor = 0xff63ad59.toInt(),
+                contributorName = "naicfeng、fankes"
             ),
             IconDataBean(
                 isEnabled = true,
