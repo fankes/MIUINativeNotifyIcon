@@ -3035,6 +3035,77 @@ object IconPackParams {
                 iconColor = 0xffd22222.toInt(),
                 contributorName = "sddpljx、naicfeng"
             ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "邮箱大师",
+                packageName = "com.netease.mail",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ\n" +
+                        "bWFnZVJlYWR5ccllPAAAAyFpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdp\n" +
+                        "bj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6\n" +
+                        "eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQyIDc5LjE2\n" +
+                        "MDkyNCwgMjAxNy8wNy8xMy0wMTowNjozOSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJo\n" +
+                        "dHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlw\n" +
+                        "dGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAv\n" +
+                        "IiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RS\n" +
+                        "ZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpD\n" +
+                        "cmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJ\n" +
+                        "RD0ieG1wLmlpZDpENzI5MzQ4RDhGM0ExMUVDODg5OEEzNzE1NTJGMDhBMyIgeG1wTU06RG9jdW1l\n" +
+                        "bnRJRD0ieG1wLmRpZDpENzI5MzQ4RThGM0ExMUVDODg5OEEzNzE1NTJGMDhBMyI+IDx4bXBNTTpE\n" +
+                        "ZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkQ3MjkzNDhCOEYzQTExRUM4ODk4\n" +
+                        "QTM3MTU1MkYwOEEzIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkQ3MjkzNDhDOEYzQTExRUM4\n" +
+                        "ODk4QTM3MTU1MkYwOEEzIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBt\n" +
+                        "ZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+rXaktQAABJ5JREFUeNrsmkloFEEUhnsmrTGJmUzMOole\n" +
+                        "3EFERVEJCAqCIiIeDIiexJMg6EFPIkKioCIoHvSo4HLQBEQQVBAPCuKGgqAoQsCNJCaaZExmSTLt\n" +
+                        "X/I3FkX1THfPlhELPnpS1V1dr5ZXf71OwLKsZsMwykDKKM0UBJMmjRAEStgQw+RIBEp4RERKBfNQ\n" +
+                        "qUUKPyw5SgHyE8Q4XQuWzBx0xC+QYONFWs96n4LqUhmRCRAGc8FmcAzcBktBtJRGpA9cA9tBhZQ/\n" +
+                        "kOd2W6qXDeagwnrFiFyvPbXeYTCirkEzB5WPZtGoGK/lkvsX6y0ueT57a0jwugLMB/dBVS4N8Zom\n" +
+                        "wTj4QWfQRIchGtkPKkGLNKoWDW0Ey8Ah8ATcdGuIqCgJBvlypzSiyfvC6zeHZ8RUXAk6wWVwg/l7\n" +
+                        "wU6wCsxM075+t4u9jAtWDP1G0AZqNPcJz7Rak78frFPcb4rvqwWLwFrmn+f1HDjgf7VaVgTMBi1E\n" +
+                        "/K4CIXDdyn9aAtqUvF6wA8wB1aBDKb8ADKm9Ed2IiEU1Bm6BbZryOKdckPO3QjOyca6DgDTPKx12\n" +
+                        "e/HsbiXvCOjiM6ItQ342RLEmNjkYITa8JfQcYo63grua+w6ybCXvnQdeOLQhxKkmp9c0ulZaU543\n" +
+                        "RDGXN2jyr4AOGl/BXh6TpInaGVE6iRRHKJFGo6kjVc581+LTabHXafKe8xqRXiAMmaa513aLYRoy\n" +
+                        "lOZdlsYrBv1sSk6+3tD0klEMiZ6NIVaeJf+UPo8Utd2FMiSRQR34OT5kLeNjPAV6lSjVHnt8Qnq+\n" +
+                        "TynvycYQ2UXuowLNJFGq+FyNm71A6SyDumsx67LTV3BV7Rgvhoienw4ecJNLl7YTO90BbzQbn1Ma\n" +
+                        "4O5+XMl/BY6yLbV+14iofCuNiFN6R3XzleVR3iPODXtkyZ0hiWm7hUYkWY+9mYpg4llwEvT6NSRC\n" +
+                        "mbGcZ3K3EkVIne9glsv3TKPR7WAh6zkttWEBZU3K79QSc/wTzwJlHiRKJTvMrdcS55CHVBJOojGW\n" +
+                        "zWK3GyL3rFuJEvPoGaezs8J8R4UbNzcVU8DwGIsu1Z39vyH/DZHiUqk05ZlSqhCiMaTJm6H8PZ7B\n" +
+                        "UCuDkclM5yUv7td2oapPf8aNSz7LvOPvYUYiW7iR6Xo6qmlHVBGNa5Tyj9kYEqZQiyiNvsSon5w3\n" +
+                        "woYnqa/OMKKoJqG/3mpiZk3Mm8WgXbvSod2q5PFiiBBxh5U5HeSGFVfurWbdEw6BPTt18ll1Kt5L\n" +
+                        "s1Z2UWG0ylPSdLm47DN7uSa/0se66mdEpptGp/t+GadWewwugkfKrEhrSD2vH8BLVpT0s+NqOqiH\n" +
+                        "R4H3lOK6hb6JWqtBmk6f+btVF1cwHdSneOgEOGXk58tTFR3AhEO8q49yPiEd6hrZNsttXKuBmr+X\n" +
+                        "Yq3RyN93eMshalMjicZM0R1HQwIcyjqW5zuONako6lGOlKc9znTopUIG48Kcyl1044N033We5IMI\n" +
+                        "yRvF+18UO0ofplMJ0hWHjL//leFGZk0W49Ob2ohRLu5m6eRpeO3YYhti0ZhQtlP5n5HxJo0pZYP+\n" +
+                        "fDkzJUlcqv/m9Of7ym8BBgCXcsuULxM98wAAAABJRU5ErkJggg==").bitmap,
+                iconColor = 0xffec1a1c.toInt(),
+                contributorName = "naicfeng"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "小米音乐",
+                packageName = "com.miui.player",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAOBSURBVGiB7ZpdqE1ZAMf/azCahrxwY0LqUpgZ6YrCPJBIRJTrwQMejY/y5oUi4/q+\n" +
+                        "zMPUECEe6FKUPJB8PLjiwc3wIpOP8T0vY540pZ+Hs7e2ffbeZ33d+zLnX7tz1mqt/8fae6+z1t5H\n" +
+                        "aqKJ/weA6T79+veCkR8kTZQ0OnMg6amkZ8lnjzHmaQnFEkndrrpRggAzJC1Kju8t+/wp6Yak68aY\n" +
+                        "k0ldP0njfDwEBQHmSFonaalH91ZJryTdytStlGcQLwDTgBP44QFwBFhSwHs5adPq6sn5jACrJB2v\n" +
+                        "aPKvpL8kvcgcabnHGPO2hHe9pLlJcbWkLa7erAFsKBnlrYG8rcCzHOeBWL7zYpcqLpfQIBdKeI/E\n" +
+                        "8p8KnW1w3T8EhnhyH2rAfSZWiK0NhFJs8+D+xZJ7fWiIxZZCAB+BHx24bzlwvwHGhwS55iAGcMyC\n" +
+                        "sz0x5opTviHWeogBLKzg3OTJmWK1a4hhwGNPsZsFfMuBm4EhAK64Bvk5UHBNjq/RrOeCKUWevyrJ\n" +
+                        "MtspeT1+BYZmyrsC+bJYZtUKGBxp5HbmeDsj8f5jG6Q9kiBAW4Z3OH6zVRHm5X0XXVptBXW+2Jd+\n" +
+                        "Mca8UbxL7Lt8RVEQr6VGCWaTWa4bYw5KuhuBd0S+oreDSFL+h2xPBM4+PyOS9C2wPS0YY85KOhfI\n" +
+                        "aXVGBgaKFGEzkB3F/YF8dYNdFMRuenPH53WYMaZb0sEArvf5ir4MMg+YnykfkFS47bVAXZCiPXto\n" +
+                        "kHuSrqs2O70ua2SMeQ7sk7TXQ6MuSB3wX/UC7AAG2boB+gN3PHQab62BUZ4h2m0D5PRWeGhNsCV3\n" +
+                        "3VB5hcjonXfQul3EUbb6vezgo8sY0+Vu/wu4PPq5aN0SaAM+WI7QLHffhZoXLbQ+kFmI2hJ32KSI\n" +
+                        "ESLR+81CrsOH2Gq7GzFIo8dOj4FhZf3L7hEZY/6W1BnLaAR0Jp78AHQ1GKlY90jVc67QyeSzyMsK\n" +
+                        "keBlOTClgv9ljAyp0LgKofvAmED+qgfkcV/8AGMrxK4CX3vyHq3gHRs1REa0pWL0zgMzHbimAt0l\n" +
+                        "XJeAll4JkTEwEPid8h/M3cBkYECu3zfAJGqL0qol0GGgNzZ3pYEmAHuAdyWG/gP+SEy/qDCe4jTw\n" +
+                        "U58FKAg0EthI7T5xxRPgGLAg1IeJESYFMFK1F/75PwxI0vPM8Ui19+s9MfWbaKKJcnwCIC7Ye698\n" +
+                        "lvkAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xffecc833.toInt(),
+                contributorName = "fankes"
+            ),
             // TODO 可继续在这里添加更多 APP
         )
     }
