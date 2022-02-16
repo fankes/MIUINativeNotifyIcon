@@ -32,7 +32,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
@@ -93,7 +92,7 @@ class MainActivity : BaseActivity() {
                     noCancelable()
                 }
             /** 判断是否 Hook */
-            isHooked() -> {
+            YukiHookModuleStatus.isActive() -> {
                 findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(R.drawable.bg_green_round)
                 findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(R.mipmap.ic_success)
                 findViewById<TextView>(R.id.main_text_status).text = "模块已激活"
@@ -174,7 +173,7 @@ class MainActivity : BaseActivity() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
             }.onFailure {
-                Toast.makeText(this, "你可能没有安装酷安", Toast.LENGTH_SHORT).show()
+                toast(msg = "你可能没有安装酷安")
             }
         }
         /** 项目地址点击事件 */
@@ -187,7 +186,7 @@ class MainActivity : BaseActivity() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
             }.onFailure {
-                Toast.makeText(this, "无法启动系统默认浏览器", Toast.LENGTH_SHORT).show()
+                toast(msg = "无法启动系统默认浏览器")
             }
         }
     }
@@ -195,7 +194,7 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         /** MIUI 12 的版本特殊 - 所以给出提示 */
-        if (!isWarnDialogShowing && isHooked() && miuiVersion == "12" && isMiuiNotifyStyle)
+        if (!isWarnDialogShowing && YukiHookModuleStatus.isActive() && miuiVersion == "12" && isMiuiNotifyStyle)
             showDialog {
                 isWarnDialogShowing = true
                 title = "经典通知栏样式已启用"
@@ -205,10 +204,4 @@ class MainActivity : BaseActivity() {
                 noCancelable()
             }
     }
-
-    /**
-     * 判断模块是否激活
-     * @return [Boolean] 激活状态
-     */
-    private fun isHooked() = YukiHookModuleStatus.isActive()
 }
