@@ -37,7 +37,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_HOOK
+import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
@@ -216,13 +216,15 @@ class HookEntry : YukiHookXposedInitProxy {
         it: (Bitmap) -> Unit
     ) = safeRun(msg = "GetSmallIconOnSet") {
         if (iconDrawable == null) return@safeRun
+        /** 如果没开启修复 APP 的彩色图标 */
+        if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
         /** 判断是否不是灰度图标 */
         val isNotGrayscaleIcon = !isGrayscaleIcon(context, iconDrawable)
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.also { notifyInstance ->
             /** 目标彩色通知 APP 图标 */
             var customIcon: Bitmap? = null
-            if (prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true))
+            if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
                 run {
                     IconPackParams.iconDatas.forEach {
                         if ((notifyInstance.opPkgName == it.packageName ||
@@ -239,8 +241,8 @@ class HookEntry : YukiHookXposedInitProxy {
             if (prefs.getBoolean(ENABLE_MODULE_LOG))
                 loggerD(msg = "hook Icon [${findAppName(notifyInstance)}][${notifyInstance.opPkgName}] custom [${customIcon != null}] grayscale [${!isNotGrayscaleIcon}]")
             when {
-                /** 如果开启了修复 APP 的彩色图标 */
-                customIcon != null && prefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true) -> it(customIcon!!)
+                /** 处理自定义通知图标优化 */
+                customIcon != null -> it(customIcon!!)
                 /** 若不是灰度图标自动处理为圆角 */
                 isNotGrayscaleIcon -> it(expandedNf.compatNotifyIcon(context, iconDrawable).toBitmap().round(15.dp(context)))
             }
@@ -257,10 +259,12 @@ class HookEntry : YukiHookXposedInitProxy {
      */
     private fun PackageParam.hookNotifyIconOnSet(context: Context, expandedNf: StatusBarNotification?, iconImageView: ImageView) =
         safeRun(msg = "AutoSetAppIconOnSet") {
+            /** 如果没开启修复 APP 的彩色图标 */
+            if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             expandedNf?.let { notifyInstance ->
-                /** 是否 Hook 彩色通知图标 */
-                val isHookColorIcon = prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+                /** 是否开启修复 APP 的彩色图标 */
+                val isNotifyIconFix = prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
 
                 /** 新版风格反色 */
                 val newStyle = if (context.isSystemInDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
@@ -295,7 +299,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 自定义默认小图标颜色 */
                 var customIconColor = 0
 
-                if (isHookColorIcon) run {
+                if (isNotifyIconFix) run {
                     IconPackParams.iconDatas.forEach {
                         if ((notifyInstance.opPkgName == it.packageName ||
                                     findAppName(notifyInstance) == it.appName) &&
@@ -309,8 +313,8 @@ class HookEntry : YukiHookXposedInitProxy {
                         }
                     }
                 }
-                /** 如果开启了修复 APP 的彩色图标 */
-                if (customIcon != null && prefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true))
+                /** 处理自定义通知图标优化 */
+                if (customIcon != null)
                     iconImageView.apply {
                         /** 设置自定义小图标 */
                         setImageBitmap(customIcon)
@@ -323,36 +327,32 @@ class HookEntry : YukiHookXposedInitProxy {
                 else {
                     /** 重新设置图标 - 防止系统更改它 */
                     iconImageView.setImageDrawable(iconDrawable)
-                    /** 判断是否开启 Hook 彩色图标 */
-                    if (isHookColorIcon) {
-                        /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                        if (isGrayscaleIcon) iconImageView.apply {
-                            /** 设置图标着色 */
-                            setColorFilter(supportColor)
-                            /** Android 12 设置图标外圈颜色 */
-                            if (isUpperOfAndroidS && hasIconColor)
-                                background = DrawableBuilder().rounded().solidColor(iconColor).build()
-                        } else iconImageView.apply {
-                            /** 重新设置图标 */
-                            setImageDrawable(expandedNf.compatNotifyIcon(context, iconDrawable))
-                            /** 设置裁切到边界 */
-                            clipToOutline = true
-                            /** 设置一个圆角轮廓裁切 */
-                            outlineProvider = object : ViewOutlineProvider() {
-                                override fun getOutline(view: View, out: Outline) {
-                                    out.setRoundRect(
-                                        0, 0,
-                                        view.width, view.height, 5.dp(context)
-                                    )
-                                }
+                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
+                    if (isGrayscaleIcon) iconImageView.apply {
+                        /** 设置图标着色 */
+                        setColorFilter(supportColor)
+                        /** Android 12 设置图标外圈颜色 */
+                        if (isUpperOfAndroidS && hasIconColor)
+                            background = DrawableBuilder().rounded().solidColor(iconColor).build()
+                    } else iconImageView.apply {
+                        /** 重新设置图标 */
+                        setImageDrawable(expandedNf.compatNotifyIcon(context, iconDrawable))
+                        /** 设置裁切到边界 */
+                        clipToOutline = true
+                        /** 设置一个圆角轮廓裁切 */
+                        outlineProvider = object : ViewOutlineProvider() {
+                            override fun getOutline(view: View, out: Outline) {
+                                out.setRoundRect(
+                                    0, 0,
+                                    view.width, view.height, 5.dp(context)
+                                )
                             }
-                            /** 清除原生的背景边距设置 */
-                            if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
-                            /** 清除原生的主题色背景圆圈颜色 */
-                            if (isUpperOfAndroidS) background = null
                         }
-                        /** 否则一律设置灰度图标 */
-                    } else iconImageView.setColorFilter(supportColor)
+                        /** 清除原生的背景边距设置 */
+                        if (isUpperOfAndroidS) setPadding(0, 0, 0, 0)
+                        /** 清除原生的主题色背景圆圈颜色 */
+                        if (isUpperOfAndroidS) background = null
+                    }
                 }
             }
         }
@@ -377,26 +377,25 @@ class HookEntry : YukiHookXposedInitProxy {
                 val isNotGrayscaleIcon = !isGrayscaleIcon(context, iconDrawable)
 
                 /** 获取目标修复彩色图标的 APP */
-                var isTargetApp = false
-                run {
-                    IconPackParams.iconDatas.forEach {
-                        if ((notifyInstance.opPkgName == it.packageName ||
-                                    findAppName(notifyInstance) == it.appName) &&
-                            isAppNotifyHookOf(it)
-                        ) {
-                            if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetApp = true
-                            return@run
+                var isTargetFixApp = false
+                /** 如果开启了自定义通知图标优化 */
+                if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
+                    run {
+                        IconPackParams.iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                isAppNotifyHookOf(it)
+                            ) {
+                                if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
+                                return@run
+                            }
                         }
                     }
-                }
                 /**
-                 * 如果开启了修复 APP 的彩色图标
                  * 只要不是灰度就返回彩色图标
                  * 否则不对颜色进行反色处理防止一些系统图标出现异常
                  */
-                if (isTargetApp && prefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true))
-                    false
-                else isNotGrayscaleIcon
+                if (isTargetFixApp) false else isNotGrayscaleIcon
             } ?: true
         } else false
 

@@ -41,7 +41,7 @@ import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_HOOK
+import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.*
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
@@ -114,7 +114,7 @@ class MainActivity : BaseActivity() {
         val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
-        val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
+        val notifyIconFixSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         /** 获取 Sp 存储的信息 */
         notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
@@ -122,7 +122,7 @@ class MainActivity : BaseActivity() {
         moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
         hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        notifyIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true)
+        notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_MODULE, b)
@@ -149,9 +149,9 @@ class MainActivity : BaseActivity() {
             notifyIconConfigItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        notifyIconHookSwitch.setOnCheckedChangeListener { btn, b ->
+        notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_HOOK, b)
+            modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
         /** 重启按钮点击事件 */
