@@ -208,6 +208,30 @@ object IconPackParams {
             ),
             IconDataBean(
                 isEnabled = true,
+                isEnabledAll = false,
+                appName = "应用商店",
+                packageName = "com.xiaomi.market",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAANzSURBVGiB7ZtPax1VGMZ/r5obK6FNoNKKGhBioq7EPy1Fja5NXIp+g4oIdZdkY9pP\n" +
+                        "kI26tsFNPkBQ6KpoF81KQa2xASFijCQakoDa4s3jYs4M506ul3vPnT/JZH6bO5wz73Pe55xh5pxz\n" +
+                        "Z6Cm2linSkkjwDvAq8CzwGPAw8BI/ql1xQ7wD/AbcAf4Glgys52eVCQNSroqaVfHj11FuQ+283Zo\n" +
+                        "hCWdBZaBC7129xFjBZgys22/sMWw65WbwMUCE8uT28Ckmd2PCx5InfAR1TELkZd5vyAZYXcprwOn\n" +
+                        "Ck4qb/4GRuNL2x/htwkz2zAzAz7MILn/44proxEQe4rIG9Bq+JXAZOJH1B+B8d3wZ6qtXkm8+Yaf\n" +
+                        "DhSL474JjO+Gb1Nt9cpYfOAbfjJQ7JL7/R74NVCjExvAd6m2emU0PvANPxIoNgVgZgIWAzU6cd1p\n" +
+                        "A7wZqJF48+/STQ4/prrhAJgwszVJ54CfgNOBiaXZB8bNbFPSGLAamqOZPUgqOEQojpsBMLPfgblA\n" +
+                        "nXbMmtmmO56hvxxb6XP++q+kF52OSfq8Tz05DXOaL7k2gsnasCTdkTTktAYkXe9Da1HSgNMactp9\n" +
+                        "kYdhSfpSUsPTvCxpq4f4LUnvefENSV9kkVhehiXppqJpaqw7LGlenUfpR0VLumEv7qzTyoRY179L\n" +
+                        "H+6FcH4G3jWzlVSnjgPPA48C94kW7qtmdjd13svAEvBUVgm5qWlLI1nTlPSZM9kVksZdTDPrZBLj\n" +
+                        "vuFMurKND6Ktl2Wi9ekqsOvqzgATRMu4KaKtpI7bTqHEI1yE4SNBbDj0QX5sqQ1Xndpw1akNV53a\n" +
+                        "cBZYlwCPA5+kwue8+swpdYTNbMPMPiBaKBTCQ3mKS3oCeMYr8veV94EbZtYEPib6WzZ3cjUMvAV8\n" +
+                        "2qH+DaI/737JOY+Esm9aQ+63sIVL3iPs8z6wDbwAzBbYbgtFGl42s3VJfxXY5iHKvqQLpzZcdWrD\n" +
+                        "VafexKs6J9rwQWlZ5E/izTe8X0IiRZF48w2XOuXLmcSbb7iwJVoJrMcHvuG7bU6sCmvxgW/4VgmJ\n" +
+                        "FEXi7eS+XOoKFsrKKkcW/JfET8IL4q+b2b24oGWm5SqmiV6fP+6sANO+WWgztXTDPwlcA/aKyS1T\n" +
+                        "9ohyn0x/7wDdf8bzGvAccB4Y5Gh9xnMP2AR+AL4i5DOemgrxH3VlWjzgXbNOAAAAAElFTkSuQmCC").bitmap,
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
                 isEnabledAll = true,
                 appName = "下载管理程序",
                 packageName = "com.android.providers.downloads",
@@ -3169,6 +3193,27 @@ object IconPackParams {
                         "IZbirwADAFpUZLC/Lta4AAAAAElFTkSuQmCC").bitmap,
                 iconColor = 0xff637ffd.toInt(),
                 contributorName = "HeMing505、naicfeng"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "百度贴吧",
+                packageName = "com.baidu.tieba",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAKMSURBVGiB7ZoxaxRBGIafdxEs9A9EBBXEIgcWNsHuAiGdmM5CQbERLAWLNCZpJH/A\n" +
+                        "xkIEDViaQgQNeCIoWEkwKfUKGy0sNCmsXotswrHuZvZ2Nzd3Zx44bmfm22++9252dvabFRls3wQu\n" +
+                        "ApPAeeB41iYSW8A6sAl8kPSot1G9BdvPgcuDi60Wq5Lmdgt7Qmw7Tjz1kCSABMD2YtxwqmN7AUC2\n" +
+                        "rwJPI8dTl2sJMBM7igaYSYBW7CgaoCXbW8Cx2JHUZFujOltlORKhzw7wNj0+BdxoxKvDfLV9uob/\n" +
+                        "2xl/7T77L0VSIpaupG5VIewsKQ6cGEMry3QJmzchg76FZIdGHpI6Zf2VsbXdAfbtt8o/0gYWAjYK\n" +
+                        "tDdO3aG1lCmHBFYlONnUEiJpb7GZDrm+hTR1Hysza40Eh0KGjUMhw8bYCBnkEmWJnZVvltAS5Q5w\n" +
+                        "KeR8kEI6ecuR0BIlvT8FhYzN0DoUUpd9npEeVPE3jP/IZJWThlFIJf4rIScy5Yn0+1Om/kfB+RMF\n" +
+                        "9Y1S5j5yruCZITv/f9s9aOoZox+qDq3vwL3eCkm/gFu1I6pIVSGzkn5nKyU9BF7XC6kaZYX8Ab4A\n" +
+                        "74BpSetFhpJmgXngI/CzdoQlKXONdCWdKWq0fRd4IWkvESdpGVhO29vk56Uek59UKJ1KygYSojA5\n" +
+                        "ZvtKavPZ9oVAH8F8WMG5i02lTPOcT9l+AjxLq1rAe9v3bZ+t4rMuZYZWO/01T6afOWAqx+4oO9fG\n" +
+                        "vO2XwCugCxQOyyYZ5P5I73ZCP1ynRIJubDZ6EmA7dhANsJ0woP2LA2YzATZiR9EAGwmwFjuKBlhL\n" +
+                        "JK3w7/bAKLEoaWW8XqrpqViNFlH/rO6KgJwtMo/oi2d/AZEjomStBmkLAAAAAElFTkSuQmCC").bitmap,
+                iconColor = 0xff5584f9.toInt(),
+                contributorName = "fankes"
             ),
             // TODO 可继续在这里添加更多 APP
         )
