@@ -1824,7 +1824,7 @@ object IconPackParams {
                         "NJpH7Bcre9ZSYsUx83n6RDNHY0uOmc/Tvx9q/6nGCrFCWkPItwADAOE16XaIqJjsAAAAAElFTkSu\n" +
                         "QmCC").bitmap,
                 iconColor = 0xffa90000.toInt(),
-                contributorName = "fankes"
+                contributorName = "fankes、naicfeng"
             ),
             IconDataBean(
                 isEnabled = true,
