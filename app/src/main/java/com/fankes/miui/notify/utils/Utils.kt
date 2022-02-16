@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/7.
  */
-@file:Suppress("DEPRECATION", "PrivateApi", "unused")
+@file:Suppress("DEPRECATION", "PrivateApi", "unused", "ObsoleteSdkInt")
 
 package com.fankes.miui.notify.utils
 
