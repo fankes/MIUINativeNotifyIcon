@@ -28,6 +28,7 @@ import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.service.notification.StatusBarNotification
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -140,10 +141,55 @@ class HookEntry : YukiHookXposedInitProxy {
     }
 
     /**
+     * 适配通知栏、状态栏图标
+     *
+     * 适配第三方图标包对系统包管理器更换图标后的彩色图标
+     *
+     * 自动识别 MIPUSH 图标
+     * @param context 实例
+     * @param iconDrawable 原始图标
+     * @return [Drawable] 适配的图标
+     */
+    private fun StatusBarNotification.compatNotifyIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
+        /** 给 MIPUSH 设置 APP 自己的图标 */
+        if (isXmsf && opPkgName.isNotBlank())
+            context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadIcon(context.packageManager)
+        else iconDrawable
+    }
+
+    /**
+     * 获取推送通知的包名
+     *
+     * 自动兼容旧版本系统
+     * @return [String]
+     */
+    private val StatusBarNotification.compatOpPkgName
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) opPkg else packageName ?: ""
+
+    /**
      * 判断通知是否来自 MIPUSH
      * @return [Boolean]
      */
-    private val StatusBarNotification.isXmsf get() = opPkgName == "com.xiaomi.xmsf"
+    private val StatusBarNotification.isXmsf get() = compatOpPkgName == "com.xiaomi.xmsf"
+
+    /**
+     * 获取推送通知的包名
+     *
+     * 自动判断 MIPUSH
+     * @return [String]
+     */
+    private val StatusBarNotification.opPkgName get() = if (isXmsf) xmsfPkgName else compatOpPkgName
+
+    /**
+     * 获取 MIPUSH 通知真实包名
+     * @return [String]
+     */
+    private val StatusBarNotification.xmsfPkgName: String
+        get() {
+            val xmsfPkg = notification.extras.getString("xmsf_target_package") ?: ""
+            val targetPkg = notification.extras.getString("target_package") ?: ""
+            return xmsfPkg.ifBlank { targetPkg.ifBlank { compatOpPkgName } }
+        }
 
     /**
      * 获取全局上下文
@@ -196,7 +242,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 如果开启了修复 APP 的彩色图标 */
                 customIcon != null && prefs.getBoolean(ENABLE_NOTIFY_ICON_HOOK, default = true) -> it(customIcon!!)
                 /** 若不是灰度图标自动处理为圆角 */
-                isNotGrayscaleIcon -> it(iconDrawable.toBitmap().round(15.dp(context)))
+                isNotGrayscaleIcon -> it(expandedNf.compatNotifyIcon(context, iconDrawable).toBitmap().round(15.dp(context)))
             }
         }
     }
@@ -287,6 +333,9 @@ class HookEntry : YukiHookXposedInitProxy {
                             if (isUpperOfAndroidS && hasIconColor)
                                 background = DrawableBuilder().rounded().solidColor(iconColor).build()
                         } else iconImageView.apply {
+                            /** 重新设置图标 */
+                            setImageDrawable(expandedNf.compatNotifyIcon(context, iconDrawable))
+                            /** 设置裁切到边界 */
                             clipToOutline = true
                             /** 设置一个圆角轮廓裁切 */
                             outlineProvider = object : ViewOutlineProvider() {
@@ -434,16 +483,18 @@ class HookEntry : YukiHookXposedInitProxy {
                                 /** 获取通知实例 */
                                 val expandedNf = field { name = "mNotification" }.of<StatusBarNotification>(instance)
 
+                                /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
+                                if (!hasIgnoreStatusBarIconColor() && isShowMiuiStyle()) return@afterHook
+
                                 /**
-                                 * 强制设置图标 - 防止 MIPUSH 不生效
-                                 * 由于之前版本没有 [hasIgnoreStatusBarIconColor] 判断 - MIPUSH 的图标颜色也是白色的
-                                 * 所以之前的版本取消这个 Hook - 实在找不到设置图标的地方 - 状态栏图标就彩色吧
+                                 * 强制重新进行设置图标
+                                 * 防止 MIPUSH 不生效
                                  */
-                                if (hasIgnoreStatusBarIconColor() && expandedNf?.isXmsf == true)
+                                if (expandedNf?.isXmsf == true)
                                     hookSmallIconOnSet(
                                         context = iconImageView.context,
                                         expandedNf,
-                                        expandedNf.notification?.smallIcon?.loadDrawable(iconImageView.context)
+                                        expandedNf.notification?.smallIcon?.loadDrawable(iconImageView.context),
                                     ) { icon -> iconImageView.setImageBitmap(icon) }
                             }
                         }
