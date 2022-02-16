@@ -58,6 +58,24 @@
         </LinearLayout>
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/config_title_up"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="10dp"
+            android:src="@mipmap/ic_page_top"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="滚动到顶部" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/config_title_down"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="17dp"
+            android:src="@mipmap/ic_page_bottom"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="滚动到底部" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/config_title_filter"
             android:layout_width="22dp"
             android:layout_height="22dp"
