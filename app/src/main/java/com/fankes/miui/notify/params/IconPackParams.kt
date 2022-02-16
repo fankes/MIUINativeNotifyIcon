@@ -3144,7 +3144,7 @@ object IconPackParams {
                         "WTxab5wQ/Y+V1G/Pl+Thv8FL8JRs9Q54/b/a06qYSfm9l/LxRKoFCPd5T9WYPpML2hIS9xj/p5px\n" +
                         "IZbirwADAFpUZLC/Lta4AAAAAElFTkSuQmCC").bitmap,
                 iconColor = 0xff637ffd.toInt(),
-                contributorName = "HeMing505"
+                contributorName = "HeMing505、naicfeng"
             ),
             // TODO 可继续在这里添加更多 APP
         )
