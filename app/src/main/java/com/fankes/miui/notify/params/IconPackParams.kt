@@ -3104,7 +3104,7 @@ object IconPackParams {
                         "U58FKAg0EthI7T5xxRPgGLAg1IeJESYFMFK1F/75PwxI0vPM8Ui19+s9MfWbaKKJcnwCIC7Ye698\n" +
                         "lvkAAAAASUVORK5CYII=").bitmap,
                 iconColor = 0xffecc833.toInt(),
-                contributorName = "fankes"
+                contributorName = "naicfeng"
             ),
             // TODO 可继续在这里添加更多 APP
         )
