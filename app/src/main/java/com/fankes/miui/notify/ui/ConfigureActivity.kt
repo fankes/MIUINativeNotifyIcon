@@ -56,6 +56,9 @@ class ConfigureActivity : BaseActivity() {
     /** 回调适配器改变 */
     private var onChanged: (() -> Unit)? = null
 
+    /** 回调滚动事件改变 */
+    private var onScrollEvent: ((Boolean) -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_config)
@@ -63,6 +66,9 @@ class ConfigureActivity : BaseActivity() {
         findViewById<View>(R.id.title_back_icon).setOnClickListener { onBackPressed() }
         /** 刷新适配器结果相关 */
         refreshAdapterResult()
+        /** 设置上下按钮点击事件 */
+        findViewById<View>(R.id.config_title_up).setOnClickListener { onScrollEvent?.invoke(false) }
+        findViewById<View>(R.id.config_title_down).setOnClickListener { onScrollEvent?.invoke(true) }
         /** 设置过滤按钮点击事件 */
         findViewById<View>(R.id.config_title_filter).setOnClickListener {
             showDialog {
@@ -162,6 +168,7 @@ class ConfigureActivity : BaseActivity() {
                     lateinit var switchAll: MaterialSwitch
                 }
             }.apply { onChanged = { notifyDataSetChanged() } }
+            onScrollEvent = { post { setSelection(if (it) iconDatas.lastIndex else 0) } }
         }
         /** 设置点击事件 */
         findViewById<View>(R.id.config_cbr_button).setOnClickListener {
