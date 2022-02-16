@@ -53,5 +53,4 @@
             android:exported="false"
             android:screenOrientation="behind" />
     </application>
-
 </manifest>
