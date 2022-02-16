@@ -22,11 +22,9 @@
  */
 package com.fankes.miui.notify.utils
 
-import android.app.Activity
 import android.content.Context
-import android.graphics.Color
-import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
+import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 /**
  * 系统界面工具
@@ -46,7 +44,7 @@ object SystemUITool {
                 execShellSu(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
                         execShellSu(cmd = "kill -9 $pid")
-                    else Toast.makeText(context, "ROOT 权限获取失败", Toast.LENGTH_SHORT).show()
+                    else toast(msg = "ROOT 权限获取失败")
                 }
             }
             cancelButton()
@@ -57,9 +55,7 @@ object SystemUITool {
      * @param context 实例
      */
     fun showNeedRestartSnake(context: Context) =
-        Snackbar.make((context as Activity).findViewById(android.R.id.content), "设置需要重启系统界面才能生效", Snackbar.LENGTH_LONG)
-            .apply {
-                setActionTextColor(Color.WHITE)
-                setAction("立即重启") { restartSystemUI(context) }
-            }.show()
+        if (YukiHookModuleStatus.isActive())
+            context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
+        else context.snake(msg = "模块没有激活，更改不会生效")
 }

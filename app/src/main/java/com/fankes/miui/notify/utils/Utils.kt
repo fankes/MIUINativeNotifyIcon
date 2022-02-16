@@ -24,6 +24,7 @@
 
 package com.fankes.miui.notify.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -34,7 +35,9 @@ import android.os.Build
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.util.Base64
+import android.widget.Toast
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
+import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.callStatic
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.hasClass
@@ -260,6 +263,26 @@ fun execShellSu(cmd: String) = safeOfNothing {
         if (it.isNotEmpty()) it[0].trim() else ""
     }
 }
+
+/**
+ * 弹出 [Toast]
+ * @param msg 提示内容
+ */
+fun toast(msg: String) = Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
+
+/**
+ * 弹出 [Snackbar]
+ * @param msg 提示内容
+ * @param actionText 按钮文本 - 不写默认取消按钮
+ * @param it 按钮事件回调
+ */
+fun Context.snake(msg: String, actionText: String = "", it: () -> Unit = {}) =
+    Snackbar.make((this as Activity).findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG)
+        .apply {
+            if (actionText.isBlank()) return@apply
+            setActionTextColor(Color.WHITE)
+            setAction(actionText) { it() }
+        }.show()
 
 /**
  * 忽略异常返回值

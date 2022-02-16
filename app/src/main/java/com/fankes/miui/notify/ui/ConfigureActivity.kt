@@ -33,7 +33,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
@@ -45,6 +44,8 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.SystemUITool
 import com.fankes.miui.notify.utils.showDialog
+import com.fankes.miui.notify.utils.snake
+import com.fankes.miui.notify.utils.toast
 import com.fankes.miui.notify.view.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
 
@@ -67,8 +68,14 @@ class ConfigureActivity : BaseActivity() {
         /** 刷新适配器结果相关 */
         refreshAdapterResult()
         /** 设置上下按钮点击事件 */
-        findViewById<View>(R.id.config_title_up).setOnClickListener { onScrollEvent?.invoke(false) }
-        findViewById<View>(R.id.config_title_down).setOnClickListener { onScrollEvent?.invoke(true) }
+        findViewById<View>(R.id.config_title_up).setOnClickListener {
+            snake(msg = "滚动到顶部")
+            onScrollEvent?.invoke(false)
+        }
+        findViewById<View>(R.id.config_title_down).setOnClickListener {
+            snake(msg = "滚动到底部")
+            onScrollEvent?.invoke(true)
+        }
         /** 设置过滤按钮点击事件 */
         findViewById<View>(R.id.config_title_filter).setOnClickListener {
             showDialog {
@@ -90,7 +97,7 @@ class ConfigureActivity : BaseActivity() {
                         onChanged?.invoke()
                         refreshAdapterResult()
                     } else {
-                        Toast.makeText(applicationContext, "条件不能为空", Toast.LENGTH_SHORT).show()
+                        toast(msg = "条件不能为空")
                         it.performClick()
                     }
                 }
@@ -180,7 +187,7 @@ class ConfigureActivity : BaseActivity() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
             }.onFailure {
-                Toast.makeText(this, "无法启动系统默认浏览器", Toast.LENGTH_SHORT).show()
+                toast(msg = "无法启动系统默认浏览器")
             }
         }
     }
