@@ -269,20 +269,6 @@
                     android:text="此选项默认开启，开启后将对优化名单内 APP 通知小图标进行色彩修复，特别是通过 MIPUSH 推送的通知，它们始终是彩色的，修复后使得它们的图标看起来更加符合原生规范。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/config_notify_app_icon_warn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:alpha="0.6"
-                    android:lineSpacingExtra="6dp"
-                    android:text="⚠️ 你的 MIUI 版本过低，状态栏上 MIPUSH 的彩色图标由于不能识别反色将不会被优化为黑白小图标，仅在通知栏生效。"
-                    android:textColor="#FF9800"
-                    android:textSize="12sp"
-                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout

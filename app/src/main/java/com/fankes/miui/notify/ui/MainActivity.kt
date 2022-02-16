@@ -115,8 +115,6 @@ class MainActivity : BaseActivity() {
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
         val notifyIconHookSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
-        /** 设置旧版本警告 */
-        findViewById<View>(R.id.config_notify_app_icon_warn).isVisible = miuiVersion == "12"
         /** 获取 Sp 存储的信息 */
         notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
