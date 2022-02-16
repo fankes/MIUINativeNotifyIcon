@@ -111,13 +111,18 @@ class MainActivity : BaseActivity() {
         /** 初始化 View */
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val moduleEnableLogSwitch = findViewById<SwitchCompat>(R.id.module_enable_log_switch)
+        val colorIconHookItem = findViewById<View>(R.id.config_item_color_hook)
         val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
         val notifyIconFixSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
+        val notifyIconFixButton = findViewById<View>(R.id.config_notify_app_button)
         /** 获取 Sp 存储的信息 */
-        notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
+                modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
         hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
@@ -127,6 +132,8 @@ class MainActivity : BaseActivity() {
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_MODULE, b)
             moduleEnableLogSwitch.isVisible = b
+            colorIconHookItem.isVisible = b
+            notifyIconConfigItem.isVisible = b && colorIconHookSwitch.isChecked
             SystemUITool.showNeedRestartSnake(context = this)
         }
         moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
@@ -152,14 +159,13 @@ class MainActivity : BaseActivity() {
         notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX, b)
+            notifyIconFixButton.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
+        /** 通知图标优化名单按钮点击事件 */
+        notifyIconFixButton.setOnClickListener { startActivity(Intent(this, ConfigureActivity::class.java)) }
         /** 重启按钮点击事件 */
         findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
-        /** 通知图标优化名单按钮点击事件 */
-        findViewById<View>(R.id.config_notify_app_button).setOnClickListener {
-            startActivity(Intent(this, ConfigureActivity::class.java))
-        }
         /** 恰饭！ */
         findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
             runCatching {
