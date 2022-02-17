@@ -523,20 +523,23 @@ class HookEntry : YukiHookXposedInitProxy {
                                 afterHook {
                                     /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
                                     if (!hasIgnoreStatusBarIconColor() && isShowMiuiStyle()) return@afterHook
+
                                     /** 获取小图标 */
                                     val iconImageView =
                                         NotificationHeaderViewWrapperClass.clazz
                                             .field { name = "mIcon" }.of<ImageView>(instance) ?: return@afterHook
-                                    /** 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass] */
-                                    NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(instance).apply {
-                                        /** 获取其中的得到通知方法 */
-                                        val expandedNf =
-                                            ExpandableNotificationRowClass.clazz
-                                                .method { name = "getStatusBarNotification" }
-                                                .get(self).invoke<StatusBarNotification>()
-                                        /** 执行 Hook */
-                                        hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView)
-                                    }
+
+                                    /**
+                                     * 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass]
+                                     * 获取其中的得到通知方法
+                                     */
+                                    val expandedNf =
+                                        ExpandableNotificationRowClass.clazz
+                                            .method { name = "getStatusBarNotification" }
+                                            .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(instance).self)
+                                            .invoke<StatusBarNotification>()
+                                    /** 执行 Hook */
+                                    hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView)
                                 }
                             }
                         }
