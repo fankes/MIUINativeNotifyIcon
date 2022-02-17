@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    appVersionName = "1.6"
+    appVersionName = "1.6(pending)"
     appVersionCode = 11
 }
 
