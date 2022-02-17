@@ -22,12 +22,17 @@ android {
         applicationId "com.fankes.miui.notify"
         minSdk 28
         targetSdk 31
-        versionCode rootProject.ext.appVersionCode
-        versionName rootProject.ext.appVersionName
+        versionCode rootProject.getGitVersionCode()
+        versionName rootProject.ext.appVersionName + "." + rootProject.getGitHash()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            if (outputFileName.toString().contains("release"))
+                outputFileName = "${defaultConfig.applicationId}-${defaultConfig.versionName}-release.apk"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true

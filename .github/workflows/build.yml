@@ -1,0 +1,52 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    if: ${{ !startsWith(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+        fetch-depth: 0
+    - name: set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+    - name: Build with Gradle
+      run: |
+        bash ./gradlew assembleRelease assembleDebug --stacktrace
+    - name: Prepare artifact
+      if: success()
+      id: prepareArtifact
+      run: |
+        releasename=`ls app/build/outputs/apk/release/*.apk | awk -F '(/|.apk)' '{print $6}'` && echo "::set-output name=releasename::$releasename"
+    - name: Upload debug
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.prepareArtifact.outputs.releasename }}-${{ steps.date.outputs.date }}-debug
+        path: app/build/outputs/apk/debug/*.apk
+    - name: Upload release
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.prepareArtifact.outputs.releasename }}-${{ steps.date.outputs.date }}-release
+        path: app/build/outputs/apk/release/*.apk
+    - name: Upload mappings
+      uses: actions/upload-artifact@v2
+      with:
+        name: mappings
+        path: |
+          app/build/outputs/mapping
