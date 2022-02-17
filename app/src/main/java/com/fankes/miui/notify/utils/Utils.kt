@@ -37,7 +37,6 @@ import android.util.Base64
 import android.widget.Toast
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.hook.factory.callStatic
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
@@ -241,9 +240,10 @@ fun Bitmap.round(radius: Float): Bitmap =
  * @return [String]
  */
 fun findPropString(key: String, default: String = "") = safeOf(default) {
-    (classOf(name = "android.os.SystemProperties").method(
-        name = "get", StringType, StringType
-    )?.callStatic(key, default)) ?: default
+    (classOf(name = "android.os.SystemProperties").method {
+        name = "get"
+        param(StringType, StringType)
+    }.get().invoke(key, default)) ?: default
 }
 
 /**
