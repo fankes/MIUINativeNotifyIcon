@@ -9,6 +9,24 @@ ext {
     appVersionCode = 11
 }
 
+def getGitVersionCode() {
+    try {
+        return 'git rev-list HEAD --first-parent --count'.execute().text.trim().toInteger()
+    }
+    catch (ignored) {
+        return 1
+    }
+}
+
+def getGitHash() {
+    try {
+        return 'git show -s --format=%h'.execute().text.trim()
+    }
+    catch (ignored) {
+        return 'surprise'
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
