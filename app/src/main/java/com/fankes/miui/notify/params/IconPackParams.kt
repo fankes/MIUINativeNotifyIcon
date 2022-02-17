@@ -984,7 +984,7 @@ object IconPackParams {
                         "U58FKAg0EthI7T5xxRPgGLAg1IeJESYFMFK1F/75PwxI0vPM8Ui19+s9MfWbaKKJcnwCIC7Ye698\n" +
                         "lvkAAAAASUVORK5CYII=").bitmap,
                 iconColor = 0xff29cbb6.toInt(),
-                contributorName = "fankes"
+                contributorName = "fankes、naicfeng"
             ),
             IconDataBean(
                 isEnabled = true,
