@@ -77,9 +77,6 @@ class HookEntry : YukiHookXposedInitProxy {
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
 
         /** 原生存在的类 */
-        private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
-
-        /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
         /** 未确定是否只有旧版本存在的类 */
@@ -475,33 +472,6 @@ class HookEntry : YukiHookXposedInitProxy {
                                             (result as Icon).loadDrawable(context)
                                         ) { icon -> result = Icon.createWithBitmap(icon) }
                                     }
-                            }
-                        }
-                    }
-                    StatusBarIconViewClass.hook {
-                        /** 修复通知图标为彩色 - MIPUSH 修复 */
-                        injectMember {
-                            method { name = "updateIconColor" }
-                            afterHook {
-                                /** 获取自身 */
-                                val iconImageView = instance<ImageView?>() ?: return@afterHook
-
-                                /** 获取通知实例 */
-                                val expandedNf = field { name = "mNotification" }.of<StatusBarNotification>(instance)
-
-                                /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                if (!hasIgnoreStatusBarIconColor() && isShowMiuiStyle()) return@afterHook
-
-                                /**
-                                 * 强制重新进行设置图标
-                                 * 防止 MIPUSH 不生效
-                                 */
-                                if (expandedNf?.isXmsf == true)
-                                    hookSmallIconOnSet(
-                                        context = iconImageView.context,
-                                        expandedNf,
-                                        expandedNf.notification?.smallIcon?.loadDrawable(iconImageView.context),
-                                    ) { icon -> iconImageView.setImageBitmap(icon) }
                             }
                         }
                     }
