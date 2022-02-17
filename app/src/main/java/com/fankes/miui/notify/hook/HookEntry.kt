@@ -108,8 +108,13 @@ class HookEntry : YukiHookXposedInitProxy {
      */
     private fun PackageParam.isGrayscaleIcon(context: Context, drawable: Drawable) = safeOfFalse {
         ContrastColorUtilClass.clazz.let {
-            it.method(name = "isGrayscaleIcon", DrawableClass)
-                ?.call<Boolean>(it.method(name = "getInstance", ContextClass)?.callStatic(context), drawable) ?: false
+            it.method {
+                name = "isGrayscaleIcon"
+                param(DrawableClass)
+            }.get(it.method {
+                name = "getInstance"
+                param(ContextClass)
+            }.get().invoke(context)).invoke<Boolean>(drawable) ?: false
         }
     }
 
@@ -118,7 +123,7 @@ class HookEntry : YukiHookXposedInitProxy {
      * @return [Boolean]
      */
     private fun PackageParam.isShowMiuiStyle() = safeOfFalse {
-        NotificationUtilClass.clazz.method(name = "showMiuiStyle")?.callStatic() ?: false
+        NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false
     }
 
     /**
@@ -137,7 +142,7 @@ class HookEntry : YukiHookXposedInitProxy {
      * @return [String]
      */
     private fun PackageParam.findAppName(instance: Any?) = safeOf(default = "<unknown>") {
-        ExpandedNotificationClass.clazz.method(name = "getAppName")?.call(instance) ?: "<empty>"
+        ExpandedNotificationClass.clazz.method { name = "getAppName" }.get(instance).invoke() ?: "<empty>"
     }
 
     /**
@@ -197,7 +202,9 @@ class HookEntry : YukiHookXposedInitProxy {
      */
     private val PackageParam.globalContext
         get() = safeOfNull {
-            SystemUIApplicationClass.clazz.method(name = "getContext")?.callStatic<Context>()
+            if (SystemUIApplicationClass.clazz.hasMethod(name = "getContext"))
+                SystemUIApplicationClass.clazz.method { name = "getContext" }.get().invoke<Context>()
+            else null
         }
 
     /**
@@ -471,7 +478,7 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                         }
                     }
-                    findClass(StatusBarIconViewClass).hook {
+                    StatusBarIconViewClass.hook {
                         /** 修复通知图标为彩色 - MIPUSH 修复 */
                         injectMember {
                             method { name = "updateIconColor" }
@@ -499,7 +506,7 @@ class HookEntry : YukiHookXposedInitProxy {
                         }
                     }
                     if (NotificationHeaderViewWrapperInjectorClass.hasClass)
-                        findClass(NotificationHeaderViewWrapperInjectorClass).hook {
+                        NotificationHeaderViewWrapperInjectorClass.hook {
                             /** 修复下拉通知图标自动设置回 APP 图标的方法 */
                             injectMember {
                                 var isUseLegacy = false
@@ -539,7 +546,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }
                         }
                     else
-                        findClass(NotificationHeaderViewWrapperClass).hook {
+                        NotificationHeaderViewWrapperClass.hook {
                             /** 之前的版本解决方案 */
                             injectMember {
                                 method { name = "handleHeaderViews" }
@@ -547,19 +554,16 @@ class HookEntry : YukiHookXposedInitProxy {
                                     /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
                                     if (!hasIgnoreStatusBarIconColor() && isShowMiuiStyle()) return@afterHook
                                     /** 获取小图标 */
-                                    val iconImageView = field {
-                                        classSet = NotificationHeaderViewWrapperClass.clazz
-                                        name = "mIcon"
-                                    }.of<ImageView>(instance) ?: return@afterHook
+                                    val iconImageView =
+                                        NotificationHeaderViewWrapperClass.clazz
+                                            .field { name = "mIcon" }.of<ImageView>(instance) ?: return@afterHook
                                     /** 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass] */
-                                    field {
-                                        classSet = NotificationViewWrapperClass.clazz
-                                        name = "mRow"
-                                    }.get(instance).apply {
+                                    NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(instance).apply {
                                         /** 获取其中的得到通知方法 */
                                         val expandedNf =
-                                            ExpandableNotificationRowClass.clazz.method(name = "getStatusBarNotification")
-                                                ?.call<StatusBarNotification>(instance = self)
+                                            ExpandableNotificationRowClass.clazz
+                                                .method { name = "getStatusBarNotification" }
+                                                .get(self).invoke<StatusBarNotification>()
                                         /** 执行 Hook */
                                         hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView)
                                     }
