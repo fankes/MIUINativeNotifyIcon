@@ -23,7 +23,10 @@
 package com.fankes.miui.notify.utils
 
 import android.graphics.*
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.VectorDrawable
 import android.util.ArrayMap
 import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.abs
@@ -49,14 +52,21 @@ object BitmapCompatTool {
      * @param drawable 要判断的 [Drawable]
      * @return [Boolean] 是否灰度
      */
-    fun isGrayscaleDrawable(drawable: Drawable) = safeOfFalse { isGrayscale(drawable.toBitmap()) }
+    fun isGrayscaleDrawable(drawable: Drawable) = safeOfFalse {
+        when (drawable) {
+            is BitmapDrawable -> isGrayscaleBitmap(drawable.bitmap)
+            is AnimationDrawable -> !(drawable.numberOfFrames <= 0 || !isGrayscaleBitmap(drawable.getFrame(0).toBitmap()))
+            is VectorDrawable -> true
+            else -> isGrayscaleBitmap(drawable.toBitmap())
+        }
+    }
 
     /**
      * 判断 [Bitmap] 是否为灰度位图
      * @param bitmap 要判断的位图
      * @return [Boolean] 是否灰度
      */
-    private fun isGrayscale(bitmap: Bitmap) =
+    private fun isGrayscaleBitmap(bitmap: Bitmap) =
         cachedBitmapGrayscales[bitmap.generationId] ?: let {
             var height = bitmap.height
             var width = bitmap.width
@@ -77,7 +87,7 @@ object BitmapCompatTool {
             ensureBufferSize(size)
             tempCompactBitmap?.getPixels(tempBuffer, 0, width, 0, 0, width, height)
             for (i in 0 until size)
-                if (!isGrayscale(tempBuffer[i])) {
+                if (!isGrayscaleColor(tempBuffer[i])) {
                     cachedBitmapGrayscales[bitmap.generationId] = false
                     return@let false
                 }
@@ -90,7 +100,7 @@ object BitmapCompatTool {
      * @param color 颜色
      * @return [Boolean] 是否灰度
      */
-    private fun isGrayscale(color: Int): Boolean {
+    private fun isGrayscaleColor(color: Int): Boolean {
         if (color shr 24 and 255 < 50) return true
         val r = color shr 16 and 255
         val g = color shr 8 and 255
