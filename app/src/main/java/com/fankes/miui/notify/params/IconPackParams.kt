@@ -3438,6 +3438,57 @@ object IconPackParams {
                 iconColor = 0xff4679e9.toInt(),
                 contributorName = "fankes"
             ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "QQ阅读",
+                packageName = "com.qq.reader",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAMRSURBVGiB7ZhNSFVBGIbfCVIuBG4UMgiSgihq5dZqY5ERSOSunRtXgYs2tW3TImjh\n" +
+                        "tkWbqHDRIrAfI7CltErIwMJIJfuRDOEKGjwtZvTe5J6fb+7Rg+ADlwv3fjPzvjNz5nzfSHvs0RSu\n" +
+                        "yM6AbklXJJ2RdExSh6S/kpYkTUl6I+mJc26uyHGbBugFJsnPI6CrbN0CKsB9g/B6qsBQmeLbjbOe\n" +
+                        "xEgZ4isFiS/HBDBSoPgNru2U+O5tEA+wDHRa9eyL8HA7ok0e2iTdsjYyvQeAw5K+WgcxsCqp0zn3\n" +
+                        "J28D6wr0G+OtVCRdtTSwGjhnjI/hrCXYauC4MT6Gk5Zgq4GDxvgYTCeR1UCLMT6GVktwzDG63eQ+\n" +
+                        "gSS7gZ/G+Bi+W4KtBiYkrRvbWPgo6XEhPVHL8R8Ag4T8HZ/I9QJ3gZkm04c1YAwY2kgj8FluP3AH\n" +
+                        "GA9jDMYYmGsw4Bw+/+8HKiGuG5/c/TAIfw8MA+2hj54geDohfiXGQJagKvAUGMCvSgvQh5/RRqzh\n" +
+                        "K7Hu0P/RILrRRG1lOcbAeI6ONwfAr0xPnbgRYCUYHaG2BQeACUPfAGMxBvqNg2wwDdwEOoG28GkH\n" +
+                        "bgCzkX32JelsmI1SKy46JN0zu68xL38rcaSJPq5LWpTU6px7mKsFfm/PACfCzJXFcNAwA4zmtkyt\n" +
+                        "3q3i9/NCCeJngS78cwQw2Uhr0ovsV/iuSOqV9CG3++J4J+mCpANbNP1HkoH6p35/gaKs1I+d/yTC\n" +
+                        "n+mjYeuUvYUWgpa4TBh/JJbFcJa+xKIenyp8knQoynlxzEs6lVTop95KAFX5B7lM1p1zidsnK51e\n" +
+                        "KFhMDKn1QZaB3wUKieVb2p+7YQVSS8wsA0sFCokldRKzDCwWKCSWhm/gDXaDgVQNWQY+Fygkli9p\n" +
+                        "f2beTuOrrMuSLkk6XZCoLKYkvZL0wjn3Oi0w5nr9vKQ+SRdVyxSbZVXSS0nPJD13zqUenYWAL+QH\n" +
+                        "8IX6SnI6k8gK/spm84ajNOrMjOKLoCSqIWagdNFJ4Iv4QeBtnfCJ8Ftb2fpMBDO7S/RO8w+xh352\n" +
+                        "EqfboQAAAABJRU5ErkJggg==").bitmap,
+                iconColor = 0xff45afff.toInt(),
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
+                appName = "QQ浏览器",
+                packageName = "com.tencent.mtt",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADUAAAAyCAYAAAD845PIAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAPhSURBVGiB5ZpLiB1FFIb/I4nR8REw0UkGE9zERyIDxriIbgYXQTKuXKhBERcujAYf\n" +
+                        "oAshiwEloLgQNA+UoKCiC40YRBEXCYoIEiE4YzJxQPJkzEtEGXQw8LmovtjpdPf0qep7r+gPDUPX\n" +
+                        "qXPOV9W3q+r0SP9BWTecAssl5a/fJB3PrmNmdrobcVsVsBzYCHxCM50CtgKjwEC/8z9PwDpgd0OQ\n" +
+                        "OsDtwM39hlkLvJMIU9QM8CLh0e050JaWYYqaBh7tFcwA8H6XgfLa3m2gNT2EyeuzbgEN9wmoo21t\n" +
+                        "Ay0FzvYZCtr6jQHzga/6TZPTA21APd9vioKmafi6v6gCaIWkx5NHRpqV9J2koy34WqKUnIBXEkZ0\n" +
+                        "J/AwcGvB5yBhB/IMcDzS9wwxOw9gNXAuMug9DWMMArsiY/jXL+C5iEDfAAsiYq2LiHUWuMwbaI8z\n" +
+                        "yF9emEK8FRFg99b5PO9FASyTNOLMa5MXJC8zm5L0tLPbaGNL4DHniO1wJlMX+wtH3DN1voqv9Ouc\n" +
+                        "ubS56fzYYbsIuLqqsQh1pcPxjKQfHPZzadJpv6yqIQXqgJmdcyZSp/1O+2urGopQCx1O25wlmdkZ\n" +
+                        "+XYejaHmOZxOO2y74bNyAopQPzucLnXYNtUqh+2JqoYUqCGH7ZwCrpJ0uaNLJVTxcfNM/wiwwMxm\n" +
+                        "HX0ELFFYOi6RJDPbmzXdqFDsrPytFFQJVQx4v3Pxva+Bz4XAZmAf8EuJj6PAy8BdwLzMdrZB7Cua\n" +
+                        "Qo04ob4GKh8ZYBMw6fC3M+t3C3Cyxm6iEVAukXEnWOmuAnjX6aej01n/0RqbMS/UxohExgo+tkbh\n" +
+                        "/KMvMz9PVLSv9EINEndIHMv6vxBLUtBLmb/rgQ3ANuBXGjx6F9QozOykpLdcIxE0AAyqndqGJD0L\n" +
+                        "HJH0mqTbJX0kaY2kD6K8AesjRvY24JGWZqlKrxLOfHHKHDTVt1mf1M86TbQPuDQF7OAcASaAp4DF\n" +
+                        "hM8wvdIbKVAraxxPZO3rqV9TuqUNVXmXFjM7MrMDkp4saZqV9JDCNut1SddEj1y87kzqzYU7jS3Z\n" +
+                        "/bf7MEMd/ZQ8LIRPOp3y2U3E1ezaVunxp/bxy8vMvpf0oKRdZnZQ0nDySKXrhrKbjaEkycxOKIBJ\n" +
+                        "0h2pGbWgQ2U3XVCSZGZ/ZH+eSkonXXvNrPT854bKaTyhbxvaXdWQAlU69T3Spwp7wvYF7Pg3vfXa\n" +
+                        "BPuwhzAzwNquAuXA7gamSpL4E3gT+HyOZPcQzkx1h8v3mubT2r/GEWoVw9k1X9IxSfvN7HDWfrHC\n" +
+                        "Z6IhhZrh7wrVq3Ez+zHnZ7XC+jOkUK+flDSVLSf/X/0N9IzKpFVJbfwAAAAASUVORK5CYII=").bitmap,
+                iconColor = 0xff6593f1.toInt(),
+                contributorName = "fankes"
+            ),
             // TODO 可继续在这里添加更多 APP
         )
     }
