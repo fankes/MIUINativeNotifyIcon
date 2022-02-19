@@ -228,7 +228,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 }
             /** 打印日志 */
             if (prefs.getBoolean(ENABLE_MODULE_LOG))
-                loggerD(msg = "hook Icon [${findAppName(notifyInstance)}][${notifyInstance.opPkgName}] custom [${customIcon != null}] grayscale [${!isNotGrayscaleIcon}] xmsf [${notifyInstance.isXmsf}]")
+                loggerD(msg = "Icon --> [${findAppName(notifyInstance)}][${notifyInstance.opPkgName}] custom [${customIcon != null}] grayscale [${!isNotGrayscaleIcon}] xmsf [${notifyInstance.isXmsf}]")
             when {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(customIcon!!)
