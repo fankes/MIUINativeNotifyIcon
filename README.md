@@ -35,9 +35,9 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 - [CONTRIBUTING](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md)
 
-# 通知测试工具
+# 通知测试
 
-[点击下载](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/tool/NotifyTester.apk)通知测试工具测试通知图标是否生效。
+你可以 [点击这里下载](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/tool/NotifyTester.apk) 工具测试通知图标是否生效。
 
 # 历史背景
 
