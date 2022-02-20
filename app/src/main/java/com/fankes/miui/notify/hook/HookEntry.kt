@@ -107,15 +107,18 @@ class HookEntry : YukiHookXposedInitProxy {
      * @return [Boolean]
      */
     private val PackageParam.hasIgnoreStatusBarIconColor
-        get() = NotificationUtilClass.clazz.hasMethod(name = "ignoreStatusBarIconColor", ExpandedNotificationClass.clazz)
+        get() = safeOfFalse {
+            NotificationUtilClass.clazz.hasMethod(name = "ignoreStatusBarIconColor", ExpandedNotificationClass.clazz)
+        }
 
     /**
      * 获取当前通知栏的样式
      * @return [Boolean]
      */
-    private fun PackageParam.isShowMiuiStyle() = safeOfFalse {
-        NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false
-    }
+    private val PackageParam.isShowMiuiStyle
+        get() = safeOfFalse {
+            NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false
+        }
 
     /**
      * 获取 [ExpandedNotificationClass] 的应用名称
@@ -416,7 +419,7 @@ class HookEntry : YukiHookXposedInitProxy {
                              * 因为之前的 MIUI 版本的状态栏图标颜色会全部设置为白色的 - 找不到修复的地方就直接判断版本了
                              * 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook
                              */
-                            replaceAny { if (hasIgnoreStatusBarIconColor) false else isShowMiuiStyle() }
+                            replaceAny { if (hasIgnoreStatusBarIconColor) false else isShowMiuiStyle }
                         }
                         if (hasIgnoreStatusBarIconColor)
                             injectMember {
@@ -449,7 +452,7 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                             afterHook {
                                 /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                if (hasIgnoreStatusBarIconColor || !isShowMiuiStyle())
+                                if (hasIgnoreStatusBarIconColor || !isShowMiuiStyle)
                                     (globalContext ?: args[0] as Context).also { context ->
                                         hookSmallIconOnSet(
                                             context = context,
@@ -507,7 +510,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 method { name = "handleHeaderViews" }
                                 afterHook {
                                     /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                    if (!hasIgnoreStatusBarIconColor && isShowMiuiStyle()) return@afterHook
+                                    if (!hasIgnoreStatusBarIconColor && isShowMiuiStyle) return@afterHook
 
                                     /** 获取小图标 */
                                     val iconImageView =
