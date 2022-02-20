@@ -37,6 +37,7 @@ import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
@@ -115,10 +116,14 @@ class MainActivity : BaseActivity() {
         val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
         val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
+        val colorIconCompatSwitch = findViewById<SwitchCompat>(R.id.color_icon_compat_switch)
+        val colorIconCompatText = findViewById<View>(R.id.color_icon_compat_text)
         val notifyIconFixSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         val notifyIconFixButton = findViewById<View>(R.id.config_notify_app_button)
         /** 获取 Sp 存储的信息 */
         colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        colorIconCompatText.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
                 modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
@@ -127,6 +132,7 @@ class MainActivity : BaseActivity() {
         moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
         hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
         notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
@@ -154,6 +160,13 @@ class MainActivity : BaseActivity() {
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_COLOR_ICON_HOOK, b)
             notifyIconConfigItem.isVisible = b
+            colorIconCompatSwitch.isVisible = b
+            colorIconCompatText.isVisible = b
+            SystemUITool.showNeedRestartSnake(context = this)
+        }
+        colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
+            if (!btn.isPressed) return@setOnCheckedChangeListener
+            modulePrefs.putBoolean(ENABLE_COLOR_ICON_COMPAT, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
         notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->

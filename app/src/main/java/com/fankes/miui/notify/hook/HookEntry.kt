@@ -34,6 +34,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
+import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
@@ -51,6 +52,7 @@ import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.type.android.ContextClass
+import com.highcapable.yukihookapi.hook.type.android.DrawableClass
 import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.xposed.proxy.YukiHookXposedInitProxy
@@ -78,6 +80,9 @@ class HookEntry : YukiHookXposedInitProxy {
         /** 未确定是否只有旧版本存在的类 */
         private const val ExpandableNotificationRowClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
 
+        /** 原生存在的类 */
+        private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
+
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationUtilClass = VariousClass(
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
@@ -94,11 +99,23 @@ class HookEntry : YukiHookXposedInitProxy {
     /**
      * - 这个是修复彩色图标的关键核心代码判断
      *
-     * 判断是否为灰度图标 - [isXmsf] 直接标记为非灰度图标防止 💩 MIUI 乱改
+     * 判断是否为灰度图标 - 反射执行系统方法
+     * @param context 实例
      * @param drawable 要判断的图标
      * @return [Boolean]
      */
-    private fun StatusBarNotification.isGrayscaleIcon(drawable: Drawable) = !isXmsf && BitmapCompatTool.isGrayscaleDrawable(drawable)
+    private fun PackageParam.isGrayscaleIcon(context: Context, drawable: Drawable) =
+        if (!prefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)) safeOfFalse {
+            ContrastColorUtilClass.clazz.let {
+                it.method {
+                    name = "isGrayscaleIcon"
+                    param(DrawableClass)
+                }.get(it.method {
+                    name = "getInstance"
+                    param(ContextClass)
+                }.get().invoke(context)).invoke<Boolean>(drawable) ?: false
+            }
+        } else BitmapCompatTool.isGrayscaleDrawable(drawable)
 
     /**
      * 是否为新版本 MIUI 方案
@@ -212,7 +229,7 @@ class HookEntry : YukiHookXposedInitProxy {
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.also { notifyInstance ->
             /** 判断是否不是灰度图标 */
-            val isNotGrayscaleIcon = !notifyInstance.isGrayscaleIcon(iconDrawable)
+            val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
             /** 目标彩色通知 APP 图标 */
             var customIcon: Bitmap? = null
@@ -283,7 +300,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
                 /** 判断图标风格 */
-                val isGrayscaleIcon = notifyInstance.isGrayscaleIcon(iconDrawable)
+                val isGrayscaleIcon = !notifyInstance.isXmsf && isGrayscaleIcon(context, iconDrawable)
 
                 /** 自定义默认小图标 */
                 var customIcon: Bitmap? = null
@@ -366,7 +383,7 @@ class HookEntry : YukiHookXposedInitProxy {
                     notifyInstance.notification.smallIcon.loadDrawable(context)
 
                 /** 判断是否不是灰度图标 */
-                val isNotGrayscaleIcon = !notifyInstance.isGrayscaleIcon(iconDrawable)
+                val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
                 /** 获取目标修复彩色图标的 APP */
                 var isTargetFixApp = false
