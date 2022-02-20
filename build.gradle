@@ -5,8 +5,8 @@ plugins {
 }
 
 ext {
-    appVersionName = "1.67"
-    appVersionCode = 14
+    appVersionName = "1.7"
+    appVersionCode = 15
 }
 
 task clean(type: Delete) {
