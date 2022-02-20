@@ -29,8 +29,9 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.*
-import android.graphics.Bitmap.createBitmap
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
@@ -213,25 +214,6 @@ val ByteArray.bitmap: Bitmap get() = BitmapFactory.decodeByteArray(this, 0, size
  * @return [Bitmap]
  */
 val String.bitmap: Bitmap get() = unbase64.bitmap
-
-/**
- * 圆角图片
- * @param radius 圆角度
- * @return [Bitmap] 圆角后的位图 - 失败会返回处理之前的位图
- */
-fun Bitmap.round(radius: Float): Bitmap =
-    createBitmap(width, height, Bitmap.Config.ARGB_8888).also { out ->
-        Canvas(out).also { canvas ->
-            Paint().also { paint ->
-                paint.isAntiAlias = true
-                canvas.drawARGB(0, 0, 0, 0)
-                paint.color = Color.WHITE
-                canvas.drawRoundRect(RectF(Rect(0, 0, width, height)), radius, radius, paint)
-                paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-                canvas.drawBitmap(this, Rect(0, 0, width, height), Rect(0, 0, width, height), paint)
-            }
-        }
-    }
 
 /**
  * 获取系统 Prop 值
