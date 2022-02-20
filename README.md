@@ -2,7 +2,7 @@
 
 ![Eclipse Marketplace](https://img.shields.io/badge/build-passing-brightgreen)
 ![Eclipse Marketplace](https://img.shields.io/badge/license-AGPL3.0-blue)
-![Eclipse Marketplace](https://img.shields.io/badge/version-v1.7-green)
+![Eclipse Marketplace](https://img.shields.io/badge/version-v1.71-green)
 <br/><br/>
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png" width = "100" height = "100"/>
 <br/>
@@ -12,7 +12,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 # 开始使用
 
 点击下载最新版本
-<a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v1.7-green)</a>
+<a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v1.71-green)</a>
 <br/><br/>
 ⚠️ 适配说明<br/>
 
@@ -34,6 +34,10 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 欢迎为通知图标优化名单贡献宝贵资源！<br/>
 
 - [CONTRIBUTING](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md)
+
+# 通知测试工具
+
+[点击下载](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/tool/NotifyTester.apk)通知测试工具测试通知图标是否生效。
 
 # 历史背景
 
