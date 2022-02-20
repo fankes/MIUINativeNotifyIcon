@@ -253,7 +253,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(customIcon!!)
                 /** 若不是灰度图标自动处理为圆角 */
-                isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable).toBitmap().round(15.dp(context)))
+                isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable).toBitmap())
             }
         }
     }
