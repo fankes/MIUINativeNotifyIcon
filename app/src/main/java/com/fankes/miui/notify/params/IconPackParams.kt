@@ -209,6 +209,23 @@ object IconPackParams {
             IconDataBean(
                 isEnabled = true,
                 isEnabledAll = false,
+                appName = "主题壁纸",
+                packageName = "com.android.thememanager",
+                iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+                        "CHwIZIgAAAGISURBVGiB7dg/TgJBGIbx96Oj1JLExITWW9BZ2cAZPIAH0BpPosFo4p9Say20wMJG\n" +
+                        "EtHEG1g+Fu4YVFhml11n0PkldLuz38NuMgtSksQD6ANj4AU4AtoLrNXO1ngFRkC/ylnzLnzATw9A\n" +
+                        "p8Ranezc7w7qmH3ywtMinDdgu8Ba29k5sxSKsSIRkroehz5JepxzzHr2mefQzHoex/mZcyfqVs1j\n" +
+                        "FjjCWSyGOCKccjHEFeEUiyHOCMcvhrgjnPwYliPC+RJjkxHy2ydi8rnPmLS0Ec6hmfWMj5e0ndDT\n" +
+                        "LGjfgJH8Xhdi9twIPUFVGpJOQw9RgWMD1iSdS9oIPU1JQ0mbDTMbS9qSdB14oDJuJG1lDR+AFnAZ\n" +
+                        "cIMr6gpoTc0DVoCzwAP6uABWc+8V0AQGgQfNMwCa3g8fsBt64il2Z81b5Dc73t9ChczMa8Y/tSH+\n" +
+                        "CSkkNikkNikkNikkNikkNikkNikkNv8y5K62KWa79z2wSMhJiUEWtVfLqkAXGP7Cnwy3eX80JMkv\n" +
+                        "egc2IfYAVj4oAwAAAABJRU5ErkJggg==").bitmap,
+                iconColor = 0xffd943a5.toInt(),
+                contributorName = "fankes"
+            ),
+            IconDataBean(
+                isEnabled = true,
+                isEnabledAll = false,
                 appName = "应用商店",
                 packageName = "com.xiaomi.market",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
