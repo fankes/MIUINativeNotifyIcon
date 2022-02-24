@@ -1,0 +1,11 @@
+[
+  {
+    "appName": "Android 系统",
+    "packageName": "android",
+    "isEnabled": true,
+    "isEnabledAll": false,
+    "iconBitmap": "iVBORw0KGgoAAAANSUhEUgAAAD4AAAA+CAYAAABzwahEAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAMCSURBVGiB7ZlLixRXGIafMzqC6MyoUfCCEFwoBpzZGK9hQGzQlW4SENGN4FZI9Ed4+Q8iuBdNQEVHhZCoW10oLt0JipfRqIwyj4vuoduxu27d1V2R80Bvur/z1vueS5061RCJRCKRSCQSiUQiFSKkFaiTwEHgHXA+hPC0dFcFUH8EjgFLgCshhL+7ETuuztpkWq31ymyvUGsNb3PMqseLig2pr/2W91UK3wj9vo3PV+pQEcGVbcQqFT4h9Bw/FBV+UtXwGUI/TmqfeHNTdwFTwOIOJR+AAyGEqQ7tlwC/ABPAT8BmYCUwBow0yt4Cb4AXwKPG5yHwTwjhvw66NeDPFF+1EMLdpHyJZOjZr0ZeXaOeUm+pHxPapfFRnVJPqquL+umKjBc7oV5SP3URthMzDe0TGXxkCp26j7eEnwSuUt8nq0jisusKdVJ9V8KIdkv5N1rr035mwEFbmbFA6FwbvLoAqAHDeS9UIsPAb2o5ntTl6s2Bjm0yN9RlWfNkurlZfwK6A2wp2nF94gGwJ4TwKq0wdaqro8A1qh8a6g9K19WRtMLE4Ooi4C/g5x4Z6wfbgCumrPm0ET8HTPbMUv/YA5xOKui4xtUDwOWkmooj8GsI4VK7H9uGUtdSPyyMZbzII+B6Q28/9cNILymq/xrYHEJ4lqlavZhjGzmjLmxpO6ye7eE21a3+hayhd/v166YkbqnfzBo1qLfzpCtRf1bdmSX4vRzGDiXoHM6XsVT9f+e3H5onthvYkdo7TZIeFF7m0Clbf5fzRn3+dvZHDjGo75md2J5Tq2z939t+q65XP+ecitPqhjZaG9S3ObXK1v+krpvTaB3xg8CCnL04AtxTj6ij6ph6FLgPLM2pVbb+QuoZgZZ9XJ0C9vbAbJW5EULYB43g6hjwnGqds8tgBlgVQpiem+rb+P5DAywCtkJzjY8PzkvfGYdm8IkBGuk3E9AMvnGARvrNJmgGL/bn2v+TFdAMnvX4+T2wDJrBRwdopN9kfhMbiUQikUgkEolEIpGy+QJozXWVnxEugwAAAABJRU5ErkJggg==",
+    "iconColor": "#ff72c476",
+    "contributorName": "fankes"
+  }
+]
