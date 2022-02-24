@@ -26,8 +26,6 @@ package com.fankes.miui.notify.utils
 
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -109,14 +107,7 @@ class DialogBuilder(private val context: Context) {
     internal fun show() = instance?.create()?.apply {
         val dm = DisplayMetrics()
         (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.getMetrics(dm)
-        customLayoutView?.let { setView(it.apply { minimumWidth = round(dm.widthPixels / 1.3).toInt() }) }
-        window?.setBackgroundDrawable(GradientDrawable(
-            GradientDrawable.Orientation.TOP_BOTTOM,
-            intArrayOf(Color.WHITE, Color.WHITE)
-        ).apply {
-            shape = GradientDrawable.RECTANGLE
-            gradientType = GradientDrawable.LINEAR_GRADIENT
-            cornerRadius = 15.dp(this@DialogBuilder.context)
-        })
+        customLayoutView?.let { setView(it.apply { minimumWidth = round(x = dm.widthPixels / 1.3).toInt() }) }
+        setDefaultStyle(context = this@DialogBuilder.context)
     }?.show()
 }

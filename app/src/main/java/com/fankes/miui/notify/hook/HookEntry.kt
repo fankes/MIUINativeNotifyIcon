@@ -34,6 +34,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
+import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
@@ -95,6 +96,9 @@ class HookEntry : YukiHookXposedInitProxy {
             "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
         )
     }
+
+    /** 缓存的通知优化图标数组 */
+    private var iconDatas = ArrayList<IconDataBean>()
 
     /**
      * - 这个是修复彩色图标的关键核心代码判断
@@ -235,16 +239,17 @@ class HookEntry : YukiHookXposedInitProxy {
             var customIcon: Bitmap? = null
             if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
                 run {
-                    IconPackParams.iconDatas.forEach {
-                        if ((notifyInstance.opPkgName == it.packageName ||
-                                    findAppName(notifyInstance) == it.appName) &&
-                            isAppNotifyHookOf(it)
-                        ) {
-                            if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it))
-                                customIcon = it.iconBitmap
-                            return@run
+                    if (iconDatas.isNotEmpty())
+                        iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                isAppNotifyHookOf(it)
+                            ) {
+                                if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it))
+                                    customIcon = it.iconBitmap
+                                return@run
+                            }
                         }
-                    }
                 }
             /** 打印日志 */
             if (prefs.getBoolean(ENABLE_MODULE_LOG))
@@ -309,18 +314,19 @@ class HookEntry : YukiHookXposedInitProxy {
                 var customIconColor = 0
 
                 if (isNotifyIconFix) run {
-                    IconPackParams.iconDatas.forEach {
-                        if ((notifyInstance.opPkgName == it.packageName ||
-                                    findAppName(notifyInstance) == it.appName) &&
-                            isAppNotifyHookOf(it)
-                        ) {
-                            if (!isGrayscaleIcon || isAppNotifyHookAllOf(it)) {
-                                customIcon = it.iconBitmap
-                                customIconColor = it.iconColor
-                                return@run
+                    if (iconDatas.isNotEmpty())
+                        iconDatas.forEach {
+                            if ((notifyInstance.opPkgName == it.packageName ||
+                                        findAppName(notifyInstance) == it.appName) &&
+                                isAppNotifyHookOf(it)
+                            ) {
+                                if (!isGrayscaleIcon || isAppNotifyHookAllOf(it)) {
+                                    customIcon = it.iconBitmap
+                                    customIconColor = it.iconColor
+                                    return@run
+                                }
                             }
                         }
-                    }
                 }
                 /** 处理自定义通知图标优化 */
                 if (customIcon != null)
@@ -390,15 +396,16 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 如果开启了自定义通知图标优化 */
                 if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
                     run {
-                        IconPackParams.iconDatas.forEach {
-                            if ((notifyInstance.opPkgName == it.packageName ||
-                                        findAppName(notifyInstance) == it.appName) &&
-                                isAppNotifyHookOf(it)
-                            ) {
-                                if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
-                                return@run
+                        if (iconDatas.isNotEmpty())
+                            iconDatas.forEach {
+                                if ((notifyInstance.opPkgName == it.packageName ||
+                                            findAppName(notifyInstance) == it.appName) &&
+                                    isAppNotifyHookOf(it)
+                                ) {
+                                    if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
+                                    return@run
+                                }
                             }
-                        }
                     }
                 /**
                  * 只要不是灰度就返回彩色图标
@@ -425,6 +432,9 @@ class HookEntry : YukiHookXposedInitProxy {
                 !prefs.getBoolean(ENABLE_MODULE, default = true) -> loggerW(msg = "Aborted Hook -> Hook Closed")
                 /** 开始 Hook */
                 else -> {
+                    /** 缓存图标数据 */
+                    iconDatas = IconPackParams(param = this).iconDatas
+                    /** 执行 Hook */
                     NotificationUtilClass.hook {
                         /** 强制回写系统的状态栏图标样式为原生 */
                         injectMember {

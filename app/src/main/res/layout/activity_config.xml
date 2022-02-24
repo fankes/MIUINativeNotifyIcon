@@ -52,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="..."
+                android:text="适配列表正在等待装载"
                 android:textColor="@color/colorTextDark"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -61,7 +61,7 @@
             android:id="@+id/config_title_up"
             android:layout_width="22dp"
             android:layout_height="22dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="5dp"
             android:src="@mipmap/ic_page_top"
             android:tint="@color/colorTextGray"
             android:tooltipText="滚动到顶部" />
@@ -70,7 +70,7 @@
             android:id="@+id/config_title_down"
             android:layout_width="22dp"
             android:layout_height="22dp"
-            android:layout_marginEnd="17dp"
+            android:layout_marginEnd="15dp"
             android:src="@mipmap/ic_page_bottom"
             android:tint="@color/colorTextGray"
             android:tooltipText="滚动到底部" />
@@ -83,6 +83,15 @@
             android:src="@mipmap/ic_filter"
             android:tint="@color/colorTextGray"
             android:tooltipText="按条件过滤" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/config_title_sync"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_marginEnd="10dp"
+            android:src="@mipmap/ic_sync"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="同步列表" />
     </LinearLayout>
 
     <LinearLayout
@@ -126,7 +135,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="噫，竟然什么都没找到~"
+            android:gravity="center"
+            android:lineSpacingExtra="6dp"
+            android:text="没有数据"
             android:textColor="@color/colorTextDark"
             android:textSize="17sp"
             android:visibility="gone" />

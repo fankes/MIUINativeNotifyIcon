@@ -13,26 +13,32 @@
 
 ## 贡献方法
 
-- 在下方的类中添加新的 APP 通知图标适配条目
-- [IconPackParams.kt](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/java/com/fankes/miui/notify/params/IconPackParams.kt)
+- 2022.02.25 适配数据已变更为云端更新
+- 在下方的 JSON 文件中添加新的 APP 通知图标适配条目
+- [NotifyIconsSupportConfig.json](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/iconPack/NotifyIconsSupportConfig.json)
 - 使用灰度位图转 Base64 来得到 Base64 的位图数据字符串
 - [BitmapToBase64](https://github.com/fankes/BitmapToBase64)
 - 新增条目的模板如下所示
 
-```kotlin
-IconDataBean(
-    isEnabled = true, // 是否默认启用替换彩色图标 - 关闭后将全部停止替换
-    isEnabledAll = false, // 是否默认启用替换全部图标
-    appName = "", // APP 名称
-    packageName = "", // APP 包名
-    iconBitmap = ("").bitmap, // 位图数据 Base64
-    iconColor = 0, // 通知栏中显示的图标颜色 - 设置为 0 使用系统默认颜色 (不设置颜色可不写)
-    contributorName = "" // 贡献者昵称
-)
+```json
+{
+  "appName": "", // APP 名称
+  "packageName": "", // APP 包名
+  "isEnabled": true, // 是否默认启用替换彩色图标 - 关闭后将全部停止替换
+  "isEnabledAll": false, // 是否默认启用替换全部图标
+  "iconBitmap": "", // 位图数据 Base64 字符串
+  "iconColor": "#ff232323", // 通知栏中显示的图标颜色 - 不设置使用系统默认颜色 (不设置颜色可删除此项)
+  "contributorName": "" // 贡献者昵称
+}
 ```
 
 - 图标大小建议保持在 50x50
 - 提交时请将后方的注释删除，否则不予合并代码
+
+## 同步列表地址
+
+- Github 直连地址 [Raw](https://raw.githubusercontent.com/fankes/MIUINativeNotifyIcon/master/iconPack/NotifyIconsSupportConfig.json)
+- 数据将在稍后同步至 [Surge](https://fankes.mnn.surge.sh/NotifyIconsSupportConfig.json)
 
 ## 其它要求
 

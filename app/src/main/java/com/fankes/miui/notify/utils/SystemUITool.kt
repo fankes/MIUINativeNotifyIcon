@@ -58,4 +58,13 @@ object SystemUITool {
         if (YukiHookModuleStatus.isActive())
             context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
         else context.snake(msg = "模块没有激活，更改不会生效")
+
+    /**
+     * 显示更新数据后需要重启系统界面的 [Snackbar]
+     * @param context 实例
+     */
+    fun showNeedUpdateApplySnake(context: Context) =
+        if (YukiHookModuleStatus.isActive())
+            context.snake(msg = "数据已更新，请重启系统界面使更改生效", actionText = "立即重启") { restartSystemUI(context) }
+        else context.snake(msg = "模块没有激活，更改不会生效")
 }
