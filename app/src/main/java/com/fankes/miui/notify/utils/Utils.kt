@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.utils
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -32,6 +33,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
@@ -214,6 +216,21 @@ val ByteArray.bitmap: Bitmap get() = BitmapFactory.decodeByteArray(this, 0, size
  * @return [Bitmap]
  */
 val String.bitmap: Bitmap get() = unbase64.bitmap
+
+/**
+ * 设置对话框默认风格
+ * @param context 使用的实例
+ */
+fun AlertDialog.setDefaultStyle(context: Context) =
+    window?.setBackgroundDrawable(
+        GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(Color.WHITE, Color.WHITE)
+        ).apply {
+            shape = GradientDrawable.RECTANGLE
+            gradientType = GradientDrawable.LINEAR_GRADIENT
+            cornerRadius = 15.dp(context)
+        })
 
 /**
  * 获取系统 Prop 值

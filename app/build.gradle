@@ -30,7 +30,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -72,6 +72,7 @@ dependencies {
     ksp 'com.highcapable.yukihookapi:ksp-xposed:1.0.2'
     implementation 'com.geyifeng.immersionbar:immersionbar:3.2.0'
     implementation 'com.geyifeng.immersionbar:immersionbar-ktx:3.2.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'

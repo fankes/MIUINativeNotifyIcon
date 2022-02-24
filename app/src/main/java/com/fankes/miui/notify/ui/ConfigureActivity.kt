@@ -24,6 +24,7 @@
 
 package com.fankes.miui.notify.ui
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -36,18 +37,17 @@ import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.hook.factory.putAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
-import com.fankes.miui.notify.utils.SystemUITool
-import com.fankes.miui.notify.utils.showDialog
-import com.fankes.miui.notify.utils.snake
-import com.fankes.miui.notify.utils.toast
+import com.fankes.miui.notify.utils.*
 import com.fankes.miui.notify.view.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
+import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class ConfigureActivity : BaseActivity() {
 
@@ -60,9 +60,22 @@ class ConfigureActivity : BaseActivity() {
     /** 回调滚动事件改变 */
     private var onScrollEvent: ((Boolean) -> Unit)? = null
 
+    /** 全部的通知优化图标数据 */
+    private var iconAllDatas = ArrayList<IconDataBean>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_config)
+        /** 检查激活状态 */
+        if (!YukiHookModuleStatus.isActive()) {
+            showDialog {
+                title = "模块没有激活"
+                msg = "模块没有激活，你无法使用这里的功能，请先激活模块。"
+                confirmButton(text = "我知道了") { finish() }
+                noCancelable()
+            }
+            return
+        }
         /** 返回按钮点击事件 */
         findViewById<View>(R.id.title_back_icon).setOnClickListener { onBackPressed() }
         /** 刷新适配器结果相关 */
@@ -94,7 +107,6 @@ class ConfigureActivity : BaseActivity() {
                 confirmButton {
                     if (editText.text.toString().isNotBlank()) {
                         filterText = editText.text.toString().trim()
-                        onChanged?.invoke()
                         refreshAdapterResult()
                     } else {
                         toast(msg = "条件不能为空")
@@ -105,11 +117,12 @@ class ConfigureActivity : BaseActivity() {
                 if (filterText.isNotBlank())
                     neutralButton(text = "清除条件") {
                         filterText = ""
-                        onChanged?.invoke()
                         refreshAdapterResult()
                     }
             }
         }
+        /** 设置同步列表按钮点击事件 */
+        findViewById<View>(R.id.config_title_sync).setOnClickListener { onStartRefresh() }
         /** 设置列表元素和 Adapter */
         findViewById<ListView>(R.id.config_list_view).apply {
             adapter = object : BaseAdapter() {
@@ -182,7 +195,7 @@ class ConfigureActivity : BaseActivity() {
             runCatching {
                 startActivity(Intent().apply {
                     action = "android.intent.action.VIEW"
-                    data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon")
+                    data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md")
                     /** 防止顶栈一样重叠在自己的 APP 中 */
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
@@ -190,14 +203,78 @@ class ConfigureActivity : BaseActivity() {
                 toast(msg = "无法启动系统默认浏览器")
             }
         }
+        /** 装载数据 */
+        mockLocalData()
+        /** 更新数据 */
+        onStartRefresh()
+    }
+
+    /** 装载或刷新本地数据 */
+    private fun mockLocalData() {
+        iconAllDatas = IconPackParams(context = this).iconDatas
+        refreshAdapterResult()
+    }
+
+    /** 首次进入或更新数据 */
+    private fun onStartRefresh() =
+        showDialog {
+            title = if (iconAllDatas.isNotEmpty()) "同步列表" else "初始化"
+            msg = (if (iconAllDatas.isNotEmpty()) "建议定期从云端拉取数据以获得最新的通知图标优化名单适配数据。\n\n"
+            else "首次装载需要从云端下载最新适配数据，后续可继续前往这里检查更新。\n\n") +
+                    "[Github] 同步最新数据，无法连接可能需要魔法上网。\n\n[Surge] 缓存 CDN 数据，可以直连，但数据可能会有更新延迟。\n\n" +
+                    "如果以上地址均无法使用，建议魔法上网或修改 Host 文件直连。"
+            confirmButton(text = "Surge") {
+                onRefreshing(url = "https://fankes.mnn.surge.sh/NotifyIconsSupportConfig.json")
+            }
+            cancelButton(text = "Github") {
+                onRefreshing(url = "https://raw.githubusercontent.com/fankes/MIUINativeNotifyIcon/master/iconPack/NotifyIconsSupportConfig.json")
+            }
+            neutralButton(text = "取消")
+        }
+
+    /**
+     * 开始更新数据
+     * @param url 使用的地址
+     */
+    private fun onRefreshing(url: String) {
+        ProgressDialog(this).apply {
+            setDefaultStyle(context = this@ConfigureActivity)
+            setCancelable(false)
+            setTitle("同步中")
+            setMessage("正在同步云端数据")
+            show()
+        }.also {
+            ClientRequestTool.wait(context = this, url) { isDone, content ->
+                it.cancel()
+                IconPackParams(context = this).also { params ->
+                    if (isDone)
+                        if (params.isCompareDifferent(content)) {
+                            params.save(content)
+                            filterText = ""
+                            mockLocalData()
+                            SystemUITool.showNeedUpdateApplySnake(context = this)
+                        } else snake(msg = "列表数据已是最新")
+                    else
+                        showDialog {
+                            title = "连接失败"
+                            msg = "连接失败，错误如下：\n$content"
+                            confirmButton(text = "我知道了")
+                        }
+                }
+            }
+        }
     }
 
     /** 刷新适配器结果相关 */
     private fun refreshAdapterResult() {
+        onChanged?.invoke()
         findViewById<TextView>(R.id.config_title_count_text).text =
             if (filterText.isBlank()) "已适配 ${iconDatas.size} 个 APP 的通知图标"
             else "“${filterText}” 匹配到 ${iconDatas.size} 个结果"
-        findViewById<View>(R.id.config_list_no_data_view).isVisible = iconDatas.isEmpty()
+        findViewById<TextView>(R.id.config_list_no_data_view).apply {
+            text = if (iconAllDatas.isEmpty()) "噫，竟然什么都没有~\n请点击右上角同步按钮获取云端数据" else "噫，竟然什么都没找到~"
+            isVisible = iconDatas.isEmpty()
+        }
     }
 
     /**
@@ -205,8 +282,8 @@ class ConfigureActivity : BaseActivity() {
      * @return [Array]
      */
     private val iconDatas
-        get() = if (filterText.isBlank()) IconPackParams.iconDatas
-        else IconPackParams.iconDatas.filter {
+        get() = if (filterText.isBlank()) iconAllDatas
+        else iconAllDatas.filter {
             it.appName.lowercase().contains(filterText.lowercase()) || it.packageName.lowercase().contains(filterText.lowercase())
-        }.toTypedArray()
+        }
 }

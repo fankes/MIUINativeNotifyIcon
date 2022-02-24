@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fankes.miui.notify">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".application.MNNApplication"
         android:allowBackup="true"

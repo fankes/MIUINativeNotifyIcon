@@ -32,6 +32,7 @@ object HookConst {
     const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
     const val ENABLE_COLOR_ICON_COMPAT = "_color_icon_compat"
     const val ENABLE_NOTIFY_ICON_FIX = "_notify_icon_fix"
+    const val NOTIFY_ICON_DATAS = "_notify_icon_datas"
 
     const val SYSTEMUI_PACKAGE_NAME = "com.android.systemui"
 }
