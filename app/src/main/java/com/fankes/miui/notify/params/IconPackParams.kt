@@ -3680,7 +3680,7 @@ object IconPackParams {
                         "rTVINMQgc9bVKABvZPJv9TTRMedS+ZsdKd50NRJRXf2S3LO2EMDZwEDpaqwdbYV15H++lPswcO5I\n" +
                         "g6XNjNm3kST/s0O5vydzkF5rsFbgMcbvq+5qYOF45G6iiSb+g/gLEOV14rPjSCQAAAAASUVORK5C\n" +
                         "YII=").bitmap,
-                iconColor = 0xff77de7.toInt(),
+                iconColor = 0xff177de7.toInt(),
                 contributorName = "sddpljx"
             ),
             IconDataBean(
