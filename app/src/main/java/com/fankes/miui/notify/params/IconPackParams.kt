@@ -3687,7 +3687,7 @@ object IconPackParams {
                 isEnabled = true,
                 isEnabledAll = false,
                 appName = "小米钱包",
-                packageName = "com.miui.tsmclient",
+                packageName = "com.mipay.wallet",
                 iconBitmap = ("iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
                         "CHwIZIgAAANlSURBVGiBzZk9iFxVFMd/Z8SkiB/gErKmUBGJWESiWcFCo8VKoo0fiR9BjWAIJN0W\n" +
                         "ooUEFFQUbAIipjABTRox2KhFomgWQYtFK0XBZAURY1QQhFVjdn8Wb0bG3ZmduW/u3eevmWLmnPP/\n" +
