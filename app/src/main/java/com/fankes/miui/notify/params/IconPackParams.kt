@@ -27,6 +27,7 @@ import android.graphics.Color
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.HookConst.NOTIFY_ICON_DATAS
 import com.fankes.miui.notify.utils.bitmap
+import com.fankes.miui.notify.utils.safeOf
 import com.fankes.miui.notify.utils.safeOfNan
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
@@ -75,6 +76,16 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
                     }
             }
         }
+
+    /**
+     * 拼接图标数组数据
+     * @param dataJson1 图标数据 JSON
+     * @param dataJson2 图标数据 JSON
+     * @return [String] 拼接后的数据
+     */
+    fun splicingJsonArray(dataJson1: String, dataJson2: String) = safeOf(default = "[]") {
+        dataJson1.replace(oldValue = "]", newValue = "") + "," + dataJson2.replace(oldValue = "[", newValue = "")
+    }
 
     /**
      * 比较图标数据不相等

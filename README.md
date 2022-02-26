@@ -29,16 +29,11 @@ Fix the native notification bar icon function abandoned by the MIUI development 
   [Release](https://github.com/fankes/MIUINativeNotifyIcon/releases)
   及[蓝奏云](https://fankes.lanzouy.com/b030o2e8h)，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
 
-# 开始贡献
+# 贡献通知优化图标
 
-由于国内厂商 APP 的不规范彩色图标影响整体图标的美观，现在开放第三方 APP 的通知图标适配。<br/>
-欢迎为通知图标优化名单贡献宝贵资源！<br/>
+此项目是 `AndroidNotifyIconAdapt` 项目的一部分，详情请参考下方。<br/>
 
-- [CONTRIBUTING](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md)
-
-# 通知测试
-
-你可以 [点击这里](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/tool/NotifyTester.apk) 下载工具测试通知图标是否生效。
+- [AndroidNotifyIconAdapt](https://github.com/fankes/AndroidNotifyIconAdapt)
 
 # 历史背景
 
