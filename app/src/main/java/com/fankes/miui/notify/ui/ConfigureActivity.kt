@@ -195,7 +195,7 @@ class ConfigureActivity : BaseActivity() {
             runCatching {
                 startActivity(Intent().apply {
                     action = "android.intent.action.VIEW"
-                    data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon/blob/master/CONTRIBUTING.md")
+                    data = Uri.parse("https://github.com/fankes/AndroidNotifyIconAdapt/blob/main/CONTRIBUTING.md")
                     /** 防止顶栈一样重叠在自己的 APP 中 */
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
@@ -221,45 +221,45 @@ class ConfigureActivity : BaseActivity() {
             title = if (iconAllDatas.isNotEmpty()) "同步列表" else "初始化"
             msg = (if (iconAllDatas.isNotEmpty()) "建议定期从云端拉取数据以获得最新的通知图标优化名单适配数据。\n\n"
             else "首次装载需要从云端下载最新适配数据，后续可继续前往这里检查更新。\n\n") +
-                    "[Github] 同步最新数据，无法连接可能需要魔法上网。\n\n[Surge] 缓存 CDN 数据，可以直连，但数据可能会有更新延迟。\n\n" +
-                    "如果以上地址均无法使用，建议魔法上网或修改 Host 文件直连。"
-            confirmButton(text = "Surge") {
-                onRefreshing(url = "https://fankes.mnn.surge.sh/NotifyIconsSupportConfig.json")
-            }
-            cancelButton(text = "Github") {
-                onRefreshing(url = "https://raw.githubusercontent.com/fankes/MIUINativeNotifyIcon/master/iconPack/NotifyIconsSupportConfig.json")
-            }
-            neutralButton(text = "取消")
+                    "通过从 Github 同步最新数据，无法连接可能需要魔法上网。"
+            confirmButton(text = "开始同步") { onRefreshing() }
+            cancelButton()
         }
 
-    /**
-     * 开始更新数据
-     * @param url 使用的地址
-     */
-    private fun onRefreshing(url: String) {
+    /** 开始更新数据 */
+    private fun onRefreshing() {
         ProgressDialog(this).apply {
             setDefaultStyle(context = this@ConfigureActivity)
             setCancelable(false)
             setTitle("同步中")
-            setMessage("正在同步云端数据")
+            setMessage("正在同步 OS 数据")
             show()
         }.also {
-            ClientRequestTool.wait(context = this, url) { isDone, content ->
-                it.cancel()
-                IconPackParams(context = this).also { params ->
-                    if (isDone)
-                        if (params.isCompareDifferent(content)) {
-                            params.save(content)
-                            filterText = ""
-                            mockLocalData()
-                            SystemUITool.showNeedUpdateApplySnake(context = this)
-                        } else snake(msg = "列表数据已是最新")
-                    else
-                        showDialog {
-                            title = "连接失败"
-                            msg = "连接失败，错误如下：\n$content"
-                            confirmButton(text = "我知道了")
-                        }
+            ClientRequestTool.wait(
+                context = this,
+                url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main/OS/MIUI/NotifyIconsSupportConfig.json"
+            ) { isDone1, ctOS ->
+                it.setMessage("正在同步 APP 数据")
+                ClientRequestTool.wait(
+                    context = this,
+                    url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main/APP/NotifyIconsSupportConfig.json"
+                ) { isDone2, ctAPP ->
+                    it.cancel()
+                    IconPackParams(context = this).also { params ->
+                        if (isDone1 && isDone2) params.splicingJsonArray(ctOS, ctAPP).also {
+                            if (params.isCompareDifferent(it)) {
+                                params.save(it)
+                                filterText = ""
+                                mockLocalData()
+                                SystemUITool.showNeedUpdateApplySnake(context = this)
+                            } else snake(msg = "列表数据已是最新")
+                        } else
+                            showDialog {
+                                title = "连接失败"
+                                msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
+                                confirmButton(text = "我知道了")
+                            }
+                    }
                 }
             }
         }
