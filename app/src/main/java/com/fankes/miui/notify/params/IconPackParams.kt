@@ -50,11 +50,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
 
     /**
      * 获取图标数据
-     *
-     * 通知栏小图标数组
-     *
-     * 默认使用包名进行匹配 - 若失败则使用 APP 名称进行匹配
-     * @return [Array]
+     * @return [Array] 通知栏小图标数组
      */
     val iconDatas
         get() = ArrayList<IconDataBean>().apply {

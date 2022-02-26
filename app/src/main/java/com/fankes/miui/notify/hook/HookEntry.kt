@@ -70,19 +70,26 @@ class HookEntry : YukiHookXposedInitProxy {
         private const val NotificationHeaderViewWrapperInjectorClass =
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
-        /** MIUI 新版本存在的类 */
-        private const val NotificationHeaderViewWrapperClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
-
-        /** MIUI 新版本存在的类 */
-        private const val NotificationViewWrapperClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
-
-        /** 未确定是否只有旧版本存在的类 */
-        private const val ExpandableNotificationRowClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
-
         /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
+
+        /** 根据多个版本存在不同的包名相同的类 */
+        private val ExpandableNotificationRowClass = VariousClass(
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
+        )
+
+        /** 根据多个版本存在不同的包名相同的类 */
+        private val NotificationViewWrapperClass = VariousClass(
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationViewWrapper",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
+        )
+
+        /** 根据多个版本存在不同的包名相同的类 */
+        private val NotificationHeaderViewWrapperClass = VariousClass(
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
+        )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationUtilClass = VariousClass(
@@ -133,22 +140,26 @@ class HookEntry : YukiHookXposedInitProxy {
         }
 
     /**
+     * 是否为旧版本 MIUI 方案
+     *
+     * 拥有 “handleHeaderViews” 方法
+     * @return [Boolean]
+     */
+    private val PackageParam.hasHandleHeaderViews
+        get() = safeOfFalse {
+            NotificationHeaderViewWrapperClass.clazz.hasMethod(name = "handleHeaderViews")
+        }
+
+    /**
      * 获取当前通知栏的样式
+     *
+     *  - ❗新版本可能不存在这个方法
      * @return [Boolean]
      */
     private val PackageParam.isShowMiuiStyle
         get() = safeOfFalse {
             NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false
         }
-
-    /**
-     * 获取 [ExpandedNotificationClass] 的应用名称
-     * @param instance 通知实例
-     * @return [String]
-     */
-    private fun PackageParam.findAppName(instance: Any?) = safeOf(default = "<unknown>") {
-        ExpandedNotificationClass.clazz.method { name = "getAppName" }.get(instance).invoke() ?: "<empty>"
-    }
 
     /**
      * 适配通知栏、状态栏图标
@@ -163,8 +174,49 @@ class HookEntry : YukiHookXposedInitProxy {
     private fun StatusBarNotification.compatNotifyIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
         /** 给 MIPUSH 设置 APP 自己的图标 */
         if (isXmsf && opPkgName.isNotBlank())
-            context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadIcon(context.packageManager)
+            findAppIcon(context)
         else iconDrawable
+    }
+
+    /**
+     * 获取推送通知的应用名称
+     * @param context 实例
+     * @return [String]
+     */
+    private fun StatusBarNotification.findAppName(context: Context) = safeOf(default = "<unknown>") {
+        context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadLabel(context.packageManager)
+    }
+
+    /**
+     * 获取通知栏、状态栏 APP 图标
+     * @param context 实例
+     * @return [Drawable] 适配的图标
+     */
+    private fun StatusBarNotification.findAppIcon(context: Context) = safeOf(notification.smallIcon.loadDrawable(context)) {
+        context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadIcon(context.packageManager)
+    }
+
+    /**
+     * 打印日志
+     * @param tag 标识
+     * @param context 实例
+     * @param expandedNf 通知实例
+     * @param isCustom 是否为通知优化生效图标
+     * @param isGrayscale 是否为灰度图标
+     */
+    private fun PackageParam.printLogcat(
+        tag: String,
+        context: Context,
+        expandedNf: StatusBarNotification?,
+        isCustom: Boolean,
+        isGrayscale: Boolean
+    ) {
+        if (prefs.getBoolean(ENABLE_MODULE_LOG)) loggerD(
+            msg = "$tag --> [${expandedNf?.findAppName(context)}][${expandedNf?.opPkgName}] " +
+                    "custom [$isCustom] " +
+                    "grayscale [$isGrayscale] " +
+                    "xmsf [${expandedNf?.isXmsf}]"
+        )
     }
 
     /**
@@ -232,6 +284,11 @@ class HookEntry : YukiHookXposedInitProxy {
         if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.also { notifyInstance ->
+            /** 判断是 MIUI 样式就停止 Hook */
+            if (context.isMiuiNotifyStyle) {
+                it(notifyInstance.findAppIcon(context).toBitmap())
+                return@safeRun
+            }
             /** 判断是否不是灰度图标 */
             val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
@@ -241,10 +298,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 run {
                     if (iconDatas.isNotEmpty())
                         iconDatas.forEach {
-                            if ((notifyInstance.opPkgName == it.packageName ||
-                                        findAppName(notifyInstance) == it.appName) &&
-                                isAppNotifyHookOf(it)
-                            ) {
+                            if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
                                 if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it))
                                     customIcon = it.iconBitmap
                                 return@run
@@ -252,8 +306,7 @@ class HookEntry : YukiHookXposedInitProxy {
                         }
                 }
             /** 打印日志 */
-            if (prefs.getBoolean(ENABLE_MODULE_LOG))
-                loggerD(msg = "Icon --> [${findAppName(notifyInstance)}][${notifyInstance.opPkgName}] custom [${customIcon != null}] grayscale [${!isNotGrayscaleIcon}] xmsf [${notifyInstance.isXmsf}]")
+            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, !isNotGrayscaleIcon)
             when {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(customIcon!!)
@@ -273,6 +326,8 @@ class HookEntry : YukiHookXposedInitProxy {
      */
     private fun PackageParam.hookNotifyIconOnSet(context: Context, expandedNf: StatusBarNotification?, iconImageView: ImageView) =
         safeRun(msg = "AutoSetAppIconOnSet") {
+            /** 判断是 MIUI 样式就停止 Hook */
+            if (context.isMiuiNotifyStyle) return@safeRun
             /** 如果没开启修复 APP 的彩色图标 */
             if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
@@ -316,10 +371,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 if (isNotifyIconFix) run {
                     if (iconDatas.isNotEmpty())
                         iconDatas.forEach {
-                            if ((notifyInstance.opPkgName == it.packageName ||
-                                        findAppName(notifyInstance) == it.appName) &&
-                                isAppNotifyHookOf(it)
-                            ) {
+                            if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
                                 if (!isGrayscaleIcon || isAppNotifyHookAllOf(it)) {
                                     customIcon = it.iconBitmap
                                     customIconColor = it.iconColor
@@ -328,6 +380,8 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                         }
                 }
+                /** 打印日志 */
+                printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
                 /** 处理自定义通知图标优化 */
                 if (customIcon != null)
                     iconImageView.apply {
@@ -381,39 +435,37 @@ class HookEntry : YukiHookXposedInitProxy {
      * @return [Boolean] 是否忽略通知图标颜色
      */
     private fun PackageParam.hookIgnoreStatusBarIconColor(context: Context, expandedNf: StatusBarNotification?) =
-        if (prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) safeOfFalse {
-            /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
-            expandedNf?.let { notifyInstance ->
-                /** 获取通知小图标 */
-                val iconDrawable =
-                    notifyInstance.notification.smallIcon.loadDrawable(context)
+        if (!context.isMiuiNotifyStyle)
+            if (prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) safeOfFalse {
+                /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
+                expandedNf?.let { notifyInstance ->
+                    /** 获取通知小图标 */
+                    val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
-                /** 判断是否不是灰度图标 */
-                val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
+                    /** 判断是否不是灰度图标 */
+                    val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
-                /** 获取目标修复彩色图标的 APP */
-                var isTargetFixApp = false
-                /** 如果开启了自定义通知图标优化 */
-                if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
-                    run {
-                        if (iconDatas.isNotEmpty())
-                            iconDatas.forEach {
-                                if ((notifyInstance.opPkgName == it.packageName ||
-                                            findAppName(notifyInstance) == it.appName) &&
-                                    isAppNotifyHookOf(it)
-                                ) {
-                                    if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
-                                    return@run
+                    /** 获取目标修复彩色图标的 APP */
+                    var isTargetFixApp = false
+                    /** 如果开启了自定义通知图标优化 */
+                    if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
+                        run {
+                            if (iconDatas.isNotEmpty())
+                                iconDatas.forEach {
+                                    if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
+                                        if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
+                                        return@run
+                                    }
                                 }
-                            }
-                    }
-                /**
-                 * 只要不是灰度就返回彩色图标
-                 * 否则不对颜色进行反色处理防止一些系统图标出现异常
-                 */
-                if (isTargetFixApp) false else isNotGrayscaleIcon
-            } ?: true
-        } else false
+                        }
+                    /**
+                     * 只要不是灰度就返回彩色图标
+                     * 否则不对颜色进行反色处理防止一些系统图标出现异常
+                     */
+                    if (isTargetFixApp) false else isNotGrayscaleIcon
+                } ?: true
+            } else false
+        else true
 
     override fun onHook() = encase {
         configs {
@@ -443,10 +495,10 @@ class HookEntry : YukiHookXposedInitProxy {
                                 param(ExpandedNotificationClass.clazz)
                             }
                             /**
-                             * 因为之前的 MIUI 版本的状态栏图标颜色会全部设置为白色的 - 找不到修复的地方就直接判断版本了
-                             * 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook
+                             * 为了防止 MIUI 自身的版本不同造成的各种 BUG
+                             * 判断是 MIUI 样式就停止 Hook
                              */
-                            replaceAny { if (hasIgnoreStatusBarIconColor) false else isShowMiuiStyle }
+                            replaceAny { globalContext?.isMiuiNotifyStyle ?: isShowMiuiStyle }
                         }
                         if (hasIgnoreStatusBarIconColor)
                             injectMember {
@@ -478,86 +530,71 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }.onFind { isUseLegacy = true }
                             }
                             afterHook {
-                                /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                if (hasIgnoreStatusBarIconColor || !isShowMiuiStyle)
-                                    (globalContext ?: args[0] as Context).also { context ->
-                                        hookSmallIconOnSet(
-                                            context = context,
-                                            args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?,
-                                            (result as Icon).loadDrawable(context)
-                                        ) { icon -> result = Icon.createWithBitmap(icon) }
-                                    }
+                                (globalContext ?: args[0] as Context).also { context ->
+                                    hookSmallIconOnSet(
+                                        context = context,
+                                        args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?,
+                                        (result as Icon).loadDrawable(context)
+                                    ) { icon -> result = Icon.createWithBitmap(icon) }
+                                }
                             }
                         }
                     }
-                    if (NotificationHeaderViewWrapperInjectorClass.hasClass)
-                        NotificationHeaderViewWrapperInjectorClass.hook {
-                            /** 修复下拉通知图标自动设置回 APP 图标的方法 */
-                            injectMember {
-                                var isUseLegacy = false
+                    NotificationHeaderViewWrapperClass.hook {
+                        /** 修复下拉通知图标自动设置回 APP 图标的方法 */
+                        injectMember {
+                            if (hasHandleHeaderViews)
+                                method { name = "handleHeaderViews" }
+                            else method { name = "resolveHeaderViews" }
+                            afterHook {
+                                /** 获取小图标 */
+                                val iconImageView =
+                                    NotificationHeaderViewWrapperClass.clazz
+                                        .field { name = "mIcon" }.of<ImageView>(instance) ?: return@afterHook
+
+                                /**
+                                 * 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass]
+                                 * 获取其中的得到通知方法
+                                 */
+                                val expandedNf = ExpandableNotificationRowClass.clazz
+                                    .method { name = "getEntry" }
+                                    .get(NotificationViewWrapperClass.clazz.field {
+                                        name = "mRow"
+                                    }.get(instance).self).call()?.let {
+                                        it.javaClass.method {
+                                            name = "getSbn"
+                                        }.get(it).invoke<StatusBarNotification>()
+                                    } ?: ExpandableNotificationRowClass.clazz
+                                    .method { name = "getStatusBarNotification" }
+                                    .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(instance).self)
+                                    .invoke<StatusBarNotification>()
+                                /** 执行 Hook */
+                                hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView)
+                            }
+                        }
+                    }
+                    /** 干掉下拉通知图标自动设置回 APP 图标的方法 */
+                    NotificationHeaderViewWrapperInjectorClass.hook {
+                        injectMember {
+                            method {
+                                name = "setAppIcon"
+                                param(ContextClass, ImageViewClass, ExpandedNotificationClass.clazz)
+                            }.remedys {
                                 method {
                                     name = "setAppIcon"
-                                    param(ContextClass, ImageViewClass, ExpandedNotificationClass.clazz)
-                                }.remedys {
-                                    method {
-                                        name = "setAppIcon"
-                                        param(ImageViewClass, ExpandedNotificationClass.clazz)
-                                    }.onFind { isUseLegacy = true }
-                                }
-                                replaceUnit {
-                                    if (isUseLegacy)
-                                        hookNotifyIconOnSet(
-                                            context = globalContext ?: error("GlobalContext got null"),
-                                            args[1] as? StatusBarNotification?,
-                                            args[0] as ImageView
-                                        )
-                                    else
-                                        hookNotifyIconOnSet(
-                                            context = args[0] as? Context ?: globalContext ?: error("GlobalContext got null"),
-                                            args[2] as? StatusBarNotification?,
-                                            args[1] as ImageView
-                                        )
-
+                                    param(ImageViewClass, ExpandedNotificationClass.clazz)
                                 }
                             }
-                            /** 干掉下拉通知图标自动设置回 APP 图标的方法 - Android 12 */
-                            if (isUpperOfAndroidS)
-                                injectMember {
-                                    method {
-                                        name = "resetIconBgAndPaddings"
-                                        param(ImageViewClass, ExpandedNotificationClass.clazz)
-                                    }
-                                    intercept()
-                                }
-                        }
-                    else
-                        NotificationHeaderViewWrapperClass.hook {
-                            /** 之前的版本解决方案 */
-                            injectMember {
-                                method { name = "handleHeaderViews" }
-                                afterHook {
-                                    /** 对于之前没有通知图标色彩判断功能的版本判断是 MIUI 样式就停止 Hook */
-                                    if (!hasIgnoreStatusBarIconColor && isShowMiuiStyle) return@afterHook
-
-                                    /** 获取小图标 */
-                                    val iconImageView =
-                                        NotificationHeaderViewWrapperClass.clazz
-                                            .field { name = "mIcon" }.of<ImageView>(instance) ?: return@afterHook
-
-                                    /**
-                                     * 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass]
-                                     * 获取其中的得到通知方法
-                                     */
-                                    val expandedNf =
-                                        ExpandableNotificationRowClass.clazz
-                                            .method { name = "getStatusBarNotification" }
-                                            .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(instance).self)
-                                            .invoke<StatusBarNotification>()
-                                    /** 执行 Hook */
-                                    hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView)
-                                }
+                            intercept()
+                        }.ignoredAllFailure()
+                        injectMember {
+                            method {
+                                name = "resetIconBgAndPaddings"
+                                param(ImageViewClass, ExpandedNotificationClass.clazz)
                             }
-                        }
+                            intercept()
+                        }.ignoredAllFailure()
+                    }
                 }
             }
         }

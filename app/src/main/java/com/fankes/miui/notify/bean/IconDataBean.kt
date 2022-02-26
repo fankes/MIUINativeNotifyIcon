@@ -28,7 +28,7 @@ import java.io.Serializable
 
 /**
  * 通知栏小图标 bean
- * @param appName APP 名称 - 仅限默认语言区域
+ * @param appName APP 名称
  * @param packageName 包名
  * @param iconBitmap 图标位图
  * @param iconColor 通知栏中显示的图标颜色 - 设置为 0 使用系统默认颜色

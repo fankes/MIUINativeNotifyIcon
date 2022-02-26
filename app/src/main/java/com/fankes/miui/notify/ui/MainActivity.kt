@@ -93,11 +93,7 @@ class MainActivity : BaseActivity() {
                     noCancelable()
                 }
             /** 判断是否 Hook */
-            YukiHookModuleStatus.isActive() -> {
-                findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(R.drawable.bg_green_round)
-                findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(R.mipmap.ic_success)
-                findViewById<TextView>(R.id.main_text_status).text = "模块已激活"
-            }
+            YukiHookModuleStatus.isActive() -> {}
             else ->
                 showDialog {
                     title = "模块没有激活"
@@ -208,16 +204,56 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    /** 刷新模块状态 */
+    private fun refreshModuleStatus() {
+        findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(
+            when {
+                YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> R.drawable.bg_yellow_round
+                YukiHookModuleStatus.isActive() -> R.drawable.bg_green_round
+                else -> R.drawable.bg_dark_round
+            }
+        )
+        findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(
+            when {
+                YukiHookModuleStatus.isActive() && !isMiuiNotifyStyle -> R.mipmap.ic_success
+                else -> R.mipmap.ic_warn
+            }
+        )
+        findViewById<TextView>(R.id.main_text_status).text =
+            when {
+                YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> "模块已激活，但未在工作"
+                YukiHookModuleStatus.isActive() -> "模块已激活"
+                else -> "模块未激活"
+            }
+    }
+
     override fun onResume() {
         super.onResume()
-        /** MIUI 12 的版本特殊 - 所以给出提示 */
-        if (!isWarnDialogShowing && YukiHookModuleStatus.isActive() && miuiVersion == "12" && isMiuiNotifyStyle)
+        /** 刷新模块状态 */
+        refreshModuleStatus()
+        /** 经典样式启用后给出警告 */
+        if (!isWarnDialogShowing && YukiHookModuleStatus.isActive() && isMiuiNotifyStyle)
             showDialog {
                 isWarnDialogShowing = true
                 title = "经典通知栏样式已启用"
-                msg = "在 MIUI 12 中启用了经典通知栏样式后状态栏图标将不再做原生处理，模块停止工作，" +
-                        "这取决于系统设置，你应当在 设置>通知管理>通知显示设置 中将样式设置为“原生样式”。"
-                confirmButton(text = "我知道了") { isWarnDialogShowing = false }
+                msg = "当你启用了经典通知栏样式后，为防止 MIUI 自身不规范 APP 图标被破坏，状态栏图标将不再做原生处理。\n\n" +
+                        "若要使用原生样式，请前往 设置>通知管理>通知显示设置 中将样式设置为“原生样式”，新版本为 设置>通知与控制中心>通知显示设置。"
+                confirmButton(text = "去设置") {
+                    runCatching {
+                        startActivity(Intent().apply {
+                            component = ComponentName(
+                                "com.miui.notification",
+                                "miui.notification.management.activity.NotificationDisplaySettingsActivity"
+                            )
+                            /** 防止顶栈一样重叠在自己的 APP 中 */
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+                    }.onFailure {
+                        toast(msg = "启动失败，请手动调整设置")
+                    }
+                    isWarnDialogShowing = false
+                }
+                cancelButton { isWarnDialogShowing = false }
                 noCancelable()
             }
     }
