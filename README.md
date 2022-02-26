@@ -29,7 +29,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
   [Release](https://github.com/fankes/MIUINativeNotifyIcon/releases)
   及[蓝奏云](https://fankes.lanzouy.com/b030o2e8h)，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
 
-# 贡献通知优化图标
+# 贡献通知图标优化名单
 
 此项目是 `AndroidNotifyIconAdapt` 项目的一部分，详情请参考下方。<br/>
 
