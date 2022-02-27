@@ -56,7 +56,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
     val iconDatas
         get() = ArrayList<IconDataBean>().apply {
             storageDataJson?.also {
-                if (it.isNotBlank())
+                if (it.isNotBlank()) runCatching {
                     JSONArray(it).also { array ->
                         for (i in 0 until array.length()) runCatching {
                             (array.get(i) as JSONObject).apply {
@@ -74,6 +74,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
                             }
                         }
                     }
+                }
             }
         }
 
