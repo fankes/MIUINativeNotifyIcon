@@ -265,6 +265,28 @@ class HookEntry : YukiHookXposedInitProxy {
         }
 
     /**
+     * 自动适配状态栏、通知栏自定义小图标
+     * @param isGrayscaleIcon 是否为灰度图标
+     * @param packageName APP 包名
+     * @return [Pair] - ([Bitmap] 位图,[Int] 颜色)
+     */
+    private fun PackageParam.compatCustomIcon(isGrayscaleIcon: Boolean, packageName: String): Pair<Bitmap?, Int> {
+        var customPair: Pair<Bitmap?, Int>? = null
+        if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
+            run {
+                if (iconDatas.isNotEmpty())
+                    iconDatas.forEach {
+                        if (packageName == it.packageName && isAppNotifyHookOf(it)) {
+                            if (!isGrayscaleIcon || isAppNotifyHookAllOf(it))
+                                customPair = Pair(it.iconBitmap, it.iconColor)
+                            return@run
+                        }
+                    }
+            }
+        return customPair ?: Pair(null, 0)
+    }
+
+    /**
      * Hook 状态栏小图标
      *
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
@@ -293,23 +315,12 @@ class HookEntry : YukiHookXposedInitProxy {
             val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
             /** 目标彩色通知 APP 图标 */
-            var customIcon: Bitmap? = null
-            if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
-                run {
-                    if (iconDatas.isNotEmpty())
-                        iconDatas.forEach {
-                            if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
-                                if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it))
-                                    customIcon = it.iconBitmap
-                                return@run
-                            }
-                        }
-                }
+            val customIcon = compatCustomIcon(!isNotGrayscaleIcon, notifyInstance.opPkgName).first
             /** 打印日志 */
             printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, !isNotGrayscaleIcon)
             when {
                 /** 处理自定义通知图标优化 */
-                customIcon != null -> it(customIcon!!)
+                customIcon != null -> it(customIcon)
                 /** 若不是灰度图标自动处理为圆角 */
                 isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable).toBitmap())
             }
@@ -332,9 +343,6 @@ class HookEntry : YukiHookXposedInitProxy {
             if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             expandedNf?.let { notifyInstance ->
-                /** 是否开启修复 APP 的彩色图标 */
-                val isNotifyIconFix = prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-
                 /** 新版风格反色 */
                 val newStyle = if (context.isSystemInDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
 
@@ -363,22 +371,13 @@ class HookEntry : YukiHookXposedInitProxy {
                 val isGrayscaleIcon = !notifyInstance.isXmsf && isGrayscaleIcon(context, iconDrawable)
 
                 /** 自定义默认小图标 */
-                var customIcon: Bitmap? = null
+                var customIcon: Bitmap?
 
                 /** 自定义默认小图标颜色 */
-                var customIconColor = 0
-
-                if (isNotifyIconFix) run {
-                    if (iconDatas.isNotEmpty())
-                        iconDatas.forEach {
-                            if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
-                                if (!isGrayscaleIcon || isAppNotifyHookAllOf(it)) {
-                                    customIcon = it.iconBitmap
-                                    customIconColor = it.iconColor
-                                    return@run
-                                }
-                            }
-                        }
+                var customIconColor: Int
+                compatCustomIcon(isGrayscaleIcon, notifyInstance.opPkgName).also {
+                    customIcon = it.first
+                    customIconColor = it.second
                 }
                 /** 打印日志 */
                 printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
@@ -446,18 +445,7 @@ class HookEntry : YukiHookXposedInitProxy {
                     val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
 
                     /** 获取目标修复彩色图标的 APP */
-                    var isTargetFixApp = false
-                    /** 如果开启了自定义通知图标优化 */
-                    if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
-                        run {
-                            if (iconDatas.isNotEmpty())
-                                iconDatas.forEach {
-                                    if (notifyInstance.opPkgName == it.packageName && isAppNotifyHookOf(it)) {
-                                        if (isNotGrayscaleIcon || isAppNotifyHookAllOf(it)) isTargetFixApp = true
-                                        return@run
-                                    }
-                                }
-                        }
+                    val isTargetFixApp = compatCustomIcon(!isNotGrayscaleIcon, notifyInstance.opPkgName).first != null
                     /**
                      * 只要不是灰度就返回彩色图标
                      * 否则不对颜色进行反色处理防止一些系统图标出现异常
