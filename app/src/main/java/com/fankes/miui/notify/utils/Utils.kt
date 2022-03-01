@@ -27,6 +27,7 @@ package com.fankes.miui.notify.utils
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -34,6 +35,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
@@ -275,6 +277,26 @@ fun Context.snake(msg: String, actionText: String = "", it: () -> Unit = {}) =
             setActionTextColor(Color.WHITE)
             setAction(actionText) { it() }
         }.show()
+
+/**
+ * 启动系统浏览器
+ * @param url 网址
+ * @param packageName 指定包名 - 可不填
+ */
+fun Context.openBrowser(url: String, packageName: String = "") =
+    runCatching {
+        startActivity(Intent().apply {
+            if (packageName.isNotBlank()) setPackage(packageName)
+            action = Intent.ACTION_VIEW
+            data = Uri.parse(url)
+            /** 防止顶栈一样重叠在自己的 APP 中 */
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        })
+    }.onFailure {
+        if (packageName.isNotBlank())
+            snake(msg = "启动 $packageName 失败")
+        else snake(msg = "启动系统浏览器失败")
+    }
 
 /**
  * 忽略异常返回值

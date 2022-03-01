@@ -20,11 +20,15 @@
  *
  * This file is Created by fankes on 2022/2/25.
  */
-@file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager")
+@file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager", "DEPRECATION")
 
 package com.fankes.miui.notify.utils
 
 import android.app.Activity
+import android.app.ProgressDialog
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
 import java.io.IOException
@@ -36,6 +40,38 @@ import javax.net.ssl.*
  * 网络请求管理类
  */
 object ClientRequestTool {
+
+    /**
+     * 检查网络连接情况
+     * @param context 实例
+     * @param it 已连接回调
+     */
+    fun checkingInternetConnect(context: Activity, it: () -> Unit) =
+        ProgressDialog(context).apply {
+            setDefaultStyle(context)
+            setCancelable(false)
+            setTitle("准备中")
+            setMessage("正在检查网络连接情况")
+        }.apply {
+            wait(context, url = "https://www.baidu.com") { isDone, _ ->
+                cancel()
+                if (isDone) it() else
+                    context.showDialog {
+                        title = "网络不可用"
+                        msg = "无法连接到互联网，请检查你当前的设备是否可以上网，且没有在手机管家中禁用本模块的联网权限。"
+                        confirmButton(text = "检查设置") {
+                            runCatching {
+                                context.startActivity(Intent().apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                })
+                            }.onFailure { context.snake(msg = "启动应用信息页面失败") }
+                        }
+                        cancelButton()
+                    }
+            }
+        }.show()
 
     /**
      * 发送 GET 请求内容并等待

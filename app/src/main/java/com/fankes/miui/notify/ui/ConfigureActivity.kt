@@ -25,8 +25,6 @@
 package com.fankes.miui.notify.ui
 
 import android.app.ProgressDialog
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -50,6 +48,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class ConfigureActivity : BaseActivity() {
+
+    /** 访问请求链接 */
+    private var rawGithubUrl = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
     /** 当前筛选条件 */
     private var filterText = ""
@@ -192,16 +193,7 @@ class ConfigureActivity : BaseActivity() {
         }
         /** 设置点击事件 */
         findViewById<View>(R.id.config_cbr_button).setOnClickListener {
-            runCatching {
-                startActivity(Intent().apply {
-                    action = "android.intent.action.VIEW"
-                    data = Uri.parse("https://github.com/fankes/AndroidNotifyIconAdapt/blob/main/CONTRIBUTING.md")
-                    /** 防止顶栈一样重叠在自己的 APP 中 */
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }.onFailure {
-                toast(msg = "无法启动系统默认浏览器")
-            }
+            openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt/blob/main/CONTRIBUTING.md")
         }
         /** 装载数据 */
         mockLocalData()
@@ -227,7 +219,7 @@ class ConfigureActivity : BaseActivity() {
         }
 
     /** 开始更新数据 */
-    private fun onRefreshing() {
+    private fun onRefreshing() = ClientRequestTool.checkingInternetConnect(context = this) {
         ProgressDialog(this).apply {
             setDefaultStyle(context = this@ConfigureActivity)
             setCancelable(false)
@@ -237,12 +229,12 @@ class ConfigureActivity : BaseActivity() {
         }.also {
             ClientRequestTool.wait(
                 context = this,
-                url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main/OS/MIUI/NotifyIconsSupportConfig.json"
+                url = "$rawGithubUrl/OS/MIUI/NotifyIconsSupportConfig.json"
             ) { isDone1, ctOS ->
                 it.setMessage("正在同步 APP 数据")
                 ClientRequestTool.wait(
                     context = this,
-                    url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main/APP/NotifyIconsSupportConfig.json"
+                    url = "$rawGithubUrl/APP/NotifyIconsSupportConfig.json"
                 ) { isDone2, ctAPP ->
                     it.cancel()
                     IconPackParams(context = this).also { params ->
@@ -253,12 +245,14 @@ class ConfigureActivity : BaseActivity() {
                                 mockLocalData()
                                 SystemUITool.showNeedUpdateApplySnake(context = this)
                             } else snake(msg = "列表数据已是最新")
-                        } else
-                            showDialog {
-                                title = "连接失败"
-                                msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
-                                confirmButton(text = "我知道了")
+                        } else showDialog {
+                            title = "连接失败"
+                            msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
+                            confirmButton(text = "解决方案") {
+                                openBrowser(url = "https://www.baidu.com/s?wd=github%2Braw%2B%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE")
                             }
+                            cancelButton()
+                        }
                     }
                 }
             }

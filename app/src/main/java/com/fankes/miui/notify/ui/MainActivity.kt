@@ -27,7 +27,6 @@ package com.fankes.miui.notify.ui
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -177,30 +176,11 @@ class MainActivity : BaseActivity() {
         findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 恰饭！ */
         findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
-            runCatching {
-                startActivity(Intent().apply {
-                    setPackage("com.coolapk.market")
-                    action = "android.intent.action.VIEW"
-                    data = Uri.parse("https://www.coolapk.com/u/876977")
-                    /** 防止顶栈一样重叠在自己的 APP 中 */
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }.onFailure {
-                toast(msg = "你可能没有安装酷安")
-            }
+            openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
         /** 项目地址点击事件 */
         findViewById<View>(R.id.link_with_project_address).setOnClickListener {
-            runCatching {
-                startActivity(Intent().apply {
-                    action = "android.intent.action.VIEW"
-                    data = Uri.parse("https://github.com/fankes/MIUINativeNotifyIcon")
-                    /** 防止顶栈一样重叠在自己的 APP 中 */
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }.onFailure {
-                toast(msg = "无法启动系统默认浏览器")
-            }
+            openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
         }
     }
 
