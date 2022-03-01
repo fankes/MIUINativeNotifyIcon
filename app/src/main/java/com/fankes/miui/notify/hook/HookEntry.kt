@@ -595,14 +595,14 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }
                             }
                             intercept()
-                        }
+                        }.ignoredHookingFailure()
                         injectMember {
                             method {
                                 name = "resetIconBgAndPaddings"
                                 param(ImageViewClass, ExpandedNotificationClass.clazz)
                             }
                             intercept()
-                        }
+                        }.ignoredHookingFailure()
                     }.ignoredHookClassNotFoundFailure()
                 }
             }
