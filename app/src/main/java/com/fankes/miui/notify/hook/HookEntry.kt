@@ -261,9 +261,7 @@ class HookEntry : YukiHookXposedInitProxy {
      */
     private val PackageParam.globalContext
         get() = safeOfNull {
-            if (SystemUIApplicationClass.clazz.hasMethod(name = "getContext"))
-                SystemUIApplicationClass.clazz.method { name = "getContext" }.get().invoke<Context>()
-            else null
+            SystemUIApplicationClass.clazz.method { name = "getContext" }.ignoredError().get().invoke<Context>()
         }
 
     /**
@@ -505,7 +503,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 replaceAny {
                                     hookIgnoreStatusBarIconColor(
                                         context = globalContext ?: error("GlobalContext got null"),
-                                        expandedNf = args[0] as? StatusBarNotification?
+                                        expandedNf = firstArgs as? StatusBarNotification?
                                     )
                                 }
                             }
@@ -526,7 +524,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }.onFind { isUseLegacy = true }
                             }
                             afterHook {
-                                (globalContext ?: args[0] as Context).also { context ->
+                                (globalContext ?: firstArgs as Context).also { context ->
                                     hookSmallIconOnSet(
                                         context = context,
                                         args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?,
@@ -597,15 +595,15 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }
                             }
                             intercept()
-                        }.ignoredAllFailure()
+                        }
                         injectMember {
                             method {
                                 name = "resetIconBgAndPaddings"
                                 param(ImageViewClass, ExpandedNotificationClass.clazz)
                             }
                             intercept()
-                        }.ignoredAllFailure()
-                    }
+                        }
+                    }.ignoredHookClassNotFoundFailure()
                 }
             }
         }
