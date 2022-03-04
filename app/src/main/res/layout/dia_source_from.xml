@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="15dp"
+    android:paddingTop="15dp"
+    android:paddingRight="15dp"
+    tools:ignore="HardcodedText">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8.5dp"
+        android:layout_marginRight="8.5dp"
+        android:layout_marginBottom="10dp"
+        android:lineSpacingExtra="6dp"
+        android:text="在线规则将不定期更新，建议定期同步列表以适配更多 APP，若无法同步请自行寻找解决方法或魔法上网。"
+        android:textSize="14sp" />
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/dia_sf_rd1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="从 FastGit 获取" />
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/dia_sf_rd2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="从 Github Raw 获取" />
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/dia_sf_rd3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="从自定义地址获取" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/dia_sf_text_lin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/dia_sf_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:hint="请输入在线地址 URL"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

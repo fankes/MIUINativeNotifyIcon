@@ -79,7 +79,7 @@ object ClientRequestTool {
      * @param url 请求地址
      * @param it 回调 - ([Boolean] 是否成功,[String] 成功的内容或失败消息)
      */
-    fun wait(context: Activity, url: String, it: (Boolean, String) -> Unit) {
+    fun wait(context: Activity, url: String, it: (Boolean, String) -> Unit) = runCatching {
         OkHttpClient().newBuilder().apply {
             SSLSocketClient.sSLSocketFactory?.let { sslSocketFactory(it, SSLSocketClient.trustManager) }
             hostnameVerifier(SSLSocketClient.hostnameVerifier)
@@ -98,7 +98,7 @@ object ClientRequestTool {
                 context.runOnUiThread { it(true, bodyString) }
             }
         })
-    }
+    }.onFailure { it(false, "URL 无效") }
 
     /**
      * 自动信任 SSL 证书

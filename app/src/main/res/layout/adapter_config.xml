@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_permotion_round"
     android:baselineAligned="false"
+    android:descendantFocusability="blocksDescendants"
     android:gravity="center|start"
     android:orientation="horizontal"
     android:padding="15dp"

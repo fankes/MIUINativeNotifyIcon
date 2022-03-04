@@ -34,5 +34,12 @@ object HookConst {
     const val ENABLE_NOTIFY_ICON_FIX = "_notify_icon_fix"
     const val NOTIFY_ICON_DATAS = "_notify_icon_datas"
 
+    const val SOURCE_SYNC_WAY = "_source_sync_way"
+    const val SOURCE_SYNC_WAY_CUSTOM_URL = "_source_sync_way_custom_url"
+
+    const val TYPE_SOURCE_SYNC_WAY_1 = 1000
+    const val TYPE_SOURCE_SYNC_WAY_2 = 2000
+    const val TYPE_SOURCE_SYNC_WAY_3 = 3000
+
     const val SYSTEMUI_PACKAGE_NAME = "com.android.systemui"
 }

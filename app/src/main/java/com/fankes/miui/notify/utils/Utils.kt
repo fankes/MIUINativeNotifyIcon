@@ -26,6 +26,8 @@ package com.fankes.miui.notify.utils
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
@@ -48,6 +50,7 @@ import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.loggerE
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
+import java.io.ByteArrayOutputStream
 
 /**
  * 系统深色模式是否开启
@@ -199,6 +202,17 @@ fun Number.dp(context: Context) = toFloat() * context.resources.displayMetrics.d
  * Base64 加密
  * @return [String]
  */
+val Bitmap.base64
+    get() = safeOfNothing {
+        val baos = ByteArrayOutputStream()
+        compress(Bitmap.CompressFormat.PNG, 100, baos)
+        Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
+    }
+
+/**
+ * Base64 加密
+ * @return [String]
+ */
 val String.base64: String get() = Base64.encodeToString(toByteArray(), Base64.DEFAULT)
 
 /**
@@ -297,6 +311,19 @@ fun Context.openBrowser(url: String, packageName: String = "") =
             snake(msg = "启动 $packageName 失败")
         else snake(msg = "启动系统浏览器失败")
     }
+
+/**
+ * 复制到剪贴板
+ * @param content 要复制的文本
+ */
+fun Context.copyToClipboard(content: String) = runCatching {
+    (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
+        setPrimaryClip(ClipData.newPlainText(null, content))
+        (primaryClip?.getItemAt(0)?.text ?: "").also {
+            if (it != content) snake(msg = "复制失败") else snake(msg = "已复制")
+        }
+    }
+}
 
 /**
  * 忽略异常返回值
