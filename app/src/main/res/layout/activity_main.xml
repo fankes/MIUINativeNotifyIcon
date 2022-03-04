@@ -95,7 +95,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:alpha="0.8"
-                android:text="MIUI 版本：%1"
+                android:text="系统版本：%1"
                 android:textColor="@color/white"
                 android:textSize="13sp" />
         </LinearLayout>

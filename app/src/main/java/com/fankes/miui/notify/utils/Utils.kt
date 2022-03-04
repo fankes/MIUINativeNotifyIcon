@@ -151,8 +151,35 @@ val miuiVersion
  * @return [String]
  */
 val miuiFullVersion
-    get() = if (isMIUI) (miuiVersion + " " + findPropString(key = "ro.system.build.version.incremental"))
-    else "不是 MIUI 系统"
+    get() = if (isMIUI) findPropString(key = "ro.system.build.version.incremental").let {
+        if (it.lowercase().contains("a") ||
+            it.lowercase().contains("b") ||
+            it.lowercase().contains("c") ||
+            it.lowercase().contains("d") ||
+            it.lowercase().contains("e") ||
+            it.lowercase().contains("f") ||
+            it.lowercase().contains("g") ||
+            it.lowercase().contains("h") ||
+            it.lowercase().contains("i") ||
+            it.lowercase().contains("j") ||
+            it.lowercase().contains("k") ||
+            it.lowercase().contains("l") ||
+            it.lowercase().contains("m") ||
+            it.lowercase().contains("n") ||
+            it.lowercase().contains("o") ||
+            it.lowercase().contains("p") ||
+            it.lowercase().contains("q") ||
+            it.lowercase().contains("r") ||
+            it.lowercase().contains("s") ||
+            it.lowercase().contains("t") ||
+            it.lowercase().contains("u") ||
+            it.lowercase().contains("v") ||
+            it.lowercase().contains("w") ||
+            it.lowercase().contains("x") ||
+            it.lowercase().contains("y") ||
+            it.lowercase().contains("z")
+        ) "$it 稳定版" else "V$miuiVersion $it 开发版"
+    } else "不是 MIUI 系统"
 
 /**
  * 得到安装包信息
