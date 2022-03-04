@@ -50,7 +50,7 @@ import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 class ConfigureActivity : BaseActivity() {
 
     /** 访问请求链接 */
-    private var rawGithubUrl = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
+    private var rawGithubUrl = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main"
 
     /** 当前筛选条件 */
     private var filterText = ""
