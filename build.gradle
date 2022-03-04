@@ -1,12 +1,12 @@
 plugins {
-    id 'com.android.application' version '7.1.1' apply false
-    id 'com.android.library' version '7.1.1' apply false
+    id 'com.android.application' version '7.1.2' apply false
+    id 'com.android.library' version '7.1.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
 }
 
 ext {
-    appVersionName = "1.87"
-    appVersionCode = 20
+    appVersionName = "1.9"
+    appVersionCode = 21
 }
 
 task clean(type: Delete) {
