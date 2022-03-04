@@ -34,8 +34,14 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isVisible
+import androidx.core.widget.doOnTextChanged
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.IconDataBean
+import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY
+import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY_CUSTOM_URL
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_1
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.hook.factory.putAppNotifyHookAllOf
@@ -44,13 +50,12 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.*
 import com.fankes.miui.notify.view.MaterialSwitch
+import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textfield.TextInputEditText
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class ConfigureActivity : BaseActivity() {
-
-    /** 访问请求链接 */
-    private var rawGithubUrl = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main"
 
     /** 当前筛选条件 */
     private var filterText = ""
@@ -188,7 +193,18 @@ class ConfigureActivity : BaseActivity() {
                     lateinit var switchOpen: MaterialSwitch
                     lateinit var switchAll: MaterialSwitch
                 }
-            }.apply { onChanged = { notifyDataSetChanged() } }
+            }.apply {
+                setOnItemLongClickListener { _, _, p, _ ->
+                    showDialog {
+                        title = "复制“${iconDatas[p].appName}”的规则"
+                        msg = "是否复制单条规则到剪贴板？"
+                        confirmButton { copyToClipboard(iconDatas[p].toString()) }
+                        cancelButton()
+                    }
+                    true
+                }
+                onChanged = { notifyDataSetChanged() }
+            }
             onScrollEvent = { post { setSelection(if (it) iconDatas.lastIndex else 0) } }
         }
         /** 设置点击事件 */
@@ -210,16 +226,99 @@ class ConfigureActivity : BaseActivity() {
     /** 首次进入或更新数据 */
     private fun onStartRefresh() =
         showDialog {
-            title = if (iconAllDatas.isNotEmpty()) "同步列表" else "初始化"
-            msg = (if (iconAllDatas.isNotEmpty()) "建议定期从云端拉取数据以获得最新的通知图标优化名单适配数据。\n\n"
-            else "首次装载需要从云端下载最新适配数据，后续可继续前往这里检查更新。\n\n") +
-                    "通过从 Github 同步最新数据，无法连接可能需要魔法上网。"
-            confirmButton(text = "开始同步") { onRefreshing() }
+            title = "同步列表"
+            var sourceType = modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
+            var customUrl = modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL)
+            addView(R.layout.dia_source_from).apply {
+                val radio1 = findViewById<MaterialRadioButton>(R.id.dia_sf_rd1)
+                val radio2 = findViewById<MaterialRadioButton>(R.id.dia_sf_rd2)
+                val radio3 = findViewById<MaterialRadioButton>(R.id.dia_sf_rd3)
+                val edLin = findViewById<View>(R.id.dia_sf_text_lin)
+                findViewById<TextInputEditText>(R.id.dia_sf_text).apply {
+                    if (customUrl.isNotBlank()) {
+                        setText(customUrl)
+                        setSelection(customUrl.length)
+                    }
+                    doOnTextChanged { text, _, _, _ ->
+                        customUrl = text.toString()
+                        modulePrefs.putString(SOURCE_SYNC_WAY_CUSTOM_URL, text.toString())
+                    }
+                }
+                edLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
+                radio1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
+                radio2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
+                radio3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
+                radio1.setOnClickListener {
+                    radio2.isChecked = false
+                    radio3.isChecked = false
+                    edLin.isVisible = false
+                    sourceType = TYPE_SOURCE_SYNC_WAY_1
+                    modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
+                }
+                radio2.setOnClickListener {
+                    radio1.isChecked = false
+                    radio3.isChecked = false
+                    edLin.isVisible = false
+                    sourceType = TYPE_SOURCE_SYNC_WAY_2
+                    modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_2)
+                }
+                radio3.setOnClickListener {
+                    radio1.isChecked = false
+                    radio2.isChecked = false
+                    edLin.isVisible = true
+                    sourceType = TYPE_SOURCE_SYNC_WAY_3
+                    modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_3)
+                }
+            }
+            confirmButton {
+                when (sourceType) {
+                    TYPE_SOURCE_SYNC_WAY_1 -> onRefreshing(url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main")
+                    TYPE_SOURCE_SYNC_WAY_2 -> onRefreshing(url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main")
+                    TYPE_SOURCE_SYNC_WAY_3 ->
+                        if (customUrl.isNotBlank())
+                            if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
+                                onRefreshingCustom(customUrl)
+                            else snake(msg = "同步地址不是一个合法的 URL")
+                        else snake(msg = "同步地址不能为空")
+                    else -> snake(msg = "同步类型错误")
+                }
+            }
             cancelButton()
+            neutralButton(text = "自定义规则") {
+                showDialog {
+                    title = "自定义规则"
+                    var editText: TextInputEditText
+                    addView(R.layout.dia_source_from_string).apply {
+                        editText = findViewById<TextInputEditText>(R.id.dia_sfs_input_edit).apply {
+                            requestFocus()
+                            invalidate()
+                        }
+                    }
+                    confirmButton {
+                        IconPackParams(context = this@ConfigureActivity).also { params ->
+                            when {
+                                editText.text.toString().isNotBlank() && params.isNotVaildJson(editText.text.toString()) ->
+                                    snake(msg = "不是有效的 JSON 数据")
+                                editText.text.toString().isNotBlank() -> {
+                                    params.save(editText.text.toString())
+                                    filterText = ""
+                                    mockLocalData()
+                                    SystemUITool.showNeedUpdateApplySnake(context = this@ConfigureActivity)
+                                }
+                                else -> snake(msg = "规则数组内容为空")
+                            }
+                        }
+                    }
+                    cancelButton()
+                }
+            }
         }
 
-    /** 开始更新数据 */
-    private fun onRefreshing() = ClientRequestTool.checkingInternetConnect(context = this) {
+    /**
+     * 开始更新数据
+     * @param url
+     */
+    private fun onRefreshing(url: String) = ClientRequestTool.checkingInternetConnect(context = this) {
         ProgressDialog(this).apply {
             setDefaultStyle(context = this@ConfigureActivity)
             setCancelable(false)
@@ -229,22 +328,27 @@ class ConfigureActivity : BaseActivity() {
         }.also {
             ClientRequestTool.wait(
                 context = this,
-                url = "$rawGithubUrl/OS/MIUI/NotifyIconsSupportConfig.json"
+                url = "$url/OS/MIUI/NotifyIconsSupportConfig.json"
             ) { isDone1, ctOS ->
                 it.setMessage("正在同步 APP 数据")
                 ClientRequestTool.wait(
                     context = this,
-                    url = "$rawGithubUrl/APP/NotifyIconsSupportConfig.json"
+                    url = "$url/APP/NotifyIconsSupportConfig.json"
                 ) { isDone2, ctAPP ->
                     it.cancel()
                     IconPackParams(context = this).also { params ->
                         if (isDone1 && isDone2) params.splicingJsonArray(ctOS, ctAPP).also {
-                            if (params.isCompareDifferent(it)) {
-                                params.save(it)
-                                filterText = ""
-                                mockLocalData()
-                                SystemUITool.showNeedUpdateApplySnake(context = this)
-                            } else snake(msg = "列表数据已是最新")
+                            when {
+                                params.isHackString(it) -> snake(msg = "请求需要验证，请尝试魔法上网或关闭魔法")
+                                params.isNotVaildJson(it) -> snake(msg = "在线规则发生问题，请稍后重试")
+                                params.isCompareDifferent(it) -> {
+                                    params.save(it)
+                                    filterText = ""
+                                    mockLocalData()
+                                    SystemUITool.showNeedUpdateApplySnake(context = this)
+                                }
+                                else -> snake(msg = "列表数据已是最新")
+                            }
                         } else showDialog {
                             title = "连接失败"
                             msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
@@ -253,6 +357,46 @@ class ConfigureActivity : BaseActivity() {
                             }
                             cancelButton()
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 开始更新数据
+     * @param url
+     */
+    private fun onRefreshingCustom(url: String) = ClientRequestTool.checkingInternetConnect(context = this) {
+        ProgressDialog(this).apply {
+            setDefaultStyle(context = this@ConfigureActivity)
+            setCancelable(false)
+            setTitle("同步中")
+            setMessage("正在通过自定义地址同步数据")
+            show()
+        }.also {
+            ClientRequestTool.wait(
+                context = this,
+                url = url
+            ) { isDone, content ->
+                it.cancel()
+                IconPackParams(context = this).also { params ->
+                    if (isDone)
+                        when {
+                            params.isHackString(content) -> snake(msg = "请求需要验证，请尝试魔法上网或关闭魔法")
+                            params.isNotVaildJson(content) -> snake(msg = "目标地址不是有效的 JSON 数据")
+                            params.isCompareDifferent(content) -> {
+                                params.save(content)
+                                filterText = ""
+                                mockLocalData()
+                                SystemUITool.showNeedUpdateApplySnake(context = this)
+                            }
+                            else -> snake(msg = "列表数据已是最新")
+                        }
+                    else showDialog {
+                        title = "连接失败"
+                        msg = "连接失败，错误如下：\n$content"
+                        confirmButton(text = "我知道了")
                     }
                 }
             }

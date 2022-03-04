@@ -89,6 +89,20 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
     }
 
     /**
+     * 是否不为合法 JSON
+     * @param json 数据
+     * @return [Boolean]
+     */
+    fun isNotVaildJson(json: String) = json.trim().let { !it.startsWith("[") || !it.endsWith("]") }
+
+    /**
+     * 是否为异常地址
+     * @param json 数据
+     * @return [Boolean]
+     */
+    fun isHackString(json: String) = json.contains(other = "Checking your browser before accessing")
+
+    /**
      * 比较图标数据不相等
      * @param dataJson 图标数据 JSON
      * @return [Boolean] 是否不相等
