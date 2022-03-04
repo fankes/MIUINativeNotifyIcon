@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:alpha="0.8"
-                android:text="当前版本：%1"
+                android:text="模块版本：%1"
                 android:textColor="@color/white"
                 android:textSize="13sp" />
 
