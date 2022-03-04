@@ -62,7 +62,7 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         /** 设置文本 */
         findViewById<TextView>(R.id.main_text_version).text = "当前版本：$moduleVersion"
-        findViewById<TextView>(R.id.main_text_miui_version).text = "MIUI 版本：$miuiFullVersion"
+        findViewById<TextView>(R.id.main_text_miui_version).text = "系统版本：$miuiFullVersion"
         when {
             /** 判断是否为 MIUI 系统 */
             isNotMIUI ->
