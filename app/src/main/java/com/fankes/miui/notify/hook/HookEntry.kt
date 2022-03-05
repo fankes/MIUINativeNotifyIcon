@@ -75,6 +75,9 @@ class HookEntry : YukiHookXposedInitProxy {
         /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
+        /** 原生存在的类 */
+        private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
+
         /** 根据多个版本存在不同的包名相同的类 */
         private val ExpandableNotificationRowClass = VariousClass(
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
@@ -129,17 +132,6 @@ class HookEntry : YukiHookXposedInitProxy {
                 }.get().invoke(context)).invoke<Boolean>(drawable) ?: false
             }
         } else BitmapCompatTool.isGrayscaleDrawable(drawable)
-
-    /**
-     * 是否为新版本 MIUI 方案
-     *
-     * 拥有状态栏图标颜色检查功能
-     * @return [Boolean]
-     */
-    private val PackageParam.hasIgnoreStatusBarIconColor
-        get() = safeOfFalse {
-            NotificationUtilClass.clazz.hasMethod(name = "ignoreStatusBarIconColor", ExpandedNotificationClass.clazz)
-        }
 
     /**
      * 是否为旧版本 MIUI 方案
@@ -432,14 +424,14 @@ class HookEntry : YukiHookXposedInitProxy {
     }
 
     /**
-     * Hook 通知栏小图标颜色
+     * 判断状态栏小图标颜色以及反射的核心方法
      *
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
      * @param context 实例
      * @param expandedNf 状态栏实例
      * @return [Boolean] 是否忽略通知图标颜色
      */
-    private fun PackageParam.hookIgnoreStatusBarIconColor(context: Context, expandedNf: StatusBarNotification?) =
+    private fun PackageParam.hasIgnoreStatusBarIconColor(context: Context, expandedNf: StatusBarNotification?) =
         if (!context.isMiuiNotifyStyle)
             if (prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) safeOfFalse {
                 /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
@@ -456,16 +448,26 @@ class HookEntry : YukiHookXposedInitProxy {
                      * 只要不是灰度就返回彩色图标
                      * 否则不对颜色进行反色处理防止一些系统图标出现异常
                      */
-                    if (isTargetFixApp) false else isNotGrayscaleIcon
-                } ?: true
-            } else false
-        else true
+                    (if (isTargetFixApp) false else isNotGrayscaleIcon).also {
+                        printLogcat(tag = "IconColor", context, expandedNf, isTargetFixApp, !isNotGrayscaleIcon)
+                    }
+                } ?: true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
+            } else false.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = true) }
+        else true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
 
-    override fun onHook() = encase {
-        configs {
-            debugTag = "MIUINativeNotifyIcon"
-            isDebug = false
-        }
+    override fun onHook() {
+        runConfig()
+        runHook()
+    }
+
+    /** 配置 Hook */
+    private fun runConfig() = configs {
+        debugTag = "MIUINativeNotifyIcon"
+        isDebug = false
+    }
+
+    /** 开始 Hook */
+    private fun runHook() = encase {
         loadApp(SYSTEMUI_PACKAGE_NAME) {
             when {
                 /** 不是 MIUI 系统停止 Hook */
@@ -494,19 +496,6 @@ class HookEntry : YukiHookXposedInitProxy {
                              */
                             replaceAny { globalContext?.isMiuiNotifyStyle ?: isShowMiuiStyle }
                         }
-                        if (hasIgnoreStatusBarIconColor)
-                            injectMember {
-                                method {
-                                    name = "ignoreStatusBarIconColor"
-                                    param(ExpandedNotificationClass.clazz)
-                                }
-                                replaceAny {
-                                    hookIgnoreStatusBarIconColor(
-                                        context = globalContext ?: error("GlobalContext got null"),
-                                        expandedNf = firstArgs as? StatusBarNotification?
-                                    )
-                                }
-                            }
                         /** 强制回写系统的状态栏图标样式为原生 */
                         injectMember {
                             var isUseLegacy = false
@@ -530,6 +519,19 @@ class HookEntry : YukiHookXposedInitProxy {
                                         args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?,
                                         (result as Icon).loadDrawable(context)
                                     ) { icon -> result = Icon.createWithBitmap(icon) }
+                                }
+                            }
+                        }
+                    }
+                    StatusBarIconViewClass.hook {
+                        /** Hook 状态栏图标的颜色 */
+                        injectMember {
+                            method { name = "updateIconColor" }
+                            afterHook {
+                                instance<ImageView>().also {
+                                    if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
+                                            .of<StatusBarNotification>(instance))) it.colorFilter = null
+                                    else it.setColorFilter(field { name = "mCurrentSetColor" }.of<Int>(instance) ?: 0)
                                 }
                             }
                         }
