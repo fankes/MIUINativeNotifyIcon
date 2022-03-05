@@ -294,22 +294,42 @@ class ConfigureActivity : BaseActivity() {
                             invalidate()
                         }
                     }
-                    confirmButton {
-                        IconPackParams(context = this@ConfigureActivity).also { params ->
-                            when {
-                                editText.text.toString().isNotBlank() && params.isNotVaildJson(editText.text.toString()) ->
-                                    snake(msg = "不是有效的 JSON 数据")
-                                editText.text.toString().isNotBlank() -> {
-                                    params.save(editText.text.toString())
-                                    filterText = ""
-                                    mockLocalData()
-                                    SystemUITool.showNeedUpdateApplySnake(context = this@ConfigureActivity)
+                    IconPackParams(context = this@ConfigureActivity).also { params ->
+                        confirmButton(text = "合并") {
+                            editText.text.toString().also { jsonString ->
+                                when {
+                                    jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> snake(msg = "不是有效的 JSON 数据")
+                                    jsonString.isNotBlank() -> {
+                                        params.save(
+                                            params.splicingJsonArray(
+                                                dataJson1 = params.storageDataJson ?: "[]",
+                                                dataJson2 = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]"
+                                            )
+                                        )
+                                        filterText = ""
+                                        mockLocalData()
+                                        SystemUITool.showNeedUpdateApplySnake(context = this@ConfigureActivity)
+                                    }
+                                    else -> snake(msg = "请输入有效内容")
                                 }
-                                else -> snake(msg = "规则数组内容为空")
+                            }
+                        }
+                        cancelButton(text = "覆盖") {
+                            editText.text.toString().also { jsonString ->
+                                when {
+                                    jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> snake(msg = "不是有效的 JSON 数据")
+                                    jsonString.isNotBlank() -> {
+                                        params.save(dataJson = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]")
+                                        filterText = ""
+                                        mockLocalData()
+                                        SystemUITool.showNeedUpdateApplySnake(context = this@ConfigureActivity)
+                                    }
+                                    else -> snake(msg = "请输入有效内容")
+                                }
                             }
                         }
                     }
-                    cancelButton()
+                    neutralButton(text = "取消")
                 }
             }
         }
