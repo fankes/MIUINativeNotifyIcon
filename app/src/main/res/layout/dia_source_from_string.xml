@@ -19,7 +19,7 @@
             android:layout_height="150dp"
             android:ellipsize="end"
             android:gravity="center|start|top"
-            android:hint="请粘贴 JSON 规则数组到此处"
+            android:hint="请粘贴 JSON 规则到此处"
             android:textSize="14sp" />
     </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

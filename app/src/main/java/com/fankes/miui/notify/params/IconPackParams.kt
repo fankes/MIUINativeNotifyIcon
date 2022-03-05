@@ -20,15 +20,15 @@
  *
  * This file is Created by fankes on 2022/1/24.
  */
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.fankes.miui.notify.params
 
 import android.content.Context
 import android.graphics.Color
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.HookConst.NOTIFY_ICON_DATAS
-import com.fankes.miui.notify.utils.bitmap
-import com.fankes.miui.notify.utils.safeOf
-import com.fankes.miui.notify.utils.safeOfNan
+import com.fankes.miui.notify.utils.*
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import org.json.JSONArray
@@ -47,7 +47,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * 已存储的 JSON 数据
      * @return [String]
      */
-    private val storageDataJson get() = (context?.modulePrefs ?: param?.prefs)?.getString(NOTIFY_ICON_DATAS)
+    internal val storageDataJson get() = (context?.modulePrefs ?: param?.prefs)?.getString(NOTIFY_ICON_DATAS)
 
     /**
      * 获取图标数据
@@ -59,24 +59,31 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
                 if (it.isNotBlank()) runCatching {
                     JSONArray(it).also { array ->
                         for (i in 0 until array.length()) runCatching {
-                            (array.get(i) as JSONObject).apply {
-                                add(
-                                    IconDataBean(
-                                        appName = getString("appName"),
-                                        packageName = getString("packageName"),
-                                        isEnabled = getBoolean("isEnabled"),
-                                        isEnabledAll = getBoolean("isEnabledAll"),
-                                        iconBitmap = getString("iconBitmap").bitmap,
-                                        iconColor = safeOfNan { Color.parseColor(getString("iconColor")) },
-                                        contributorName = getString("contributorName")
-                                    )
-                                )
-                            }
-                        }
+                            add(convertToBean(array.get(i) as JSONObject)!!)
+                        }.onFailure { context?.snake(msg = "部分规则加载失败") }
                     }
-                }
+                }.onFailure { context?.snake(msg = "规则加载发生错误") }
             }
         }
+
+    /**
+     * 转换为 [IconDataBean]
+     * @param jsonObject Json 实例
+     * @return [IconDataBean] or null
+     */
+    private fun convertToBean(jsonObject: JSONObject) = safeOfNull {
+        jsonObject.let {
+            IconDataBean(
+                appName = it.getString("appName"),
+                packageName = it.getString("packageName"),
+                isEnabled = it.getBoolean("isEnabled"),
+                isEnabledAll = it.getBoolean("isEnabledAll"),
+                iconBitmap = it.getString("iconBitmap").bitmap,
+                iconColor = safeOfNan { Color.parseColor(it.getString("iconColor")) },
+                contributorName = it.getString("contributorName")
+            )
+        }
+    }
 
     /**
      * 拼接图标数组数据
@@ -93,7 +100,21 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * @param json 数据
      * @return [Boolean]
      */
-    fun isNotVaildJson(json: String) = json.trim().let { !it.startsWith("[") || !it.endsWith("]") }
+    fun isNotVaildJson(json: String) = !isJsonArray(json) && !isJsonObject(json)
+
+    /**
+     * 是否为 JSON 数组
+     * @param json 数据
+     * @return [Boolean]
+     */
+    fun isJsonArray(json: String) = json.trim().let { it.startsWith("[") && it.endsWith("]") }
+
+    /**
+     * 是否为 JSON 实例
+     * @param json 数据
+     * @return [Boolean]
+     */
+    fun isJsonObject(json: String) = json.trim().let { it.startsWith("{") && it.endsWith("}") }
 
     /**
      * 是否为异常地址
