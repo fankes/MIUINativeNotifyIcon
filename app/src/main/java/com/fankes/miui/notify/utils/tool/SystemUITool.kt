@@ -20,9 +20,13 @@
  *
  * This file is Created by fankes on 2022/2/8.
  */
-package com.fankes.miui.notify.utils
+package com.fankes.miui.notify.utils.tool
 
 import android.content.Context
+import com.fankes.miui.notify.utils.factory.execShellSu
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.toast
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 

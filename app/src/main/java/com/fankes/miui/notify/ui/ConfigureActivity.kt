@@ -48,7 +48,9 @@ import com.fankes.miui.notify.hook.factory.putAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
-import com.fankes.miui.notify.utils.*
+import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.tool.ClientRequestTool
+import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.miui.notify.view.MaterialSwitch
 import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textfield.TextInputEditText

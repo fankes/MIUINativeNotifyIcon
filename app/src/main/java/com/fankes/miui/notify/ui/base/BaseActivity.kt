@@ -25,7 +25,7 @@ package com.fankes.miui.notify.ui.base
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.utils.isNotSystemInDarkMode
+import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.gyf.immersionbar.ktx.immersionBar
 
 abstract class BaseActivity : AppCompatActivity() {

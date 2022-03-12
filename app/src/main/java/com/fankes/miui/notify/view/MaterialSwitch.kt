@@ -29,8 +29,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import androidx.appcompat.widget.SwitchCompat
-import com.fankes.miui.notify.utils.dp
 import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
+import com.fankes.miui.notify.utils.factory.dp
 
 class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs) {
 
