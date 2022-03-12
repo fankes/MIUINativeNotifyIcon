@@ -23,7 +23,7 @@
 package com.fankes.miui.notify.bean
 
 import android.graphics.Bitmap
-import com.fankes.miui.notify.utils.base64
+import com.fankes.miui.notify.utils.factory.base64
 import java.io.Serializable
 
 /**

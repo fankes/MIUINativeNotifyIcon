@@ -45,8 +45,9 @@ import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
-import com.fankes.miui.notify.utils.*
 import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
+import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.factory.*
@@ -292,16 +293,16 @@ class HookEntry : YukiHookXposedInitProxy {
         expandedNf: StatusBarNotification?,
         iconDrawable: Drawable?,
         it: (Bitmap) -> Unit
-    ) = safeRun(msg = "GetSmallIconOnSet") {
-        if (iconDrawable == null) return@safeRun
+    ) = runSafe(msg = "GetSmallIconOnSet") {
+        if (iconDrawable == null) return@runSafe
         /** 如果没开启修复 APP 的彩色图标 */
-        if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
+        if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@runSafe
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.also { notifyInstance ->
             /** 判断是 MIUI 样式就停止 Hook */
             if (context.isMiuiNotifyStyle) {
                 it(notifyInstance.findAppIcon(context).toBitmap())
-                return@safeRun
+                return@runSafe
             }
             /** 判断是否不是灰度图标 */
             val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
@@ -333,11 +334,11 @@ class HookEntry : YukiHookXposedInitProxy {
         expandedNf: StatusBarNotification?,
         iconImageView: ImageView,
         isExpanded: Boolean
-    ) = safeRun(msg = "AutoSetAppIconOnSet") {
+    ) = runSafe(msg = "AutoSetAppIconOnSet") {
         /** 判断是 MIUI 样式就停止 Hook */
-        if (context.isMiuiNotifyStyle) return@safeRun
+        if (context.isMiuiNotifyStyle) return@runSafe
         /** 如果没开启修复 APP 的彩色图标 */
-        if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@safeRun
+        if (!prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)) return@runSafe
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.let { notifyInstance ->
 
@@ -451,7 +452,7 @@ class HookEntry : YukiHookXposedInitProxy {
                     (if (isTargetFixApp) false else isNotGrayscaleIcon).also {
                         printLogcat(tag = "IconColor", context, expandedNf, isTargetFixApp, !isNotGrayscaleIcon)
                     }
-                } ?: true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
+                } ?: true.also { printLogcat(tag = "IconColor", context, expandedNf = null, isCustom = false, isGrayscale = false) }
             } else false.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = true) }
         else true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
 

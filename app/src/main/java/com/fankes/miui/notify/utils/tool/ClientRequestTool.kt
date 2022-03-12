@@ -22,13 +22,17 @@
  */
 @file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager", "DEPRECATION")
 
-package com.fankes.miui.notify.utils
+package com.fankes.miui.notify.utils.tool
 
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import com.fankes.miui.notify.utils.factory.safeOfNull
+import com.fankes.miui.notify.utils.factory.setDefaultStyle
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
 import java.io.IOException

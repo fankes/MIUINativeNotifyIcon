@@ -22,7 +22,7 @@
  */
 @file:Suppress("unused", "DEPRECATION")
 
-package com.fankes.miui.notify.utils
+package com.fankes.miui.notify.utils.factory
 
 import android.app.AlertDialog
 import android.content.Context

@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/2/19.
  */
-package com.fankes.miui.notify.utils
+package com.fankes.miui.notify.utils.tool
 
 import android.graphics.*
 import android.graphics.drawable.AnimationDrawable
@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.VectorDrawable
 import android.util.ArrayMap
 import androidx.core.graphics.drawable.toBitmap
+import com.fankes.miui.notify.utils.factory.safeOfFalse
 import kotlin.math.abs
 
 /**
