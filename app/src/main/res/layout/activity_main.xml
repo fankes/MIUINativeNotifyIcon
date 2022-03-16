@@ -510,7 +510,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="6dp"
-                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 自身就存在的问题，后期只能等官方修复。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题。\n(3) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，若你的系统不存在原生图标问题不建议使用模块。"
+                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 自身就存在的问题，后期只能等官方修复。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面”(“系统 UI”)选择重新优化。\n(3) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，将不再进行适配。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
