@@ -57,7 +57,7 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             .solidColor(Color.WHITE)
             .size(20.dp, 20.dp)
             .cornerRadius(20.dp)
-            .strokeWidth(2.dp)
+            .strokeWidth(8.dp)
             .strokeColor(Color.TRANSPARENT)
             .build()
         trackTintList = toColors(

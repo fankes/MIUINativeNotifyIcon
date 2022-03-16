@@ -32,7 +32,9 @@ object HookConst {
     const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
     const val ENABLE_COLOR_ICON_COMPAT = "_color_icon_compat"
     const val ENABLE_NOTIFY_ICON_FIX = "_notify_icon_fix"
+    const val ENABLE_HOOK_STATUS_ICON_COUNT = "_enable_hook_status_icon_count"
     const val NOTIFY_ICON_DATAS = "_notify_icon_datas"
+    const val HOOK_STATUS_ICON_COUNT = "_hook_status_icon_count"
 
     const val SOURCE_SYNC_WAY = "_source_sync_way"
     const val SOURCE_SYNC_WAY_CUSTOM_URL = "_source_sync_way_custom_url"

@@ -39,12 +39,15 @@ import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
+import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
+import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.google.android.material.textfield.TextInputEditText
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
@@ -108,6 +111,10 @@ class MainActivity : BaseActivity() {
         /** 初始化 View */
         val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
         val moduleEnableLogSwitch = findViewById<SwitchCompat>(R.id.module_enable_log_switch)
+        val statusIconCountItem = findViewById<View>(R.id.config_item_s_count_hook)
+        val statusIconCountChildItem = findViewById<View>(R.id.config_item_s_count_child_hook)
+        val statusIconCountSwitch = findViewById<SwitchCompat>(R.id.config_status_icon_count_switch)
+        val statusIconCountText = findViewById<TextView>(R.id.config_status_icon_count_text)
         val colorIconHookItem = findViewById<View>(R.id.config_item_color_hook)
         val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
         val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
@@ -116,25 +123,31 @@ class MainActivity : BaseActivity() {
         val colorIconCompatText = findViewById<View>(R.id.color_icon_compat_text)
         val notifyIconFixSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
         val notifyIconFixButton = findViewById<View>(R.id.config_notify_app_button)
+
         /** 获取 Sp 存储的信息 */
+        val statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
         colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         colorIconCompatText.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
                 modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        moduleEnableLogSwitch.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+        statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
+        statusIconCountChildItem.isVisible = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
         moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
         hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
         colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
         notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+        statusIconCountText.text = statusBarIconCount.toString()
         moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_MODULE, b)
             moduleEnableLogSwitch.isVisible = b
             colorIconHookItem.isVisible = b
+            statusIconCountItem.isVisible = b
             notifyIconConfigItem.isVisible = b && colorIconHookSwitch.isChecked
             SystemUITool.showNeedRestartSnake(context = this)
         }
@@ -151,6 +164,12 @@ class MainActivity : BaseActivity() {
                 if (b) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP
             )
+        }
+        statusIconCountSwitch.setOnCheckedChangeListener { btn, b ->
+            if (!btn.isPressed) return@setOnCheckedChangeListener
+            modulePrefs.putBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, b)
+            statusIconCountChildItem.isVisible = b
+            SystemUITool.showNeedRestartSnake(context = this)
         }
         colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
@@ -173,6 +192,34 @@ class MainActivity : BaseActivity() {
         }
         /** 通知图标优化名单按钮点击事件 */
         notifyIconFixButton.setOnClickListener { startActivity(Intent(this, ConfigureActivity::class.java)) }
+        /** 修改状态栏通知图标个数按钮点击事件 */
+        findViewById<View>(R.id.config_status_icon_count_button).setOnClickListener {
+            showDialog {
+                title = "设置最多显示的图标个数"
+                var editText: TextInputEditText
+                addView(R.layout.dia_status_icon_count).apply {
+                    editText = findViewById<TextInputEditText>(R.id.dia_status_icon_count_input_edit).apply {
+                        requestFocus()
+                        invalidate()
+                        setText(statusBarIconCount.toString())
+                        setSelection(statusBarIconCount.toString().length)
+                    }
+                }
+                confirmButton {
+                    when {
+                        (runCatching { editText.text.toString().toInt() }.getOrNull() ?: -1)
+                                !in 0..100 -> snake(msg = "请输入有效数值")
+                        editText.text.toString().isNotBlank() -> runCatching {
+                            modulePrefs.putInt(HOOK_STATUS_ICON_COUNT, editText.text.toString().trim().toInt())
+                            statusIconCountText.text = editText.text.toString().trim()
+                            SystemUITool.showNeedRestartSnake(context = this@MainActivity)
+                        }.onFailure { snake(msg = "数值格式无效") }
+                        else -> snake(msg = "请输入有效数值")
+                    }
+                }
+                cancelButton()
+            }
+        }
         /** 重启按钮点击事件 */
         findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 恰饭！ */
