@@ -79,6 +79,9 @@ class HookEntry : YukiHookXposedInitProxy {
         /** 原生存在的类 */
         private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
 
+        /** 原生存在的类 */
+        private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
+
         /** 根据多个版本存在不同的包名相同的类 */
         private val ExpandableNotificationRowClass = VariousClass(
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
@@ -532,7 +535,10 @@ class HookEntry : YukiHookXposedInitProxy {
                                 instance<ImageView>().also {
                                     if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
                                             .of<StatusBarNotification>(instance))) it.colorFilter = null
-                                    else it.setColorFilter(field { name = "mCurrentSetColor" }.of<Int>(instance) ?: 0)
+                                    /** 防止图标不是纯黑的问题 */
+                                    else it.setColorFilter(
+                                        field { name = "mCurrentSetColor" }.of<Int>(instance)
+                                            ?.let { color -> if (color == -419430401) color else Color.BLACK } ?: 0)
                                 }
                             }
                         }
