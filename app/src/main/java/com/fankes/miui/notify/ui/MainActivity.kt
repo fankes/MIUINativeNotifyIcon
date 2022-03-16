@@ -222,13 +222,13 @@ class MainActivity : BaseActivity() {
         }
         /** 重启按钮点击事件 */
         findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
+        /** 项目地址按钮点击事件 */
+        findViewById<View>(R.id.title_github_icon).setOnClickListener {
+            openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
+        }
         /** 恰饭！ */
         findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
-        }
-        /** 项目地址点击事件 */
-        findViewById<View>(R.id.link_with_project_address).setOnClickListener {
-            openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
         }
     }
 
