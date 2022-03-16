@@ -125,7 +125,7 @@ class MainActivity : BaseActivity() {
         val notifyIconFixButton = findViewById<View>(R.id.config_notify_app_button)
 
         /** 获取 Sp 存储的信息 */
-        val statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
+        var statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
         colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
@@ -210,8 +210,9 @@ class MainActivity : BaseActivity() {
                         (runCatching { editText.text.toString().toInt() }.getOrNull() ?: -1)
                                 !in 0..100 -> snake(msg = "请输入有效数值")
                         editText.text.toString().isNotBlank() -> runCatching {
-                            modulePrefs.putInt(HOOK_STATUS_ICON_COUNT, editText.text.toString().trim().toInt())
-                            statusIconCountText.text = editText.text.toString().trim()
+                            statusBarIconCount = editText.text.toString().trim().toInt()
+                            modulePrefs.putInt(HOOK_STATUS_ICON_COUNT, statusBarIconCount)
+                            statusIconCountText.text = statusBarIconCount.toString()
                             SystemUITool.showNeedRestartSnake(context = this@MainActivity)
                         }.onFailure { snake(msg = "数值格式无效") }
                         else -> snake(msg = "请输入有效数值")
