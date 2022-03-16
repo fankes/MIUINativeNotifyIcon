@@ -32,15 +32,18 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.notification.StatusBarNotification
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
+import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
+import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
@@ -540,6 +543,25 @@ class HookEntry : YukiHookXposedInitProxy {
                                         field { name = "mCurrentSetColor" }.of<Int>(instance)
                                             ?.let { color -> if (color == -419430401) color else Color.BLACK } ?: 0)
                                 }
+                            }
+                        }
+                    }
+                    NotificationIconContainerClass.hook {
+                        injectMember {
+                            method { name = "calculateIconTranslations" }
+                            afterHook {
+                                /** 修复最新开发版状态栏图标只能显示一个的问题 */
+                                instance<ViewGroup>().layoutParams.width = 9999
+                            }
+                        }
+                        injectMember {
+                            method { name = "updateState" }
+                            beforeHook {
+                                /** 解除状态栏通知图标个数限制 */
+                                if (prefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
+                                    field { name = "MAX_STATIC_ICONS" }
+                                        .get(instance).set(prefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
+                                            .let { if (it in 0..100) it else 5 })
                             }
                         }
                     }

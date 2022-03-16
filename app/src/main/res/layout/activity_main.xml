@@ -190,6 +190,106 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/config_item_s_count_hook"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:animateLayoutChanges="true"
+                android:background="@drawable/bg_permotion_round"
+                android:elevation="0dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <com.fankes.miui.notify.view.MaterialSwitch
+                    android:id="@+id/config_status_icon_count_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="解除状态栏通知图标个数限制"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="此选项默认开启，MIUI 默认最多只能显示 3 个图标，其余图标将变成省略号，你可以在下方自定义最多显示的图标个数，修改为 0 则只会显示省略号代表图标个数，为防止发生异常，最大限制 100 个，超出的图标可能会被信号或网速指示器遮挡。"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/config_item_s_count_child_hook"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/ic_notify_icon"
+                        app:tint="@color/colorTextGray" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text="最多显示"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/config_status_icon_count_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxWidth="100dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:singleLine="true"
+                        android:text="5"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text="个"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/config_status_icon_count_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_button_round"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:paddingLeft="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingRight="10dp"
+                        android:paddingBottom="5dp"
+                        android:singleLine="true"
+                        android:text="修改个数"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/config_item_color_hook"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
