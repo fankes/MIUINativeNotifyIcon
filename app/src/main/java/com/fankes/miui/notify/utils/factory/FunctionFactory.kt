@@ -129,21 +129,26 @@ inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
  * @return [String]
  */
 val miuiVersion
-    get() =
-        if (isMIUI)
-            findPropString(key = "ro.miui.ui.version.name", default = "V无法获取").let {
-                when (it) {
-                    "V110" -> "11"
-                    "V11" -> "11"
-                    "V120" -> "12"
-                    "V12" -> "12"
-                    "V125" -> "12.5"
-                    "V130" -> "13"
-                    "V13" -> "13"
-                    else -> it.replace(oldValue = "V", newValue = "")
-                }
-            }.trim()
-        else "NULL"
+    get() = if (isMIUI)
+        findPropString(key = "ro.miui.ui.version.name", default = "V无法获取").let {
+            when (it) {
+                "V110" -> "11"
+                "V11" -> "11"
+                "V120" -> "12"
+                "V12" -> "12"
+                "V125" -> "12.5"
+                "V130" -> "13"
+                "V13" -> "13"
+                else -> it.replace(oldValue = "V", newValue = "")
+            }
+        }.trim()
+    else "NULL"
+
+/**
+ * 获取 MIUI 版本号
+ * @return [Float]
+ */
+val miuiVersionCode get() = safeOf(default = 0f) { miuiVersion.toFloat() }
 
 /**
  * 获取 MIUI 完全版本
