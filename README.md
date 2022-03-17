@@ -9,7 +9,7 @@
 <br/>
 Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
 修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 12、12.5、13 以及最新版本。
-
+ 
 # 开始使用
 
 点击下载最新版本
