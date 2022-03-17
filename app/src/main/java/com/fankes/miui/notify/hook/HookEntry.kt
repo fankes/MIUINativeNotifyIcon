@@ -119,6 +119,9 @@ class HookEntry : YukiHookXposedInitProxy {
     /** 缓存的通知优化图标数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
+    /** 是否显示通知图标 - 跟随 Hook 保存 */
+    private var isShowNotificationIcons = true
+
     /**
      * - 这个是修复彩色图标的关键核心代码判断
      *
@@ -558,11 +561,18 @@ class HookEntry : YukiHookXposedInitProxy {
                             method { name = "updateState" }
                             beforeHook {
                                 /** 解除状态栏通知图标个数限制 */
-                                if (prefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
+                                if (isShowNotificationIcons && prefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
                                     field { name = "MAX_STATIC_ICONS" }
                                         .get(instance).set(prefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
                                             .let { if (it in 0..100) it else 5 })
                             }
+                        }
+                        injectMember {
+                            method {
+                                name = "miuiShowNotificationIcons"
+                                param(BooleanType)
+                            }
+                            beforeHook { isShowNotificationIcons = firstArgs as Boolean }
                         }
                     }
                     NotificationHeaderViewWrapperClass.hook {
