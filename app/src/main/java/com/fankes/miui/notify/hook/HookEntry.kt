@@ -122,10 +122,6 @@ class HookEntry : YukiHookXposedInitProxy {
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
 
-    /** 是否有最大图标设置功能 */
-    private val PackageParam.hasMaxStaticIcons
-        get() = safeOfFalse { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") }
-
     /**
      * - 这个是修复彩色图标的关键核心代码判断
      *
@@ -469,19 +465,12 @@ class HookEntry : YukiHookXposedInitProxy {
             } else false.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = true) }
         else true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
 
-    override fun onHook() {
-        runConfig()
-        runHook()
-    }
-
-    /** 配置 Hook */
-    private fun runConfig() = configs {
+    override fun onInit() = configs {
         debugTag = "MIUINativeNotifyIcon"
         isDebug = false
     }
 
-    /** 开始 Hook */
-    private fun runHook() = encase {
+    override fun onHook() = encase {
         loadApp(SYSTEMUI_PACKAGE_NAME) {
             when {
                 /** 不是 MIUI 系统停止 Hook */
@@ -562,42 +551,41 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                         }
                     }
-                    if (hasMaxStaticIcons)
-                        NotificationIconContainerClass.hook {
-                            injectMember {
-                                method { name = "calculateIconTranslations" }
-                                afterHook {
-                                    /** 修复最新开发版状态栏图标只能显示一个的问题 */
-                                    instance<ViewGroup>().layoutParams.width = 9999
-                                }
+                    NotificationIconContainerClass.hook {
+                        injectMember {
+                            method { name = "calculateIconTranslations" }
+                            afterHook {
+                                /** 修复最新开发版状态栏图标只能显示一个的问题 */
+                                instance<ViewGroup>().layoutParams.width = 9999
                             }
-                            injectMember {
-                                method { name = "updateState" }
-                                beforeHook {
-                                    /** 解除状态栏通知图标个数限制 */
-                                    if (isShowNotificationIcons && prefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
-                                        field { name = "MAX_STATIC_ICONS" }
-                                            .get(instance).set(prefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
-                                                .let { if (it in 0..100) it else 5 })
-                                }
-                            }
-                            /** 旧版方法 - 新版不存在 */
-                            injectMember {
-                                method {
-                                    name = "setMaxStaticIcons"
-                                    param(IntType)
-                                    beforeHook { isShowNotificationIcons = firstArgs as Int > 0 }
-                                }
-                            }.ignoredHookingFailure()
-                            /** 新版方法 - 旧版不存在 */
-                            injectMember {
-                                method {
-                                    name = "miuiShowNotificationIcons"
-                                    param(BooleanType)
-                                }
-                                beforeHook { isShowNotificationIcons = firstArgs as Boolean }
-                            }.ignoredHookingFailure()
                         }
+                        injectMember {
+                            method { name = "updateState" }
+                            beforeHook {
+                                /** 解除状态栏通知图标个数限制 */
+                                if (isShowNotificationIcons && prefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
+                                    field { name = "MAX_STATIC_ICONS" }
+                                        .get(instance).set(prefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
+                                            .let { if (it in 0..100) it else 5 })
+                            }
+                        }
+                        /** 旧版方法 - 新版不存在 */
+                        injectMember {
+                            method {
+                                name = "setMaxStaticIcons"
+                                param(IntType)
+                                beforeHook { isShowNotificationIcons = firstArgs as Int > 0 }
+                            }
+                        }.ignoredNoSuchMemberFailure()
+                        /** 新版方法 - 旧版不存在 */
+                        injectMember {
+                            method {
+                                name = "miuiShowNotificationIcons"
+                                param(BooleanType)
+                            }
+                            beforeHook { isShowNotificationIcons = firstArgs as Boolean }
+                        }.ignoredNoSuchMemberFailure()
+                    }.by { safeOfFalse { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") } }
                     NotificationHeaderViewWrapperClass.hook {
                         /** 修复下拉通知图标自动设置回 APP 图标的方法 */
                         injectMember {
@@ -659,14 +647,14 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }
                             }
                             intercept()
-                        }.ignoredHookingFailure()
+                        }.ignoredNoSuchMemberFailure()
                         injectMember {
                             method {
                                 name = "resetIconBgAndPaddings"
                                 param(ImageViewClass, ExpandedNotificationClass.clazz)
                             }
                             intercept()
-                        }.ignoredHookingFailure()
+                        }.ignoredNoSuchMemberFailure()
                     }.ignoredHookClassNotFoundFailure()
                 }
             }
