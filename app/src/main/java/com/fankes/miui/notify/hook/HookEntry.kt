@@ -544,12 +544,18 @@ class HookEntry : YukiHookXposedInitProxy {
                             afterHook {
                                 instance<ImageView>().also {
                                     if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
-                                            .of<StatusBarNotification>(instance))) it.colorFilter = null
-                                    /** 防止图标不是纯黑的问题 */
+                                            .of<StatusBarNotification>(instance))) it.apply {
+                                        alpha = 1f
+                                        colorFilter = null
+                                    }
+                                    /**
+                                     * 防止图标不是纯黑的问题
+                                     * 图标在任何场景下跟随状态栏其它图标保持半透明
+                                     */
                                     else it.apply {
-                                        field { name = "mCurrentSetColor" }.of<Int>(instance).also { color ->
-                                            setColorFilter(if (color == -419430401) color else Color.BLACK)
-                                            alpha = if (color == -419430401) 1f else 0.8f
+                                        field { name = "mCurrentSetColor" }.of<Int>(instance)?.also { color ->
+                                            alpha = 0.9f
+                                            setColorFilter(if (color.isWhite) color else Color.BLACK)
                                         }
                                     }
                                 }

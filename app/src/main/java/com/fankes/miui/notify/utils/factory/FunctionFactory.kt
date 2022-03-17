@@ -224,6 +224,12 @@ val Context.versionCode get() = packageInfo.versionCode
 fun Number.dp(context: Context) = (toFloat() * context.resources.displayMetrics.density)
 
 /**
+ * 是否为白色
+ * @return [Boolean]
+ */
+val Int.isWhite get() = this == -419430401 || this == Color.WHITE
+
+/**
  * Base64 加密
  * @return [String]
  */
