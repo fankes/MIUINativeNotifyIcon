@@ -546,9 +546,12 @@ class HookEntry : YukiHookXposedInitProxy {
                                     if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
                                             .of<StatusBarNotification>(instance))) it.colorFilter = null
                                     /** 防止图标不是纯黑的问题 */
-                                    else it.setColorFilter(
-                                        field { name = "mCurrentSetColor" }.of<Int>(instance)
-                                            ?.let { color -> if (color == -419430401) color else Color.BLACK } ?: 0)
+                                    else it.apply {
+                                        field { name = "mCurrentSetColor" }.of<Int>(instance).also { color ->
+                                            setColorFilter(if (color == -419430401) color else Color.BLACK)
+                                            alpha = if (color == -419430401) 1f else 0.8f
+                                        }
+                                    }
                                 }
                             }
                         }
