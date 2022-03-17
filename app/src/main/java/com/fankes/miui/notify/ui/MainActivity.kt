@@ -45,6 +45,7 @@ import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
 import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
+import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.SystemUITool
@@ -97,7 +98,18 @@ class MainActivity : BaseActivity() {
                     noCancelable()
                 }
             /** 判断是否 Hook */
-            YukiHookModuleStatus.isActive() -> {}
+            YukiHookModuleStatus.isActive() -> {
+                if (IconPackParams(context = this).iconDatas.isEmpty()
+                    && modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+                ) showDialog {
+                    title = "配置通知图标优化名单"
+                    msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
+                            "你可以随时在本页面下方找到“配置通知图标优化名单”手动前往。"
+                    confirmButton(text = "前往") { startActivity(Intent(this@MainActivity, ConfigureActivity::class.java)) }
+                    cancelButton()
+                    noCancelable()
+                }
+            }
             else ->
                 showDialog {
                     title = "模块没有激活"
