@@ -213,16 +213,10 @@ val Context.versionCode get() = packageInfo.versionCode
 
 /**
  * dp 转换为 px
- * @return [Int]
- */
-val Number.dp get() = (toFloat() * appContext.resources.displayMetrics.density).toInt()
-
-/**
- * dp 转换为 px
  * @param context 使用的实例
  * @return [Float]
  */
-fun Number.dp(context: Context) = toFloat() * context.resources.displayMetrics.density
+fun Number.dp(context: Context) = (toFloat() * context.resources.displayMetrics.density)
 
 /**
  * Base64 加密
