@@ -51,6 +51,7 @@ import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
 
+
 /**
  * 系统深色模式是否开启
  * @return [Boolean] 是否开启
@@ -227,7 +228,13 @@ fun Number.dp(context: Context) = (toFloat() * context.resources.displayMetrics.
  * 是否为白色
  * @return [Boolean]
  */
-val Int.isWhite get() = this == -419430401 || this == Color.WHITE
+val Int.isWhite
+    get() = safeOfTrue {
+        val r = this and 0xff0000 shr 16
+        val g = this and 0x00ff00 shr 8
+        val b = this and 0x0000ff
+        (0.2126 * r + 0.7152 * g + 0.0722 * b) >= 128
+    }
 
 /**
  * Base64 加密
