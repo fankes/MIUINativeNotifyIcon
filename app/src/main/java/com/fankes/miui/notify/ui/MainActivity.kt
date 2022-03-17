@@ -33,6 +33,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
@@ -192,6 +193,8 @@ class MainActivity : BaseActivity() {
         }
         /** 通知图标优化名单按钮点击事件 */
         notifyIconFixButton.setOnClickListener { startActivity(Intent(this, ConfigureActivity::class.java)) }
+        /** 设置警告 */
+        findViewById<View>(R.id.config_warn_s_count_dis_tip).isGone = miuiVersionCode > 12.5
         /** 修改状态栏通知图标个数按钮点击事件 */
         findViewById<View>(R.id.config_status_icon_count_button).setOnClickListener {
             showDialog {

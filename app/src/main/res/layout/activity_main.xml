@@ -233,6 +233,17 @@
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
+                <TextView
+                    android:id="@+id/config_warn_s_count_dis_tip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="⚠️ 仅支持 MIUI 12.5 后期开发版以及最新版本"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp" />
+
                 <LinearLayout
                     android:id="@+id/config_item_s_count_child_hook"
                     android:layout_width="match_parent"
