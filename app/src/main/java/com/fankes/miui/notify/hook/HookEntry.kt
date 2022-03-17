@@ -554,7 +554,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                      */
                                     else it.apply {
                                         field { name = "mCurrentSetColor" }.of<Int>(instance)?.also { color ->
-                                            alpha = if (color.isWhite) 0.95f else 0.75f
+                                            alpha = if (color.isWhite) 0.95f else 0.8f
                                             setColorFilter(if (color.isWhite) color else Color.BLACK)
                                         }
                                     }
