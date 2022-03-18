@@ -218,11 +218,18 @@ val Context.versionName get() = packageInfo.versionName ?: ""
 val Context.versionCode get() = packageInfo.versionCode
 
 /**
- * dp 转换为 px
+ * dp 转换为 pxInt
+ * @param context 使用的实例
+ * @return [Int]
+ */
+fun Number.dp(context: Context) = dpFloat(context).toInt()
+
+/**
+ * dp 转换为 pxFloat
  * @param context 使用的实例
  * @return [Float]
  */
-fun Number.dp(context: Context) = (toFloat() * context.resources.displayMetrics.density)
+fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetrics.density
 
 /**
  * 是否为白色
@@ -283,7 +290,7 @@ fun AlertDialog.setDefaultStyle(context: Context) =
         ).apply {
             shape = GradientDrawable.RECTANGLE
             gradientType = GradientDrawable.LINEAR_GRADIENT
-            cornerRadius = 15.dp(context)
+            cornerRadius = 15.dpFloat(context)
         })
 
 /**

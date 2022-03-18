@@ -420,7 +420,7 @@ class HookEntry : YukiHookXposedInitProxy {
                         override fun getOutline(view: View, out: Outline) {
                             out.setRoundRect(
                                 0, 0,
-                                view.width, view.height, 5.dp(context)
+                                view.width, view.height, 5.dpFloat(context)
                             )
                         }
                     }
