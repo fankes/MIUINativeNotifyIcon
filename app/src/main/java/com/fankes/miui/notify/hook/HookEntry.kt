@@ -585,7 +585,7 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                             beforeHook { isShowNotificationIcons = firstArgs as Boolean }
                         }.ignoredNoSuchMemberFailure()
-                    }.by { safeOfFalse { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") } }
+                    }.by { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") }
                     NotificationHeaderViewWrapperClass.hook {
                         /** 修复下拉通知图标自动设置回 APP 图标的方法 */
                         injectMember {
