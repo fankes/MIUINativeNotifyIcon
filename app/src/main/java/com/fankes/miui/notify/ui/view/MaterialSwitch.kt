@@ -22,7 +22,7 @@
  */
 @file:Suppress("SameParameterValue")
 
-package com.fankes.miui.notify.view
+package com.fankes.miui.notify.ui.view
 
 import android.content.Context
 import android.content.res.ColorStateList

@@ -20,18 +20,36 @@
  *
  * This file is Created by fankes on 2022/1/30.
  */
-package com.fankes.miui.notify.ui.base
+@file:Suppress("UNCHECKED_CAST")
+
+package com.fankes.miui.notify.ui.activity.base
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.gyf.immersionbar.ktx.immersionBar
+import com.highcapable.yukihookapi.hook.factory.method
+import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
+import java.lang.reflect.ParameterizedType
 
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
+
+    /** 获取绑定布局对象 */
+    lateinit var binding: VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        javaClass.genericSuperclass.also { type ->
+            if (type is ParameterizedType) {
+                binding = (type.actualTypeArguments[0] as Class<VB>).method {
+                    name = "inflate"
+                    param(LayoutInflaterClass)
+                }.get().invoke<VB>(layoutInflater) ?: error("binding failed")
+                setContentView(binding.root)
+            } else error("binding but got wrong type")
+        }
         /** 隐藏系统的标题栏 */
         supportActionBar?.hide()
         /** 初始化沉浸状态栏 */
@@ -43,5 +61,10 @@ abstract class BaseActivity : AppCompatActivity() {
             navigationBarDarkIcon(isNotSystemInDarkMode)
             fitsSystemWindows(true)
         }
+        /** 装载子类 */
+        onCreate()
     }
+
+    /** 回调 [onCreate] 方法 */
+    abstract fun onCreate()
 }

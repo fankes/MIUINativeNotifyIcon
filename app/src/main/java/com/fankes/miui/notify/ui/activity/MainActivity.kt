@@ -22,21 +22,17 @@
  */
 @file:Suppress("SetTextI18n")
 
-package com.fankes.miui.notify.ui
+package com.fankes.miui.notify.ui.activity
 
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Bundle
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.appcompat.widget.SwitchCompat
-import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.databinding.ActivityMainBinding
+import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
@@ -46,14 +42,13 @@ import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
 import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.params.IconPackParams
-import com.fankes.miui.notify.ui.base.BaseActivity
+import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.SystemUITool
-import com.google.android.material.textfield.TextInputEditText
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     companion object {
 
@@ -61,14 +56,13 @@ class MainActivity : BaseActivity() {
         private const val moduleVersion = BuildConfig.VERSION_NAME
     }
 
-    private var isWarnDialogShowing = false // 警告对话框是否显示
+    /** 警告对话框是否显示 */
+    private var isWarnDialogShowing = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override fun onCreate() {
         /** 设置文本 */
-        findViewById<TextView>(R.id.main_text_version).text = "模块版本：$moduleVersion"
-        findViewById<TextView>(R.id.main_text_miui_version).text = "系统版本：$miuiFullVersion"
+        binding.mainTextVersion.text = "模块版本：$moduleVersion"
+        binding.mainTextMiuiVersion.text = "系统版本：$miuiFullVersion"
         when {
             /** 判断是否为 MIUI 系统 */
             isNotMIUI ->
@@ -105,7 +99,7 @@ class MainActivity : BaseActivity() {
                     title = "配置通知图标优化名单"
                     msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
                             "你可以随时在本页面下方找到“配置通知图标优化名单”手动前往。"
-                    confirmButton(text = "前往") { startActivity(Intent(this@MainActivity, ConfigureActivity::class.java)) }
+                    confirmButton(text = "前往") { navigate<ConfigureActivity>() }
                     cancelButton()
                     noCancelable()
                 }
@@ -121,55 +115,39 @@ class MainActivity : BaseActivity() {
                     noCancelable()
                 }
         }
-        /** 初始化 View */
-        val moduleEnableSwitch = findViewById<SwitchCompat>(R.id.module_enable_switch)
-        val moduleEnableLogSwitch = findViewById<SwitchCompat>(R.id.module_enable_log_switch)
-        val statusIconCountItem = findViewById<View>(R.id.config_item_s_count_hook)
-        val statusIconCountChildItem = findViewById<View>(R.id.config_item_s_count_child_hook)
-        val statusIconCountSwitch = findViewById<SwitchCompat>(R.id.config_status_icon_count_switch)
-        val statusIconCountText = findViewById<TextView>(R.id.config_status_icon_count_text)
-        val colorIconHookItem = findViewById<View>(R.id.config_item_color_hook)
-        val notifyIconConfigItem = findViewById<View>(R.id.config_item_notify)
-        val hideIconInLauncherSwitch = findViewById<SwitchCompat>(R.id.hide_icon_in_launcher_switch)
-        val colorIconHookSwitch = findViewById<SwitchCompat>(R.id.color_icon_fix_switch)
-        val colorIconCompatSwitch = findViewById<SwitchCompat>(R.id.color_icon_compat_switch)
-        val colorIconCompatText = findViewById<View>(R.id.color_icon_compat_text)
-        val notifyIconFixSwitch = findViewById<SwitchCompat>(R.id.notify_icon_fix_switch)
-        val notifyIconFixButton = findViewById<View>(R.id.config_notify_app_button)
-
         /** 获取 Sp 存储的信息 */
         var statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
-        colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        colorIconCompatText.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
+        binding.colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        binding.statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        binding.colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        binding.colorIconCompatText.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        binding.notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
                 modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-        statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
-        statusIconCountChildItem.isVisible = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
-        moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
-        hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
-        colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
-        notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-        statusIconCountText.text = statusBarIconCount.toString()
-        moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+        binding.statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
+        binding.statusIconCountChildItem.isVisible = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
+        binding.moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
+        binding.moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
+        binding.hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
+        binding.colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        binding.colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
+        binding.notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+        binding.statusIconCountText.text = statusBarIconCount.toString()
+        binding.moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_MODULE, b)
-            moduleEnableLogSwitch.isVisible = b
-            colorIconHookItem.isVisible = b
-            statusIconCountItem.isVisible = b
-            notifyIconConfigItem.isVisible = b && colorIconHookSwitch.isChecked
+            binding.moduleEnableLogSwitch.isVisible = b
+            binding.colorIconHookItem.isVisible = b
+            binding.statusIconCountItem.isVisible = b
+            binding.notifyIconConfigItem.isVisible = b && binding.colorIconHookSwitch.isChecked
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_MODULE_LOG, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_HIDE_ICON, b)
             packageManager.setComponentEnabledSetting(
@@ -178,47 +156,44 @@ class MainActivity : BaseActivity() {
                 PackageManager.DONT_KILL_APP
             )
         }
-        statusIconCountSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.statusIconCountSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, b)
-            statusIconCountChildItem.isVisible = b
+            binding.statusIconCountChildItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_COLOR_ICON_HOOK, b)
-            notifyIconConfigItem.isVisible = b
-            colorIconCompatSwitch.isVisible = b
-            colorIconCompatText.isVisible = b
+            binding.notifyIconConfigItem.isVisible = b
+            binding.colorIconCompatSwitch.isVisible = b
+            binding.colorIconCompatText.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_COLOR_ICON_COMPAT, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
+        binding.notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX, b)
-            notifyIconFixButton.isVisible = b
+            binding.notifyIconFixButton.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
         /** 通知图标优化名单按钮点击事件 */
-        notifyIconFixButton.setOnClickListener { startActivity(Intent(this, ConfigureActivity::class.java)) }
+        binding.notifyIconFixButton.setOnClickListener { navigate<ConfigureActivity>() }
         /** 设置警告 */
-        findViewById<View>(R.id.config_warn_s_count_dis_tip).isGone = miuiVersionCode > 12.5
+        binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
         /** 修改状态栏通知图标个数按钮点击事件 */
-        findViewById<View>(R.id.config_status_icon_count_button).setOnClickListener {
+        binding.statusIconCountButton.setOnClickListener {
             showDialog {
                 title = "设置最多显示的图标个数"
-                var editText: TextInputEditText
-                addView(R.layout.dia_status_icon_count).apply {
-                    editText = findViewById<TextInputEditText>(R.id.dia_status_icon_count_input_edit).apply {
-                        requestFocus()
-                        invalidate()
-                        setText(statusBarIconCount.toString())
-                        setSelection(statusBarIconCount.toString().length)
-                    }
+                val editText = bind<DiaStatusIconCountBinding>().diaStatusIconCountInputEdit.apply {
+                    requestFocus()
+                    invalidate()
+                    setText(statusBarIconCount.toString())
+                    setSelection(statusBarIconCount.toString().length)
                 }
                 confirmButton {
                     when {
@@ -227,8 +202,8 @@ class MainActivity : BaseActivity() {
                         editText.text.toString().isNotBlank() -> runCatching {
                             statusBarIconCount = editText.text.toString().trim().toInt()
                             modulePrefs.putInt(HOOK_STATUS_ICON_COUNT, statusBarIconCount)
-                            statusIconCountText.text = statusBarIconCount.toString()
-                            SystemUITool.showNeedRestartSnake(context = this@MainActivity)
+                            binding.statusIconCountText.text = statusBarIconCount.toString()
+                            SystemUITool.showNeedRestartSnake(context)
                         }.onFailure { snake(msg = "数值格式无效") }
                         else -> snake(msg = "请输入有效数值")
                     }
@@ -237,33 +212,33 @@ class MainActivity : BaseActivity() {
             }
         }
         /** 重启按钮点击事件 */
-        findViewById<View>(R.id.title_restart_icon).setOnClickListener { SystemUITool.restartSystemUI(context = this) }
+        binding.titleRestartIcon.setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 项目地址按钮点击事件 */
-        findViewById<View>(R.id.title_github_icon).setOnClickListener {
+        binding.titleGithubIcon.setOnClickListener {
             openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
         }
         /** 恰饭！ */
-        findViewById<View>(R.id.link_with_follow_me).setOnClickListener {
+        binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
     }
 
     /** 刷新模块状态 */
     private fun refreshModuleStatus() {
-        findViewById<LinearLayout>(R.id.main_lin_status).setBackgroundResource(
+        binding.mainLinStatus.setBackgroundResource(
             when {
                 YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> R.drawable.bg_yellow_round
                 YukiHookModuleStatus.isActive() -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
-        findViewById<ImageFilterView>(R.id.main_img_status).setImageResource(
+        binding.mainImgStatus.setImageResource(
             when {
                 YukiHookModuleStatus.isActive() && !isMiuiNotifyStyle -> R.mipmap.ic_success
                 else -> R.mipmap.ic_warn
             }
         )
-        findViewById<TextView>(R.id.main_text_status).text =
+        binding.mainTextStatus.text =
             when {
                 YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> "模块已激活，但未在工作"
                 YukiHookModuleStatus.isActive() -> "模块已激活"
