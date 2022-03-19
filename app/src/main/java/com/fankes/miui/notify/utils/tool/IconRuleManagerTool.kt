@@ -1,0 +1,432 @@
+/*
+ * MIUINativeNotifyIcon - Fix the native notification bar icon function abandoned by the MIUI development team.
+ * Copyright (C) 2019-2022 Fankes Studio(qzmmcn@163.com)
+ * https://github.com/fankes/MIUINativeNotifyIcon
+ *
+ * This software is non-free but opensource software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ * <p>
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * and eula along with this software.  If not, see
+ * <https://www.gnu.org/licenses/>
+ *
+ * This file is Created by fankes on 2022/2/25.
+ */
+@file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager", "DEPRECATION", "IMPLICIT_CAST_TO_ANY")
+
+package com.fankes.miui.notify.utils.tool
+
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.content.getSystemService
+import androidx.core.view.isVisible
+import androidx.core.widget.doOnTextChanged
+import com.fankes.miui.notify.R
+import com.fankes.miui.notify.databinding.DiaSourceFromBinding
+import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
+import com.fankes.miui.notify.hook.HookConst
+import com.fankes.miui.notify.params.IconPackParams
+import com.fankes.miui.notify.ui.activity.ConfigureActivity
+import com.fankes.miui.notify.utils.factory.openBrowser
+import com.fankes.miui.notify.utils.factory.safeOfNull
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.log.loggerD
+import okhttp3.*
+import java.io.IOException
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.*
+
+/**
+ * 通知图标在线规则管理类
+ */
+object IconRuleManagerTool {
+
+    /** 当前规则的系统名称 */
+    private const val OS_TAG = "MIUI"
+
+    /**
+     * 从在线地址手动同步规则
+     * @param context 实例
+     * @param it 成功后回调
+     */
+    fun syncByHand(context: Context, it: () -> Unit) =
+        context.showDialog {
+            title = "同步列表"
+            var sourceType = context.modulePrefs.getInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
+            var customUrl = context.modulePrefs.getString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL)
+            bind<DiaSourceFromBinding>().apply {
+                diaSfText.apply {
+                    if (customUrl.isNotBlank()) {
+                        setText(customUrl)
+                        setSelection(customUrl.length)
+                    }
+                    doOnTextChanged { text, _, _, _ ->
+                        customUrl = text.toString()
+                        context.modulePrefs.putString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL, text.toString())
+                    }
+                }
+                diaSfTextLin.isVisible = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_3
+                diaSfRd1.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_1
+                diaSfRd2.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_2
+                diaSfRd3.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_3
+                diaSfRd1.setOnClickListener {
+                    diaSfRd2.isChecked = false
+                    diaSfRd3.isChecked = false
+                    diaSfTextLin.isVisible = false
+                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_1
+                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
+                }
+                diaSfRd2.setOnClickListener {
+                    diaSfRd1.isChecked = false
+                    diaSfRd3.isChecked = false
+                    diaSfTextLin.isVisible = false
+                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_2
+                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_2)
+                }
+                diaSfRd3.setOnClickListener {
+                    diaSfRd1.isChecked = false
+                    diaSfRd2.isChecked = false
+                    diaSfTextLin.isVisible = true
+                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_3
+                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_3)
+                }
+            }
+            confirmButton { sync(context, it) }
+            cancelButton()
+            neutralButton(text = "自定义规则") {
+                context.showDialog {
+                    title = "自定义规则"
+                    val editText = bind<DiaSourceFromStringBinding>().diaSfsInputEdit.apply {
+                        requestFocus()
+                        invalidate()
+                    }
+                    IconPackParams(context).also { params ->
+                        confirmButton(text = "合并") {
+                            editText.text.toString().also { jsonString ->
+                                when {
+                                    jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
+                                    jsonString.isNotBlank() -> {
+                                        params.save(
+                                            params.splicingJsonArray(
+                                                dataJson1 = params.storageDataJson ?: "[]",
+                                                dataJson2 = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]"
+                                            )
+                                        )
+                                        it()
+                                    }
+                                    else -> context.snake(msg = "请输入有效内容")
+                                }
+                            }
+                        }
+                        cancelButton(text = "覆盖") {
+                            editText.text.toString().also { jsonString ->
+                                when {
+                                    jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
+                                    jsonString.isNotBlank() -> {
+                                        params.save(dataJson = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]")
+                                        it()
+                                    }
+                                    else -> context.snake(msg = "请输入有效内容")
+                                }
+                            }
+                        }
+                    }
+                    neutralButton(text = "取消")
+                }
+            }
+        }
+
+    /**
+     * 从在线地址同步规则
+     * @param context 实例
+     * @param it 成功后回调
+     */
+    fun sync(context: Context, it: () -> Unit) {
+        val sourceType = context.modulePrefs.getInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
+        val customUrl = context.modulePrefs.getString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL)
+        when (sourceType) {
+            HookConst.TYPE_SOURCE_SYNC_WAY_1 ->
+                onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", it)
+            HookConst.TYPE_SOURCE_SYNC_WAY_2 ->
+                onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", it)
+            HookConst.TYPE_SOURCE_SYNC_WAY_3 ->
+                if (customUrl.isNotBlank())
+                    if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
+                        onRefreshingCustom(context, customUrl, it)
+                    else context.snakeOrNotify(title = "同步失败", msg = "同步地址不是一个合法的 URL")
+                else context.snakeOrNotify(title = "同步失败", msg = "同步地址不能为空")
+            else -> context.snakeOrNotify(title = "同步异常", msg = "同步类型错误")
+        }
+    }
+
+    /**
+     * 开始更新数据
+     * @param context 实例
+     * @param url
+     * @param it 成功后回调
+     */
+    private fun onRefreshing(context: Context, url: String, it: () -> Unit) = checkingInternetConnect(context) {
+        fun doParse(callback: (Boolean) -> Unit = {}) {
+            wait(context, url = "$url/OS/$OS_TAG/NotifyIconsSupportConfig.json") { isDone1, ctOS ->
+                callback(true)
+                wait(context, url = "$url/APP/NotifyIconsSupportConfig.json") { isDone2, ctAPP ->
+                    callback(false)
+                    IconPackParams(context).also { params ->
+                        when {
+                            isDone1 && isDone2 -> params.splicingJsonArray(ctOS, ctAPP).also {
+                                when {
+                                    params.isHackString(it) ->
+                                        context.snakeOrNotify(title = "同步错误", msg = "请求需要验证，请尝试魔法上网或关闭魔法")
+                                    params.isNotVaildJson(it) ->
+                                        context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
+                                    params.isCompareDifferent(it) -> {
+                                        params.save(it)
+                                        it()
+                                    }
+                                    else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
+                                }
+                            }
+                            context is AppCompatActivity ->
+                                context.showDialog {
+                                    title = "连接失败"
+                                    msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
+                                    confirmButton(text = "解决方案") {
+                                        context.openBrowser(url = "https://www.baidu.com/s?wd=github%2Braw%2B%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE")
+                                    }
+                                    cancelButton()
+                                }
+                            else -> pushNotify(context, title = "同步地址不可用", msg = if (!isDone1) ctOS else ctAPP)
+                        }
+                    }
+                }
+            }
+        }
+        if (context is AppCompatActivity)
+            context.showDialog {
+                title = "同步中"
+                progressContent = "正在同步 OS 数据"
+                noCancelable()
+                doParse { if (it) progressContent = "正在同步 APP 数据" else cancel() }
+            }
+        else doParse()
+    }
+
+    /**
+     * 开始更新数据
+     * @param context 实例
+     * @param url
+     * @param it 成功后回调
+     */
+    private fun onRefreshingCustom(context: Context, url: String, it: () -> Unit) = checkingInternetConnect(context) {
+        fun doParse(callback: () -> Unit = {}) {
+            wait(context, url) { isDone, content ->
+                callback()
+                IconPackParams(context).also { params ->
+                    when {
+                        isDone -> when {
+                            params.isHackString(content) ->
+                                context.snakeOrNotify(title = "同步错误", msg = "请求需要验证，请尝试魔法上网或关闭魔法")
+                            params.isNotVaildJson(content) ->
+                                context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
+                            params.isCompareDifferent(content) -> {
+                                params.save(content)
+                                it()
+                            }
+                            else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
+                        }
+                        context is AppCompatActivity ->
+                            context.showDialog {
+                                title = "连接失败"
+                                msg = "连接失败，错误如下：\n$content"
+                                confirmButton(text = "我知道了")
+                            }
+                        else -> pushNotify(context, title = "同步地址不可用", msg = content)
+                    }
+                }
+            }
+        }
+        if (context is AppCompatActivity)
+            context.showDialog {
+                title = "同步中"
+                progressContent = "正在通过自定义地址同步数据"
+                noCancelable()
+                doParse { cancel() }
+            }
+        else doParse()
+    }
+
+    /**
+     * 检查网络连接情况
+     * @param context 实例
+     * @param it 已连接回调
+     */
+    private fun checkingInternetConnect(context: Context, it: () -> Unit) =
+        if (context is AppCompatActivity) context.showDialog {
+            title = "准备中"
+            progressContent = "正在检查网络连接情况"
+            noCancelable()
+            baseCheckingInternetConnect(context) { isDone ->
+                cancel()
+                if (isDone) it() else
+                    context.showDialog {
+                        title = "网络不可用"
+                        msg = "无法连接到互联网，请检查你当前的设备是否可以上网，且没有在手机管家中禁用本模块的联网权限。"
+                        confirmButton(text = "检查设置") {
+                            runCatching {
+                                context.startActivity(Intent().apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                })
+                            }.onFailure { context.snake(msg = "启动应用信息页面失败") }
+                        }
+                        cancelButton()
+                    }
+            }
+        } else baseCheckingInternetConnect(context) { isDone ->
+            if (isDone) it() else pushNotify(context, title = "网络不可用", msg = "无法连接到互联网，无法更新通知图标规则")
+        }
+
+    /**
+     * 检查网络连接情况
+     * @param context 实例
+     * @param it 已连接回调
+     */
+    private fun baseCheckingInternetConnect(context: Context, it: (Boolean) -> Unit) =
+        wait(context, url = "https://www.baidu.com") { isDone, _ -> it(isDone) }
+
+    /**
+     * 发送 GET 请求内容并等待
+     * @param context 实例
+     * @param url 请求地址
+     * @param it 回调 - ([Boolean] 是否成功,[String] 成功的内容或失败消息)
+     */
+    private fun wait(context: Context, url: String, it: (Boolean, String) -> Unit) = runCatching {
+        OkHttpClient().newBuilder().apply {
+            SSLSocketClient.sSLSocketFactory?.let { sslSocketFactory(it, SSLSocketClient.trustManager) }
+            hostnameVerifier(SSLSocketClient.hostnameVerifier)
+        }.build().newCall(
+            Request.Builder()
+                .url(url)
+                .get()
+                .build()
+        ).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                (context as? Activity?)?.runOnUiThread { it(false, e.toString()) } ?: it(false, e.toString())
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val bodyString = response.body?.string() ?: ""
+                (context as? Activity?)?.runOnUiThread { it(true, bodyString) } ?: it(true, bodyString)
+            }
+        })
+    }.onFailure { it(false, "URL 无效") }
+
+    /**
+     * 根据实例类型决定推送通知还是弹出提示
+     * @param title 标题 - 仅对通知生效
+     * @param msg 消息内容
+     */
+    private fun Context.snakeOrNotify(title: String, msg: String) {
+        if (this !is AppCompatActivity)
+            pushNotify(context = this, title, msg)
+        else snake(msg)
+    }
+
+    /**
+     * 推送通知
+     * @param context 实例
+     * @param title 通知标题
+     * @param msg 通知消息
+     */
+    private fun pushNotify(context: Context, title: String, msg: String) {
+        context.getSystemService<NotificationManager>()?.apply {
+            areNotificationsEnabled()
+            createNotificationChannel(
+                NotificationChannel(
+                    "notifyRuleUpdateId", "通知图标优化规则",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+            )
+            notify(0, NotificationCompat.Builder(context, "notifyRuleUpdateId").apply {
+                setContentTitle(title)
+                setContentText(msg)
+                color = 0xFF858585.toInt()
+                setSmallIcon(R.drawable.ic_nf_icon_update)
+                setSound(null)
+                setDefaults(NotificationCompat.DEFAULT_ALL)
+                setContentIntent(
+                    PendingIntent.getActivity(
+                        context, 0,
+                        Intent(context, ConfigureActivity::class.java),
+                        if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
+            }.build())
+        }
+    }
+
+    /**
+     * 自动信任 SSL 证书
+     *
+     * 放行全部加密 SSL 请求
+     */
+    private object SSLSocketClient {
+
+        /**
+         * 格式化实例
+         * @return [SSLSocketFactory] or null
+         */
+        val sSLSocketFactory
+            get() = safeOfNull {
+                SSLContext.getInstance("TLS").let {
+                    it.init(null, arrayOf<TrustManager>(trustManager), SecureRandom())
+                    it.socketFactory
+                }
+            }
+
+        /**
+         * 使用的实例
+         * @return [HostnameVerifier]
+         */
+        val hostnameVerifier get() = HostnameVerifier { _, _ -> true }
+
+        /**
+         * 信任管理者
+         * @return [X509TrustManager]
+         */
+        val trustManager
+            get() = object : X509TrustManager {
+
+                override fun checkClientTrusted(chain: Array<X509Certificate?>?, authType: String?) {
+                    loggerD(msg = "TrustX509 --> $authType")
+                }
+
+                override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) {
+                    loggerD(msg = "TrustX509 --> $authType")
+                }
+
+                override fun getAcceptedIssuers() = arrayOf<X509Certificate>()
+            }
+    }
+}

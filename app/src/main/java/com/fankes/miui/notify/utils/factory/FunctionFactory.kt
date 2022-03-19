@@ -40,6 +40,7 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Base64
 import android.widget.Toast
+import androidx.core.app.NotificationManagerCompat
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.classOf
@@ -213,6 +214,12 @@ val Context.versionName get() = packageInfo.versionName ?: ""
  * @return [Int]
  */
 val Context.versionCode get() = packageInfo.versionCode
+
+/**
+ * 是否关闭了通知权限
+ * @return [Boolean]
+ */
+val isNotNoificationEnabled get() = !NotificationManagerCompat.from(appContext).areNotificationsEnabled()
 
 /**
  * dp 转换为 pxInt
