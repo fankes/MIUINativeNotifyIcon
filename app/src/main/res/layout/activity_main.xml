@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorThemeBackground"
     android:orientation="vertical"
-    tools:context=".ui.MainActivity"
+    tools:context=".ui.activity.MainActivity"
     tools:ignore="HardcodedText,UseCompoundDrawables,ContentDescription">
 
     <LinearLayout
@@ -171,7 +171,7 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <com.fankes.miui.notify.view.MaterialSwitch
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/module_enable_switch"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -180,7 +180,7 @@
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
-                <com.fankes.miui.notify.view.MaterialSwitch
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/module_enable_log_switch"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
@@ -201,7 +201,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/config_item_s_count_hook"
+                android:id="@+id/status_icon_count_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -215,8 +215,8 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <com.fankes.miui.notify.view.MaterialSwitch
-                    android:id="@+id/config_status_icon_count_switch"
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
+                    android:id="@+id/status_icon_count_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="解除状态栏通知图标个数限制"
@@ -234,7 +234,7 @@
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/config_warn_s_count_dis_tip"
+                    android:id="@+id/warn_s_count_dis_tip"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -245,7 +245,7 @@
                     android:textSize="12sp" />
 
                 <LinearLayout
-                    android:id="@+id/config_item_s_count_child_hook"
+                    android:id="@+id/status_icon_count_child_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -269,7 +269,7 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/config_status_icon_count_text"
+                        android:id="@+id/status_icon_count_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -294,7 +294,7 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/config_status_icon_count_button"
+                        android:id="@+id/status_icon_count_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_button_round"
@@ -312,7 +312,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/config_item_color_hook"
+                android:id="@+id/color_icon_hook_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -325,8 +325,8 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <com.fankes.miui.notify.view.MaterialSwitch
-                    android:id="@+id/color_icon_fix_switch"
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
+                    android:id="@+id/color_icon_hook_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="忽略彩色通知图标"
@@ -343,7 +343,7 @@
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
-                <com.fankes.miui.notify.view.MaterialSwitch
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/color_icon_compat_switch"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
@@ -365,7 +365,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/config_item_notify"
+                android:id="@+id/notify_icon_config_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
@@ -379,7 +379,7 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <com.fankes.miui.notify.view.MaterialSwitch
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/notify_icon_fix_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -390,7 +390,7 @@
                     android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/config_notify_app_button"
+                    android:id="@+id/notify_icon_fix_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -440,7 +440,7 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <com.fankes.miui.notify.view.MaterialSwitch
+                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/hide_icon_in_launcher_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -25,7 +25,6 @@
 package com.fankes.miui.notify.utils.factory
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -36,7 +35,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -50,7 +48,6 @@ import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
-
 
 /**
  * 系统深色模式是否开启
@@ -279,21 +276,6 @@ val ByteArray.bitmap: Bitmap get() = BitmapFactory.decodeByteArray(this, 0, size
 val String.bitmap: Bitmap get() = unbase64.bitmap
 
 /**
- * 设置对话框默认风格
- * @param context 使用的实例
- */
-fun AlertDialog.setDefaultStyle(context: Context) =
-    window?.setBackgroundDrawable(
-        GradientDrawable(
-            GradientDrawable.Orientation.TOP_BOTTOM,
-            intArrayOf(Color.WHITE, Color.WHITE)
-        ).apply {
-            shape = GradientDrawable.RECTANGLE
-            gradientType = GradientDrawable.LINEAR_GRADIENT
-            cornerRadius = 15.dpFloat(context)
-        })
-
-/**
  * 获取系统 Prop 值
  * @param key Key
  * @param default 默认值
@@ -322,6 +304,13 @@ fun execShellSu(cmd: String) = safeOfNothing {
  * @param msg 提示内容
  */
 fun toast(msg: String) = Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
+
+/**
+ * 跳转到指定页面
+ *
+ * [T] 为指定的 [Activity]
+ */
+inline fun <reified T : Activity> Context.navigate() = startActivity(Intent(this, T::class.java))
 
 /**
  * 弹出 [Snackbar]

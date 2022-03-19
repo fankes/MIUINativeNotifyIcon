@@ -26,7 +26,7 @@
             android:value="93" />
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:exported="true"
             android:screenOrientation="behind">
             <intent-filter>
@@ -42,7 +42,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="behind"
-            android:targetActivity=".ui.MainActivity">
+            android:targetActivity=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,7 +51,7 @@
         </activity-alias>
 
         <activity
-            android:name=".ui.ConfigureActivity"
+            android:name=".ui.activity.ConfigureActivity"
             android:exported="false"
             android:screenOrientation="behind" />
     </application>

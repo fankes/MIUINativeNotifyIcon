@@ -25,12 +25,11 @@
 package com.fankes.miui.notify.utils.tool
 
 import android.app.Activity
-import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import com.fankes.miui.notify.utils.factory.safeOfNull
-import com.fankes.miui.notify.utils.factory.setDefaultStyle
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.highcapable.yukihookapi.hook.log.loggerD
@@ -50,13 +49,11 @@ object ClientRequestTool {
      * @param context 实例
      * @param it 已连接回调
      */
-    fun checkingInternetConnect(context: Activity, it: () -> Unit) =
-        ProgressDialog(context).apply {
-            setDefaultStyle(context)
-            setCancelable(false)
-            setTitle("准备中")
-            setMessage("正在检查网络连接情况")
-        }.apply {
+    fun checkingInternetConnect(context: Context, it: () -> Unit) =
+        context.showDialog {
+            title = "准备中"
+            progressContent = "正在检查网络连接情况"
+            noCancelable()
             wait(context, url = "https://www.baidu.com") { isDone, _ ->
                 cancel()
                 if (isDone) it() else
@@ -75,7 +72,7 @@ object ClientRequestTool {
                         cancelButton()
                     }
             }
-        }.show()
+        }
 
     /**
      * 发送 GET 请求内容并等待
@@ -83,7 +80,7 @@ object ClientRequestTool {
      * @param url 请求地址
      * @param it 回调 - ([Boolean] 是否成功,[String] 成功的内容或失败消息)
      */
-    fun wait(context: Activity, url: String, it: (Boolean, String) -> Unit) = runCatching {
+    fun wait(context: Context, url: String, it: (Boolean, String) -> Unit) = runCatching {
         OkHttpClient().newBuilder().apply {
             SSLSocketClient.sSLSocketFactory?.let { sslSocketFactory(it, SSLSocketClient.trustManager) }
             hostnameVerifier(SSLSocketClient.hostnameVerifier)
@@ -94,12 +91,12 @@ object ClientRequestTool {
                 .build()
         ).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                context.runOnUiThread { it(false, e.toString()) }
+                (context as? Activity?)?.runOnUiThread { it(false, e.toString()) }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 val bodyString = response.body?.string() ?: ""
-                context.runOnUiThread { it(true, bodyString) }
+                (context as? Activity?)?.runOnUiThread { it(true, bodyString) }
             }
         })
     }.onFailure { it(false, "URL 无效") }
