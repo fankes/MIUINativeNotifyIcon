@@ -47,8 +47,8 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
-import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
@@ -94,7 +94,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     noCancelable()
                 }
             /** 判断是否 Hook */
-            YukiHookModuleStatus.isActive() -> {
+            isXposedModuleActive -> {
                 if (IconPackParams(context = this).iconDatas.isEmpty()
                     && modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
                 ) showDialog {
@@ -246,21 +246,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun refreshModuleStatus() {
         binding.mainLinStatus.setBackgroundResource(
             when {
-                YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> R.drawable.bg_yellow_round
-                YukiHookModuleStatus.isActive() -> R.drawable.bg_green_round
+                isXposedModuleActive && isMiuiNotifyStyle -> R.drawable.bg_yellow_round
+                isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                YukiHookModuleStatus.isActive() && !isMiuiNotifyStyle -> R.mipmap.ic_success
+                isXposedModuleActive && !isMiuiNotifyStyle -> R.mipmap.ic_success
                 else -> R.mipmap.ic_warn
             }
         )
         binding.mainTextStatus.text =
             when {
-                YukiHookModuleStatus.isActive() && isMiuiNotifyStyle -> "模块已激活，但未在工作"
-                YukiHookModuleStatus.isActive() -> "模块已激活"
+                isXposedModuleActive && isMiuiNotifyStyle -> "模块已激活，但未在工作"
+                isXposedModuleActive -> "模块已激活"
                 else -> "模块未激活"
             }
     }
@@ -270,7 +270,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 刷新模块状态 */
         refreshModuleStatus()
         /** 经典样式启用后给出警告 */
-        if (!isWarnDialogShowing && YukiHookModuleStatus.isActive() && isMiuiNotifyStyle)
+        if (!isWarnDialogShowing && isXposedModuleActive && isMiuiNotifyStyle)
             showDialog {
                 isWarnDialogShowing = true
                 title = "经典通知栏样式已启用"
