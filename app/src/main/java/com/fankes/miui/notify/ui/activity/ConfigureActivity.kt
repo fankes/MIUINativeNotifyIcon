@@ -181,7 +181,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         /** 装载数据 */
         mockLocalData()
         /** 更新数据 */
-        onStartRefresh()
+        if (intent?.getBooleanExtra("isShowUpdDialog", true) == true) onStartRefresh()
     }
 
     /** 开始手动同步 */
