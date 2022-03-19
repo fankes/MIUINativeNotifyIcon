@@ -64,6 +64,9 @@ object IconRuleManagerTool {
     /** 当前规则的系统名称 */
     private const val OS_TAG = "MIUI"
 
+    /** 当前规则的通知图标颜色 */
+    private const val OS_COLOR = 0xFFE06818
+
     /**
      * 从在线地址手动同步规则
      * @param context 实例
@@ -201,6 +204,7 @@ object IconRuleManagerTool {
                                         context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
                                     params.isCompareDifferent(it) -> {
                                         params.save(it)
+                                        pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                         it()
                                     }
                                     else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -250,6 +254,7 @@ object IconRuleManagerTool {
                                 context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
                             params.isCompareDifferent(content) -> {
                                 params.save(content)
+                                pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                 it()
                             }
                             else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -355,35 +360,37 @@ object IconRuleManagerTool {
 
     /**
      * 推送通知
-     * @param context 实例
+     * @param context 实例 - 类型为 [AppCompatActivity] 时将不会推送通知
      * @param title 通知标题
      * @param msg 通知消息
      */
     private fun pushNotify(context: Context, title: String, msg: String) {
-        context.getSystemService<NotificationManager>()?.apply {
-            areNotificationsEnabled()
-            createNotificationChannel(
-                NotificationChannel(
-                    "notifyRuleUpdateId", "通知图标优化规则",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-            )
-            notify(0, NotificationCompat.Builder(context, "notifyRuleUpdateId").apply {
-                setContentTitle(title)
-                setContentText(msg)
-                color = 0xFF858585.toInt()
-                setSmallIcon(R.drawable.ic_nf_icon_update)
-                setSound(null)
-                setDefaults(NotificationCompat.DEFAULT_ALL)
-                setContentIntent(
-                    PendingIntent.getActivity(
-                        context, 0,
-                        Intent(context, ConfigureActivity::class.java),
-                        if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+        if (context !is AppCompatActivity)
+            context.getSystemService<NotificationManager>()?.apply {
+                areNotificationsEnabled()
+                createNotificationChannel(
+                    NotificationChannel(
+                        "notifyRuleUpdateId", "通知图标优化规则",
+                        NotificationManager.IMPORTANCE_DEFAULT
                     )
                 )
-            }.build())
-        }
+                notify(0, NotificationCompat.Builder(context, "notifyRuleUpdateId").apply {
+                    setContentTitle(title)
+                    setContentText(msg)
+                    color = OS_COLOR.toInt()
+                    setAutoCancel(true)
+                    setSmallIcon(R.drawable.ic_nf_icon_update)
+                    setSound(null)
+                    setDefaults(NotificationCompat.DEFAULT_ALL)
+                    setContentIntent(
+                        PendingIntent.getActivity(
+                            context, 1,
+                            Intent(context, ConfigureActivity::class.java).apply { putExtra("isShowUpdDialog", false) },
+                            if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+                        )
+                    )
+                }.build())
+            }
     }
 
     /**
