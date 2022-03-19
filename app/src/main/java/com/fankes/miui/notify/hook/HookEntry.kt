@@ -536,15 +536,22 @@ class HookEntry : YukiHookXposedInitProxy {
                                             .of<StatusBarNotification>(instance))) it.apply {
                                         alpha = 1f
                                         colorFilter = null
-                                    }
-                                    /**
-                                     * 防止图标不是纯黑的问题
-                                     * 图标在任何场景下跟随状态栏其它图标保持半透明
-                                     */
-                                    else it.apply {
+                                    } else it.apply {
+                                        /**
+                                         * 防止图标不是纯黑的问题
+                                         * 图标在任何场景下跟随状态栏其它图标保持半透明
+                                         * MIUI 12 进行单独判断
+                                         */
                                         field { name = "mCurrentSetColor" }.of<Int>(instance)?.also { color ->
-                                            alpha = if (color.isWhite) 0.95f else 0.8f
-                                            setColorFilter(if (color.isWhite) color else Color.BLACK)
+                                            if (safeOfFalse {
+                                                    NotificationUtilClass.clazz.hasMethod(
+                                                        name = "ignoreStatusBarIconColor",
+                                                        ExpandedNotificationClass.clazz
+                                                    )
+                                                }) {
+                                                alpha = if (color.isWhite) 0.95f else 0.8f
+                                                setColorFilter(if (color.isWhite) color else Color.BLACK)
+                                            } else setColorFilter(color)
                                         }
                                     }
                                 }
