@@ -64,13 +64,13 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 选择放弃原生通知功能，而做出这种违反原生通知规则的做法，而这些彩色图标被设置为单色调图标，也确实会发生黑白块的问题，但是同时又会破坏遵守规范的图标。<br/><br/>
 真的没有办法了吗？在不断探索下，我找到了原生支持色彩判断的类。
 
-```
+```kotlin
 com.android.internal.util.ContrastColorUtil
 ```
 
 这个类中有一个方法可以拿出来判断图标的灰度效果。
 
-```
+```kotlin
 ContrastColorUtil.getInstance().isGrayscaleIcon(drawable)
 ```
 
