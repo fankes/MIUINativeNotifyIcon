@@ -41,7 +41,11 @@ import androidx.core.widget.doOnTextChanged
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
-import com.fankes.miui.notify.hook.HookConst
+import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY
+import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY_CUSTOM_URL
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_1
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
+import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
 import com.fankes.miui.notify.utils.factory.openBrowser
@@ -75,8 +79,8 @@ object IconRuleManagerTool {
     fun syncByHand(context: Context, it: () -> Unit) =
         context.showDialog {
             title = "同步列表"
-            var sourceType = context.modulePrefs.getInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
-            var customUrl = context.modulePrefs.getString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL)
+            var sourceType = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
+            var customUrl = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL)
             bind<DiaSourceFromBinding>().apply {
                 diaSfText.apply {
                     if (customUrl.isNotBlank()) {
@@ -85,33 +89,33 @@ object IconRuleManagerTool {
                     }
                     doOnTextChanged { text, _, _, _ ->
                         customUrl = text.toString()
-                        context.modulePrefs.putString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL, text.toString())
+                        context.modulePrefs.putString(SOURCE_SYNC_WAY_CUSTOM_URL, text.toString())
                     }
                 }
-                diaSfTextLin.isVisible = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_3
-                diaSfRd1.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_1
-                diaSfRd2.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_2
-                diaSfRd3.isChecked = sourceType == HookConst.TYPE_SOURCE_SYNC_WAY_3
+                diaSfTextLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
+                diaSfRd1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
+                diaSfRd2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
+                diaSfRd3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
                 diaSfRd1.setOnClickListener {
                     diaSfRd2.isChecked = false
                     diaSfRd3.isChecked = false
                     diaSfTextLin.isVisible = false
-                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_1
-                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
+                    sourceType = TYPE_SOURCE_SYNC_WAY_1
+                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
                 }
                 diaSfRd2.setOnClickListener {
                     diaSfRd1.isChecked = false
                     diaSfRd3.isChecked = false
                     diaSfTextLin.isVisible = false
-                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_2
-                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_2)
+                    sourceType = TYPE_SOURCE_SYNC_WAY_2
+                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_2)
                 }
                 diaSfRd3.setOnClickListener {
                     diaSfRd1.isChecked = false
                     diaSfRd2.isChecked = false
                     diaSfTextLin.isVisible = true
-                    sourceType = HookConst.TYPE_SOURCE_SYNC_WAY_3
-                    context.modulePrefs.putInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_3)
+                    sourceType = TYPE_SOURCE_SYNC_WAY_3
+                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_3)
                 }
             }
             confirmButton { sync(context, it) }
@@ -165,14 +169,14 @@ object IconRuleManagerTool {
      * @param it 成功后回调
      */
     fun sync(context: Context, it: () -> Unit) {
-        val sourceType = context.modulePrefs.getInt(HookConst.SOURCE_SYNC_WAY, HookConst.TYPE_SOURCE_SYNC_WAY_1)
-        val customUrl = context.modulePrefs.getString(HookConst.SOURCE_SYNC_WAY_CUSTOM_URL)
+        val sourceType = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
+        val customUrl = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL)
         when (sourceType) {
-            HookConst.TYPE_SOURCE_SYNC_WAY_1 ->
+            TYPE_SOURCE_SYNC_WAY_1 ->
                 onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", it)
-            HookConst.TYPE_SOURCE_SYNC_WAY_2 ->
+            TYPE_SOURCE_SYNC_WAY_2 ->
                 onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", it)
-            HookConst.TYPE_SOURCE_SYNC_WAY_3 ->
+            TYPE_SOURCE_SYNC_WAY_3 ->
                 if (customUrl.isNotBlank())
                     if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
                         onRefreshingCustom(context, customUrl, it)
@@ -367,7 +371,6 @@ object IconRuleManagerTool {
     private fun pushNotify(context: Context, title: String, msg: String) {
         if (context !is AppCompatActivity)
             context.getSystemService<NotificationManager>()?.apply {
-                areNotificationsEnabled()
                 createNotificationChannel(
                     NotificationChannel(
                         "notifyRuleUpdateId", "通知图标优化规则",
