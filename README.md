@@ -1,8 +1,8 @@
 # MIUI 原生通知图标
 
 [![Blank](https://img.shields.io/badge/build-pending-dbab09)](https://github.com/fankes/MIUINativeNotifyIcon)
-[![Blank](https://img.shields.io/badge/license-AGPL3.0-blue)](https://github.com/fankes/MIUINativeNotifyIcon)
-[![Blank](https://img.shields.io/badge/version-v2.16-green)](https://github.com/fankes/MIUINativeNotifyIcon)
+[![Blank](https://img.shields.io/badge/license-AGPL3.0-blue)](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/LICENSE)
+[![Blank](https://img.shields.io/badge/version-v2.16-green)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
 [![Blank](https://img.shields.io/github/downloads/fankes/MIUINativeNotifyIcon/total?label=Release)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
 [![Blank](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20Repo&logo=Android&style=flat&labelColor=F48FB1&logoColor=ffffff)](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=交流讨论&color=0088cc)](https://t.me/XiaofangInternet)
