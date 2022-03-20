@@ -78,6 +78,6 @@ inline fun <T> safeOf(default: T, result: () -> T) = try {
  * @param msg 出错输出的消息 - 默认为空
  * @param block 正常回调
  */
-inline fun <T> T.runSafe(msg: String = "", block: () -> Unit) {
+inline fun <T> T.runInSafe(msg: String = "", block: () -> Unit) {
     runCatching(block).onFailure { if (msg.isNotBlank()) loggerE(msg = msg, e = it) }
 }
