@@ -581,8 +581,8 @@ class HookEntry : YukiHookXposedInitProxy {
                             method {
                                 name = "setMaxStaticIcons"
                                 param(IntType)
-                                beforeHook { isShowNotificationIcons = firstArgs as Int > 0 }
                             }
+                            beforeHook { isShowNotificationIcons = firstArgs as Int > 0 }
                         }.ignoredNoSuchMemberFailure()
                         /** 新版方法 - 旧版不存在 */
                         injectMember {
