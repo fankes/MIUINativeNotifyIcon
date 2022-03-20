@@ -35,12 +35,14 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.classOf
@@ -222,6 +224,13 @@ val Context.versionCode get() = packageInfo.versionCode
 val isNotNoificationEnabled get() = !NotificationManagerCompat.from(appContext).areNotificationsEnabled()
 
 /**
+ * 网络连接是否正常
+ * @return [Boolean] 网络是否连接
+ */
+val isNetWorkSuccess
+    get() = safeOfFalse { appContext.getSystemService<ConnectivityManager>()?.activeNetworkInfo != null }
+
+/**
  * dp 转换为 pxInt
  * @param context 使用的实例
  * @return [Int]
@@ -353,10 +362,24 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
 }
 
 /**
+ * 跳转 APP 自身设置界面
+ * @param packageName 包名
+ */
+fun Context.openSelfSetting(packageName: String = appContext.packageName) = runCatching {
+    if (packageName.isInstall)
+        startActivity(Intent().apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            data = Uri.fromParts("package", packageName, null)
+        })
+    else toast(msg = "你没有安装此应用")
+}.onFailure { toast(msg = "启动 $packageName 应用信息失败") }
+
+/**
  * 复制到剪贴板
  * @param content 要复制的文本
  */
-fun Context.copyToClipboard(content: String) = runSafe {
+fun Context.copyToClipboard(content: String) = runInSafe {
     (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
         setPrimaryClip(ClipData.newPlainText(null, content))
         (primaryClip?.getItemAt(0)?.text ?: "").also {

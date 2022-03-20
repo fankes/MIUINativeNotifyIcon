@@ -46,6 +46,7 @@ import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
@@ -65,6 +66,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 设置文本 */
         binding.mainTextVersion.text = "模块版本：$moduleVersion"
         binding.mainTextMiuiVersion.text = "系统版本：$miuiFullVersion"
+        /** 检查更新 */
+        GithubReleaseTool.checkingForUpdate(context = this, moduleVersion) { version, function ->
+            binding.mainTextReleaseVersion.apply {
+                text = "点击更新 $version"
+                isVisible = true
+                setOnClickListener { function() }
+            }
+        }
         when {
             /** 判断是否为 MIUI 系统 */
             isNotMIUI ->
@@ -233,9 +242,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 重启按钮点击事件 */
         binding.titleRestartIcon.setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 项目地址按钮点击事件 */
-        binding.titleGithubIcon.setOnClickListener {
-            openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
-        }
+        binding.titleGithubIcon.setOnClickListener { openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon") }
         /** 恰饭！ */
         binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
@@ -286,9 +293,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             /** 防止顶栈一样重叠在自己的 APP 中 */
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         })
-                    }.onFailure {
-                        toast(msg = "启动失败，请手动调整设置")
-                    }
+                    }.onFailure { toast(msg = "启动失败，请手动调整设置") }
                     isWarnDialogShowing = false
                 }
                 cancelButton { isWarnDialogShowing = false }
