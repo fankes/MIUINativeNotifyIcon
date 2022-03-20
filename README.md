@@ -3,12 +3,17 @@
 ![Eclipse Marketplace](https://img.shields.io/badge/build-pending-dbab09)
 ![Eclipse Marketplace](https://img.shields.io/badge/license-AGPL3.0-blue)
 ![Eclipse Marketplace](https://img.shields.io/badge/version-v2.16-green)
+<a href="https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=Downloads"></a>
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=交流讨论&color=0088cc)](https://t.me/XiaofangInternet)
 <br/><br/>
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png" width = "100" height = "100"/>
 <br/>
 Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
 修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 12、12.5、13 以及最新版本。
+
+# Developer
+
+[酷安 @星夜不荟](http://www.coolapk.com/u/876977)
 
 # 开始使用
 
