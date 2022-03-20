@@ -1,9 +1,10 @@
 # MIUI 原生通知图标
 
-![Eclipse Marketplace](https://img.shields.io/badge/build-pending-dbab09)
-![Eclipse Marketplace](https://img.shields.io/badge/license-AGPL3.0-blue)
-![Eclipse Marketplace](https://img.shields.io/badge/version-v2.16-green)
-<a href="https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=Downloads"></a>
+![Blank](https://img.shields.io/badge/build-pending-dbab09)
+![Blank](https://img.shields.io/badge/license-AGPL3.0-blue)
+![Blank](https://img.shields.io/badge/version-v2.16-green)
+[![Blank](https://img.shields.io/github/downloads/fankes/MIUINativeNotifyIcon/total?label=Release)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
+[![Blank](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20Repo&logo=Android&style=flat&labelColor=F48FB1&logoColor=ffffff)](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=交流讨论&color=0088cc)](https://t.me/XiaofangInternet)
 <br/><br/>
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png" width = "100" height = "100"/>
@@ -15,12 +16,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 [酷安 @星夜不荟](http://www.coolapk.com/u/876977)
 
-# 开始使用
-
-点击下载最新版本
-<a href='https://github.com/fankes/MIUINativeNotifyIcon/releases'>![Eclipse Marketplace](https://img.shields.io/badge/download-v2.16-green)</a>
-<br/><br/>
-⚠️ 适配说明<br/>
+# 适配说明
 
 - 此模块仅支持 LSPosed(作用域“系统界面”)、~~EdXposed(随时停止支持)~~、不支持太极无极
 - 请确保你使用的是 MIUI 官方版本，任何第三方官改包发生的问题，开发者没有义务去解决和修复，请自求多福
@@ -33,7 +29,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 - 本模块完全开源免费，如果好用你可以打赏支持开发，但是请不要用于非法用途。
 - 本模块发布地址仅有 [Xposed-Modules-Repo](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)、
   [Release](https://github.com/fankes/MIUINativeNotifyIcon/releases)
-  及[蓝奏云](https://fankes.lanzouy.com/b030o2e8h)，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
+  及 [蓝奏云](https://fankes.lanzouy.com/b030o2e8h)，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
 
 # 贡献通知图标优化名单
 
