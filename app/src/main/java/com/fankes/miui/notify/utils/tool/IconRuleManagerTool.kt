@@ -48,7 +48,6 @@ import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
-import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
@@ -218,9 +217,7 @@ object IconRuleManagerTool {
                                 context.showDialog {
                                     title = "连接失败"
                                     msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
-                                    confirmButton(text = "解决方案") {
-                                        context.openBrowser(url = "https://www.baidu.com/s?wd=github%2Braw%2B%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE")
-                                    }
+                                    confirmButton(text = "再试一次") { syncByHand(context, it) }
                                     cancelButton()
                                 }
                             else -> pushNotify(context, title = "同步地址不可用", msg = if (!isDone1) ctOS else ctAPP)

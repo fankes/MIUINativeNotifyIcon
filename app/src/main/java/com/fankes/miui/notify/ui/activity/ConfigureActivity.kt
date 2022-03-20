@@ -181,17 +181,37 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         /** 装载数据 */
         mockLocalData()
         /** 更新数据 */
-        if (intent?.getBooleanExtra("isShowUpdDialog", true) == true) onStartRefresh()
+        when {
+            intent?.getBooleanExtra("isNewAppSupport", false) == true ->
+                showDialog {
+                    val appName = intent?.getStringExtra("appName") ?: ""
+                    val pkgName = intent?.getStringExtra("pkgName") ?: ""
+                    title = "新安装应用通知图标适配"
+                    msg = "你已安装 $appName($pkgName)\n\n" +
+                            "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
+                            "可随时点击本页面下方的“贡献通知图标优化名单”按钮提交贡献或请求适配。\n\n" +
+                            "你可以现在立即同步适配列表，以获取最新的适配数据。"
+                    confirmButton(text = "同步列表") { onStartRefresh() }
+                    cancelButton(text = "复制名称+包名") { copyToClipboard(content = "$appName($pkgName)") }
+                    neutralButton(text = "取消")
+                    noCancelable()
+                }
+            intent?.getBooleanExtra("isShowUpdDialog", true) == true -> onStartRefresh()
+        }
+        /** 清除数据 */
+        intent?.apply {
+            removeExtra("isNewAppSupport")
+            removeExtra("isShowUpdDialog")
+        }
     }
 
     /** 开始手动同步 */
-    private fun onStartRefresh() {
+    private fun onStartRefresh() =
         IconRuleManagerTool.syncByHand(context = this) {
             filterText = ""
             mockLocalData()
             SystemUITool.showNeedUpdateApplySnake(context = this)
         }
-    }
 
     /** 装载或刷新本地数据 */
     private fun mockLocalData() {
