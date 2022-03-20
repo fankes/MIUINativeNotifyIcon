@@ -447,6 +447,36 @@
                     android:text="此选项默认开启，开启后将对优化名单内的 APP 通知小图标使用单色调进行修复，特别是通过 MIPUSH 推送的通知，它们始终是 APP 默认图标(彩色的 APP 图标)，修复后使得它们的图标看起来更加符合 Android 原生的统一规范。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/notify_icon_fix_notify_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.view.MaterialSwitch
+                        android:id="@+id/notify_icon_fix_notify_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="提醒未适配通知图标的新安装应用"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="此选项默认开启，在通知图标优化名单有数据时将自动检查新安装的应用是否存在适配数据，若没有将会发送通知提醒，如果你了解日后新安装的应用通知图标是遵守原生单色图标规范的，可以关闭此提醒。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

@@ -24,6 +24,7 @@ package com.fankes.miui.notify.hook
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
@@ -43,6 +44,7 @@ import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
+import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY
 import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
@@ -51,6 +53,7 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
+import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.factory.*
@@ -60,6 +63,7 @@ import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.type.android.ContextClass
 import com.highcapable.yukihookapi.hook.type.android.DrawableClass
 import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
+import com.highcapable.yukihookapi.hook.type.android.IntentClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.xposed.proxy.YukiHookXposedInitProxy
@@ -84,6 +88,9 @@ class HookEntry : YukiHookXposedInitProxy {
 
         /** 原生存在的类 */
         private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
+
+        /** 原生存在的类 */
+        private const val PluginManagerImplClass = "$SYSTEMUI_PACKAGE_NAME.shared.plugins.PluginManagerImpl"
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val ExpandableNotificationRowClass = VariousClass(
@@ -187,9 +194,7 @@ class HookEntry : YukiHookXposedInitProxy {
      * @param context 实例
      * @return [String]
      */
-    private fun StatusBarNotification.findAppName(context: Context) = safeOf(default = "<unknown>") {
-        context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadLabel(context.packageManager)
-    }
+    private fun StatusBarNotification.findAppName(context: Context) = context.findAppName(opPkgName)
 
     /**
      * 获取通知栏、状态栏 APP 图标
@@ -663,6 +668,38 @@ class HookEntry : YukiHookXposedInitProxy {
                             intercept()
                         }.ignoredNoSuchMemberFailure()
                     }.ignoredHookClassNotFoundFailure()
+                    /** 发送适配新的 APP 图标通知 */
+                    PluginManagerImplClass.hook {
+                        injectMember {
+                            method {
+                                name = "onReceive"
+                                param(ContextClass, IntentClass)
+                            }
+                            afterHook {
+                                if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true) &&
+                                    prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true)
+                                ) (lastArgs as? Intent)?.also {
+                                    if (!it.action.equals(Intent.ACTION_PACKAGE_REPLACED) &&
+                                        it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                                    ) return@also
+                                    when (it.action) {
+                                        Intent.ACTION_PACKAGE_ADDED ->
+                                            it.data?.schemeSpecificPart?.also { newPkgName ->
+                                                if (iconDatas.takeIf { e -> e.isNotEmpty() }
+                                                        ?.filter { e -> e.packageName == newPkgName }
+                                                        .isNullOrEmpty()
+                                                ) IconAdaptationTool.pushNewAppSupportNotify(firstArgs as Context, newPkgName)
+                                            }
+                                        Intent.ACTION_PACKAGE_REMOVED ->
+                                            IconAdaptationTool.removeNewAppSupportNotify(
+                                                firstArgs as Context,
+                                                packageName = it.data?.schemeSpecificPart ?: ""
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
