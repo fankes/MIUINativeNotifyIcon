@@ -157,7 +157,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
         binding.statusIconCountChildItem.isVisible = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
         binding.moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG, default = false)
+        binding.moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG)
         binding.hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
         binding.colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         binding.colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
