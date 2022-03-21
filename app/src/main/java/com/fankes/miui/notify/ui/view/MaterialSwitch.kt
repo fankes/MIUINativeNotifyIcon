@@ -27,6 +27,7 @@ package com.fankes.miui.notify.ui.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.appcompat.widget.SwitchCompat
 import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
@@ -65,5 +66,7 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             0xFFCCCCCC.toInt(),
             0xFFCCCCCC.toInt()
         )
+        isSingleLine = true
+        ellipsize = TextUtils.TruncateAt.END
     }
 }
