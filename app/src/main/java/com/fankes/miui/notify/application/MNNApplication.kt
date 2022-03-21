@@ -26,10 +26,14 @@ package com.fankes.miui.notify.application
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import com.fankes.miui.notify.BuildConfig
 
 class MNNApplication : Application() {
 
     companion object {
+
+        /** 当前模块的包名 */
+        const val MODULE_PACKAGE_NAME = BuildConfig.APPLICATION_ID
 
         /** 全局静态实例 */
         private var context: MNNApplication? = null

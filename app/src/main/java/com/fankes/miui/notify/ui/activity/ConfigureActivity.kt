@@ -182,6 +182,14 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         mockLocalData()
         /** 更新数据 */
         when {
+            intent?.getBooleanExtra("isShowNeedRestart", false) == true ->
+                showDialog {
+                    title = "规则列表已同步至最新"
+                    msg = "同步完成，部分通知图标可能需要重新启动系统界面才能生效。"
+                    confirmButton(text = "重新启动") { SystemUITool.restartSystemUI(context) }
+                    cancelButton()
+                    noCancelable()
+                }
             intent?.getBooleanExtra("isNewAppSupport", false) == true ->
                 showDialog {
                     val appName = intent?.getStringExtra("appName") ?: ""
@@ -190,6 +198,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     msg = "你已安装 $appName($pkgName)\n\n" +
                             "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
                             "可随时点击本页面下方的“贡献通知图标优化名单”按钮提交贡献或请求适配。\n\n" +
+                            "若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n" +
                             "你可以现在立即同步适配列表，以获取最新的适配数据。"
                     confirmButton(text = "同步列表") { onStartRefresh() }
                     cancelButton(text = "复制名称+包名") { copyToClipboard(content = "$appName($pkgName)") }
@@ -200,6 +209,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
         /** 清除数据 */
         intent?.apply {
+            removeExtra("isShowNeedRestart")
             removeExtra("isNewAppSupport")
             removeExtra("isShowUpdDialog")
         }

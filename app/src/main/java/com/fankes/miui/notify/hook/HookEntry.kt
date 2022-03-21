@@ -37,6 +37,7 @@ import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
+import com.fankes.miui.notify.application.MNNApplication.Companion.MODULE_PACKAGE_NAME
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
@@ -54,6 +55,7 @@ import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
+import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.factory.*
@@ -473,6 +475,11 @@ class HookEntry : YukiHookXposedInitProxy {
             } else false.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = true) }
         else true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
 
+    /** 缓存图标数据 */
+    private fun PackageParam.cachingIconDatas() {
+        iconDatas = IconPackParams(param = this).iconDatas
+    }
+
     override fun onInit() = configs {
         debugTag = "MIUINativeNotifyIcon"
         isDebug = false
@@ -492,7 +499,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 开始 Hook */
                 else -> {
                     /** 缓存图标数据 */
-                    iconDatas = IconPackParams(param = this).iconDatas
+                    cachingIconDatas()
                     /** 执行 Hook */
                     NotificationUtilClass.hook {
                         /** 强制回写系统的状态栏图标样式为原生 */
@@ -525,11 +532,17 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                             afterHook {
                                 (globalContext ?: firstArgs as Context).also { context ->
+                                    val expandedNf = args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?
+                                    /** Hook 状态栏小图标 */
                                     hookSmallIconOnSet(
                                         context = context,
-                                        args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?,
+                                        expandedNf,
                                         (result as Icon).loadDrawable(context)
                                     ) { icon -> result = Icon.createWithBitmap(icon) }
+                                    /** 刷新图标缓存 */
+                                    if (expandedNf?.compatOpPkgName == MODULE_PACKAGE_NAME &&
+                                        expandedNf.notification?.channelId == IconRuleManagerTool.NOTIFY_CHANNEL
+                                    ) cachingIconDatas()
                                 }
                             }
                         }
@@ -646,6 +659,10 @@ class HookEntry : YukiHookXposedInitProxy {
                                 if (importance != 1) isExpanded = true
                                 /** 执行 Hook */
                                 hookNotifyIconOnSet(iconImageView.context, expandedNf, iconImageView, isExpanded)
+                                /** 刷新图标缓存 */
+                                if (expandedNf?.compatOpPkgName == MODULE_PACKAGE_NAME &&
+                                    expandedNf.notification?.channelId == IconRuleManagerTool.NOTIFY_CHANNEL
+                                ) cachingIconDatas()
                             }
                         }
                     }

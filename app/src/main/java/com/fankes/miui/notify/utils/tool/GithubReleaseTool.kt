@@ -36,10 +36,10 @@ import java.io.Serializable
 object GithubReleaseTool {
 
     /** 仓库作者 */
-    private const val repoAuthor = "fankes"
+    private const val REPO_AUTHOR = "fankes"
 
     /** 仓库名称 */
-    private const val repoName = "MIUINativeNotifyIcon"
+    private const val REPO_NAME = "MIUINativeNotifyIcon"
 
     /**
      * 获取最新版本信息
@@ -50,7 +50,7 @@ object GithubReleaseTool {
     fun checkingForUpdate(context: Context, version: String, it: (String, () -> Unit) -> Unit) = checkingInternetConnect(context) {
         OkHttpClient().newBuilder().build().newCall(
             Request.Builder()
-                .url("https://api.github.com/repos/$repoAuthor/$repoName/releases/latest")
+                .url("https://api.github.com/repos/$REPO_AUTHOR/$REPO_NAME/releases/latest")
                 .get()
                 .build()
         ).enqueue(object : Callback {
