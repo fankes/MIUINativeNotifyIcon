@@ -275,14 +275,14 @@
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_modify" />
+                        android:src="@mipmap/ic_control" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:alpha="0.85"
                         android:singleLine="true"
-                        android:text="图标调整"
+                        android:text="功能调整"
                         android:textColor="@color/colorTextGray"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -407,14 +407,14 @@
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_control" />
+                        android:src="@mipmap/ic_modify" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:alpha="0.85"
                         android:singleLine="true"
-                        android:text="功能调整"
+                        android:text="图标调整"
                         android:textColor="@color/colorTextGray"
                         android:textSize="12sp" />
                 </LinearLayout>
