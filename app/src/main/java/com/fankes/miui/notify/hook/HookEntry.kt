@@ -80,6 +80,9 @@ class HookEntry : YukiHookXposedInitProxy {
         private const val NotificationHeaderViewWrapperInjectorClass =
             "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
+        /** MIUI 大部分版本存在的类 */
+        private const val MiuiClockClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock"
+
         /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
@@ -697,6 +700,16 @@ class HookEntry : YukiHookXposedInitProxy {
                                             )
                                     }
                                 }
+                            }
+                        }
+                    }
+                    /** 自动检查通知优化图标更新的注入监听 */
+                    MiuiClockClass.hook {
+                        injectMember {
+                            method { name = "updateTime" }
+                            afterHook {
+                                // TODO 待实现
+                                loggerD(msg = "当前时间：${System.currentTimeMillis()}")
                             }
                         }
                     }
