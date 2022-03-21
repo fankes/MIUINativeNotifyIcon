@@ -58,6 +58,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         /** 模块版本 */
         private const val moduleVersion = BuildConfig.VERSION_NAME
+
+        /** 预发布的版本标识 */
+        private const val pendingFlag = "[pending]"
     }
 
     /** 警告对话框是否显示 */
@@ -65,7 +68,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun onCreate() {
         /** 设置文本 */
-        binding.mainTextVersion.text = "模块版本：$moduleVersion"
+        binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
         binding.mainTextMiuiVersion.text = "系统版本：$miuiFullVersion"
         /** 检查更新 */
         GithubReleaseTool.checkingForUpdate(context = this, moduleVersion) { version, function ->
