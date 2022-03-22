@@ -83,11 +83,11 @@ object IconAdaptationTool {
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
-                    "notifyRuleAdaptId", "通知图标优化适配",
+                    IconRuleManagerTool.NOTIFY_CHANNEL, "通知图标优化适配",
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply { enableLights(false) }
             )
-            notify(packageName.hashCode(), Notification.Builder(context, "notifyRuleAdaptId").apply {
+            notify(packageName.hashCode(), Notification.Builder(context, IconRuleManagerTool.NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
                 setContentTitle("您已安装 ${context.findAppName(packageName)}")
                 setContentText("尚未适配此应用，点按打开在线规则。")

@@ -56,7 +56,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     /** 回调滚动事件改变 */
     private var onScrollEvent: ((Boolean) -> Unit)? = null
 
-    /** 全部的通知优化图标数据 */
+    /** 全部的通知图标优化数据 */
     private var iconAllDatas = ArrayList<IconDataBean>()
 
     override fun onCreate() {

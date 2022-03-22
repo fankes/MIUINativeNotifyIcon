@@ -128,11 +128,21 @@ class HookEntry : YukiHookXposedInitProxy {
         )
     }
 
-    /** 缓存的通知优化图标数组 */
+    /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
+
+    /**
+     * 是否启用忽略彩色图标和启用通知图标优化功能
+     * @param isHooking 是否判断启用通知功能 - 默认：是
+     * @return [Boolean]
+     */
+    private fun PackageParam.isEnableHookColorNotifyIcon(isHooking: Boolean = true) =
+        prefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true) &&
+                prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true) &&
+                (if (isHooking) prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true) else true)
 
     /**
      * - 这个是修复彩色图标的关键核心代码判断
@@ -477,7 +487,13 @@ class HookEntry : YukiHookXposedInitProxy {
 
     /** 缓存图标数据 */
     private fun PackageParam.cachingIconDatas() {
-        iconDatas = IconPackParams(param = this).iconDatas
+        iconDatas.clear()
+        IconPackParams(param = this).iconDatas.apply {
+            when {
+                isNotEmpty() -> forEach { iconDatas.add(it) }
+                isEmpty() && isEnableHookColorNotifyIcon(isHooking = false) -> loggerW(msg = "NotifyIconSupportData is empty!")
+            }
+        }
     }
 
     override fun onInit() = configs {
@@ -696,9 +712,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 param(ContextClass, IntentClass)
                             }
                             afterHook {
-                                if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true) &&
-                                    prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true)
-                                ) (lastArgs as? Intent)?.also {
+                                if (isEnableHookColorNotifyIcon()) (lastArgs as? Intent)?.also {
                                     if (!it.action.equals(Intent.ACTION_PACKAGE_REPLACED) &&
                                         it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
                                     ) return@also
@@ -720,7 +734,7 @@ class HookEntry : YukiHookXposedInitProxy {
                             }
                         }
                     }
-                    /** 自动检查通知优化图标更新的注入监听 */
+                    /** 自动检查通知图标优化更新的注入监听 */
                     MiuiClockClass.hook {
                         injectMember {
                             method { name = "updateTime" }

@@ -121,7 +121,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 if (isNotNoificationEnabled && modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
                     showDialog {
                         title = "模块的通知权限已关闭"
-                        msg = "请开启通知权限，以确保你能收到通知优化图标在线规则的更新。"
+                        msg = "请开启通知权限，以确保你能收到通知图标优化在线规则的更新。"
                         confirmButton {
                             runCatching {
                                 Intent().also { intent ->
