@@ -220,7 +220,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         IconRuleManagerTool.syncByHand(context = this) {
             filterText = ""
             mockLocalData()
-            SystemUITool.showNeedUpdateApplySnake(context = this)
         }
 
     /** 装载或刷新本地数据 */
