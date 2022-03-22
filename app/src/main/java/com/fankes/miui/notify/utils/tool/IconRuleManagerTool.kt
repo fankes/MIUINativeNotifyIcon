@@ -141,7 +141,7 @@ object IconRuleManagerTool {
                                                 dataJson2 = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]"
                                             )
                                         )
-                                        pushWithRefresh(context)
+                                        pushAndNotifyRefresh(context)
                                         it()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
@@ -154,7 +154,7 @@ object IconRuleManagerTool {
                                     jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
                                     jsonString.isNotBlank() -> {
                                         params.save(dataJson = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]")
-                                        pushWithRefresh(context)
+                                        pushAndNotifyRefresh(context)
                                         it()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
@@ -218,7 +218,7 @@ object IconRuleManagerTool {
                                     params.isCompareDifferent(it) -> {
                                         params.save(it)
                                         pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
-                                        pushWithRefresh(context)
+                                        pushAndNotifyRefresh(context)
                                         it()
                                     }
                                     else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -267,7 +267,7 @@ object IconRuleManagerTool {
                             params.isCompareDifferent(content) -> {
                                 params.save(content)
                                 pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
-                                pushWithRefresh(context)
+                                pushAndNotifyRefresh(context)
                                 it()
                             }
                             else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -361,15 +361,34 @@ object IconRuleManagerTool {
     }.onFailure { it(false, "URL 无效") }
 
     /**
+     * 刷新系统界面状态栏与通知图标
+     * @param context 实例
+     */
+    fun refreshSystemUI(context: Context) {
+        if (context !is AppCompatActivity) return
+        context.showDialog {
+            title = "请稍后"
+            progressContent = "正在刷新系统界面改变"
+            /** 发送通知提醒宿主更新图标缓存 */
+            pushNotify(appContext, title = "请稍后", msg = "正在等待系统界面响应", isAction = false)
+            /** 刷新成功后取消通知 */
+            Handler().postDelayed({
+                context.getSystemService<NotificationManager>()?.cancel(1)
+                cancel()
+            }, 500)
+            noCancelable()
+        }
+    }
+
+    /**
      * 推送通知图标更新通知
      * @param context 实例
      */
-    private fun pushWithRefresh(context: Context) {
+    private fun pushAndNotifyRefresh(context: Context) {
         if (context !is AppCompatActivity) return
         SystemUITool.showNeedUpdateApplySnake(context)
-        pushNotify(appContext, title = "更新完成", msg = "部分通知图标需要重启系统界面生效", isAction = false)
-        /** 刷新成功后取消通知 */
-        Handler().postDelayed({ context.getSystemService<NotificationManager>()?.cancel(1) }, 1500)
+        /** 刷新改变 */
+        refreshSystemUI(context)
     }
 
     /**
@@ -404,16 +423,14 @@ object IconRuleManagerTool {
                     setContentText(msg)
                     color = OS_COLOR.toInt()
                     setAutoCancel(true)
-                    setSmallIcon(R.drawable.ic_nf_icon_update)
+                    setSmallIcon(if (isAction) R.drawable.ic_nf_icon_update else R.drawable.ic_nf_icon_refresh)
                     setSound(null)
                     setDefaults(NotificationCompat.DEFAULT_ALL)
                     if (isAction) setContentIntent(
                         PendingIntent.getActivity(
                             context, msg.hashCode(),
-                            Intent(context, ConfigureActivity::class.java).apply {
-                                putExtra("isShowNeedRestart", true)
-                                putExtra("isShowUpdDialog", false)
-                            }, if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+                            Intent(context, ConfigureActivity::class.java).apply { putExtra("isShowUpdDialog", false) },
+                            if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
                         )
                     )
                 }.build())

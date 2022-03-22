@@ -29,7 +29,6 @@ object HookConst {
     const val ENABLE_MODULE = "_enable_module"
     const val ENABLE_MODULE_LOG = "_enable_module_log"
     const val ENABLE_HIDE_ICON = "_hide_icon"
-    const val ENABLE_COLOR_ICON_HOOK = "_color_icon_hook"
     const val ENABLE_COLOR_ICON_COMPAT = "_color_icon_compat"
     const val ENABLE_NOTIFY_ICON_FIX = "_notify_icon_fix"
     const val ENABLE_NOTIFY_ICON_FIX_NOTIFY = "_notify_icon_fix_notify"

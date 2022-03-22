@@ -36,7 +36,6 @@ import com.fankes.miui.notify.R
 import com.fankes.miui.notify.databinding.ActivityMainBinding
 import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
-import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_HOOK
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
@@ -151,10 +150,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         var statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
         binding.colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         binding.statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.colorIconCompatSwitch.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        binding.colorIconCompatText.isVisible = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
-        binding.notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true) &&
-                modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
+        binding.notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         binding.notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         binding.notifyIconFixNotifyItem.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         binding.statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
@@ -162,7 +158,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
         binding.moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG)
         binding.hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
-        binding.colorIconHookSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_HOOK, default = true)
         binding.colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
         binding.notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
         binding.notifyIconFixNotifySwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true)
@@ -173,7 +168,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             binding.moduleEnableLogSwitch.isVisible = b
             binding.colorIconHookItem.isVisible = b
             binding.statusIconCountItem.isVisible = b
-            binding.notifyIconConfigItem.isVisible = b && binding.colorIconHookSwitch.isChecked
+            binding.notifyIconConfigItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
         binding.moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
@@ -196,30 +191,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             binding.statusIconCountChildItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
-        binding.colorIconHookSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_COLOR_ICON_HOOK, b)
-            binding.notifyIconConfigItem.isVisible = b
-            binding.colorIconCompatSwitch.isVisible = b
-            binding.colorIconCompatText.isVisible = b
-            SystemUITool.showNeedRestartSnake(context = this)
-        }
         binding.colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_COLOR_ICON_COMPAT, b)
-            SystemUITool.showNeedRestartSnake(context = this)
+            SystemUITool.refreshSystemUI(context = this)
         }
         binding.notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX, b)
             binding.notifyIconFixButton.isVisible = b
             binding.notifyIconFixNotifyItem.isVisible = b
-            SystemUITool.showNeedRestartSnake(context = this)
+            SystemUITool.refreshSystemUI(context = this)
         }
         binding.notifyIconFixNotifySwitch.setOnCheckedChangeListener { btn, b ->
             if (!btn.isPressed) return@setOnCheckedChangeListener
             modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, b)
-            SystemUITool.showNeedRestartSnake(context = this)
+            SystemUITool.refreshSystemUI(context = this)
         }
         /** 通知图标优化名单按钮点击事件 */
         binding.notifyIconFixButton.setOnClickListener { navigate<ConfigureActivity>() }
