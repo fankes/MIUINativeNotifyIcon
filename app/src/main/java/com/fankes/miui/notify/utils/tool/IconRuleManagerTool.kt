@@ -91,10 +91,7 @@ object IconRuleManagerTool {
                         setText(customUrl)
                         setSelection(customUrl.length)
                     }
-                    doOnTextChanged { text, _, _, _ ->
-                        customUrl = text.toString()
-                        context.modulePrefs.putString(SOURCE_SYNC_WAY_CUSTOM_URL, text.toString())
-                    }
+                    doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
                 }
                 diaSfTextLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
                 diaSfRd1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
@@ -105,24 +102,25 @@ object IconRuleManagerTool {
                     diaSfRd3.isChecked = false
                     diaSfTextLin.isVisible = false
                     sourceType = TYPE_SOURCE_SYNC_WAY_1
-                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
                 }
                 diaSfRd2.setOnClickListener {
                     diaSfRd1.isChecked = false
                     diaSfRd3.isChecked = false
                     diaSfTextLin.isVisible = false
                     sourceType = TYPE_SOURCE_SYNC_WAY_2
-                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_2)
                 }
                 diaSfRd3.setOnClickListener {
                     diaSfRd1.isChecked = false
                     diaSfRd2.isChecked = false
                     diaSfTextLin.isVisible = true
                     sourceType = TYPE_SOURCE_SYNC_WAY_3
-                    context.modulePrefs.putInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_3)
                 }
             }
-            confirmButton { sync(context, it) }
+            confirmButton {
+                context.modulePrefs.putInt(SOURCE_SYNC_WAY, sourceType)
+                context.modulePrefs.putString(SOURCE_SYNC_WAY_CUSTOM_URL, customUrl)
+                sync(context, sourceType, customUrl, it)
+            }
             cancelButton()
             neutralButton(text = "自定义规则") {
                 context.showDialog {
@@ -172,11 +170,16 @@ object IconRuleManagerTool {
     /**
      * 从在线地址同步规则
      * @param context 实例
+     * @param sourceType 同步地址类型 - 默认自动获取已存储的键值
+     * @param customUrl 自定义同步地址 - 默认自动获取已存储的键值
      * @param it 成功后回调
      */
-    fun sync(context: Context, it: () -> Unit) {
-        val sourceType = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
-        val customUrl = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL)
+    fun sync(
+        context: Context,
+        sourceType: Int = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1),
+        customUrl: String = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL),
+        it: () -> Unit
+    ) {
         when (sourceType) {
             TYPE_SOURCE_SYNC_WAY_1 ->
                 onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", it)

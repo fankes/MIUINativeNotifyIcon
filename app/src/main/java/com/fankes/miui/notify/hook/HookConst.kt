@@ -37,8 +37,8 @@ object HookConst {
     const val NOTIFY_ICON_DATAS = "_notify_icon_datas"
     const val HOOK_STATUS_ICON_COUNT = "_hook_status_icon_count"
 
-    const val SOURCE_SYNC_WAY = "_source_sync_way"
-    const val SOURCE_SYNC_WAY_CUSTOM_URL = "_source_sync_way_custom_url"
+    const val SOURCE_SYNC_WAY = "_rule_source_sync_way"
+    const val SOURCE_SYNC_WAY_CUSTOM_URL = "_rule_source_sync_way_custom_url"
 
     const val TYPE_SOURCE_SYNC_WAY_1 = 1000
     const val TYPE_SOURCE_SYNC_WAY_2 = 2000
