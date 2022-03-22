@@ -420,34 +420,14 @@
                 </LinearLayout>
 
                 <com.fankes.miui.notify.ui.view.MaterialSwitch
-                    android:id="@+id/color_icon_hook_switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="忽略彩色通知图标"
-                    android:textColor="@color/colorTextGray"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:alpha="0.6"
-                    android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，开启后将自动对 APP 通知图标进行判断，保持高版本 API 的 APP 不规范的彩色图标不被着色为白、黑色块并对图标进行圆角优化，关闭后将按照 Android API 规范对 APP 通知进行图标着色，可能会出现着色为黑白、色块情况。"
-                    android:textColor="@color/colorTextDark"
-                    android:textSize="12sp" />
-
-                <com.fankes.miui.notify.ui.view.MaterialSwitch
                     android:id="@+id/color_icon_compat_switch"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginBottom="5dp"
+                    android:layout_height="wrap_content"
                     android:text="启用兼容模式"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/color_icon_compat_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"

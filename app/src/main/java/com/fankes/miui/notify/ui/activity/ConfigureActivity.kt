@@ -149,13 +149,13 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             if (!btn.isPressed) return@setOnCheckedChangeListener
                             putAppNotifyHookOf(it, b)
                             holder.adpAppAllSwitch.isEnabled = b
-                            SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
+                            SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
                         holder.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(it)
                         holder.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
                             if (!btn.isPressed) return@setOnCheckedChangeListener
                             putAppNotifyHookAllOf(it, b)
-                            SystemUITool.showNeedRestartSnake(context = this@ConfigureActivity)
+                            SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
                     }
                     return cView!!
@@ -182,14 +182,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         mockLocalData()
         /** 更新数据 */
         when {
-            intent?.getBooleanExtra("isShowNeedRestart", false) == true ->
-                showDialog {
-                    title = "规则列表已同步至最新"
-                    msg = "同步完成，部分通知图标可能需要重新启动系统界面才能生效。"
-                    confirmButton(text = "重新启动") { SystemUITool.restartSystemUI(context) }
-                    cancelButton()
-                    noCancelable()
-                }
             intent?.getBooleanExtra("isNewAppSupport", false) == true ->
                 showDialog {
                     val appName = intent?.getStringExtra("appName") ?: ""
@@ -209,7 +201,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
         /** 清除数据 */
         intent?.apply {
-            removeExtra("isShowNeedRestart")
             removeExtra("isNewAppSupport")
             removeExtra("isShowUpdDialog")
         }

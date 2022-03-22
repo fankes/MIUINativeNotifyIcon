@@ -153,11 +153,17 @@ val miuiVersion
 val miuiVersionCode get() = safeOf(default = 0f) { miuiVersion.toFloat() }
 
 /**
+ * 获取 MIUI 次版本号
+ * @return [String]
+ */
+val miuiIncrementalVersion get() = findPropString(key = "ro.system.build.version.incremental").trim()
+
+/**
  * 获取 MIUI 完全版本
  * @return [String]
  */
 val miuiFullVersion
-    get() = if (isMIUI) findPropString(key = "ro.system.build.version.incremental").let {
+    get() = if (isMIUI) miuiIncrementalVersion.let {
         if (it.lowercase().contains("a") ||
             it.lowercase().contains("b") ||
             it.lowercase().contains("c") ||
