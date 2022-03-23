@@ -375,7 +375,7 @@ object IconRuleManagerTool {
             Handler().postDelayed({
                 context.getSystemService<NotificationManager>()?.cancel(1)
                 cancel()
-            }, 500)
+            }, 1000)
             noCancelable()
         }
     }
