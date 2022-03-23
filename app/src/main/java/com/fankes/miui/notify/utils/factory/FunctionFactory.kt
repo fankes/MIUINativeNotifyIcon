@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.utils.factory
 
 import android.app.Activity
+import android.app.Notification
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -421,6 +422,16 @@ fun Context.openSelfSetting(packageName: String = appContext.packageName) = runC
         })
     else toast(msg = "你没有安装此应用")
 }.onFailure { toast(msg = "启动 $packageName 应用信息失败") }
+
+/** 跳转通知设置界面 */
+fun Context.openNotifySetting() = runCatching {
+    Intent().also { intent ->
+        intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        intent.putExtra(Notification.EXTRA_CHANNEL_ID, applicationInfo.uid)
+        startActivity(intent)
+    }
+}.onFailure { snake(msg = "跳转通知设置失败") }
 
 /**
  * 复制到剪贴板

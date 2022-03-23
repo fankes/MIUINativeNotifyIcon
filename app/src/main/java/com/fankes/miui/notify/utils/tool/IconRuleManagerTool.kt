@@ -50,9 +50,7 @@ import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
-import com.fankes.miui.notify.utils.factory.safeOfNull
-import com.fankes.miui.notify.utils.factory.showDialog
-import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.*
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
@@ -366,7 +364,13 @@ object IconRuleManagerTool {
      */
     fun refreshSystemUI(context: Context) {
         if (context !is AppCompatActivity) return
-        context.showDialog {
+        if (isNotNoificationEnabled) context.showDialog {
+            title = "模块的通知权限已关闭"
+            msg = "请开启通知权限然后重启系统界面，否则无法动态刷新系统界面使更改生效。"
+            confirmButton { context.openNotifySetting() }
+            cancelButton()
+            noCancelable()
+        } else context.showDialog {
             title = "请稍后"
             progressContent = "正在刷新系统界面改变"
             /** 发送通知提醒宿主更新图标缓存 */
