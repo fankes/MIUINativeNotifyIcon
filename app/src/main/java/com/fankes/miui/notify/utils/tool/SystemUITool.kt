@@ -23,7 +23,10 @@
 package com.fankes.miui.notify.utils.tool
 
 import android.content.Context
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.execShellSu
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.toast
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
 
@@ -72,9 +75,6 @@ object SystemUITool {
      * @param context 实例
      */
     fun showNeedUpdateApplySnake(context: Context) =
-        if (isXposedModuleActive)
-            if (isNotNoificationEnabled)
-                context.snake(msg = "无通知权限，请重启系统界面使更改生效", actionText = "立即重启") { restartSystemUI(context) }
-            else context.snake(msg = "通知图标优化名单已完成同步")
+        if (isXposedModuleActive) context.snake(msg = "通知图标优化名单已完成同步")
         else context.snake(msg = "模块没有激活，更改不会生效")
 }

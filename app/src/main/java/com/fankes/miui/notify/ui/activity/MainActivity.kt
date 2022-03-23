@@ -24,11 +24,9 @@
 
 package com.fankes.miui.notify.ui.activity
 
-import android.app.Notification
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.Settings
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
@@ -121,16 +119,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     showDialog {
                         title = "模块的通知权限已关闭"
                         msg = "请开启通知权限，以确保你能收到通知图标优化在线规则的更新。"
-                        confirmButton {
-                            runCatching {
-                                Intent().also { intent ->
-                                    intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                                    intent.putExtra(Notification.EXTRA_CHANNEL_ID, applicationInfo.uid)
-                                    startActivity(intent)
-                                }
-                            }.onFailure { snake(msg = "跳转通知设置失败") }
-                        }
+                        confirmButton { openNotifySetting() }
                         cancelButton()
                         noCancelable()
                     }
