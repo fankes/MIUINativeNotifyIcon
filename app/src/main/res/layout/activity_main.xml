@@ -87,6 +87,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
+                android:ellipsize="end"
+                android:singleLine="true"
                 android:text="模块状态未知"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
@@ -137,6 +139,19 @@
                 android:text="系统版本：%1"
                 android:textColor="@color/white"
                 android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/main_text_api_way"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:alpha="0.6"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="%1"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

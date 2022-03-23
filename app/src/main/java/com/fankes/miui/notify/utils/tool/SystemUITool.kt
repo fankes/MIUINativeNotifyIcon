@@ -59,7 +59,10 @@ object SystemUITool {
      * 刷新系统界面状态栏与通知图标
      * @param context 实例
      */
-    fun refreshSystemUI(context: Context) = IconRuleManagerTool.refreshSystemUI(context)
+    fun refreshSystemUI(context: Context) =
+        if (isXposedModuleActive)
+            IconRuleManagerTool.refreshSystemUI(context)
+        else context.snake(msg = "模块没有激活，更改不会生效")
 
     /**
      * 显示需要重启系统界面的 [Snackbar]

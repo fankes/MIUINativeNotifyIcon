@@ -23,8 +23,10 @@
 package com.fankes.miui.notify.hook
 
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
@@ -38,8 +40,8 @@ import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
-import com.fankes.miui.notify.application.MNNApplication.Companion.MODULE_PACKAGE_NAME
 import com.fankes.miui.notify.bean.IconDataBean
+import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
@@ -139,6 +141,32 @@ class HookEntry : YukiHookXposedInitProxy {
 
     /** 缓存的通知小图标包装纸实例 */
     private var notificationViewWrappers = HashSet<Any>()
+
+    /** 是否已经注册广播 */
+    private var isRegisterModuleReceiver = false
+
+    /** 模块广播接收器 */
+    private val moduleReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                context?.sendBroadcast(Intent().apply {
+                    action = Const.MODULE_HANDLER_RECEIVER
+                    putExtra("isAction", true)
+                    putExtra("isValied", intent?.getStringExtra(Const.MODULE_VERSION_VERIFY_TAG) == Const.MODULE_VERSION_VERIFY)
+                })
+            }
+        }
+    }
+
+    /**
+     * 注册模块广播接收器
+     * @param context 实例
+     */
+    private fun registerModuleReceiver(context: Context) {
+        if (isRegisterModuleReceiver) return
+        context.registerReceiver(moduleReceiver, IntentFilter().apply { addAction(Const.MODULE_CHECKING_RECEIVER) })
+        isRegisterModuleReceiver = true
+    }
 
     /**
      * 是否启用通知图标优化功能
@@ -605,7 +633,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                         (result as Icon).loadDrawable(context)
                                     ) { icon, isReplace -> if (isReplace) result = Icon.createWithBitmap(icon.toBitmap()) }
                                     /** 刷新缓存 */
-                                    if (expandedNf?.compatOpPkgName == MODULE_PACKAGE_NAME &&
+                                    if (expandedNf?.compatOpPkgName == Const.MODULE_PACKAGE_NAME &&
                                         expandedNf.notification?.channelId == IconRuleManagerTool.NOTIFY_CHANNEL
                                     ) recachingPrefs()
                                 }
@@ -654,7 +682,12 @@ class HookEntry : YukiHookXposedInitProxy {
                                     param(ExpandedNotificationClass.clazz)
                                 }
                             }
-                            afterHook { if (firstArgs != null) statusBarIconViews.add(instance()) }
+                            afterHook {
+                                if (firstArgs != null) instance<ImageView>().also {
+                                    registerModuleReceiver(it.context)
+                                    statusBarIconViews.add(it)
+                                }
+                            }
                         }
                     }
                     NotificationIconContainerClass.hook {
