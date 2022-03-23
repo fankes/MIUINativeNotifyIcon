@@ -141,7 +141,7 @@ class HookEntry : YukiHookXposedInitProxy {
     private var notificationViewWrappers = HashSet<Any>()
 
     /**
-     * 是否启用忽略彩色图标和启用通知图标优化功能
+     * 是否启用通知图标优化功能
      * @param isHooking 是否判断启用通知功能 - 默认：是
      * @return [Boolean]
      */
@@ -191,6 +191,13 @@ class HookEntry : YukiHookXposedInitProxy {
         get() = safeOfFalse {
             NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false
         }
+
+    /**
+     * 处理为圆角图标
+     * @return [Drawable]
+     */
+    private fun Drawable.rounded(context: Context) =
+        safeOf(default = this) { BitmapDrawable(context.resources, toBitmap().round(10.dpFloat(context))) }
 
     /**
      * 适配通知栏、状态栏图标
@@ -369,7 +376,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(BitmapDrawable(context.resources, customIcon), true)
                 /** 若不是灰度图标自动处理为圆角 */
-                isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable), true)
+                isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable).rounded(context), true)
                 /** 否则返回原始小图标 */
                 else -> it(notifyInstance.notification.smallIcon.loadDrawable(context), false)
             }
