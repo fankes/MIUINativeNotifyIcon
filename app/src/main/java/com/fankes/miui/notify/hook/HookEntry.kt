@@ -383,14 +383,12 @@ class HookEntry : YukiHookXposedInitProxy {
      * @param context 实例
      * @param expandedNf 通知实例
      * @param iconImageView 通知图标实例
-     * @param origColor 通知图标系统默认颜色 - Android >= 12
      * @param isExpanded 通知是否展开 - 可做最小化通知处理
      */
     private fun PackageParam.compatNotifyIcon(
         context: Context,
         expandedNf: StatusBarNotification?,
         iconImageView: ImageView,
-        origColor: Int,
         isExpanded: Boolean
     ) = runInSafe(msg = "compatNotifyIcon") {
         /** 判断是 MIUI 样式就停止 Hook */
@@ -432,7 +430,8 @@ class HookEntry : YukiHookXposedInitProxy {
             var customIconColor: Int
             compatCustomIcon(isGrayscaleIcon, notifyInstance.opPkgName).also {
                 customIcon = it.first
-                customIconColor = if (isUpperOfAndroidS || isExpanded) it.second else 0
+                customIconColor = if (isUpperOfAndroidS || isExpanded)
+                    (it.second.takeIf { e -> e != 0 } ?: context.systemAccentColor) else 0
             }
             /** 打印日志 */
             printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
@@ -460,7 +459,7 @@ class HookEntry : YukiHookXposedInitProxy {
                     setColorFilter(supportColor)
                     /** Android 12 设置图标外圈颜色 */
                     if (isUpperOfAndroidS) background =
-                        DrawableBuilder().rounded().solidColor(if (hasIconColor) iconColor else origColor).build()
+                        DrawableBuilder().rounded().solidColor(if (hasIconColor) iconColor else context.systemAccentColor).build()
                     /** 设置原生的背景边距 */
                     if (isUpperOfAndroidS) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
                 } else iconImageView.apply {
@@ -696,12 +695,6 @@ class HookEntry : YukiHookXposedInitProxy {
                                 method { name = "handleHeaderViews" }
                             else method { name = "resolveHeaderViews" }
                             afterHook {
-                                /** 获取通知图标系统默认颜色 */
-                                val origColor =
-                                    NotificationHeaderViewWrapperClass.clazz.method { name = "getOriginalIconColor" }
-                                        .ignoredError()
-                                        .get(instance).invoke<Int>() ?: 0
-
                                 /** 获取小图标 */
                                 val iconImageView =
                                     NotificationHeaderViewWrapperClass.clazz
@@ -739,7 +732,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 /** 非最小化优先级的通知全部设置为展开状态 */
                                 if (importance != 1) isExpanded = true
                                 /** 执行 Hook */
-                                compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, origColor, isExpanded)
+                                compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
                             }
                         }
                         /** 记录实例 */

@@ -268,6 +268,15 @@ fun Number.dp(context: Context) = dpFloat(context).toInt()
 fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetrics.density
 
 /**
+ * 获取系统主题色
+ * @return [Int] Android < 12 返回透明色
+ */
+val Context.systemAccentColor
+    get() = safeOfNan {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) resources.getColor(android.R.color.system_accent1_600) else 0
+    }
+
+/**
  * 是否为白色
  * @return [Boolean]
  */
