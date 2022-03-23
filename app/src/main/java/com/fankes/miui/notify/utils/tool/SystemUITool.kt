@@ -40,7 +40,8 @@ object SystemUITool {
         context.showDialog {
             title = "重启系统界面"
             msg = "你确定要立即重启系统界面吗？\n\n" +
-                    "部分 MIUI 系统使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。"
+                    "部分 MIUI 系统使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n" +
+                    "重启过程会黑屏并等待进入锁屏重新解锁。"
             confirmButton {
                 execShellSu(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
