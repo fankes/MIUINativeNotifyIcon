@@ -32,7 +32,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Build
-import com.fankes.miui.notify.application.MNNApplication.Companion.MODULE_PACKAGE_NAME
+import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.hook.HookEntry
 import com.fankes.miui.notify.utils.factory.bitmap
 import com.fankes.miui.notify.utils.factory.findAppIcon
@@ -132,8 +132,8 @@ object IconAdaptationTool {
                         context, packageName.hashCode(),
                         Intent().apply {
                             component = ComponentName(
-                                MODULE_PACKAGE_NAME,
-                                "$MODULE_PACKAGE_NAME.ui.activity.ConfigureActivity"
+                                Const.MODULE_PACKAGE_NAME,
+                                "${Const.MODULE_PACKAGE_NAME}.ui.activity.ConfigureActivity"
                             )
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }.apply {

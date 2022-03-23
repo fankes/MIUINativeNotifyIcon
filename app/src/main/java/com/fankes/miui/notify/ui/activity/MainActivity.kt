@@ -24,13 +24,12 @@
 
 package com.fankes.miui.notify.ui.activity
 
-import android.content.ComponentName
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.databinding.ActivityMainBinding
 import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
@@ -48,13 +47,14 @@ import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     companion object {
 
         /** 模块版本 */
-        private const val moduleVersion = BuildConfig.VERSION_NAME
+        private const val moduleVersion = Const.MODULE_VERSION_NAME
 
         /** 预发布的版本标识 */
         private const val pendingFlag = "[pending]"
@@ -62,6 +62,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     /** 警告对话框是否显示 */
     private var isWarnDialogShowing = false
+
+    /** 模块是否激活 */
+    private var isModuleAction = false
+
+    /** 模块是否有效 */
+    private var isModuleValied = false
 
     override fun onCreate() {
         /** 设置文本 */
@@ -235,13 +241,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
+        /** 注册广播检查模块激活状态 */
+        registerReceiver(hostReceiver, IntentFilter().apply { addAction(Const.MODULE_HANDLER_RECEIVER) })
     }
 
     /** 刷新模块状态 */
     private fun refreshModuleStatus() {
         binding.mainLinStatus.setBackgroundResource(
             when {
-                isXposedModuleActive && isMiuiNotifyStyle -> R.drawable.bg_yellow_round
+                (isXposedModuleActive && isMiuiNotifyStyle) ||
+                        (isXposedModuleActive && (!isModuleAction || !isModuleValied)) -> R.drawable.bg_yellow_round
                 isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
@@ -255,15 +264,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainTextStatus.text =
             when {
                 isXposedModuleActive && isMiuiNotifyStyle -> "模块已激活，但未在工作"
+                isXposedModuleActive && !isModuleAction &&
+                        !modulePrefs.getBoolean(ENABLE_MODULE, default = true) -> "模块已停用"
+                isXposedModuleActive && !isModuleAction -> "模块已激活，请重启系统界面"
+                isXposedModuleActive && !isModuleValied -> "模块已更新，请重启系统界面"
                 isXposedModuleActive -> "模块已激活"
                 else -> "模块未激活"
             }
+        binding.mainTextApiWay.isVisible = isXposedModuleActive
+        binding.mainTextApiWay.text = "Activate by ${YukiHookModuleStatus.executorName} API ${YukiHookModuleStatus.executorVersion}"
     }
 
     override fun onResume() {
         super.onResume()
         /** 刷新模块状态 */
         refreshModuleStatus()
+        /** 发送广播检查模块激活状态 */
+        sendBroadcast(Intent().apply {
+            action = Const.MODULE_CHECKING_RECEIVER
+            putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
+        })
         /** 经典样式启用后给出警告 */
         if (!isWarnDialogShowing && isXposedModuleActive && isMiuiNotifyStyle)
             showDialog {
@@ -287,5 +307,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 cancelButton { isWarnDialogShowing = false }
                 noCancelable()
             }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        /** 取消注册广播 */
+        unregisterReceiver(hostReceiver)
+    }
+
+    /** 宿主广播接收器 */
+    private val hostReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                isModuleAction = intent?.getBooleanExtra("isAction", false) ?: false
+                isModuleValied = intent?.getBooleanExtra("isValied", false) ?: false
+                refreshModuleStatus()
+            }
+        }
     }
 }
