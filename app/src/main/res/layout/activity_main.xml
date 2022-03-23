@@ -510,7 +510,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="首次安装请打开名单列表从云端更新数据，后期适配的内容也请手动打开名单列表重新拉取数据以检查更新，数据更新后重启系统界面即可生效。"
+                    android:text="首次安装请打开名单列表从云端更新数据，后期适配的内容也请手动打开名单列表重新拉取数据以检查更新，数据更新后无需重启系统界面，实时生效。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
