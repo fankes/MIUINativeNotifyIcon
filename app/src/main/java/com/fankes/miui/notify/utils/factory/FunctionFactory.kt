@@ -55,8 +55,7 @@ import java.io.ByteArrayOutputStream
  * 系统深色模式是否开启
  * @return [Boolean] 是否开启
  */
-val isSystemInDarkMode
-    get() = (appContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+val isSystemInDarkMode get() = appContext.isSystemInDarkMode
 
 /**
  * 系统深色模式是否没开启
