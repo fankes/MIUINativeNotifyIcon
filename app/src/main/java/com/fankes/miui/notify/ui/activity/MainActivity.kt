@@ -272,7 +272,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 else -> "模块未激活"
             }
         binding.mainTextApiWay.isVisible = isXposedModuleActive
-        binding.mainTextApiWay.text = "Activate by ${YukiHookModuleStatus.executorName} API ${YukiHookModuleStatus.executorVersion}"
+        binding.mainTextApiWay.text = "Activated by ${YukiHookModuleStatus.executorName} API ${YukiHookModuleStatus.executorVersion}"
     }
 
     override fun onResume() {
