@@ -624,8 +624,8 @@ class HookEntry : YukiHookXposedInitProxy {
                                 }.onFind { isUseLegacy = true }
                             }
                             afterHook {
-                                (globalContext ?: firstArgs as Context).also { context ->
-                                    val expandedNf = args[if (isUseLegacy) 1 else 0] as? StatusBarNotification?
+                                (globalContext ?: firstArgs())?.also { context ->
+                                    val expandedNf = args(if (isUseLegacy) 1 else 0).of<StatusBarNotification?>()
                                     /** Hook 状态栏小图标 */
                                     compatStatusIcon(
                                         context = context,
@@ -717,7 +717,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 name = "setMaxStaticIcons"
                                 param(IntType)
                             }
-                            beforeHook { isShowNotificationIcons = firstArgs as Int > 0 }
+                            beforeHook { isShowNotificationIcons = (firstArgs<Int>() ?: 0) > 0 }
                         }.ignoredNoSuchMemberFailure()
                         /** 新版方法 - 旧版不存在 */
                         injectMember {
@@ -725,7 +725,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                 name = "miuiShowNotificationIcons"
                                 param(BooleanType)
                             }
-                            beforeHook { isShowNotificationIcons = firstArgs as Boolean }
+                            beforeHook { isShowNotificationIcons = firstArgs<Boolean>() ?: false }
                         }.ignoredNoSuchMemberFailure()
                     }.by { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") }
                     NotificationHeaderViewWrapperClass.hook {
@@ -821,11 +821,11 @@ class HookEntry : YukiHookXposedInitProxy {
                                                 if (iconDatas.takeIf { e -> e.isNotEmpty() }
                                                         ?.filter { e -> e.packageName == newPkgName }
                                                         .isNullOrEmpty()
-                                                ) IconAdaptationTool.pushNewAppSupportNotify(firstArgs as Context, newPkgName)
+                                                ) IconAdaptationTool.pushNewAppSupportNotify(firstArgs()!!, newPkgName)
                                             }
                                         Intent.ACTION_PACKAGE_REMOVED ->
                                             IconAdaptationTool.removeNewAppSupportNotify(
-                                                firstArgs as Context,
+                                                context = firstArgs()!!,
                                                 packageName = it.data?.schemeSpecificPart ?: ""
                                             )
                                     }
