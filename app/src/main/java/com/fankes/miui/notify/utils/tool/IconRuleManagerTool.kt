@@ -364,24 +364,27 @@ object IconRuleManagerTool {
      */
     fun refreshSystemUI(context: Context) {
         if (context !is AppCompatActivity) return
-        if (isNotNoificationEnabled) context.showDialog {
-            title = "模块的通知权限已关闭"
-            msg = "请开启通知权限然后重启系统界面，否则无法动态刷新系统界面使更改生效。"
-            confirmButton { context.openNotifySetting() }
-            cancelButton()
-            noCancelable()
-        } else context.showDialog {
-            title = "请稍后"
-            progressContent = "正在刷新系统界面改变"
-            /** 发送通知提醒宿主更新图标缓存 */
-            pushNotify(appContext, title = "请稍后", msg = "正在等待系统界面响应", isAction = false)
-            /** 刷新成功后取消通知 */
-            Handler().postDelayed({
-                context.getSystemService<NotificationManager>()?.cancel(1)
-                cancel()
-            }, 1000)
-            noCancelable()
-        }
+        if (isNotNoificationEnabled)
+            context.showDialog {
+                title = "模块的通知权限已关闭"
+                msg = "请开启通知权限然后重启系统界面，否则无法动态刷新系统界面使更改生效。"
+                confirmButton { context.openNotifySetting() }
+                cancelButton()
+                noCancelable()
+            }
+        else
+            context.showDialog {
+                title = "请稍后"
+                progressContent = "正在刷新系统界面改变"
+                /** 发送通知提醒宿主更新图标缓存 */
+                pushNotify(appContext, title = "请稍后", msg = "正在等待系统界面响应", isAction = false)
+                /** 刷新成功后取消通知 */
+                Handler().postDelayed({
+                    context.getSystemService<NotificationManager>()?.cancel(1)
+                    cancel()
+                }, 1000)
+                noCancelable()
+            }
     }
 
     /**
