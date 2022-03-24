@@ -194,7 +194,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 }.get(it.method {
                     name = "getInstance"
                     param(ContextClass)
-                }.get().invoke(context)).invoke<Boolean>(drawable) ?: false
+                }.get().invoke(context)).callBoolean(drawable)
             }
         } else BitmapCompatTool.isGrayscaleDrawable(drawable)
 
@@ -656,7 +656,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                          * 图标在任何场景下跟随状态栏其它图标保持半透明
                                          * MIUI 12 进行单独判断
                                          */
-                                        field { name = "mCurrentSetColor" }.of<Int>(instance)?.also { color ->
+                                        field { name = "mCurrentSetColor" }.ofInt(instance).also { color ->
                                             if (safeOfFalse {
                                                     NotificationUtilClass.clazz.hasMethod(
                                                         name = "ignoreStatusBarIconColor",
@@ -755,7 +755,7 @@ class HookEntry : YukiHookXposedInitProxy {
                                         isExpanded = ExpandableNotificationRowClass.clazz.method {
                                             name = "isExpanded"
                                             returnType = BooleanType
-                                        }.get(it).invoke<Boolean>() == true
+                                        }.get(it).callBoolean()
                                     }).call()?.let {
                                         it.javaClass.method {
                                             name = "getSbn"
