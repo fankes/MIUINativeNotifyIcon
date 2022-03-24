@@ -242,7 +242,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
         /** 注册广播检查模块激活状态 */
-        registerReceiver(hostReceiver, IntentFilter().apply { addAction(Const.MODULE_HANDLER_RECEIVER) })
+        registerReceiver(hostReceiver, IntentFilter().apply { addAction(Const.MODULE_HANDLER_RECEIVER_TAG) })
     }
 
     /** 刷新模块状态 */
@@ -281,7 +281,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         refreshModuleStatus()
         /** 发送广播检查模块激活状态 */
         sendBroadcast(Intent().apply {
-            action = Const.MODULE_CHECKING_RECEIVER
+            action = Const.MODULE_CHECKING_RECEIVER_TAG
             putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
         })
         /** 经典样式启用后给出警告 */
