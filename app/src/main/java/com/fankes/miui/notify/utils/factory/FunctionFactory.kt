@@ -52,6 +52,8 @@ import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * 系统深色模式是否开启
@@ -446,6 +448,14 @@ fun Context.copyToClipboard(content: String) = runInSafe {
         }
     }
 }
+
+/**
+ * 时间戳 -> 时间
+ * @param format 格式化方法 - 默认：yyyy-MM-dd HH:mm:ss
+ * @return [String] 目标字符串时间
+ */
+fun Long.stampToDate(format: String = "yyyy-MM-dd HH:mm:ss") =
+    safeOfNothing { SimpleDateFormat(format, Locale.CHINA).format(Date(this)) ?: "" }
 
 /**
  * 延迟执行

@@ -46,7 +46,9 @@ import com.fankes.miui.notify.hook.HookConst
 import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
 import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
+import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_AUTO
 import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY
+import com.fankes.miui.notify.hook.HookConst.NOTIFY_ICON_FIX_AUTO_TIME
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
@@ -836,8 +838,12 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "updateTime" }
                 afterHook {
-                    // TODO 待实现
-                    loggerD(msg = "当前时间：${System.currentTimeMillis()}")
+                    if (isEnableHookColorNotifyIcon() && prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_AUTO, default = true))
+                        IconAdaptationTool.prepareAutoUpdateIconRule(
+                            context = instance<View>().context,
+                            // TODO 设置 UI 界面设置定时更新规则
+                            timeSet = prefs.getString(NOTIFY_ICON_FIX_AUTO_TIME, default = "07:00")
+                        )
                 }
             }
         }

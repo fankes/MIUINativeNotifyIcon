@@ -35,10 +35,7 @@ import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.hook.HookEntry
-import com.fankes.miui.notify.utils.factory.bitmap
-import com.fankes.miui.notify.utils.factory.findAppIcon
-import com.fankes.miui.notify.utils.factory.findAppName
-import com.fankes.miui.notify.utils.factory.runInSafe
+import com.fankes.miui.notify.utils.factory.*
 
 /**
  * 通知图标适配推送通知类
@@ -49,6 +46,9 @@ object IconAdaptationTool {
 
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
+
+    /** 已过期的日期 */
+    private val outDateLimits = HashSet<String>()
 
     /**
      * 使用的小图标
@@ -158,5 +158,31 @@ object IconAdaptationTool {
      */
     fun removeNewAppSupportNotify(context: Context, packageName: String) = runInSafe {
         context.getSystemService(NotificationManager::class.java)?.cancel(packageName.hashCode())
+    }
+
+    /**
+     * 自动更新通知图标优化在线规则
+     *
+     * 一天执行一次
+     * @param context 实例
+     * @param timeSet 设定的时间
+     */
+    fun prepareAutoUpdateIconRule(context: Context, timeSet: String) = runInSafe {
+        System.currentTimeMillis().also {
+            if (it.stampToDate(format = "HH:mm") == timeSet && (outDateLimits.isEmpty() || outDateLimits.none { each ->
+                    each == it.stampToDate(format = "yyyy-MM-dd")
+                })) {
+                outDateLimits.add(it.stampToDate(format = "yyyy-MM-dd"))
+                context.startActivity(
+                    Intent().apply {
+                        component = ComponentName(
+                            Const.MODULE_PACKAGE_NAME,
+                            "${Const.MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity"
+                        )
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                )
+            }
+        }
     }
 }
