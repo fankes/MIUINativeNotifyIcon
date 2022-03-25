@@ -32,7 +32,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="2.5dp"
             android:layout_weight="1"
             android:gravity="center|start"
             android:orientation="vertical">
@@ -54,7 +54,7 @@
                 android:singleLine="true"
                 android:text="适配列表正在等待装载"
                 android:textColor="@color/colorTextDark"
-                android:textSize="12sp" />
+                android:textSize="11.5sp" />
         </LinearLayout>
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
