@@ -47,8 +47,8 @@ object Const {
     const val MODULE_VERSION_VERIFY_TAG = "module_version_verify"
 
     /** 发送通讯广播号标签 */
-    const val MODULE_CHECKING_RECEIVER_TAG = "mnn_checking_action"
+    const val ACTION_MODULE_CHECKING_RECEIVER = "mnn_checking_action"
 
     /** 接收通讯广播号标签 */
-    const val MODULE_HANDLER_RECEIVER_TAG = "mnn_handler_action"
+    const val ACTION_MODULE_HANDLER_RECEIVER = "mnn_handler_action"
 }
