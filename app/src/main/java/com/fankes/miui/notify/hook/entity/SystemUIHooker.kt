@@ -242,8 +242,6 @@ class SystemUIHooker : YukiBaseHooker() {
      * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
      *
      * 适配第三方图标包对系统包管理器更换图标后的彩色图标
-     *
-     * 自动识别 MIPUSH 图标
      * @param context 实例
      * @param iconDrawable 原始图标
      * @return [Drawable] 适配的图标
