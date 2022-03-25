@@ -325,7 +325,7 @@ class SystemUIHooker : YukiBaseHooker() {
         get() {
             val xmsfPkg = notification.extras.getString("xmsf_target_package") ?: ""
             val targetPkg = notification.extras.getString("target_package") ?: ""
-            return xmsfPkg.ifBlank { targetPkg.ifBlank { compatOpPkgName } }
+            return xmsfPkg.ifBlank { targetPkg.ifBlank { packageName } }
         }
 
     /**
