@@ -250,7 +250,6 @@ class SystemUIHooker : YukiBaseHooker() {
      */
     private fun StatusBarNotification.compatNotifyIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
         /** 给 MIPUSH 设置 APP 自己的图标 */
-        /** 给 MIPUSH 设置 APP 自己的图标 */
         if (isXmsf && opPkgName.isNotBlank())
             findAppIcon(context)
         else iconDrawable
