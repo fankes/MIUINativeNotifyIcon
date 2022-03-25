@@ -239,7 +239,7 @@ class SystemUIHooker : YukiBaseHooker() {
         safeOf(default = this) { BitmapDrawable(context.resources, toBitmap().round(10.dpFloat(context))) }
 
     /**
-     * 适配通知栏、状态栏图标
+     * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
      *
      * 适配第三方图标包对系统包管理器更换图标后的彩色图标
      *
@@ -248,7 +248,7 @@ class SystemUIHooker : YukiBaseHooker() {
      * @param iconDrawable 原始图标
      * @return [Drawable] 适配的图标
      */
-    private fun StatusBarNotification.compatNotifyIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
+    private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
         /** 给 MIPUSH 设置 APP 自己的图标 */
         if (isXmsf && opPkgName.isNotBlank())
             findAppIcon(context)
@@ -415,7 +415,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(BitmapDrawable(context.resources, customIcon), true)
                 /** 若不是灰度图标自动处理为圆角 */
-                isNotGrayscaleIcon -> it(notifyInstance.compatNotifyIcon(context, iconDrawable).rounded(context), true)
+                isNotGrayscaleIcon -> it(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
                 /** 否则返回原始小图标 */
                 else -> it(notifyInstance.notification.smallIcon.loadDrawable(context), false)
             }
@@ -510,7 +510,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     if (isUpperOfAndroidS) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
                 } else iconImageView.apply {
                     /** 重新设置图标 */
-                    setImageDrawable(notifyInstance.compatNotifyIcon(context, iconDrawable))
+                    setImageDrawable(notifyInstance.compatPushingIcon(context, iconDrawable))
                     /** 设置裁切到边界 */
                     clipToOutline = true
                     /** 设置一个圆角轮廓裁切 */
