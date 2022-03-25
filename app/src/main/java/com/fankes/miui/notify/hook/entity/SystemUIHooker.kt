@@ -164,7 +164,7 @@ class SystemUIHooker : YukiBaseHooker() {
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 context?.sendBroadcast(Intent().apply {
-                    action = Const.MODULE_HANDLER_RECEIVER_TAG
+                    action = Const.ACTION_MODULE_HANDLER_RECEIVER
                     putExtra("isAction", true)
                     putExtra("isValied", intent?.getStringExtra(Const.MODULE_VERSION_VERIFY_TAG) == Const.MODULE_VERSION_VERIFY)
                 })
@@ -179,7 +179,7 @@ class SystemUIHooker : YukiBaseHooker() {
     private fun registerReceiver(context: Context) {
         if (isRegisterReceiver) return
         context.registerReceiver(userPresentReceiver, IntentFilter().apply { addAction(Intent.ACTION_USER_PRESENT) })
-        context.registerReceiver(moduleReceiver, IntentFilter().apply { addAction(Const.MODULE_CHECKING_RECEIVER_TAG) })
+        context.registerReceiver(moduleReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_CHECKING_RECEIVER) })
         isRegisterReceiver = true
     }
 
