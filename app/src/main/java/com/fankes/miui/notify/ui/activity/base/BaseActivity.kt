@@ -37,11 +37,18 @@ import java.lang.reflect.ParameterizedType
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
+    companion object {
+
+        /** 应用是否正在运行 */
+        var isMainThreadRunning = false
+    }
+
     /** 获取绑定布局对象 */
     lateinit var binding: VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isMainThreadRunning = true
         javaClass.genericSuperclass.also { type ->
             if (type is ParameterizedType) {
                 binding = (type.actualTypeArguments[0] as Class<VB>).method {

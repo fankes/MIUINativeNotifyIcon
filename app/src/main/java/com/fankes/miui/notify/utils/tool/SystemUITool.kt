@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.utils.factory.*
 import com.google.android.material.snackbar.Snackbar
@@ -101,9 +102,16 @@ object SystemUITool {
      * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
      * @param it 成功后回调
      */
-    fun refreshSystemUI(context: Context, isRefreshCacheOnly: Boolean = false, it: () -> Unit = {}) =
+    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, it: () -> Unit = {}) = runInSafe {
+        fun sendMessage() {
+            (context ?: appContext).sendBroadcast(Intent().apply {
+                action = Const.ACTION_REMIND_CHECKING_RECEIVER
+                putExtra("isRefreshCacheOnly", isRefreshCacheOnly)
+                putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
+            })
+        }
         if (isXposedModuleActive)
-            context.showDialog {
+            context?.showDialog {
                 title = "请稍后"
                 progressContent = "正在等待系统界面刷新"
                 /** 是否等待成功 */
@@ -125,14 +133,11 @@ object SystemUITool {
                         else -> it()
                     }
                 }
-                context.sendBroadcast(Intent().apply {
-                    action = Const.ACTION_REMIND_CHECKING_RECEIVER
-                    putExtra("isRefreshCacheOnly", isRefreshCacheOnly)
-                    putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
-                })
+                sendMessage()
                 noCancelable()
-            }
-        else context.snake(msg = "模块没有激活，更改不会生效")
+            } ?: sendMessage()
+        else context?.snake(msg = "模块没有激活，更改不会生效")
+    }
 
     /**
      * 显示需要重启系统界面的 [Snackbar]

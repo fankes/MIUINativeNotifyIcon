@@ -33,7 +33,9 @@ object HookConst {
     const val ENABLE_NOTIFY_ICON_FIX = "_notify_icon_fix"
     const val ENABLE_NOTIFY_ICON_FIX_NOTIFY = "_notify_icon_fix_notify"
     const val ENABLE_HOOK_STATUS_ICON_COUNT = "_enable_hook_status_icon_count"
+    const val ENABLE_NOTIFY_ICON_FIX_AUTO = "_enable_notify_icon_fix_auto"
     const val NOTIFY_ICON_DATAS = "_notify_icon_datas"
+    const val NOTIFY_ICON_FIX_AUTO_TIME = "_notify_icon_fix_auto_time"
     const val HOOK_STATUS_ICON_COUNT = "_hook_status_icon_count"
 
     const val SOURCE_SYNC_WAY = "_rule_source_sync_way"
