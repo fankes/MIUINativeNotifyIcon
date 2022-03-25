@@ -38,6 +38,7 @@ import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.provider.Settings
 import android.util.Base64
 import android.widget.Toast
@@ -445,3 +446,10 @@ fun Context.copyToClipboard(content: String) = runInSafe {
         }
     }
 }
+
+/**
+ * 延迟执行
+ * @param ms 毫秒 - 默认：150
+ * @param it 方法体
+ */
+fun Any?.delayedRun(ms: Long = 150, it: () -> Unit) = runInSafe { Handler().postDelayed({ it() }, ms) }

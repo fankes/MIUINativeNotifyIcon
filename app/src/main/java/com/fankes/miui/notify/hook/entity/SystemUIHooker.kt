@@ -55,7 +55,6 @@ import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
-import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.field
@@ -160,17 +159,38 @@ class SystemUIHooker : YukiBaseHooker() {
     }
 
     /** 模块广播接收器 */
-    private val moduleReceiver by lazy {
+    private val moduleCheckingReceiver by lazy {
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 context?.sendBroadcast(Intent().apply {
                     action = Const.ACTION_MODULE_HANDLER_RECEIVER
-                    putExtra("isAction", true)
-                    putExtra("isValied", intent?.getStringExtra(Const.MODULE_VERSION_VERIFY_TAG) == Const.MODULE_VERSION_VERIFY)
+                    putExtra("isRegular", true)
+                    putExtra("isValied", intent?.isValiedModule)
                 })
             }
         }
     }
+
+    /** 通知广播接收器 */
+    private val remindCheckingReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) = delayedRun(ms = 300) {
+                if (intent?.isValiedModule == true)
+                    recachingPrefs(intent.getBooleanExtra("isRefreshCacheOnly", false))
+                context?.sendBroadcast(Intent().apply {
+                    action = Const.ACTION_REMIND_HANDLER_RECEIVER
+                    putExtra("isGrasp", true)
+                    putExtra("isValied", intent?.isValiedModule)
+                })
+            }
+        }
+    }
+
+    /**
+     * 判断模块和宿主版本是否一致
+     * @return [Boolean]
+     */
+    private val Intent.isValiedModule get() = getStringExtra(Const.MODULE_VERSION_VERIFY_TAG) == Const.MODULE_VERSION_VERIFY
 
     /**
      * 注册广播接收器
@@ -179,7 +199,8 @@ class SystemUIHooker : YukiBaseHooker() {
     private fun registerReceiver(context: Context) {
         if (isRegisterReceiver) return
         context.registerReceiver(userPresentReceiver, IntentFilter().apply { addAction(Intent.ACTION_USER_PRESENT) })
-        context.registerReceiver(moduleReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_CHECKING_RECEIVER) })
+        context.registerReceiver(moduleCheckingReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_CHECKING_RECEIVER) })
+        context.registerReceiver(remindCheckingReceiver, IntentFilter().apply { addAction(Const.ACTION_REMIND_CHECKING_RECEIVER) })
         isRegisterReceiver = true
     }
 
@@ -558,11 +579,15 @@ class SystemUIHooker : YukiBaseHooker() {
         }
     }
 
-    /** 刷新缓存数据 */
-    private fun recachingPrefs() {
+    /**
+     * 刷新缓存数据
+     * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
+     */
+    private fun recachingPrefs(isRefreshCacheOnly: Boolean = false) {
         isUsingCachingMethod = true
         prefs.clearCache()
         cachingIconDatas()
+        if (isRefreshCacheOnly) return
         refreshStatusBarIcons()
         refreshNotificationIcons()
     }
@@ -609,10 +634,6 @@ class SystemUIHooker : YukiBaseHooker() {
                             expandedNf,
                             (result as Icon).loadDrawable(context)
                         ) { icon, isReplace -> if (isReplace) result = Icon.createWithBitmap(icon.toBitmap()) }
-                        /** 刷新缓存 */
-                        if (expandedNf?.compatOpPkgName == Const.MODULE_PACKAGE_NAME &&
-                            expandedNf.notification?.channelId == IconRuleManagerTool.NOTIFY_CHANNEL
-                        ) recachingPrefs()
                     }
                 }
             }

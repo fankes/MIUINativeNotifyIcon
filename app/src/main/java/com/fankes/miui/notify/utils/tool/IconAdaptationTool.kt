@@ -47,6 +47,9 @@ import com.fankes.miui.notify.utils.factory.runInSafe
  */
 object IconAdaptationTool {
 
+    /** 推送通知的渠道名称 */
+    private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
+
     /**
      * 使用的小图标
      * @return [Bitmap]
@@ -116,11 +119,11 @@ object IconAdaptationTool {
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
-                    IconRuleManagerTool.NOTIFY_CHANNEL, "通知图标优化适配",
+                    NOTIFY_CHANNEL, "通知图标优化适配",
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply { enableLights(false) }
             )
-            notify(packageName.hashCode(), Notification.Builder(context, IconRuleManagerTool.NOTIFY_CHANNEL).apply {
+            notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
                 setContentTitle("您已安装 ${context.findAppName(packageName)}")
                 setContentText("尚未适配此应用，点按打开在线规则。")

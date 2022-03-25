@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/2/25.
  */
-@file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager", "DEPRECATION", "IMPLICIT_CAST_TO_ANY")
+@file:Suppress("TrustAllX509TrustManager", "CustomX509TrustManager", "IMPLICIT_CAST_TO_ANY")
 
 package com.fankes.miui.notify.utils.tool
 
@@ -32,7 +32,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -40,7 +39,6 @@ import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
 import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY
@@ -50,7 +48,9 @@ import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.safeOfNull
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
@@ -65,7 +65,7 @@ import javax.net.ssl.*
 object IconRuleManagerTool {
 
     /** 推送通知的渠道名称 */
-    const val NOTIFY_CHANNEL = "notifyRuleUpdateId"
+    private const val NOTIFY_CHANNEL = "notifyRuleUpdateId"
 
     /** 当前规则的系统名称 */
     private const val OS_TAG = "MIUI"
@@ -139,7 +139,7 @@ object IconRuleManagerTool {
                                                 dataJson2 = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]"
                                             )
                                         )
-                                        pushAndNotifyRefresh(context)
+                                        notifyRefresh(context)
                                         it()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
@@ -152,7 +152,7 @@ object IconRuleManagerTool {
                                     jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
                                     jsonString.isNotBlank() -> {
                                         params.save(dataJson = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]")
-                                        pushAndNotifyRefresh(context)
+                                        notifyRefresh(context)
                                         it()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
@@ -216,7 +216,7 @@ object IconRuleManagerTool {
                                     params.isCompareDifferent(it) -> {
                                         params.save(it)
                                         pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
-                                        pushAndNotifyRefresh(context)
+                                        notifyRefresh(context)
                                         it()
                                     }
                                     else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -265,7 +265,7 @@ object IconRuleManagerTool {
                             params.isCompareDifferent(content) -> {
                                 params.save(content)
                                 pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
-                                pushAndNotifyRefresh(context)
+                                notifyRefresh(context)
                                 it()
                             }
                             else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
@@ -359,43 +359,12 @@ object IconRuleManagerTool {
     }.onFailure { it(false, "URL 无效") }
 
     /**
-     * 刷新系统界面状态栏与通知图标
-     * @param context 实例
-     */
-    fun refreshSystemUI(context: Context) {
-        if (context !is AppCompatActivity) return
-        if (isNotNoificationEnabled)
-            context.showDialog {
-                title = "模块的通知权限已关闭"
-                msg = "请开启通知权限然后重启系统界面，否则无法动态刷新系统界面使更改生效。"
-                confirmButton { context.openNotifySetting() }
-                cancelButton()
-                noCancelable()
-            }
-        else
-            context.showDialog {
-                title = "请稍后"
-                progressContent = "正在刷新系统界面改变"
-                /** 发送通知提醒宿主更新图标缓存 */
-                pushNotify(appContext, title = "请稍后", msg = "正在等待系统界面响应", isAction = false)
-                /** 刷新成功后取消通知 */
-                Handler().postDelayed({
-                    context.getSystemService<NotificationManager>()?.cancel(1)
-                    cancel()
-                }, 1000)
-                noCancelable()
-            }
-    }
-
-    /**
      * 推送通知图标更新通知
      * @param context 实例
      */
-    private fun pushAndNotifyRefresh(context: Context) {
+    private fun notifyRefresh(context: Context) {
         if (context !is AppCompatActivity) return
-        SystemUITool.showNeedUpdateApplySnake(context)
-        /** 刷新改变 */
-        refreshSystemUI(context)
+        SystemUITool.refreshSystemUI(context) { context.snake(msg = "通知图标优化名单已完成同步") }
     }
 
     /**
@@ -414,9 +383,8 @@ object IconRuleManagerTool {
      * @param context 实例 - 类型为 [AppCompatActivity] 时将不会推送通知
      * @param title 通知标题
      * @param msg 通知消息
-     * @param isAction 是否增加点击跳转事件 - 默认：是
      */
-    private fun pushNotify(context: Context, title: String, msg: String, isAction: Boolean = true) {
+    private fun pushNotify(context: Context, title: String, msg: String) {
         if (context !is AppCompatActivity)
             context.getSystemService<NotificationManager>()?.apply {
                 createNotificationChannel(
@@ -425,15 +393,15 @@ object IconRuleManagerTool {
                         NotificationManager.IMPORTANCE_DEFAULT
                     )
                 )
-                notify(if (isAction) 0 else 1, NotificationCompat.Builder(context, NOTIFY_CHANNEL).apply {
+                notify(0, NotificationCompat.Builder(context, NOTIFY_CHANNEL).apply {
                     setContentTitle(title)
                     setContentText(msg)
                     color = OS_COLOR.toInt()
                     setAutoCancel(true)
-                    setSmallIcon(if (isAction) R.drawable.ic_nf_icon_update else R.drawable.ic_nf_icon_refresh)
+                    setSmallIcon(R.drawable.ic_nf_icon_update)
                     setSound(null)
                     setDefaults(NotificationCompat.DEFAULT_ALL)
-                    if (isAction) setContentIntent(
+                    setContentIntent(
                         PendingIntent.getActivity(
                             context, msg.hashCode(),
                             Intent(context, ConfigureActivity::class.java).apply { putExtra("isShowUpdDialog", false) },

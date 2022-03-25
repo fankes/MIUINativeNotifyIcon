@@ -22,11 +22,12 @@
  */
 package com.fankes.miui.notify.utils.tool
 
+import android.content.BroadcastReceiver
 import android.content.Context
-import com.fankes.miui.notify.utils.factory.execShellSu
-import com.fankes.miui.notify.utils.factory.showDialog
-import com.fankes.miui.notify.utils.factory.snake
-import com.fankes.miui.notify.utils.factory.toast
+import android.content.Intent
+import android.content.IntentFilter
+import com.fankes.miui.notify.const.Const
+import com.fankes.miui.notify.utils.factory.*
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
 
@@ -34,6 +35,45 @@ import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
  * 系统界面工具
  */
 object SystemUITool {
+
+    /** 宿主广播回调 */
+    private var moduleHandlerCallback: ((Boolean, Boolean) -> Unit)? = null
+
+    /** 通知广播回调 */
+    private var remindHandlerCallback: ((Boolean, Boolean) -> Unit)? = null
+
+    /**
+     * 注册广播
+     * @param context 实例
+     */
+    fun register(context: Context) {
+        /** 注册广播检查模块激活状态 */
+        context.registerReceiver(moduleHandlerReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_HANDLER_RECEIVER) })
+        /** 注册广播通知系统界面改变 */
+        context.registerReceiver(remindHandlerReceiver, IntentFilter().apply { addAction(Const.ACTION_REMIND_HANDLER_RECEIVER) })
+    }
+
+    /**
+     * 取消注册广播
+     * @param context 实例
+     */
+    fun unregister(context: Context) {
+        context.unregisterReceiver(moduleHandlerReceiver)
+        context.unregisterReceiver(remindHandlerReceiver)
+    }
+
+    /**
+     * 检查模块是否激活
+     * @param context 实例
+     * @param it 成功后回调 - ([Boolean] 是否激活,[Boolean] 是否有效)
+     */
+    fun checkingActivated(context: Context, it: (Boolean, Boolean) -> Unit) {
+        moduleHandlerCallback = it
+        context.sendBroadcast(Intent().apply {
+            action = Const.ACTION_MODULE_CHECKING_RECEIVER
+            putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
+        })
+    }
 
     /**
      * 重启系统界面
@@ -58,10 +98,40 @@ object SystemUITool {
     /**
      * 刷新系统界面状态栏与通知图标
      * @param context 实例
+     * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
+     * @param it 成功后回调
      */
-    fun refreshSystemUI(context: Context) =
+    fun refreshSystemUI(context: Context, isRefreshCacheOnly: Boolean = false, it: () -> Unit = {}) =
         if (isXposedModuleActive)
-            IconRuleManagerTool.refreshSystemUI(context)
+            context.showDialog {
+                title = "请稍后"
+                progressContent = "正在等待系统界面刷新"
+                /** 是否等待成功 */
+                var isWaited = false
+                /** 设置等待延迟 */
+                delayedRun(ms = 5000) {
+                    if (isWaited) return@delayedRun
+                    remindHandlerCallback = null
+                    cancel()
+                    context.snake(msg = "预计响应超时，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
+                }
+                remindHandlerCallback = { isGrasp, isValied ->
+                    remindHandlerCallback = null
+                    cancel()
+                    isWaited = true
+                    when {
+                        isGrasp && !isValied ->
+                            context.snake(msg = "请重启系统界面以生效模块更新", actionText = "立即重启") { restartSystemUI(context) }
+                        else -> it()
+                    }
+                }
+                context.sendBroadcast(Intent().apply {
+                    action = Const.ACTION_REMIND_CHECKING_RECEIVER
+                    putExtra("isRefreshCacheOnly", isRefreshCacheOnly)
+                    putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
+                })
+                noCancelable()
+            }
         else context.snake(msg = "模块没有激活，更改不会生效")
 
     /**
@@ -73,11 +143,25 @@ object SystemUITool {
             context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
         else context.snake(msg = "模块没有激活，更改不会生效")
 
-    /**
-     * 显示更新数据后需要重启系统界面的 [Snackbar]
-     * @param context 实例
-     */
-    fun showNeedUpdateApplySnake(context: Context) =
-        if (isXposedModuleActive) context.snake(msg = "通知图标优化名单已完成同步")
-        else context.snake(msg = "模块没有激活，更改不会生效")
+    /** 宿主广播接收器 */
+    private val moduleHandlerReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val isRegular = intent?.getBooleanExtra("isRegular", false) ?: false
+                val isValied = intent?.getBooleanExtra("isValied", false) ?: false
+                moduleHandlerCallback?.invoke(isRegular, isValied)
+            }
+        }
+    }
+
+    /** 通知广播接收器 */
+    private val remindHandlerReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val isGrasp = intent?.getBooleanExtra("isGrasp", false) ?: false
+                val isValied = intent?.getBooleanExtra("isValied", false) ?: false
+                remindHandlerCallback?.invoke(isGrasp, isValied)
+            }
+        }
+    }
 }
