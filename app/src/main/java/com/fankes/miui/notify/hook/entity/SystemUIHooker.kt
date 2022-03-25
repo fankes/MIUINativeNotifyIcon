@@ -249,24 +249,8 @@ class SystemUIHooker : YukiBaseHooker() {
     private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
         /** 给 MIPUSH 设置 APP 自己的图标 */
         if (isXmsf && opPkgName.isNotBlank())
-            findAppIcon(context)
+            context.findAppIcon(xmsfPkgName) ?: iconDrawable
         else iconDrawable
-    }
-
-    /**
-     * 获取推送通知的应用名称
-     * @param context 实例
-     * @return [String]
-     */
-    private fun StatusBarNotification.findAppName(context: Context) = context.findAppName(opPkgName)
-
-    /**
-     * 获取通知栏、状态栏 APP 图标
-     * @param context 实例
-     * @return [Drawable] 适配的图标
-     */
-    private fun StatusBarNotification.findAppIcon(context: Context) = safeOf(notification.smallIcon.loadDrawable(context)) {
-        context.packageManager.getPackageInfo(opPkgName, 0).applicationInfo.loadIcon(context.packageManager)
     }
 
     /**
@@ -285,7 +269,7 @@ class SystemUIHooker : YukiBaseHooker() {
         isGrayscale: Boolean
     ) {
         if (prefs.getBoolean(ENABLE_MODULE_LOG)) loggerD(
-            msg = "$tag --> [${expandedNf?.findAppName(context)}][${expandedNf?.opPkgName}] " +
+            msg = "$tag --> [${context.findAppName(name = expandedNf?.compatOpPkgName ?: "")}][${expandedNf?.opPkgName}] " +
                     "custom [$isCustom] " +
                     "grayscale [$isGrayscale] " +
                     "xmsf [${expandedNf?.isXmsf}]"
@@ -399,7 +383,7 @@ class SystemUIHooker : YukiBaseHooker() {
         expandedNf?.also { notifyInstance ->
             /** 判断是 MIUI 样式就停止 Hook */
             if (context.isMiuiNotifyStyle) {
-                it(notifyInstance.findAppIcon(context), true)
+                it(context.findAppIcon(notifyInstance.compatOpPkgName) ?: iconDrawable, true)
                 return@runInSafe
             }
             /** 判断是否不是灰度图标 */

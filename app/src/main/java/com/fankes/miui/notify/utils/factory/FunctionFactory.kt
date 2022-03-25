@@ -34,6 +34,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -42,7 +43,6 @@ import android.util.Base64
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
-import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.classOf
@@ -228,15 +228,15 @@ val Context.versionCode get() = packageInfo.versionCode
  * @return [String]
  */
 fun Context.findAppName(name: String) =
-    safeOfNothing { packageManager.getPackageInfo(name, 0).applicationInfo.loadLabel(packageManager).toString() }
+    safeOfNothing { packageManager?.getPackageInfo(name, 0)?.applicationInfo?.loadLabel(packageManager).toString() }
 
 /**
  * 得到 APP 图标
  * @param name APP 包名
- * @return [Bitmap] or null
+ * @return [Drawable] or null
  */
 fun Context.findAppIcon(name: String) =
-    safeOfNull { packageManager.getPackageInfo(name, 0).applicationInfo.loadIcon(packageManager).toBitmap() }
+    safeOfNull { packageManager?.getPackageInfo(name, 0)?.applicationInfo?.loadIcon(packageManager) }
 
 /**
  * 是否关闭了通知权限
