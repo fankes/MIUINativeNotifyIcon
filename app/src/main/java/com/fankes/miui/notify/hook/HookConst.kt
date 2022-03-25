@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/24.
  */
-@file:Suppress("DEPRECATION", "SetWorldReadable")
+@file:Suppress("SetWorldReadable")
 
 package com.fankes.miui.notify.hook
 

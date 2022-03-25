@@ -41,14 +41,20 @@ object Const {
     const val MODULE_VERSION_CODE = BuildConfig.VERSION_CODE
 
     /** 当前模块的版本校验 */
-    const val MODULE_VERSION_VERIFY = "${MODULE_VERSION_NAME}_${MODULE_VERSION_CODE}_202103240401"
+    const val MODULE_VERSION_VERIFY = "${MODULE_VERSION_NAME}_${MODULE_VERSION_CODE}_202203252250"
 
     /** 当前模块的版本校验标签 */
     const val MODULE_VERSION_VERIFY_TAG = "module_version_verify"
 
-    /** 发送通讯广播号标签 */
-    const val ACTION_MODULE_CHECKING_RECEIVER = "mnn_checking_action"
+    /** 发送通讯广播号标签 - 模块激活状态 */
+    const val ACTION_MODULE_CHECKING_RECEIVER = "mnn_module_checking_action"
 
-    /** 接收通讯广播号标签 */
-    const val ACTION_MODULE_HANDLER_RECEIVER = "mnn_handler_action"
+    /** 接收通讯广播号标签 - 模块激活状态 */
+    const val ACTION_MODULE_HANDLER_RECEIVER = "mnn_module_handler_action"
+
+    /** 发送通讯广播号标签 - 通知系统界面刷新 */
+    const val ACTION_REMIND_CHECKING_RECEIVER = "mnn_remind_checking_action"
+
+    /** 接收通讯广播号标签 - 通知系统界面刷新 */
+    const val ACTION_REMIND_HANDLER_RECEIVER = "mnn_remind_handler_action"
 }
