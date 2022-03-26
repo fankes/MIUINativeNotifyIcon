@@ -26,6 +26,7 @@ package com.fankes.miui.notify.utils.factory
 
 import android.app.Activity
 import android.app.Notification
+import android.app.Service
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -377,7 +378,15 @@ fun toast(msg: String) = Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).sho
  *
  * [T] 为指定的 [Activity]
  */
-inline fun <reified T : Activity> Context.navigate() = startActivity(Intent(this, T::class.java))
+inline fun <reified T : Activity> Context.navigate() = runInSafe { startActivity(Intent(this, T::class.java)) }
+
+/**
+ * 跳转到指定页面
+ *
+ * [T] 为指定的 [Activity]
+ */
+inline fun <reified T : Activity> Service.navigate() =
+    runInSafe { startActivity(Intent(this, T::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }) }
 
 /**
  * 弹出 [Snackbar]
