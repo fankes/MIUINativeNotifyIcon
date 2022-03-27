@@ -105,16 +105,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
             /** 判断是否 Hook */
             isXposedModuleActive -> {
-                if (IconPackParams(context = this).iconDatas.isEmpty()
-                    && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
-                ) showDialog {
-                    title = "配置通知图标优化名单"
-                    msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
-                            "你可以随时在本页面下方找到“配置通知图标优化名单”手动前往。"
-                    confirmButton(text = "前往") { navigate<ConfigureActivity>() }
-                    cancelButton()
-                    noCancelable()
-                }
+                if (IconPackParams(context = this).iconDatas.isEmpty() && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX))
+                    showDialog {
+                        title = "配置通知图标优化名单"
+                        msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
+                                "你可以随时在本页面下方找到“配置通知图标优化名单”手动前往。"
+                        confirmButton(text = "前往") { navigate<ConfigureActivity>() }
+                        cancelButton()
+                        noCancelable()
+                    }
                 if (isNotNoificationEnabled && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX))
                     showDialog {
                         title = "模块的通知权限已关闭"
