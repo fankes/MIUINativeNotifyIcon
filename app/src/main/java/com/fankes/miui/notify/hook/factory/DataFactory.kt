@@ -44,27 +44,23 @@ fun Context.isAppNotifyHookOf(bean: IconDataBean) = modulePrefs.getBoolean(bean.
  * @param bean 图标 bean
  * @param isHook 是否 Hook
  */
-fun Context.putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) =
-    modulePrefs.putBoolean(bean.toEnabledName(), isHook)
+fun Context.putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) = modulePrefs.putBoolean(bean.toEnabledName(), isHook)
 
 /**
  * 获取此 APP 的通知图标是否被全部 Hook
  * @param bean 图标 bean
  */
-fun PackageParam.isAppNotifyHookAllOf(bean: IconDataBean) =
-    prefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
+fun PackageParam.isAppNotifyHookAllOf(bean: IconDataBean) = prefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
 
 /**
  * 获取此 APP 的通知图标是否被全部 Hook
  * @param bean 图标 bean
  */
-fun Context.isAppNotifyHookAllOf(bean: IconDataBean) =
-    modulePrefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
+fun Context.isAppNotifyHookAllOf(bean: IconDataBean) = modulePrefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
 
 /**
  * 设置全部 Hook 此 APP 的通知图标
  * @param bean 图标 bean
  * @param isHook 是否 Hook
  */
-fun Context.putAppNotifyHookAllOf(bean: IconDataBean, isHook: Boolean) =
-    modulePrefs.putBoolean(bean.toEnabledAllName(), isHook)
+fun Context.putAppNotifyHookAllOf(bean: IconDataBean, isHook: Boolean) = modulePrefs.putBoolean(bean.toEnabledAllName(), isHook)
