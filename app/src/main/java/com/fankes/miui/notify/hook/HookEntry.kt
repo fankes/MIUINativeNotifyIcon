@@ -22,7 +22,7 @@
  */
 package com.fankes.miui.notify.hook
 
-import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
+import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.entity.SystemUIHooker
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
@@ -53,7 +53,7 @@ class HookEntry : YukiHookXposedInitProxy {
                 /** 不是支持的 MIUI 系统停止 Hook */
                 isNotSupportMiuiVersion -> loggerW(msg = "Aborted Hook -> This MIUI Version $miuiVersion not supported")
                 /** Hook 被手动关闭停止 Hook */
-                !prefs.getBoolean(ENABLE_MODULE, default = true) -> loggerW(msg = "Aborted Hook -> Hook Closed")
+                prefs.get(DataConst.ENABLE_MODULE).not() -> loggerW(msg = "Aborted Hook -> Hook Closed")
                 /** 开始 Hook */
                 else -> loadHooker(SystemUIHooker())
             }
