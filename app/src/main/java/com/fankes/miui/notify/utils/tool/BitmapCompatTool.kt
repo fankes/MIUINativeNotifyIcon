@@ -88,7 +88,7 @@ object BitmapCompatTool {
             ensureBufferSize(size)
             tempCompactBitmap?.getPixels(tempBuffer, 0, width, 0, 0, width, height)
             for (i in 0 until size)
-                if (!isGrayscaleColor(tempBuffer[i])) {
+                if (isGrayscaleColor(tempBuffer[i]).not()) {
                     cachedBitmapGrayscales[bitmap.generationId] = false
                     return@let false
                 }

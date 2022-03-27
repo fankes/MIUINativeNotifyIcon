@@ -42,13 +42,7 @@ import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.const.Const
-import com.fankes.miui.notify.hook.HookConst
-import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
-import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_AUTO
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY
-import com.fankes.miui.notify.hook.HookConst.NOTIFY_ICON_FIX_AUTO_TIME
+import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
@@ -212,8 +206,7 @@ class SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean]
      */
     private fun isEnableHookColorNotifyIcon(isHooking: Boolean = true) =
-        prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true) &&
-                (if (isHooking) prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true) else true)
+        prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX) && (if (isHooking) prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY) else true)
 
     /**
      * - 这个是修复彩色图标的关键核心代码判断
@@ -224,7 +217,7 @@ class SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean]
      */
     private fun isGrayscaleIcon(context: Context, drawable: Drawable) =
-        if (!prefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)) safeOfFalse {
+        if (prefs.get(DataConst.ENABLE_COLOR_ICON_COMPAT).not()) safeOfFalse {
             ContrastColorUtilClass.clazz.let {
                 it.method {
                     name = "isGrayscaleIcon"
@@ -243,7 +236,7 @@ class SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean]
      */
     private val hasHandleHeaderViews
-        get() = safeOfFalse { NotificationHeaderViewWrapperClass.clazz.hasMethod(name = "handleHeaderViews") }
+        get() = safeOfFalse { NotificationHeaderViewWrapperClass.clazz.hasMethod { name = "handleHeaderViews" } }
 
     /**
      * 获取当前通知栏的样式
@@ -271,7 +264,7 @@ class SystemUIHooker : YukiBaseHooker() {
      */
     private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
         /** 给 MIPUSH 设置 APP 自己的图标 */
-        if (isXmsf && opPkgName.isNotBlank())
+        if (isXmsf && nfPkgName.isNotBlank())
             context.findAppIcon(xmsfPkgName) ?: iconDrawable
         else iconDrawable
     }
@@ -291,8 +284,8 @@ class SystemUIHooker : YukiBaseHooker() {
         isCustom: Boolean,
         isGrayscale: Boolean
     ) {
-        if (prefs.getBoolean(ENABLE_MODULE_LOG)) loggerD(
-            msg = "$tag --> [${context.findAppName(name = expandedNf?.compatOpPkgName ?: "")}][${expandedNf?.opPkgName}] " +
+        if (prefs.get(DataConst.ENABLE_MODULE_LOG)) loggerD(
+            msg = "$tag --> [${context.findAppName(name = expandedNf?.nfPkgName ?: "")}][${expandedNf?.nfPkgName}] " +
                     "custom [$isCustom] " +
                     "grayscale [$isGrayscale] " +
                     "xmsf [${expandedNf?.isXmsf}]"
@@ -320,7 +313,7 @@ class SystemUIHooker : YukiBaseHooker() {
      * 自动判断 MIPUSH
      * @return [String]
      */
-    private val StatusBarNotification.opPkgName get() = if (isXmsf) xmsfPkgName else compatOpPkgName
+    private val StatusBarNotification.nfPkgName get() = if (isXmsf) xmsfPkgName else packageName
 
     /**
      * 获取 MIPUSH 通知真实包名
@@ -373,11 +366,11 @@ class SystemUIHooker : YukiBaseHooker() {
      */
     private fun compatCustomIcon(isGrayscaleIcon: Boolean, packageName: String): Pair<Bitmap?, Int> {
         var customPair: Pair<Bitmap?, Int>? = null
-        if (prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)) run {
+        if (prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)) run {
             if (iconDatas.isNotEmpty())
                 iconDatas.forEach {
                     if (packageName == it.packageName && isAppNotifyHookOf(it)) {
-                        if (!isGrayscaleIcon || isAppNotifyHookAllOf(it))
+                        if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
                             customPair = Pair(it.iconBitmap, it.iconColor)
                         return@run
                     }
@@ -406,16 +399,16 @@ class SystemUIHooker : YukiBaseHooker() {
         expandedNf?.also { notifyInstance ->
             /** 判断是 MIUI 样式就停止 Hook */
             if (context.isMiuiNotifyStyle) {
-                it(context.findAppIcon(notifyInstance.compatOpPkgName) ?: iconDrawable, true)
+                it(context.findAppIcon(notifyInstance.nfPkgName) ?: iconDrawable, true)
                 return@runInSafe
             }
             /** 判断是否不是灰度图标 */
-            val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
+            val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable).not()
 
             /** 目标彩色通知 APP 图标 */
-            val customIcon = compatCustomIcon(!isNotGrayscaleIcon, notifyInstance.opPkgName).first
+            val customIcon = compatCustomIcon(isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first
             /** 打印日志 */
-            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, !isNotGrayscaleIcon)
+            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, isNotGrayscaleIcon.not())
             when {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> it(BitmapDrawable(context.resources, customIcon), true)
@@ -463,7 +456,7 @@ class SystemUIHooker : YukiBaseHooker() {
             val supportColor = iconColor.let {
                 when {
                     isUpperOfAndroidS -> newStyle
-                    it == 0 || !isExpanded -> oldStyle
+                    it == 0 || isExpanded.not() -> oldStyle
                     else -> it
                 }
             }
@@ -472,14 +465,14 @@ class SystemUIHooker : YukiBaseHooker() {
             val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
             /** 判断图标风格 */
-            val isGrayscaleIcon = !notifyInstance.isXmsf && isGrayscaleIcon(context, iconDrawable)
+            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
 
             /** 自定义默认小图标 */
             var customIcon: Bitmap?
 
             /** 自定义默认小图标颜色 */
             var customIconColor: Int
-            compatCustomIcon(isGrayscaleIcon, notifyInstance.opPkgName).also {
+            compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).also {
                 customIcon = it.first
                 customIconColor = if (isUpperOfAndroidS || isExpanded)
                     (it.second.takeIf { e -> e != 0 } ?: context.systemAccentColor) else 0
@@ -549,23 +542,23 @@ class SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean] 是否忽略通知图标颜色
      */
     private fun hasIgnoreStatusBarIconColor(context: Context, expandedNf: StatusBarNotification?) =
-        if (!context.isMiuiNotifyStyle) safeOfFalse {
+        if (context.isMiuiNotifyStyle.not()) safeOfFalse {
             /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
             expandedNf?.let { notifyInstance ->
                 /** 获取通知小图标 */
                 val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
 
                 /** 判断是否不是灰度图标 */
-                val isNotGrayscaleIcon = notifyInstance.isXmsf || !isGrayscaleIcon(context, iconDrawable)
+                val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable).not()
 
                 /** 获取目标修复彩色图标的 APP */
-                val isTargetFixApp = compatCustomIcon(!isNotGrayscaleIcon, notifyInstance.opPkgName).first != null
+                val isTargetFixApp = compatCustomIcon(isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first != null
                 /**
                  * 只要不是灰度就返回彩色图标
                  * 否则不对颜色进行反色处理防止一些系统图标出现异常
                  */
                 (if (isTargetFixApp) false else isNotGrayscaleIcon).also {
-                    printLogcat(tag = "IconColor", context, expandedNf, isTargetFixApp, !isNotGrayscaleIcon)
+                    printLogcat(tag = "IconColor", context, expandedNf, isTargetFixApp, isNotGrayscaleIcon.not())
                 }
             } ?: true.also { printLogcat(tag = "IconColor", context, expandedNf = null, isCustom = false, isGrayscale = false) }
         } else true.also { printLogcat(tag = "IconColor", context, expandedNf, isCustom = false, isGrayscale = false) }
@@ -658,10 +651,10 @@ class SystemUIHooker : YukiBaseHooker() {
                              */
                             field { name = "mCurrentSetColor" }.ofInt(instance).also { color ->
                                 if (safeOfFalse {
-                                        NotificationUtilClass.clazz.hasMethod(
-                                            name = "ignoreStatusBarIconColor",
-                                            ExpandedNotificationClass.clazz
-                                        )
+                                        NotificationUtilClass.clazz.hasMethod {
+                                            name = "ignoreStatusBarIconColor"
+                                            param(ExpandedNotificationClass.clazz)
+                                        }
                                     }) {
                                     alpha = if (color.isWhite) 0.95f else 0.8f
                                     setColorFilter(if (color.isWhite) color else Color.BLACK)
@@ -705,9 +698,9 @@ class SystemUIHooker : YukiBaseHooker() {
                 method { name = "updateState" }
                 beforeHook {
                     /** 解除状态栏通知图标个数限制 */
-                    if (isShowNotificationIcons && prefs.getBoolean(HookConst.ENABLE_HOOK_STATUS_ICON_COUNT, default = true))
+                    if (isShowNotificationIcons && prefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT))
                         field { name = "MAX_STATIC_ICONS" }
-                            .get(instance).set(prefs.getInt(HookConst.HOOK_STATUS_ICON_COUNT, default = 5)
+                            .get(instance).set(prefs.get(DataConst.HOOK_STATUS_ICON_COUNT)
                                 .let { if (it in 0..100) it else 5 })
                 }
             }
@@ -727,7 +720,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 beforeHook { isShowNotificationIcons = firstArgs<Boolean>() ?: false }
             }.ignoredNoSuchMemberFailure()
-        }.by { NotificationIconContainerClass.clazz.hasField(name = "MAX_STATIC_ICONS") }
+        }.by { NotificationIconContainerClass.clazz.hasField { name = "MAX_STATIC_ICONS" } }
         NotificationHeaderViewWrapperClass.hook {
             /** 修复下拉通知图标自动设置回 APP 图标的方法 */
             injectMember {
@@ -812,7 +805,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 afterHook {
                     if (isEnableHookColorNotifyIcon()) (lastArgs as? Intent)?.also {
-                        if (!it.action.equals(Intent.ACTION_PACKAGE_REPLACED) &&
+                        if (it.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
                             it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
                         ) return@also
                         when (it.action) {
@@ -838,11 +831,11 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "updateTime" }
                 afterHook {
-                    if (isEnableHookColorNotifyIcon() && prefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_AUTO, default = true))
+                    if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
                         IconAdaptationTool.prepareAutoUpdateIconRule(
                             context = instance<View>().context,
                             // TODO 设置 UI 界面设置定时更新规则
-                            timeSet = prefs.getString(NOTIFY_ICON_FIX_AUTO_TIME, default = "07:00")
+                            timeSet = prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME)
                         )
                 }
             }

@@ -31,13 +31,13 @@ import com.highcapable.yukihookapi.hook.param.PackageParam
  * 获取此 APP 的通知图标是否被 Hook
  * @param bean 图标 bean
  */
-fun PackageParam.isAppNotifyHookOf(bean: IconDataBean) = prefs.getBoolean(key = bean.toEnabledName(), default = bean.isEnabled)
+fun PackageParam.isAppNotifyHookOf(bean: IconDataBean) = prefs.getBoolean(bean.toEnabledName(), bean.isEnabled)
 
 /**
  * 获取此 APP 的通知图标是否被 Hook
  * @param bean 图标 bean
  */
-fun Context.isAppNotifyHookOf(bean: IconDataBean) = modulePrefs.getBoolean(key = bean.toEnabledName(), default = bean.isEnabled)
+fun Context.isAppNotifyHookOf(bean: IconDataBean) = modulePrefs.getBoolean(bean.toEnabledName(), bean.isEnabled)
 
 /**
  * 设置 Hook 此 APP 的通知图标
@@ -45,21 +45,21 @@ fun Context.isAppNotifyHookOf(bean: IconDataBean) = modulePrefs.getBoolean(key =
  * @param isHook 是否 Hook
  */
 fun Context.putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) =
-    modulePrefs.putBoolean(key = bean.toEnabledName(), value = isHook)
+    modulePrefs.putBoolean(bean.toEnabledName(), isHook)
 
 /**
  * 获取此 APP 的通知图标是否被全部 Hook
  * @param bean 图标 bean
  */
 fun PackageParam.isAppNotifyHookAllOf(bean: IconDataBean) =
-    prefs.getBoolean(key = bean.toEnabledAllName(), default = bean.isEnabledAll)
+    prefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
 
 /**
  * 获取此 APP 的通知图标是否被全部 Hook
  * @param bean 图标 bean
  */
 fun Context.isAppNotifyHookAllOf(bean: IconDataBean) =
-    modulePrefs.getBoolean(key = bean.toEnabledAllName(), default = bean.isEnabledAll)
+    modulePrefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
 
 /**
  * 设置全部 Hook 此 APP 的通知图标
@@ -67,4 +67,4 @@ fun Context.isAppNotifyHookAllOf(bean: IconDataBean) =
  * @param isHook 是否 Hook
  */
 fun Context.putAppNotifyHookAllOf(bean: IconDataBean, isHook: Boolean) =
-    modulePrefs.putBoolean(key = bean.toEnabledAllName(), value = isHook)
+    modulePrefs.putBoolean(bean.toEnabledAllName(), isHook)

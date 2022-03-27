@@ -39,10 +39,9 @@ import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
-import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY
-import com.fankes.miui.notify.hook.HookConst.SOURCE_SYNC_WAY_CUSTOM_URL
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_1
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
 import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
@@ -81,8 +80,8 @@ object IconRuleManagerTool {
     fun syncByHand(context: Context, it: () -> Unit) =
         context.showDialog {
             title = "同步列表"
-            var sourceType = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1)
-            var customUrl = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL)
+            var sourceType = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY)
+            var customUrl = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL)
             bind<DiaSourceFromBinding>().apply {
                 diaSfText.apply {
                     if (customUrl.isNotBlank()) {
@@ -115,8 +114,8 @@ object IconRuleManagerTool {
                 }
             }
             confirmButton {
-                context.modulePrefs.putInt(SOURCE_SYNC_WAY, sourceType)
-                context.modulePrefs.putString(SOURCE_SYNC_WAY_CUSTOM_URL, customUrl)
+                context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY, sourceType)
+                context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL, customUrl)
                 sync(context, sourceType, customUrl, it)
             }
             cancelButton()
@@ -174,8 +173,8 @@ object IconRuleManagerTool {
      */
     fun sync(
         context: Context,
-        sourceType: Int = context.modulePrefs.getInt(SOURCE_SYNC_WAY, TYPE_SOURCE_SYNC_WAY_1),
-        customUrl: String = context.modulePrefs.getString(SOURCE_SYNC_WAY_CUSTOM_URL),
+        sourceType: Int = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY),
+        customUrl: String = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL),
         it: () -> Unit
     ) {
         when (sourceType) {
@@ -225,11 +224,11 @@ object IconRuleManagerTool {
                             context is AppCompatActivity ->
                                 context.showDialog {
                                     title = "连接失败"
-                                    msg = "连接失败，错误如下：\n${if (!isDone1) ctOS else ctAPP}"
+                                    msg = "连接失败，错误如下：\n${if (isDone1.not()) ctOS else ctAPP}"
                                     confirmButton(text = "再试一次") { syncByHand(context, it) }
                                     cancelButton()
                                 }
-                            else -> pushNotify(context, title = "同步地址不可用", msg = if (!isDone1) ctOS else ctAPP)
+                            else -> pushNotify(context, title = "同步地址不可用", msg = if (isDone1.not()) ctOS else ctAPP)
                         }
                     }
                 }

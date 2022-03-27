@@ -31,16 +31,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.const.Const
+import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.databinding.ActivityMainBinding
 import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
-import com.fankes.miui.notify.hook.HookConst.ENABLE_COLOR_ICON_COMPAT
-import com.fankes.miui.notify.hook.HookConst.ENABLE_HIDE_ICON
-import com.fankes.miui.notify.hook.HookConst.ENABLE_HOOK_STATUS_ICON_COUNT
-import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE
-import com.fankes.miui.notify.hook.HookConst.ENABLE_MODULE_LOG
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX
-import com.fankes.miui.notify.hook.HookConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY
-import com.fankes.miui.notify.hook.HookConst.HOOK_STATUS_ICON_COUNT
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
@@ -113,7 +106,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             /** 判断是否 Hook */
             isXposedModuleActive -> {
                 if (IconPackParams(context = this).iconDatas.isEmpty()
-                    && modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
+                    && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
                 ) showDialog {
                     title = "配置通知图标优化名单"
                     msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
@@ -122,7 +115,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton()
                     noCancelable()
                 }
-                if (isNotNoificationEnabled && modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true))
+                if (isNotNoificationEnabled && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX))
                     showDialog {
                         title = "模块的通知权限已关闭"
                         msg = "请开启通知权限，以确保你能收到通知图标优化在线规则的更新。"
@@ -143,24 +136,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
         }
         /** 获取 Sp 存储的信息 */
-        var statusBarIconCount = modulePrefs.getInt(HOOK_STATUS_ICON_COUNT, default = 5)
-        binding.colorIconHookItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.statusIconCountItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.notifyIconConfigItem.isVisible = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.notifyIconFixButton.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-        binding.notifyIconFixNotifyItem.isVisible = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-        binding.statusIconCountSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
-        binding.statusIconCountChildItem.isVisible = modulePrefs.getBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, default = true)
-        binding.moduleEnableSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE, default = true)
-        binding.moduleEnableLogSwitch.isChecked = modulePrefs.getBoolean(ENABLE_MODULE_LOG)
-        binding.hideIconInLauncherSwitch.isChecked = modulePrefs.getBoolean(ENABLE_HIDE_ICON)
-        binding.colorIconCompatSwitch.isChecked = modulePrefs.getBoolean(ENABLE_COLOR_ICON_COMPAT)
-        binding.notifyIconFixSwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX, default = true)
-        binding.notifyIconFixNotifySwitch.isChecked = modulePrefs.getBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, default = true)
+        var statusBarIconCount = modulePrefs.get(DataConst.HOOK_STATUS_ICON_COUNT)
+        binding.colorIconHookItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
+        binding.statusIconCountItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
+        binding.notifyIconConfigItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
+        binding.notifyIconFixButton.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
+        binding.notifyIconFixNotifyItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
+        binding.statusIconCountSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
+        binding.statusIconCountChildItem.isVisible = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
+        binding.moduleEnableSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_MODULE)
+        binding.moduleEnableLogSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_MODULE_LOG)
+        binding.hideIconInLauncherSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_HIDE_ICON)
+        binding.colorIconCompatSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_COLOR_ICON_COMPAT)
+        binding.notifyIconFixSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
+        binding.notifyIconFixNotifySwitch.isChecked = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY)
         binding.statusIconCountText.text = statusBarIconCount.toString()
         binding.moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_MODULE, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_MODULE, b)
             binding.moduleEnableLogSwitch.isVisible = b
             binding.colorIconHookItem.isVisible = b
             binding.statusIconCountItem.isVisible = b
@@ -168,13 +161,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             SystemUITool.showNeedRestartSnake(context = this)
         }
         binding.moduleEnableLogSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_MODULE_LOG, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_MODULE_LOG, b)
             SystemUITool.showNeedRestartSnake(context = this)
         }
         binding.hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_HIDE_ICON, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_HIDE_ICON, b)
             packageManager.setComponentEnabledSetting(
                 ComponentName(this@MainActivity, "com.fankes.miui.notify.Home"),
                 if (b) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -182,26 +175,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             )
         }
         binding.statusIconCountSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_HOOK_STATUS_ICON_COUNT, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT, b)
             binding.statusIconCountChildItem.isVisible = b
             SystemUITool.showNeedRestartSnake(context = this)
         }
         binding.colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_COLOR_ICON_COMPAT, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_COLOR_ICON_COMPAT, b)
             SystemUITool.refreshSystemUI(context = this)
         }
         binding.notifyIconFixSwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_NOTIFY_ICON_FIX, b)
             binding.notifyIconFixButton.isVisible = b
             binding.notifyIconFixNotifyItem.isVisible = b
             SystemUITool.refreshSystemUI(context = this)
         }
         binding.notifyIconFixNotifySwitch.setOnCheckedChangeListener { btn, b ->
-            if (!btn.isPressed) return@setOnCheckedChangeListener
-            modulePrefs.putBoolean(ENABLE_NOTIFY_ICON_FIX_NOTIFY, b)
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY, b)
             SystemUITool.refreshSystemUI(context = this, isRefreshCacheOnly = true)
         }
         /** 通知图标优化名单按钮点击事件 */
@@ -224,7 +217,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                                 !in 0..100 -> snake(msg = "请输入有效数值")
                         editText.text.toString().isNotBlank() -> runCatching {
                             statusBarIconCount = editText.text.toString().trim().toInt()
-                            modulePrefs.putInt(HOOK_STATUS_ICON_COUNT, statusBarIconCount)
+                            modulePrefs.put(DataConst.HOOK_STATUS_ICON_COUNT, statusBarIconCount)
                             binding.statusIconCountText.text = statusBarIconCount.toString()
                             SystemUITool.showNeedRestartSnake(context)
                         }.onFailure { snake(msg = "数值格式无效") }
@@ -249,24 +242,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainLinStatus.setBackgroundResource(
             when {
                 (isXposedModuleActive && isMiuiNotifyStyle) ||
-                        (isXposedModuleActive && (!isModuleRegular || !isModuleValied)) -> R.drawable.bg_yellow_round
+                        (isXposedModuleActive && (isModuleRegular.not() || isModuleValied.not())) -> R.drawable.bg_yellow_round
                 isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                isXposedModuleActive && !isMiuiNotifyStyle -> R.mipmap.ic_success
+                isXposedModuleActive && isMiuiNotifyStyle.not() -> R.mipmap.ic_success
                 else -> R.mipmap.ic_warn
             }
         )
         binding.mainTextStatus.text =
             when {
                 isXposedModuleActive && isMiuiNotifyStyle -> "模块已激活，但未在工作"
-                isXposedModuleActive && !isModuleRegular &&
-                        !modulePrefs.getBoolean(ENABLE_MODULE, default = true) -> "模块已停用"
-                isXposedModuleActive && !isModuleRegular -> "模块已激活，请重启系统界面"
-                isXposedModuleActive && !isModuleValied -> "模块已更新，请重启系统界面"
+                isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
+                isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
+                isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
                 isXposedModuleActive -> "模块已激活"
                 else -> "模块未激活"
             }
@@ -285,7 +277,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             refreshModuleStatus()
         }
         /** 经典样式启用后给出警告 */
-        if (!isWarnDialogShowing && isXposedModuleActive && isMiuiNotifyStyle)
+        if (isWarnDialogShowing.not() && isXposedModuleActive && isMiuiNotifyStyle)
             showDialog {
                 isWarnDialogShowing = true
                 title = "经典通知栏样式已启用"

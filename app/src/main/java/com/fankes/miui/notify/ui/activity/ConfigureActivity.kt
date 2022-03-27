@@ -61,7 +61,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
     override fun onCreate() {
         /** 检查激活状态 */
-        if (!isXposedModuleActive) {
+        if (isXposedModuleActive.not()) {
             showDialog {
                 title = "模块没有激活"
                 msg = "模块没有激活，你无法使用这里的功能，请先激活模块。"
@@ -146,14 +146,14 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             holder.adpAppAllSwitch.isEnabled = e
                         }
                         holder.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
-                            if (!btn.isPressed) return@setOnCheckedChangeListener
+                            if (btn.isPressed.not()) return@setOnCheckedChangeListener
                             putAppNotifyHookOf(it, b)
                             holder.adpAppAllSwitch.isEnabled = b
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
                         holder.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(it)
                         holder.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
-                            if (!btn.isPressed) return@setOnCheckedChangeListener
+                            if (btn.isPressed.not()) return@setOnCheckedChangeListener
                             putAppNotifyHookAllOf(it, b)
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
