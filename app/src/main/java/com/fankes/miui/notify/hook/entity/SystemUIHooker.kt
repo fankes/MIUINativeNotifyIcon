@@ -630,7 +630,7 @@ class SystemUIHooker : YukiBaseHooker() {
     override fun onHook() {
         /** 缓存图标数据 */
         cachingIconDatas()
-        /** 执行 Hook */
+        /** 注入 MIUI 自己增加的一个工具类 */
         NotificationUtilClass.hook {
             /** 强制回写系统的状态栏图标样式为原生 */
             injectMember {
@@ -673,8 +673,9 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
+        /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.hook {
-            /** Hook 状态栏图标的颜色 */
+            /** Hook 状态栏通知图标的颜色 */
             injectMember {
                 method { name = "updateIconColor" }
                 afterHook {
@@ -718,6 +719,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
+        /** 注入状态栏通知图标容器实例 */
         NotificationIconContainerClass.hook {
             injectMember {
                 method { name = "calculateIconTranslations" }
@@ -756,6 +758,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 beforeHook { isShowNotificationIcons = firstArgs<Boolean>() ?: false }
             }.ignoredNoSuchMemberFailure()
         }.by { NotificationIconContainerClass.clazz.hasField { name = "MAX_STATIC_ICONS" } }
+        /** 注入原生通知包装纸实例 */
         NotificationHeaderViewWrapperClass.hook {
             /** 修复下拉通知图标自动设置回 APP 图标的方法 */
             injectMember {
@@ -792,6 +795,7 @@ class SystemUIHooker : YukiBaseHooker() {
         }
         /** 修改 MIUI 风格通知栏的通知图标 */
         MiuiNotificationViewWrapperClass.hook {
+            /** 替换通知小图标 */
             injectMember {
                 method { name = "handleAppIcon" }
                 replaceUnit {
