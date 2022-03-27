@@ -25,7 +25,6 @@
 package com.fankes.miui.notify.ui.activity
 
 import android.content.ComponentName
-import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -53,9 +52,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 预发布的版本标识 */
         private const val pendingFlag = "[pending]"
     }
-
-    /** 警告对话框是否显示 */
-    private var isWarnDialogShowing = false
 
     /** 模块是否可用 */
     private var isModuleRegular = false
@@ -240,21 +236,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun refreshModuleStatus() {
         binding.mainLinStatus.setBackgroundResource(
             when {
-                (isXposedModuleActive && isMiuiNotifyStyle) ||
-                        (isXposedModuleActive && (isModuleRegular.not() || isModuleValied.not())) -> R.drawable.bg_yellow_round
+                isXposedModuleActive && (isModuleRegular.not() || isModuleValied.not()) -> R.drawable.bg_yellow_round
                 isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                isXposedModuleActive && isMiuiNotifyStyle.not() -> R.mipmap.ic_success
+                isXposedModuleActive -> R.mipmap.ic_success
                 else -> R.mipmap.ic_warn
             }
         )
         binding.mainTextStatus.text =
             when {
-                isXposedModuleActive && isMiuiNotifyStyle -> "模块已激活，但未在工作"
                 isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
                 isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
                 isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
@@ -275,28 +269,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             isModuleValied = isValied
             refreshModuleStatus()
         }
-        /** 经典样式启用后给出警告 */
-        if (isWarnDialogShowing.not() && isXposedModuleActive && isMiuiNotifyStyle)
-            showDialog {
-                isWarnDialogShowing = true
-                title = "经典通知栏样式已启用"
-                msg = "当你启用了经典通知栏样式后，为防止 MIUI 自身不规范 APP 图标被破坏，状态栏图标将不再做原生处理。\n\n" +
-                        "若要使用原生样式，请前往 设置>通知管理>通知显示设置 中将样式设置为“原生样式”，新版本为 设置>通知与控制中心>通知显示设置。"
-                confirmButton(text = "去设置") {
-                    runCatching {
-                        startActivity(Intent().apply {
-                            component = ComponentName(
-                                "com.miui.notification",
-                                "miui.notification.management.activity.NotificationDisplaySettingsActivity"
-                            )
-                            /** 防止顶栈一样重叠在自己的 APP 中 */
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        })
-                    }.onFailure { toast(msg = "启动失败，请手动调整设置") }
-                    isWarnDialogShowing = false
-                }
-                cancelButton { isWarnDialogShowing = false }
-                noCancelable()
-            }
     }
 }

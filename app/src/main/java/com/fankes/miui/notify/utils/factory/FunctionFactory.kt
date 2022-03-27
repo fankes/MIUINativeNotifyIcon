@@ -27,6 +27,7 @@ package com.fankes.miui.notify.utils.factory
 import android.app.Activity
 import android.app.Notification
 import android.app.Service
+import android.app.WallpaperManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -73,12 +74,6 @@ inline val isNotSystemInDarkMode get() = !isSystemInDarkMode
  * @return [Boolean] 是否开启
  */
 val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
-/**
- * 通知栏是否为 MIUI 样式
- * @return [Boolean] 是否符合条件
- */
-val Context.isMiuiNotifyStyle get() = safeOfFalse { Settings.System.getInt(contentResolver, "status_bar_notification_style") == 0 }
 
 /**
  * 系统深色模式是否没开启
@@ -271,10 +266,19 @@ fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetr
 
 /**
  * 获取系统主题色
- * @return [Int] Android < 12 返回透明色
+ * @return [Int] Android < 12 返回 [wallpaperColor]
  */
 val Context.systemAccentColor
-    get() = safeOfNan { if (isUpperOfAndroidS) resources.getColor(android.R.color.system_accent1_600) else 0 }
+    get() = safeOf(wallpaperColor) { if (isUpperOfAndroidS) resources.getColor(android.R.color.system_accent1_600) else wallpaperColor }
+
+/**
+ * 获取系统壁纸颜色
+ * @return [Int] 无法获取时返回透明色
+ */
+val Context.wallpaperColor
+    get() = safeOfNan {
+        WallpaperManager.getInstance(this).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)?.secondaryColor?.toArgb() ?: 0
+    }
 
 /**
  * 是否为白色
