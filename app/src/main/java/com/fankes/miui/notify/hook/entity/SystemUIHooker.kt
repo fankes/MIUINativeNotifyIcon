@@ -367,14 +367,13 @@ class SystemUIHooker : YukiBaseHooker() {
     private fun compatCustomIcon(isGrayscaleIcon: Boolean, packageName: String): Pair<Bitmap?, Int> {
         var customPair: Pair<Bitmap?, Int>? = null
         if (prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)) run {
-            if (iconDatas.isNotEmpty())
-                iconDatas.forEach {
-                    if (packageName == it.packageName && isAppNotifyHookOf(it)) {
-                        if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
-                            customPair = Pair(it.iconBitmap, it.iconColor)
-                        return@run
-                    }
+            iconDatas.takeIf { it.isNotEmpty() }?.forEach {
+                if (packageName == it.packageName && isAppNotifyHookOf(it)) {
+                    if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
+                        customPair = Pair(it.iconBitmap, it.iconColor)
+                    return@run
                 }
+            }
         }
         return customPair ?: Pair(null, 0)
     }
