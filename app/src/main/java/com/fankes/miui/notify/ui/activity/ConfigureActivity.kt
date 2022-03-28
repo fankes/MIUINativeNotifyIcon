@@ -240,4 +240,18 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         else iconAllDatas.filter {
             it.appName.lowercase().contains(filterText.lowercase()) || it.packageName.lowercase().contains(filterText.lowercase())
         }
+
+    override fun onBackPressed() {
+        if (MainActivity.isActivityLive.not())
+            showDialog {
+                title = "提示"
+                msg = "要返回模块主页吗？"
+                confirmButton {
+                    super.onBackPressed()
+                    navigate<MainActivity>()
+                }
+                cancelButton { super.onBackPressed() }
+            }
+        else super.onBackPressed()
+    }
 }

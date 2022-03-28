@@ -41,7 +41,7 @@ object Const {
     const val MODULE_VERSION_CODE = BuildConfig.VERSION_CODE
 
     /** 当前模块的版本校验 */
-    const val MODULE_VERSION_VERIFY = "${MODULE_VERSION_NAME}_${MODULE_VERSION_CODE}_202203252250"
+    const val MODULE_VERSION_VERIFY = "${MODULE_VERSION_NAME}_${MODULE_VERSION_CODE}_202203281323"
 
     /** 当前模块的版本校验标签 */
     const val MODULE_VERSION_VERIFY_TAG = "module_version_verify"

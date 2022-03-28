@@ -568,6 +568,91 @@
                         android:textColor="@color/colorTextDark"
                         android:textSize="12sp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/notify_icon_auto_sync_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.view.MaterialSwitch
+                        android:id="@+id/notify_icon_auto_sync_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="启用通知图标优化名单自动更新"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="此选项默认开启，为确保名单内的数据为云端最新版本，你可以设置每天自动更新在线规则的时间，自动更新的地址为你最后一次成功设置的在线规则同步地址。\n请确保模块能够后台联网并不被阻止其它 APP 唤醒，否则自动同步可能会失败。\n模块无需保持在后台运行，到达同步时间后会自动启动，如果到达时间后模块正在运行则会自动取消本次计划任务。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:id="@+id/notify_icon_auto_sync_child_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="17dp"
+                            android:layout_height="17dp"
+                            android:src="@drawable/ic_system_clock"
+                            app:tint="@color/colorTextGray" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:singleLine="true"
+                            android:text="每天"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/notify_icon_auto_sync_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxWidth="100dp"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"
+                            android:singleLine="true"
+                            android:text="07:00"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/notify_icon_auto_sync_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_button_round"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:paddingLeft="10dp"
+                            android:paddingTop="5dp"
+                            android:paddingRight="10dp"
+                            android:paddingBottom="5dp"
+                            android:singleLine="true"
+                            android:text="修改时间"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

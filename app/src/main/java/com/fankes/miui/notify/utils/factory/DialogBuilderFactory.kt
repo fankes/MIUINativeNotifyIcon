@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.utils.factory
 
 import android.app.Dialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -49,6 +50,14 @@ import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
  */
 fun Context.showDialog(isUseBlackTheme: Boolean = false, it: DialogBuilder.() -> Unit) =
     DialogBuilder(this, isUseBlackTheme).apply(it).show()
+
+/**
+ * 显示时间选择对话框
+ * @param timeSet 当前时间 - 不写将使用当前时间格式：HH:mm
+ * @param it 回调 - 小时与分钟 HH:mm
+ */
+fun Context.showTimePicker(timeSet: String = "", it: (String) -> Unit) =
+    TimePickerDialog(this, { _, h, m -> it("${h.autoZero}:${m.autoZero}") }, timeSet.hour, timeSet.minute, true).show()
 
 /**
  * 对话框构造器

@@ -238,6 +238,34 @@ fun Context.findAppIcon(name: String) =
     safeOfNull { packageManager?.getPackageInfo(name, 0)?.applicationInfo?.loadIcon(packageManager) }
 
 /**
+ * 对数值自动补零
+ * @return [String]
+ */
+val Int.autoZero: String get() = if (this < 10) "0$this" else toString()
+
+/**
+ * 从字符串获取小时
+ * @return [Int]
+ */
+val String.hour
+    get() = safeOfNan {
+        Calendar.getInstance().also {
+            it.time = SimpleDateFormat("HH:mm", Locale.CHINA).parse(this) as Date
+        }.get(Calendar.HOUR_OF_DAY)
+    }
+
+/**
+ * 从字符串获取分钟
+ * @return [Int]
+ */
+val String.minute
+    get() = safeOfNan {
+        Calendar.getInstance().also {
+            it.time = SimpleDateFormat("HH:mm", Locale.CHINA).parse(this) as Date
+        }.get(Calendar.MINUTE)
+    }
+
+/**
  * 是否关闭了通知权限
  * @return [Boolean]
  */
