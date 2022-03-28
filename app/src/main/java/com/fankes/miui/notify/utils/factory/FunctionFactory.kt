@@ -430,7 +430,7 @@ fun Context.snake(msg: String, actionText: String = "", it: () -> Unit = {}) =
     Snackbar.make((this as Activity).findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG)
         .apply {
             if (actionText.isBlank()) return@apply
-            setActionTextColor(Color.WHITE)
+            setActionTextColor(if (isSystemInDarkMode) Color.BLACK else Color.WHITE)
             setAction(actionText) { it() }
         }.show()
 
