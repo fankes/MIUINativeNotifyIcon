@@ -46,6 +46,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     companion object {
 
+        /** 窗口是否启动 */
+        internal var isActivityLive = false
+
         /** 模块版本 */
         private const val moduleVersion = Const.MODULE_VERSION_NAME
 
@@ -60,6 +63,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private var isModuleValied = false
 
     override fun onCreate() {
+        /** 设置可用性 */
+        isActivityLive = true
         /** 设置文本 */
         binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
         binding.mainTextMiuiVersion.text = "系统版本：$miuiFullVersion"
@@ -130,22 +135,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     noCancelable()
                 }
         }
-        /** 获取 Sp 存储的信息 */
         var statusBarIconCount = modulePrefs.get(DataConst.HOOK_STATUS_ICON_COUNT)
+        var notifyIconAutoSyncTime = modulePrefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME)
         binding.colorIconHookItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
         binding.statusIconCountItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
         binding.notifyIconConfigItem.isVisible = modulePrefs.get(DataConst.ENABLE_MODULE)
         binding.notifyIconFixButton.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
         binding.notifyIconFixNotifyItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
+        binding.notifyIconAutoSyncItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
         binding.statusIconCountSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
         binding.statusIconCountChildItem.isVisible = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
+        binding.notifyIconAutoSyncChildItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO)
         binding.moduleEnableSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_MODULE)
         binding.moduleEnableLogSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_MODULE_LOG)
         binding.hideIconInLauncherSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_HIDE_ICON)
         binding.colorIconCompatSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_COLOR_ICON_COMPAT)
         binding.notifyIconFixSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
         binding.notifyIconFixNotifySwitch.isChecked = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY)
+        binding.notifyIconAutoSyncSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO)
         binding.statusIconCountText.text = statusBarIconCount.toString()
+        binding.notifyIconAutoSyncText.text = notifyIconAutoSyncTime
         binding.moduleEnableSwitch.setOnCheckedChangeListener { btn, b ->
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
             modulePrefs.put(DataConst.ENABLE_MODULE, b)
@@ -185,11 +194,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             modulePrefs.put(DataConst.ENABLE_NOTIFY_ICON_FIX, b)
             binding.notifyIconFixButton.isVisible = b
             binding.notifyIconFixNotifyItem.isVisible = b
+            binding.notifyIconAutoSyncItem.isVisible = b
             SystemUITool.refreshSystemUI(context = this)
         }
         binding.notifyIconFixNotifySwitch.setOnCheckedChangeListener { btn, b ->
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
             modulePrefs.put(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY, b)
+            SystemUITool.refreshSystemUI(context = this, isRefreshCacheOnly = true)
+        }
+        binding.notifyIconAutoSyncSwitch.setOnCheckedChangeListener { btn, b ->
+            if (btn.isPressed.not()) return@setOnCheckedChangeListener
+            modulePrefs.put(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO, b)
+            binding.notifyIconAutoSyncChildItem.isVisible = b
             SystemUITool.refreshSystemUI(context = this, isRefreshCacheOnly = true)
         }
         /** 通知图标优化名单按钮点击事件 */
@@ -220,6 +236,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     }
                 }
                 cancelButton()
+            }
+        }
+        /** 自动更新在线规则修改时间按钮点击事件 */
+        binding.notifyIconAutoSyncButton.setOnClickListener {
+            showTimePicker(notifyIconAutoSyncTime) {
+                showDialog {
+                    title = "每天 $it 自动更新"
+                    msg = "设置保存后将在每天 $it 自动同步名单到最新云端数据，若数据已是最新则不会显示任何提示，否则会发送一条通知。\n\n" +
+                            "请确保：\n\n" +
+                            "1.模块没有被禁止前台以及后台联网权限\n" +
+                            "2.模块没有被禁止被其它 APP 关联唤醒\n" +
+                            "3.模块的系统通知权限已开启\n\n" +
+                            "模块无需保持在后台运行，到达同步时间后会自动启动，如果到达时间后模块正在运行则会自动取消本次计划任务。"
+                    confirmButton(text = "保存设置") {
+                        notifyIconAutoSyncTime = it
+                        binding.notifyIconAutoSyncText.text = it
+                        modulePrefs.put(DataConst.NOTIFY_ICON_FIX_AUTO_TIME, it)
+                        SystemUITool.refreshSystemUI(context, isRefreshCacheOnly = true)
+                    }
+                    cancelButton()
+                    noCancelable()
+                }
             }
         }
         /** 重启按钮点击事件 */
