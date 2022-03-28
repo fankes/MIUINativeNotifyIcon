@@ -874,6 +874,6 @@ class SystemUIHooker : YukiBaseHooker() {
                         )
                 }
             }
-        }
+        }.ignoredHookClassNotFoundFailure()
     }
 }
