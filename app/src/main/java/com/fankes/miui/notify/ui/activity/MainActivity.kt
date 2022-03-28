@@ -53,7 +53,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         private const val moduleVersion = Const.MODULE_VERSION_NAME
 
         /** 预发布的版本标识 */
-        private const val pendingFlag = "[pending]"
+        private const val pendingFlag = ""
     }
 
     /** 模块是否可用 */
