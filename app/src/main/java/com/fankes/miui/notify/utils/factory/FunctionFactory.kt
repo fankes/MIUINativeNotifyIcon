@@ -305,7 +305,7 @@ val Context.systemAccentColor
  */
 val Context.wallpaperColor
     get() = safeOfNan {
-        WallpaperManager.getInstance(this).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)?.secondaryColor?.toArgb() ?: 0
+        WallpaperManager.getInstance(this).getWallpaperColors(WallpaperManager.FLAG_SYSTEM)?.primaryColor?.toArgb() ?: 0
     }
 
 /**
