@@ -309,6 +309,19 @@ val Context.wallpaperColor
     }
 
 /**
+ * 获取较浅的颜色
+ * @return [Int]
+ */
+val Int.brighter: Int
+    get() {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(this, hsv)
+        hsv[1] = hsv[1] - 0.3f
+        hsv[2] = hsv[2] + 0.3f
+        return Color.HSVToColor(hsv)
+    }
+
+/**
  * 是否为白色
  * @return [Boolean]
  */

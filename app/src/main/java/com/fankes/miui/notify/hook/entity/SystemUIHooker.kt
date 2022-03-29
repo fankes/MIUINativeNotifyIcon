@@ -532,7 +532,10 @@ class SystemUIHooker : YukiBaseHooker() {
                 setColorFilter(if (isUseAndroid12Style || customIconColor == 0) supportColor else customIconColor)
                 /** Android 12 设置图标外圈颜色 */
                 if (isUseAndroid12Style && customIconColor != 0)
-                    background = DrawableBuilder().rounded().solidColor(customIconColor).build()
+                    background = DrawableBuilder()
+                        .rounded()
+                        .solidColor(if (context.isSystemInDarkMode) customIconColor.brighter else customIconColor)
+                        .build()
                 /** 设置原生的背景边距 */
                 if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
             } else {
@@ -545,8 +548,13 @@ class SystemUIHooker : YukiBaseHooker() {
                     /** 设置图标着色 */
                     setColorFilter(supportColor)
                     /** Android 12 设置图标外圈颜色 */
-                    if (isUseAndroid12Style) background =
-                        DrawableBuilder().rounded().solidColor(if (hasIconColor) iconColor else context.systemAccentColor).build()
+                    (if (hasIconColor) iconColor else context.systemAccentColor).also {
+                        if (isUseAndroid12Style)
+                            background = DrawableBuilder()
+                                .rounded()
+                                .solidColor(if (context.isSystemInDarkMode) it.brighter else it)
+                                .build()
+                    }
                     /** 设置原生的背景边距 */
                     if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
                 } else iconImageView.apply {
