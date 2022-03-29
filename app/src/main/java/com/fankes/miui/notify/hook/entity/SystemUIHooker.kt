@@ -23,6 +23,7 @@
 package com.fankes.miui.notify.hook.entity
 
 import android.app.NotificationManager
+import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -71,62 +72,70 @@ class SystemUIHooker : YukiBaseHooker() {
     companion object {
 
         /** MIUI 新版本存在的类 */
-        private const val SystemUIApplicationClass = "${SYSTEMUI_PACKAGE_NAME}.SystemUIApplication"
+        private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
 
         /** MIUI 新版本存在的类 */
         private const val NotificationHeaderViewWrapperInjectorClass =
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
+
+        /** MIUI 新版本存在的类 */
+        private const val MiuiNotificationViewWrapperClass =
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
+
+        /** MIUI 新版本存在的类 */
+        private const val MiuiNotificationChildrenContainerClass =
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.MiuiNotificationChildrenContainer"
+
+        /** 原生存在的类 */
+        private const val NotificationChildrenContainerClass =
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.NotificationChildrenContainer"
 
         /** 原生存在的类 */
         private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
         /** 原生存在的类 */
-        private const val StatusBarIconViewClass = "${SYSTEMUI_PACKAGE_NAME}.statusbar.StatusBarIconView"
+        private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
 
         /** 原生存在的类 */
-        private const val NotificationIconContainerClass = "${SYSTEMUI_PACKAGE_NAME}.statusbar.phone.NotificationIconContainer"
+        private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
 
         /** 原生存在的类 */
-        private const val PluginManagerImplClass = "${SYSTEMUI_PACKAGE_NAME}.shared.plugins.PluginManagerImpl"
-
-        /** MIUI 存在的类 - 旧版本没有 */
-        private const val MiuiNotificationViewWrapperClass =
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
+        private const val PluginManagerImplClass = "$SYSTEMUI_PACKAGE_NAME.shared.plugins.PluginManagerImpl"
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val MiuiClockClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.views.MiuiClock",
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.policy.MiuiClock"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock"
         )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val ExpandableNotificationRowClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.row.ExpandableNotificationRow",
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.ExpandableNotificationRow"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
         )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationViewWrapperClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.row.wrapper.NotificationViewWrapper",
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.NotificationViewWrapper"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationViewWrapper",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
         )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationHeaderViewWrapperClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.NotificationHeaderViewWrapper"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
         )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val NotificationUtilClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.NotificationUtil",
-            "${SYSTEMUI_PACKAGE_NAME}.miui.statusbar.notification.NotificationUtil"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
+            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.notification.NotificationUtil"
         )
 
         /** 根据多个版本存在不同的包名相同的类 */
         private val ExpandedNotificationClass = VariousClass(
-            "${SYSTEMUI_PACKAGE_NAME}.statusbar.notification.ExpandedNotification",
-            "${SYSTEMUI_PACKAGE_NAME}.miui.statusbar.ExpandedNotification"
+            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification",
+            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
         )
     }
 
@@ -147,6 +156,12 @@ class SystemUIHooker : YukiBaseHooker() {
 
     /** MIUI 样式下的缓存的通知小图标包装纸实例 */
     private var miuiNotificationViewWrappers = HashSet<Any>()
+
+    /** MIUI 样式下的缓存的通知小图标折叠通知实例 */
+    private var miuiNotificationChildrenContainers = HashSet<ViewGroup>()
+
+    /** 仅监听一次主题壁纸颜色变化 */
+    private var isWallpaperColorListenerSetUp = false
 
     /** 是否已经注册广播 */
     private var isRegisterReceiver = false
@@ -354,6 +369,19 @@ class SystemUIHooker : YukiBaseHooker() {
             SystemUIApplicationClass.clazz.method { name = "getContext" }.ignoredError().get().invoke<Context>()
         }
 
+    /**
+     * 注册主题壁纸改变颜色监听
+     *
+     *  - 仅限在 Android 12 以下注册
+     * @param view 实例
+     */
+    private fun registerWallpaperColorChanged(view: View) = runInSafe {
+        if (isWallpaperColorListenerSetUp.not() && isUpperOfAndroidS.not()) view.apply {
+            WallpaperManager.getInstance(context).addOnColorsChangedListener({ _, _ -> refreshNotificationIcons() }, handler)
+        }
+        isWallpaperColorListenerSetUp = true
+    }
+
     /** 刷新状态栏小图标 */
     private fun refreshStatusBarIcons() = runInSafe {
         StatusBarIconViewClass.clazz.field { name = "mNotification" }.also { result ->
@@ -377,6 +405,12 @@ class SystemUIHooker : YukiBaseHooker() {
         }
         MiuiNotificationViewWrapperClass.clazz.method { name = "handleViews" }.ignoredError().also { result ->
             miuiNotificationViewWrappers.takeIf { it.isNotEmpty() }?.forEach { result.get(it).call() }
+        }
+        MiuiNotificationChildrenContainerClass.clazz.method {
+            name = "updateAppIcon"
+            param(BooleanType)
+        }.ignoredError().also { result ->
+            miuiNotificationChildrenContainers.takeIf { it.isNotEmpty() }?.forEach { result.get(it).call(true) }
         }
     }
 
@@ -572,10 +606,10 @@ class SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
-     * 从 [NotificationViewWrapperClass] 中获取 [StatusBarNotification]
-     * @return [Pair] - ([Boolean] 通知是否展开,[StatusBarNotification] 通知实例)
+     * 从 [NotificationViewWrapperClass] 中获取 [ExpandableNotificationRowClass]
+     * @return [Pair] - ([Boolean] 通知是否展开,[Any] 通知 Row 实例)
      */
-    private fun Any.getSbnPair(): Pair<Boolean, StatusBarNotification?> {
+    private fun Any.getRowPair(): Pair<Boolean, Any?> {
         /** 通知是否展开 */
         var isExpanded = false
 
@@ -583,16 +617,25 @@ class SystemUIHooker : YukiBaseHooker() {
          * 从父类中得到 mRow 变量 - [ExpandableNotificationRowClass]
          * 获取其中的得到通知方法
          */
-        val expandedNf = ExpandableNotificationRowClass.clazz
+        val row = NotificationViewWrapperClass.clazz.field {
+            name = "mRow"
+        }.get(this).self?.also {
+            isExpanded = ExpandableNotificationRowClass.clazz.method {
+                name = "isExpanded"
+                returnType = BooleanType
+            }.get(it).boolean()
+        }
+        return Pair(isExpanded, row)
+    }
+
+    /**
+     * 从 [ExpandableNotificationRowClass] 中获取 [StatusBarNotification]
+     * @return [StatusBarNotification] or null
+     */
+    private fun Any?.getSbn() =
+        ExpandableNotificationRowClass.clazz
             .method { name = "getEntry" }
-            .get(NotificationViewWrapperClass.clazz.field {
-                name = "mRow"
-            }.get(this).self?.also {
-                isExpanded = ExpandableNotificationRowClass.clazz.method {
-                    name = "isExpanded"
-                    returnType = BooleanType
-                }.get(it).boolean()
-            }).call()?.let {
+            .get(this).call()?.let {
                 it.javaClass.method {
                     name = "getSbn"
                 }.get(it).invoke<StatusBarNotification>()
@@ -600,8 +643,6 @@ class SystemUIHooker : YukiBaseHooker() {
             .method { name = "getStatusBarNotification" }
             .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(this).self)
             .invoke<StatusBarNotification>()
-        return Pair(isExpanded, expandedNf)
-    }
 
     /** 缓存图标数据 */
     private fun cachingIconDatas() {
@@ -713,6 +754,8 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 afterHook {
                     if (firstArgs != null) instance<ImageView>().also {
+                        /** 注册壁纸颜色监听 */
+                        registerWallpaperColorChanged(it)
                         /** 注册广播 */
                         registerReceiver(it.context)
                         /** 缓存实例 */
@@ -773,20 +816,23 @@ class SystemUIHooker : YukiBaseHooker() {
                         NotificationHeaderViewWrapperClass.clazz
                             .field { name = "mIcon" }.get(instance).cast<ImageView>() ?: return@afterHook
 
+                    /** 获取 [ExpandableNotificationRowClass] */
+                    val rowPair = instance.getRowPair()
+
                     /** 获取 [StatusBarNotification] */
-                    val sbnPair = instance.getSbnPair()
+                    val expandedNf = rowPair.second.getSbn()
 
                     /** 通知是否展开 */
-                    var isExpanded = sbnPair.first
+                    var isExpanded = rowPair.first
 
                     /** 获取优先级 */
                     val importance =
                         (iconImageView.context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
-                            ?.getNotificationChannel(sbnPair.second?.notification?.channelId)?.importance ?: 0
+                            ?.getNotificationChannel(expandedNf?.notification?.channelId)?.importance ?: 0
                     /** 非最小化优先级的通知全部设置为展开状态 */
                     if (importance != 1) isExpanded = true
                     /** 执行 Hook */
-                    compatNotifyIcon(iconImageView.context, sbnPair.second, iconImageView, isExpanded)
+                    compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
                 }
             }
             /** 记录实例 */
@@ -802,7 +848,12 @@ class SystemUIHooker : YukiBaseHooker() {
                 method { name = "handleAppIcon" }
                 replaceUnit {
                     field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
-                        compatNotifyIcon(context, instance.getSbnPair().second, iconImageView = this, isUseAndroid12Style = true)
+                        compatNotifyIcon(
+                            context = context,
+                            expandedNf = instance.getRowPair().second.getSbn(),
+                            iconImageView = this,
+                            isUseAndroid12Style = true
+                        )
                     }
                 }
             }
@@ -810,6 +861,29 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 constructor { param(ContextClass, ViewClass, ExpandableNotificationRowClass.clazz) }
                 afterHook { miuiNotificationViewWrappers.add(instance) }
+            }
+        }.ignoredHookClassNotFoundFailure()
+        /** 修改 MIUI 风格通知栏的通知图标 - 折叠通知 */
+        MiuiNotificationChildrenContainerClass.hook {
+            /** 替换通知小图标 */
+            injectMember {
+                method {
+                    name = "updateAppIcon"
+                    param(BooleanType)
+                }
+                afterHook {
+                    val expandedNf = NotificationChildrenContainerClass.clazz.field {
+                        name = "mContainingNotification"
+                    }.get(instance).self.getSbn()
+                    field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
+                        compatNotifyIcon(context, expandedNf, iconImageView = this, isUseAndroid12Style = true)
+                    }
+                }
+            }
+            /** 记录实例 */
+            injectMember {
+                constructor { param(ContextClass, AttributeSetClass) }
+                afterHook { miuiNotificationChildrenContainers.add(instance()) }
             }
         }.ignoredHookClassNotFoundFailure()
         /** 干掉下拉通知图标自动设置回 APP 图标的方法 */
