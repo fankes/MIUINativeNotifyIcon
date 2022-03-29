@@ -713,7 +713,9 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 afterHook {
                     if (firstArgs != null) instance<ImageView>().also {
+                        /** 注册广播 */
                         registerReceiver(it.context)
+                        /** 缓存实例 */
                         statusBarIconViews.add(it)
                     }
                 }
@@ -867,11 +869,16 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "updateTime" }
                 afterHook {
-                    if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
-                        IconAdaptationTool.prepareAutoUpdateIconRule(
-                            context = instance<View>().context,
-                            timeSet = prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME)
-                        )
+                    instance<View>().context.also {
+                        /** 注册广播 */
+                        registerReceiver(it)
+                        /** 注册定时监听 */
+                        if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
+                            IconAdaptationTool.prepareAutoUpdateIconRule(
+                                context = it,
+                                timeSet = prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME)
+                            )
+                    }
                 }
             }
         }.ignoredHookClassNotFoundFailure()
