@@ -232,7 +232,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }.get(it.method {
                     name = "getInstance"
                     param(ContextClass)
-                }.get().invoke(context)).callBoolean(drawable)
+                }.get().invoke(context)).boolean(drawable)
             }
         } else BitmapCompatTool.isGrayscaleDrawable(drawable)
 
@@ -359,7 +359,7 @@ class SystemUIHooker : YukiBaseHooker() {
         StatusBarIconViewClass.clazz.field { name = "mNotification" }.also { result ->
             statusBarIconViews.takeIf { it.isNotEmpty() }?.forEach {
                 /** 得到通知实例 */
-                val nf = result.of<StatusBarNotification>(it) ?: return
+                val nf = result.get(it).cast<StatusBarNotification>() ?: return
                 /** 刷新状态栏图标 */
                 compatStatusIcon(it.context, nf, nf.notification.smallIcon.loadDrawable(it.context)).also { pair ->
                     pair.first.let { e -> it.setImageDrawable(e) }
@@ -591,7 +591,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 isExpanded = ExpandableNotificationRowClass.clazz.method {
                     name = "isExpanded"
                     returnType = BooleanType
-                }.get(it).callBoolean()
+                }.get(it).boolean()
             }).call()?.let {
                 it.javaClass.method {
                     name = "getSbn"
@@ -662,7 +662,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 afterHook {
                     (globalContext ?: firstArgs())?.also { context ->
-                        val expandedNf = args(if (isUseLegacy) 1 else 0).of<StatusBarNotification?>()
+                        val expandedNf = args(if (isUseLegacy) 1 else 0).cast<StatusBarNotification?>()
                         /** Hook 状态栏小图标 */
                         compatStatusIcon(
                             context = context,
@@ -681,7 +681,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 afterHook {
                     instance<ImageView>().also {
                         if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
-                                .of<StatusBarNotification>(instance))) it.apply {
+                                .get(instance).cast<StatusBarNotification>())) it.apply {
                             alpha = 1f
                             colorFilter = null
                         } else it.apply {
@@ -690,7 +690,7 @@ class SystemUIHooker : YukiBaseHooker() {
                              * 图标在任何场景下跟随状态栏其它图标保持半透明
                              * MIUI 12 进行单独判断
                              */
-                            field { name = "mCurrentSetColor" }.ofInt(instance).also { color ->
+                            field { name = "mCurrentSetColor" }.get(instance).int().also { color ->
                                 if (hasIgnoreStatusBarIconColor) {
                                     alpha = if (color.isWhite) 0.95f else 0.8f
                                     setColorFilter(if (color.isWhite) color else Color.BLACK)
@@ -769,7 +769,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     /** 获取小图标 */
                     val iconImageView =
                         NotificationHeaderViewWrapperClass.clazz
-                            .field { name = "mIcon" }.of<ImageView>(instance) ?: return@afterHook
+                            .field { name = "mIcon" }.get(instance).cast<ImageView>() ?: return@afterHook
 
                     /** 获取 [StatusBarNotification] */
                     val sbnPair = instance.getSbnPair()
@@ -799,7 +799,7 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "handleAppIcon" }
                 replaceUnit {
-                    field { name = "mAppIcon" }.of<ImageView>(instance)?.apply {
+                    field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
                         compatNotifyIcon(context, instance.getSbnPair().second, iconImageView = this, isUseAndroid12Style = true)
                     }
                 }
