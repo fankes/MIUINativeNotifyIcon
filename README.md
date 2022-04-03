@@ -1,6 +1,6 @@
 # MIUI 原生通知图标
 
-[![Blank](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/fankes/MIUINativeNotifyIcon)
+[![Blank](https://img.shields.io/badge/build-pending-dbab09)](https://github.com/fankes/MIUINativeNotifyIcon)
 [![Blank](https://img.shields.io/badge/license-AGPL3.0-blue)](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/LICENSE)
 [![Blank](https://img.shields.io/badge/version-v2.3-green)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
 [![Blank](https://img.shields.io/github/downloads/fankes/MIUINativeNotifyIcon/total?label=Release)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
