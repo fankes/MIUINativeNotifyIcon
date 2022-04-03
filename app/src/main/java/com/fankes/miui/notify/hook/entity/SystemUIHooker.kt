@@ -268,7 +268,7 @@ class SystemUIHooker : YukiBaseHooker() {
         get() = safeOfFalse {
             NotificationUtilClass.clazz.hasMethod {
                 name = "ignoreStatusBarIconColor"
-                param(ExpandedNotificationClass.clazz)
+                param(ExpandedNotificationClass)
             }
         }
 
@@ -685,7 +685,7 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "shouldSubstituteSmallIcon"
-                    param(ExpandedNotificationClass.clazz)
+                    param(ExpandedNotificationClass)
                 }
                 /**
                  * MIUI 12 在非原生样式下 MIPUSH 的图标着色异常
@@ -698,15 +698,15 @@ class SystemUIHooker : YukiBaseHooker() {
                 var isUseLegacy = false
                 method {
                     name = "getSmallIcon"
-                    param(ExpandedNotificationClass.clazz, IntType)
+                    param(ExpandedNotificationClass, IntType)
                 }.remedys {
                     method {
                         name = "getSmallIcon"
-                        param(ExpandedNotificationClass.clazz)
+                        param(ExpandedNotificationClass)
                     }
                     method {
                         name = "getSmallIcon"
-                        param(ContextClass, ExpandedNotificationClass.clazz)
+                        param(ContextClass, ExpandedNotificationClass)
                     }.onFind { isUseLegacy = true }
                 }
                 afterHook {
@@ -757,7 +757,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }.remedys {
                     method {
                         name = "setNotification"
-                        param(ExpandedNotificationClass.clazz)
+                        param(ExpandedNotificationClass)
                     }
                 }
                 afterHook {
@@ -845,7 +845,7 @@ class SystemUIHooker : YukiBaseHooker() {
             }
             /** 记录实例 */
             injectMember {
-                constructor { param(ContextClass, ViewClass, ExpandableNotificationRowClass.clazz) }
+                constructor { param(ContextClass, ViewClass, ExpandableNotificationRowClass) }
                 afterHook { notificationViewWrappers.add(instance) }
             }
         }
@@ -867,7 +867,7 @@ class SystemUIHooker : YukiBaseHooker() {
             }
             /** 记录实例 */
             injectMember {
-                constructor { param(ContextClass, ViewClass, ExpandableNotificationRowClass.clazz) }
+                constructor { param(ContextClass, ViewClass, ExpandableNotificationRowClass) }
                 afterHook { miuiNotificationViewWrappers.add(instance) }
             }
         }.ignoredHookClassNotFoundFailure()
@@ -899,11 +899,11 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "setAppIcon"
-                    param(ContextClass, ImageViewClass, ExpandedNotificationClass.clazz)
+                    param(ContextClass, ImageViewClass, ExpandedNotificationClass)
                 }.remedys {
                     method {
                         name = "setAppIcon"
-                        param(ImageViewClass, ExpandedNotificationClass.clazz)
+                        param(ImageViewClass, ExpandedNotificationClass)
                     }
                 }
                 intercept()
@@ -911,7 +911,7 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "resetIconBgAndPaddings"
-                    param(ImageViewClass, ExpandedNotificationClass.clazz)
+                    param(ImageViewClass, ExpandedNotificationClass)
                 }
                 intercept()
             }.ignoredNoSuchMemberFailure()
