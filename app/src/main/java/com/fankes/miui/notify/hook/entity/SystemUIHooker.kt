@@ -275,15 +275,6 @@ class SystemUIHooker : YukiBaseHooker() {
         }
 
     /**
-     * 获取当前通知栏的样式
-     *
-     *  - ❗新版本可能不存在这个方法
-     * @return [Boolean]
-     */
-    private val isShowMiuiStyle
-        get() = safeOfFalse { NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.get().invoke() ?: false }
-
-    /**
      * 处理为圆角图标
      * @return [Drawable]
      */
@@ -689,11 +680,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     name = "shouldSubstituteSmallIcon"
                     param(ExpandedNotificationClass)
                 }
-                /**
-                 * MIUI 12 在非原生样式下 MIPUSH 的图标着色异常
-                 * 所以判断是 MIUI 样式就停止 Hook 状态栏图标
-                 */
-                replaceAny { hasIgnoreStatusBarIconColor.not() && isShowMiuiStyle }
+                replaceToFalse()
             }
             /** 强制回写系统的状态栏图标样式为原生 */
             injectMember {
