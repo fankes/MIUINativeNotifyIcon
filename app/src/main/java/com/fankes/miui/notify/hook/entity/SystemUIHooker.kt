@@ -36,11 +36,13 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.notification.StatusBarNotification
+import android.util.ArraySet
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.children
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.data.DataConst
@@ -148,17 +150,17 @@ class SystemUIHooker : YukiBaseHooker() {
     /** 是否已经使用过缓存刷新功能 */
     private var isUsingCachingMethod = false
 
-    /** 缓存的状态栏小图标实例 */
-    private var statusBarIconViews = HashSet<ImageView>()
+    /** 状态栏通知图标容器 */
+    private var notificationIconContainer: ViewGroup? = null
 
     /** 缓存的通知小图标包装纸实例 */
-    private var notificationViewWrappers = HashSet<Any>()
+    private var notificationViewWrappers = ArraySet<Any>()
 
     /** MIUI 样式下的缓存的通知小图标包装纸实例 */
-    private var miuiNotificationViewWrappers = HashSet<Any>()
+    private var miuiNotificationViewWrappers = ArraySet<Any>()
 
     /** MIUI 样式下的缓存的通知小图标折叠通知实例 */
-    private var miuiNotificationChildrenContainers = HashSet<ViewGroup>()
+    private var miuiNotificationChildrenContainers = ArraySet<ViewGroup>()
 
     /** 仅监听一次主题壁纸颜色变化 */
     private var isWallpaperColorListenerSetUp = false
@@ -385,12 +387,12 @@ class SystemUIHooker : YukiBaseHooker() {
     /** 刷新状态栏小图标 */
     private fun refreshStatusBarIcons() = runInSafe {
         StatusBarIconViewClass.clazz.field { name = "mNotification" }.also { result ->
-            statusBarIconViews.takeIf { it.isNotEmpty() }?.forEach {
+            notificationIconContainer?.children?.forEach {
                 /** 得到通知实例 */
                 val nf = result.get(it).cast<StatusBarNotification>() ?: return
                 /** 刷新状态栏图标 */
                 compatStatusIcon(it.context, nf, nf.notification.smallIcon.loadDrawable(it.context)).also { pair ->
-                    pair.first.let { e -> it.setImageDrawable(e) }
+                    pair.first.let { e -> (it as? ImageView?)?.setImageDrawable(e) }
                 }
             }
         }
@@ -766,8 +768,6 @@ class SystemUIHooker : YukiBaseHooker() {
                         registerWallpaperColorChanged(it)
                         /** 注册广播 */
                         registerReceiver(it.context)
-                        /** 缓存实例 */
-                        statusBarIconViews.add(it)
                     }
                 }
             }
@@ -777,6 +777,8 @@ class SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "calculateIconTranslations" }
                 afterHook {
+                    /** 缓存实例 */
+                    notificationIconContainer = instance<ViewGroup>()
                     /** 修复部分开发版状态栏图标只能显示一个的问题 */
                     when (miuiIncrementalVersion.lowercase()) {
                         "22.3.14", "22.3.15", "22.3.16", "v13.0.1.1.16.dev", "22.3.18" ->
