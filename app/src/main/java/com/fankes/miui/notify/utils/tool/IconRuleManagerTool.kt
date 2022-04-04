@@ -121,7 +121,7 @@ object IconRuleManagerTool {
             cancelButton()
             neutralButton(text = "自定义规则") {
                 context.showDialog {
-                    title = "自定义规则"
+                    title = "自定义规则(调试)"
                     val editText = bind<DiaSourceFromStringBinding>().diaSfsInputEdit.apply {
                         requestFocus()
                         invalidate()

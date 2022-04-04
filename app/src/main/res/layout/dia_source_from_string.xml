@@ -9,6 +9,17 @@
     android:paddingRight="15dp"
     tools:ignore="HardcodedText">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="17.5dp"
+        android:lineSpacingExtra="6dp"
+        android:text="此功能仅用于调试单条规则或多条规则，同步最新在线规则后这里的内容将会被覆盖清空。"
+        android:textColor="@color/colorTextDark"
+        android:textSize="13sp" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
