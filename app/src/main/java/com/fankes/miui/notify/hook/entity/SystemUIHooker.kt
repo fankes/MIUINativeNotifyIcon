@@ -782,7 +782,7 @@ class SystemUIHooker : YukiBaseHooker() {
                             .get(instance).set(prefs.get(DataConst.HOOK_STATUS_ICON_COUNT)
                                 .let { if (it in 0..100) it else 5 })
                 }
-            }
+            }.by { NotificationIconContainerClass.clazz.hasField { name = "MAX_STATIC_ICONS" } }
             /** 旧版方法 - 新版不存在 */
             injectMember {
                 method {
@@ -799,7 +799,7 @@ class SystemUIHooker : YukiBaseHooker() {
                 }
                 beforeHook { isShowNotificationIcons = firstArgs<Boolean>() ?: false }
             }.ignoredNoSuchMemberFailure()
-        }.by { NotificationIconContainerClass.clazz.hasField { name = "MAX_STATIC_ICONS" } }
+        }
         /** 注入原生通知包装纸实例 */
         NotificationHeaderViewWrapperClass.hook {
             /** 修复下拉通知图标自动设置回 APP 图标的方法 */
