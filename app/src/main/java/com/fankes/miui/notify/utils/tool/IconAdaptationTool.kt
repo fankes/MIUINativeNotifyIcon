@@ -116,6 +116,7 @@ object IconAdaptationTool {
      * @param packageName 安装的 APP 包名
      */
     fun pushNewAppSupportNotify(context: Context, packageName: String) {
+        if (context.isAppDebuggable(packageName)) return
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
