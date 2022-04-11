@@ -412,12 +412,19 @@ fun findPropString(key: String, default: String = "") = safeOf(default) {
 }
 
 /**
- * 执行命令 - su
+ * 是否有 Root 权限
+ * @return [Boolean]
+ */
+val isRootAccess get() = safeOfFalse { Shell.rootAccess() }
+
+/**
+ * 执行命令
  * @param cmd 命令
+ * @param isSu 是否使用 Root 权限执行 - 默认：是
  * @return [String] 执行结果
  */
-fun execShellSu(cmd: String) = safeOfNothing {
-    Shell.su(cmd).exec().out.let {
+fun execShell(cmd: String, isSu: Boolean = true) = safeOfNothing {
+    (if (isSu) Shell.su(cmd) else Shell.sh(cmd)).exec().out.let {
         if (it.isNotEmpty()) it[0].trim() else ""
     }
 }
