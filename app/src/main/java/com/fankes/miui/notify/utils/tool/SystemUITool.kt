@@ -87,9 +87,9 @@ object SystemUITool {
                     "部分 MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n" +
                     "重启过程会黑屏并等待进入锁屏重新解锁。"
             confirmButton {
-                execShellSu(cmd = "pgrep systemui").also { pid ->
+                execShell(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
-                        execShellSu(cmd = "kill -9 $pid")
+                        execShell(cmd = "kill -9 $pid")
                     else toast(msg = "ROOT 权限获取失败")
                 }
             }
