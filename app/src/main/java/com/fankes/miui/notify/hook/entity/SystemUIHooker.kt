@@ -359,7 +359,7 @@ class SystemUIHooker : YukiBaseHooker() {
      */
     private val globalContext
         get() = safeOfNull {
-            SystemUIApplicationClass.clazz.method { name = "getContext" }.ignoredError().get().invoke<Context>()
+            SystemUIApplicationClass.clazz.method { name = "getContext" }.ignoredError().get().invoke<Context>() ?: appContext
         }
 
     /**
@@ -699,13 +699,13 @@ class SystemUIHooker : YukiBaseHooker() {
                     }.onFind { isUseLegacy = true }
                 }
                 afterHook {
-                    (globalContext ?: firstArgs())?.also { context ->
+                    (globalContext ?: args().first().cast())?.also { context ->
                         val expandedNf = args(if (isUseLegacy) 1 else 0).cast<StatusBarNotification?>()
                         /** Hook 状态栏小图标 */
                         compatStatusIcon(
                             context = context,
                             expandedNf,
-                            (result as Icon).loadDrawable(context)
+                            result<Icon>()?.loadDrawable(context)
                         ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                     }
                 }
@@ -750,7 +750,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     }
                 }
                 afterHook {
-                    if (firstArgs != null) instance<ImageView>().also {
+                    if (args[0] != null) instance<ImageView>().also {
                         /** 注册壁纸颜色监听 */
                         registerWallpaperColorChanged(it)
                         /** 注册广播 */
@@ -789,7 +789,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     name = "setMaxStaticIcons"
                     param(IntType)
                 }
-                beforeHook { isShowNotificationIcons = (firstArgs<Int>() ?: 0) > 0 }
+                beforeHook { isShowNotificationIcons = args().first().int() > 0 }
             }.ignoredNoSuchMemberFailure()
             /** 新版方法 - 旧版不存在 */
             injectMember {
@@ -797,7 +797,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     name = "miuiShowNotificationIcons"
                     param(BooleanType)
                 }
-                beforeHook { isShowNotificationIcons = firstArgs<Boolean>() ?: false }
+                beforeHook { isShowNotificationIcons = args().first().boolean() }
             }.ignoredNoSuchMemberFailure()
         }
         /** 注入原生通知包装纸实例 */
@@ -913,7 +913,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     param(ContextClass, IntentClass)
                 }
                 afterHook {
-                    if (isEnableHookColorNotifyIcon()) (lastArgs as? Intent)?.also {
+                    if (isEnableHookColorNotifyIcon()) args().last().cast<Intent>()?.also {
                         if (it.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
                             it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
                         ) return@also
@@ -923,11 +923,11 @@ class SystemUIHooker : YukiBaseHooker() {
                                     if (iconDatas.takeIf { e -> e.isNotEmpty() }
                                             ?.filter { e -> e.packageName == newPkgName }
                                             .isNullOrEmpty()
-                                    ) IconAdaptationTool.pushNewAppSupportNotify(firstArgs()!!, newPkgName)
+                                    ) IconAdaptationTool.pushNewAppSupportNotify(args().first().cast()!!, newPkgName)
                                 }
                             Intent.ACTION_PACKAGE_REMOVED ->
                                 IconAdaptationTool.removeNewAppSupportNotify(
-                                    context = firstArgs()!!,
+                                    context = args().first().cast()!!,
                                     packageName = it.data?.schemeSpecificPart ?: ""
                                 )
                         }
