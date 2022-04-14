@@ -738,7 +738,7 @@ class SystemUIHooker : YukiBaseHooker() {
                     }
                 }
                 afterHook {
-                    if (args[0] != null) instance<ImageView>().also {
+                    if (args().first().any() != null) instance<ImageView>().also {
                         /** 注册壁纸颜色监听 */
                         registerWallpaperColorChanged(it)
                         /** 注册广播 */

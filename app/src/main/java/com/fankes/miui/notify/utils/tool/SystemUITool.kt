@@ -26,11 +26,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.utils.factory.*
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
+import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 
 /**
  * 系统界面工具

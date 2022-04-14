@@ -47,12 +47,12 @@ import android.util.Base64
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
-import com.fankes.miui.notify.application.MNNApplication.Companion.appContext
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.java.StringType
+import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
