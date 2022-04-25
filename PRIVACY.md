@@ -16,7 +16,7 @@
 
 在阅读本协议前，请确认您已年满 18 岁，否则请在父母的陪同下阅读本协议。
 
-**目录**
+#### 目录
 
 ```
 1.  引言
@@ -177,7 +177,7 @@ Unless we obtain your consent again, we will not use your device information for
 
 Before reading this agreement, please confirm that you are at least 18 years old, otherwise please read this agreement with your parents.
 
-**content**
+#### content
 
 ````
 1 Introduction
