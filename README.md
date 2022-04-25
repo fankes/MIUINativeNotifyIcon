@@ -106,6 +106,10 @@ MIUI 再不重写，怕是永远会变成安卓之光。雷军，金凡！！
 - 工作不易，无意外情况此项目将继续维护下去，提供更多可能，欢迎打赏。<br/><br/>
   <img src="https://github.com/fankes/YuKiHookAPI/blob/master/img-src/wechat_code.jpg" width = "200" height = "200"/>
 
+## 隐私政策
+
+- [PRIVACY](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/PRIVACY.md)
+
 ## 许可证
 
 - [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)
