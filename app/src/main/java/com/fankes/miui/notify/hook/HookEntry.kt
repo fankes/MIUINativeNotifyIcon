@@ -33,10 +33,10 @@ import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.loggerW
-import com.highcapable.yukihookapi.hook.xposed.proxy.YukiHookXposedInitProxy
+import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 
 @InjectYukiHookWithXposed
-class HookEntry : YukiHookXposedInitProxy {
+class HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
         debugTag = "MIUINativeNotifyIcon"
