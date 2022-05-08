@@ -47,7 +47,7 @@ object SystemUITool {
      * 注册广播
      * @param context 实例
      */
-    fun register(context: Context) {
+    fun register(context: Context) = runInSafe {
         /** 注册广播检查模块激活状态 */
         context.registerReceiver(moduleHandlerReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_HANDLER_RECEIVER) })
         /** 注册广播通知系统界面改变 */
@@ -58,7 +58,7 @@ object SystemUITool {
      * 取消注册广播
      * @param context 实例
      */
-    fun unregister(context: Context) {
+    fun unregister(context: Context) = runInSafe {
         context.unregisterReceiver(moduleHandlerReceiver)
         context.unregisterReceiver(remindHandlerReceiver)
     }

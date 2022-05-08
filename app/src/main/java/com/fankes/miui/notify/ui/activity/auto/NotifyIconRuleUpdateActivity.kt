@@ -43,13 +43,13 @@ class NotifyIconRuleUpdateActivity : Activity() {
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window?.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window?.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+        /** 注册 */
+        SystemUITool.register(context = this)
         /** 检测运行状态 */
         if (BaseActivity.isMainThreadRunning) {
             finish()
             return
         }
-        /** 注册 */
-        SystemUITool.register(context = this)
         /** 拉取云端数据 */
         IconRuleManagerTool.sync(appContext) {
             /** 刷新系统界面 */
