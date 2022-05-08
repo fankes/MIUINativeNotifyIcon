@@ -54,7 +54,7 @@ class HookEntry : IYukiHookXposedInit {
             /** Hook 被手动关闭停止 Hook */
             prefs.get(DataConst.ENABLE_MODULE).not() -> loggerW(msg = "Aborted Hook -> Hook Closed")
             /** 开始 Hook */
-            else -> loadApp(SYSTEMUI_PACKAGE_NAME, SystemUIHooker())
+            else -> loadApp(SYSTEMUI_PACKAGE_NAME, SystemUIHooker)
         }
     }
 }
