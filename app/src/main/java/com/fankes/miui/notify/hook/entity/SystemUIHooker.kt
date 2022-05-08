@@ -20,6 +20,8 @@
  *
  * This file is Created by fankes on 2022/3/25.
  */
+@file:Suppress("StaticFieldLeak")
+
 package com.fankes.miui.notify.hook.entity
 
 import android.app.NotificationManager
@@ -65,83 +67,80 @@ import com.highcapable.yukihookapi.hook.type.java.IntType
 /**
  * 系统界面核心 Hook 类
  */
-class SystemUIHooker : YukiBaseHooker() {
+object SystemUIHooker : YukiBaseHooker() {
 
-    companion object {
+    /** MIUI 新版本存在的类 */
+    private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
 
-        /** MIUI 新版本存在的类 */
-        private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
+    /** MIUI 新版本存在的类 */
+    private const val NotificationHeaderViewWrapperInjectorClass =
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
-        /** MIUI 新版本存在的类 */
-        private const val NotificationHeaderViewWrapperInjectorClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
+    /** MIUI 新版本存在的类 */
+    private const val MiuiNotificationViewWrapperClass =
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
 
-        /** MIUI 新版本存在的类 */
-        private const val MiuiNotificationViewWrapperClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
+    /** MIUI 新版本存在的类 */
+    private const val MiuiNotificationChildrenContainerClass =
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.MiuiNotificationChildrenContainer"
 
-        /** MIUI 新版本存在的类 */
-        private const val MiuiNotificationChildrenContainerClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.MiuiNotificationChildrenContainer"
+    /** 原生存在的类 */
+    private const val NotificationChildrenContainerClass =
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.NotificationChildrenContainer"
 
-        /** 原生存在的类 */
-        private const val NotificationChildrenContainerClass =
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.NotificationChildrenContainer"
+    /** 原生存在的类 */
+    private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
-        /** 原生存在的类 */
-        private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
+    /** 原生存在的类 */
+    private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
 
-        /** 原生存在的类 */
-        private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
+    /** 原生存在的类 */
+    private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
 
-        /** 原生存在的类 */
-        private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
+    /** 原生存在的类 */
+    private const val PluginManagerImplClass = "$SYSTEMUI_PACKAGE_NAME.shared.plugins.PluginManagerImpl"
 
-        /** 原生存在的类 */
-        private const val PluginManagerImplClass = "$SYSTEMUI_PACKAGE_NAME.shared.plugins.PluginManagerImpl"
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val MiuiClockClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val MiuiClockClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock",
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock"
-        )
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val StatusBarNotificationPresenterClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBarNotificationPresenter",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBar"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val StatusBarNotificationPresenterClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBarNotificationPresenter",
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBar"
-        )
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val ExpandableNotificationRowClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val ExpandableNotificationRowClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
-        )
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val NotificationViewWrapperClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationViewWrapper",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val NotificationViewWrapperClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationViewWrapper",
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
-        )
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val NotificationHeaderViewWrapperClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val NotificationHeaderViewWrapperClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
-        )
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val NotificationUtilClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
+        "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.notification.NotificationUtil"
+    )
 
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val NotificationUtilClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
-            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.notification.NotificationUtil"
-        )
-
-        /** 根据多个版本存在不同的包名相同的类 */
-        private val ExpandedNotificationClass = VariousClass(
-            "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification",
-            "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
-        )
-    }
+    /** 根据多个版本存在不同的包名相同的类 */
+    private val ExpandedNotificationClass = VariousClass(
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification",
+        "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
+    )
 
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
