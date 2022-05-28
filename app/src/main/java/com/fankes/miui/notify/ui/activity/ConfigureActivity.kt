@@ -43,7 +43,7 @@ import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
-import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
+import com.highcapable.yukihookapi.YukiHookAPI
 
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
@@ -61,7 +61,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
     override fun onCreate() {
         /** 检查激活状态 */
-        if (isXposedModuleActive.not()) {
+        if (YukiHookAPI.Status.isXposedModuleActive.not()) {
             showDialog {
                 title = "模块没有激活"
                 msg = "模块没有激活，你无法使用这里的功能，请先激活模块。"
