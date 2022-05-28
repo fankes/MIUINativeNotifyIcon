@@ -38,9 +38,8 @@ import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
-import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
+import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.modulePrefs
-import com.highcapable.yukihookapi.hook.xposed.YukiHookModuleStatus
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
@@ -105,7 +104,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     noCancelable()
                 }
             /** 判断是否 Hook */
-            isXposedModuleActive -> {
+            YukiHookAPI.Status.isXposedModuleActive -> {
                 if (IconPackParams(context = this).iconDatas.isEmpty() && modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX))
                     showDialog {
                         title = "配置通知图标优化名单"
@@ -274,27 +273,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun refreshModuleStatus() {
         binding.mainLinStatus.setBackgroundResource(
             when {
-                isXposedModuleActive && (isModuleRegular.not() || isModuleValied.not()) -> R.drawable.bg_yellow_round
-                isXposedModuleActive -> R.drawable.bg_green_round
+                YukiHookAPI.Status.isXposedModuleActive && (isModuleRegular.not() || isModuleValied.not()) -> R.drawable.bg_yellow_round
+                YukiHookAPI.Status.isXposedModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                isXposedModuleActive -> R.mipmap.ic_success
+                YukiHookAPI.Status.isXposedModuleActive -> R.mipmap.ic_success
                 else -> R.mipmap.ic_warn
             }
         )
         binding.mainTextStatus.text =
             when {
-                isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
-                isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
-                isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
-                isXposedModuleActive -> "模块已激活"
+                YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
+                YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
+                YukiHookAPI.Status.isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
+                YukiHookAPI.Status.isXposedModuleActive -> "模块已激活"
                 else -> "模块未激活"
             }
-        binding.mainTextApiWay.isVisible = isXposedModuleActive
-        binding.mainTextApiWay.text = "Activated by ${YukiHookModuleStatus.executorName} API ${YukiHookModuleStatus.executorVersion}"
+        binding.mainTextApiWay.isVisible = YukiHookAPI.Status.isXposedModuleActive
+        binding.mainTextApiWay.text = "Activated by ${YukiHookAPI.Status.executorName} API ${YukiHookAPI.Status.executorVersion}"
     }
 
     override fun onResume() {

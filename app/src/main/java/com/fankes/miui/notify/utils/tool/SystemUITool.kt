@@ -29,7 +29,7 @@ import android.content.IntentFilter
 import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.utils.factory.*
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.hook.factory.isXposedModuleActive
+import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 
 /**
@@ -110,7 +110,7 @@ object SystemUITool {
                 putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
             })
         }
-        if (isXposedModuleActive)
+        if (YukiHookAPI.Status.isXposedModuleActive)
             context?.showDialog {
                 title = "请稍后"
                 progressContent = "正在等待系统界面刷新"
@@ -144,7 +144,7 @@ object SystemUITool {
      * @param context 实例
      */
     fun showNeedRestartSnake(context: Context) =
-        if (isXposedModuleActive)
+        if (YukiHookAPI.Status.isXposedModuleActive)
             context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
         else context.snake(msg = "模块没有激活，更改不会生效")
 
