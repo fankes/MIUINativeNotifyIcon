@@ -400,6 +400,35 @@ object SystemUIHooker : YukiBaseHooker() {
         isExpanded: Boolean = true,
         isUseAndroid12Style: Boolean = isUpperOfAndroidS,
     ) = runInSafe(msg = "compatNotifyIcon") {
+        /**
+         * 设置默认通知图标
+         * @param drawable 通知图标
+         */
+        fun setDefaultNotifyIcon(drawable: Drawable?) {
+            iconImageView.apply {
+                /** 重新设置图标 */
+                setImageDrawable(drawable)
+                /** 设置裁切到边界 */
+                clipToOutline = true
+                /** 设置一个圆角轮廓裁切 */
+                outlineProvider = object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, out: Outline) {
+                        out.setRoundRect(
+                            0, 0,
+                            view.width, view.height, 5.dpFloat(context)
+                        )
+                    }
+                }
+                if (isUseAndroid12Style) {
+                    /** 清除原生的背景边距 */
+                    setPadding(0, 0, 0, 0)
+                    /** 清除原生的主题色背景圆圈颜色 */
+                    background = null
+                }
+                /** 清除遮罩颜色 */
+                colorFilter = null
+            }
+        }
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         expandedNf?.let { notifyInstance ->
 
@@ -443,62 +472,45 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 打印日志 */
             printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             /** 处理自定义通知图标优化 */
-            if (customIcon != null) iconImageView.apply {
-                /** 设置不要裁切到边界 */
-                clipToOutline = false
-                /** 设置自定义小图标 */
-                setImageBitmap(customIcon)
-                /** 上色 */
-                setColorFilter(if (isUseAndroid12Style || customIconColor == 0) supportColor else customIconColor)
-                /** Android 12 设置图标外圈颜色 */
-                if (isUseAndroid12Style && customIconColor != 0)
-                    background = DrawableBuilder()
-                        .rounded()
-                        .solidColor(if (context.isSystemInDarkMode) customIconColor.brighter else customIconColor)
-                        .build()
-                /** 设置原生的背景边距 */
-                if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
-            } else {
-                /** 重新设置图标 - 防止系统更改它 */
-                iconImageView.setImageDrawable(iconDrawable)
-                /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                if (isGrayscaleIcon) iconImageView.apply {
+            when {
+                prefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) && isEnableHookColorNotifyIcon(isHooking = false) ->
+                    setDefaultNotifyIcon(context.findAppIcon(notifyInstance.compatOpPkgName))
+                customIcon != null -> iconImageView.apply {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
-                    /** 设置图标着色 */
-                    setColorFilter(supportColor)
+                    /** 设置自定义小图标 */
+                    setImageBitmap(customIcon)
+                    /** 上色 */
+                    setColorFilter(if (isUseAndroid12Style || customIconColor == 0) supportColor else customIconColor)
                     /** Android 12 设置图标外圈颜色 */
-                    (if (hasIconColor) iconColor else context.systemAccentColor).also {
-                        if (isUseAndroid12Style)
-                            background = DrawableBuilder()
-                                .rounded()
-                                .solidColor(if (context.isSystemInDarkMode) it.brighter else it)
-                                .build()
-                    }
+                    if (isUseAndroid12Style && customIconColor != 0)
+                        background = DrawableBuilder()
+                            .rounded()
+                            .solidColor(if (context.isSystemInDarkMode) customIconColor.brighter else customIconColor)
+                            .build()
                     /** 设置原生的背景边距 */
                     if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
-                } else iconImageView.apply {
-                    /** 重新设置图标 */
-                    setImageDrawable(notifyInstance.compatPushingIcon(context, iconDrawable))
-                    /** 设置裁切到边界 */
-                    clipToOutline = true
-                    /** 设置一个圆角轮廓裁切 */
-                    outlineProvider = object : ViewOutlineProvider() {
-                        override fun getOutline(view: View, out: Outline) {
-                            out.setRoundRect(
-                                0, 0,
-                                view.width, view.height, 5.dpFloat(context)
-                            )
+                }
+                else -> {
+                    /** 重新设置图标 - 防止系统更改它 */
+                    iconImageView.setImageDrawable(iconDrawable)
+                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
+                    if (isGrayscaleIcon) iconImageView.apply {
+                        /** 设置不要裁切到边界 */
+                        clipToOutline = false
+                        /** 设置图标着色 */
+                        setColorFilter(supportColor)
+                        /** Android 12 设置图标外圈颜色 */
+                        (if (hasIconColor) iconColor else context.systemAccentColor).also {
+                            if (isUseAndroid12Style)
+                                background = DrawableBuilder()
+                                    .rounded()
+                                    .solidColor(if (context.isSystemInDarkMode) it.brighter else it)
+                                    .build()
                         }
-                    }
-                    if (isUseAndroid12Style) {
-                        /** 清除原生的背景边距 */
-                        setPadding(0, 0, 0, 0)
-                        /** 清除原生的主题色背景圆圈颜色 */
-                        background = null
-                    }
-                    /** 清除遮罩颜色 */
-                    colorFilter = null
+                        /** 设置原生的背景边距 */
+                        if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
+                    } else setDefaultNotifyIcon(notifyInstance.compatPushingIcon(context, iconDrawable))
                 }
             }
         }
