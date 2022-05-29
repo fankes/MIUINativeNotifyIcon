@@ -31,7 +31,6 @@ import androidx.core.view.ViewCompat
 import androidx.viewbinding.ViewBinding
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
-import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
 import java.lang.reflect.ParameterizedType
@@ -71,18 +70,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
             window?.navigationBarColor = it
             window?.navigationBarDividerColor = it
         }
-        /** 注册 */
-        SystemUITool.register(context = this)
         /** 装载子类 */
         onCreate()
     }
 
     /** 回调 [onCreate] 方法 */
     abstract fun onCreate()
-
-    override fun onDestroy() {
-        super.onDestroy()
-        /** 解除注册 */
-        SystemUITool.unregister(context = this)
-    }
 }
