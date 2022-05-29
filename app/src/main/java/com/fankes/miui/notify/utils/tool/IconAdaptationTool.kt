@@ -33,7 +33,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
-import com.fankes.miui.notify.const.Const
+import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.hook.HookEntry
 import com.fankes.miui.notify.utils.factory.*
 
@@ -43,6 +43,9 @@ import com.fankes.miui.notify.utils.factory.*
  * 这个类需要在 [HookEntry] 中调用
  */
 object IconAdaptationTool {
+
+    /** 当前模块的包名 */
+    private const val MODULE_PACKAGE_NAME = BuildConfig.APPLICATION_ID
 
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
@@ -137,8 +140,8 @@ object IconAdaptationTool {
                         context, packageName.hashCode(),
                         Intent().apply {
                             component = ComponentName(
-                                Const.MODULE_PACKAGE_NAME,
-                                "${Const.MODULE_PACKAGE_NAME}.ui.activity.ConfigureActivity"
+                                MODULE_PACKAGE_NAME,
+                                "${MODULE_PACKAGE_NAME}.ui.activity.ConfigureActivity"
                             )
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }.apply {
@@ -177,8 +180,8 @@ object IconAdaptationTool {
                 context.startActivity(
                     Intent().apply {
                         component = ComponentName(
-                            Const.MODULE_PACKAGE_NAME,
-                            "${Const.MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity"
+                            MODULE_PACKAGE_NAME,
+                            "${MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity"
                         )
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     }

@@ -28,8 +28,8 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.databinding.ActivityMainBinding
 import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
@@ -50,7 +50,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         internal var isActivityLive = false
 
         /** 模块版本 */
-        private const val moduleVersion = Const.MODULE_VERSION_NAME
+        private const val moduleVersion = BuildConfig.VERSION_NAME
 
         /** 预发布的版本标识 */
         private const val pendingFlag = ""
@@ -303,9 +303,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         super.onResume()
         /** 刷新模块状态 */
         refreshModuleStatus()
-        /** 发送广播检查模块激活状态 */
-        SystemUITool.checkingActivated(context = this) { isRegular, isValied ->
-            isModuleRegular = isRegular
+        /** 检查模块激活状态 */
+        SystemUITool.checkingActivated(context = this) { isValied ->
+            isModuleRegular = true
             isModuleValied = isValied
             refreshModuleStatus()
         }

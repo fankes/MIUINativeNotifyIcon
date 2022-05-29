@@ -22,59 +22,44 @@
  */
 package com.fankes.miui.notify.utils.tool
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import com.fankes.miui.notify.const.Const
+import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.utils.factory.*
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.YukiHookAPI
-import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
+import com.highcapable.yukihookapi.hook.factory.dataChannel
+import com.highcapable.yukihookapi.hook.param.PackageParam
+import com.highcapable.yukihookapi.hook.xposed.channel.data.ChannelData
 
 /**
  * 系统界面工具
  */
 object SystemUITool {
 
-    /** 宿主广播回调 */
-    private var moduleHandlerCallback: ((Boolean, Boolean) -> Unit)? = null
-
-    /** 通知广播回调 */
-    private var remindHandlerCallback: ((Boolean, Boolean) -> Unit)? = null
+    private val CALL_HOST_REFRESH_CACHING = ChannelData("call_host_refresh_caching", false)
+    private val CALL_MODULE_REFRESH_RESULT = ChannelData("call_module_refresh_result", false)
 
     /**
-     * 注册广播
-     * @param context 实例
+     * 宿主注册监听
      */
-    fun register(context: Context) = runInSafe {
-        /** 注册广播检查模块激活状态 */
-        context.registerReceiver(moduleHandlerReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_HANDLER_RECEIVER) })
-        /** 注册广播通知系统界面改变 */
-        context.registerReceiver(remindHandlerReceiver, IntentFilter().apply { addAction(Const.ACTION_REMIND_HANDLER_RECEIVER) })
-    }
+    object Host {
 
-    /**
-     * 取消注册广播
-     * @param context 实例
-     */
-    fun unregister(context: Context) = runInSafe {
-        context.unregisterReceiver(moduleHandlerReceiver)
-        context.unregisterReceiver(remindHandlerReceiver)
+        /**
+         * 监听系统界面刷新改变
+         * @param param 实例
+         * @param result 回调 - ([Boolean] 是否成功)
+         */
+        fun onRefreshSystemUI(param: PackageParam, result: (Boolean) -> Boolean) {
+            param.dataChannel.with { wait(CALL_HOST_REFRESH_CACHING) { put(CALL_MODULE_REFRESH_RESULT, result(it)) } }
+        }
     }
 
     /**
      * 检查模块是否激活
      * @param context 实例
-     * @param it 成功后回调 - ([Boolean] 是否激活,[Boolean] 是否有效)
+     * @param result 成功后回调
      */
-    fun checkingActivated(context: Context, it: (Boolean, Boolean) -> Unit) {
-        moduleHandlerCallback = it
-        context.sendBroadcast(Intent().apply {
-            action = Const.ACTION_MODULE_CHECKING_RECEIVER
-            putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
-        })
-    }
+    fun checkingActivated(context: Context, result: (Boolean) -> Unit) = context.dataChannel(SYSTEMUI_PACKAGE_NAME).checkingVersionEquals(result)
 
     /**
      * 重启系统界面
@@ -100,16 +85,9 @@ object SystemUITool {
      * 刷新系统界面状态栏与通知图标
      * @param context 实例
      * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
-     * @param it 成功后回调
+     * @param callback 成功后回调
      */
-    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, it: () -> Unit = {}) = runInSafe {
-        fun sendMessage() {
-            (context ?: appContext).sendBroadcast(Intent().apply {
-                action = Const.ACTION_REMIND_CHECKING_RECEIVER
-                putExtra("isRefreshCacheOnly", isRefreshCacheOnly)
-                putExtra(Const.MODULE_VERSION_VERIFY_TAG, Const.MODULE_VERSION_VERIFY)
-            })
-        }
+    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, callback: () -> Unit = {}) = runInSafe {
         if (YukiHookAPI.Status.isXposedModuleActive)
             context?.showDialog {
                 title = "请稍后"
@@ -119,23 +97,29 @@ object SystemUITool {
                 /** 设置等待延迟 */
                 delayedRun(ms = 5000) {
                     if (isWaited) return@delayedRun
-                    remindHandlerCallback = null
                     cancel()
                     context.snake(msg = "预计响应超时，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
                 }
-                remindHandlerCallback = { isGrasp, isValied ->
-                    remindHandlerCallback = null
-                    cancel()
-                    isWaited = true
+                checkingActivated(context) { isValied ->
                     when {
-                        isGrasp && !isValied ->
+                        isValied.not() -> {
+                            cancel()
+                            isWaited = true
                             context.snake(msg = "请重启系统界面以生效模块更新", actionText = "立即重启") { restartSystemUI(context) }
-                        else -> it()
+                        }
+                        else -> context.dataChannel(SYSTEMUI_PACKAGE_NAME).with {
+                            wait(CALL_MODULE_REFRESH_RESULT) {
+                                cancel()
+                                isWaited = true
+                                callback()
+                                if (it.not()) context.snake(msg = "刷新失败，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
+                            }
+                            put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
+                        }
                     }
                 }
-                sendMessage()
                 noCancelable()
-            } ?: sendMessage()
+            }
         else context?.snake(msg = "模块没有激活，更改不会生效")
     }
 
@@ -147,26 +131,4 @@ object SystemUITool {
         if (YukiHookAPI.Status.isXposedModuleActive)
             context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
         else context.snake(msg = "模块没有激活，更改不会生效")
-
-    /** 宿主广播接收器 */
-    private val moduleHandlerReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val isRegular = intent?.getBooleanExtra("isRegular", false) ?: false
-                val isValied = intent?.getBooleanExtra("isValied", false) ?: false
-                moduleHandlerCallback?.invoke(isRegular, isValied)
-            }
-        }
-    }
-
-    /** 通知广播接收器 */
-    private val remindHandlerReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val isGrasp = intent?.getBooleanExtra("isGrasp", false) ?: false
-                val isValied = intent?.getBooleanExtra("isValied", false) ?: false
-                remindHandlerCallback?.invoke(isGrasp, isValied)
-            }
-        }
-    }
 }

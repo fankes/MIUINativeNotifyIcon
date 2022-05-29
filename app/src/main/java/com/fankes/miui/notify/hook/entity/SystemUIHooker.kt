@@ -26,10 +26,8 @@ package com.fankes.miui.notify.hook.entity
 
 import android.app.NotificationManager
 import android.app.WallpaperManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
@@ -37,6 +35,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.SystemClock
 import android.service.notification.StatusBarNotification
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +44,6 @@ import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.children
 import com.fankes.miui.notify.bean.IconDataBean
-import com.fankes.miui.notify.const.Const
 import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
 import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
@@ -55,6 +53,7 @@ import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
+import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.*
@@ -159,65 +158,6 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 仅监听一次主题壁纸颜色变化 */
     private var isWallpaperColorListenerSetUp = false
-
-    /** 是否已经注册广播 */
-    private var isRegisterReceiver = false
-
-    /** 用户解锁屏幕广播接收器 */
-    private val userPresentReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
-                if (isUsingCachingMethod) refreshStatusBarIcons()
-            }
-        }
-    }
-
-    /** 模块广播接收器 */
-    private val moduleCheckingReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                context?.sendBroadcast(Intent().apply {
-                    action = Const.ACTION_MODULE_HANDLER_RECEIVER
-                    putExtra("isRegular", true)
-                    putExtra("isValied", intent?.isValiedModule)
-                })
-            }
-        }
-    }
-
-    /** 通知广播接收器 */
-    private val remindCheckingReceiver by lazy {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) = delayedRun(ms = 300) {
-                if (intent?.isValiedModule == true)
-                    recachingPrefs(intent.getBooleanExtra("isRefreshCacheOnly", false))
-                context?.sendBroadcast(Intent().apply {
-                    action = Const.ACTION_REMIND_HANDLER_RECEIVER
-                    putExtra("isGrasp", true)
-                    putExtra("isValied", intent?.isValiedModule)
-                })
-            }
-        }
-    }
-
-    /**
-     * 判断模块和宿主版本是否一致
-     * @return [Boolean]
-     */
-    private val Intent.isValiedModule get() = getStringExtra(Const.MODULE_VERSION_VERIFY_TAG) == Const.MODULE_VERSION_VERIFY
-
-    /**
-     * 注册广播接收器
-     * @param context 实例
-     */
-    private fun registerReceiver(context: Context) {
-        if (isRegisterReceiver) return
-        context.registerReceiver(userPresentReceiver, IntentFilter().apply { addAction(Intent.ACTION_USER_PRESENT) })
-        context.registerReceiver(moduleCheckingReceiver, IntentFilter().apply { addAction(Const.ACTION_MODULE_CHECKING_RECEIVER) })
-        context.registerReceiver(remindCheckingReceiver, IntentFilter().apply { addAction(Const.ACTION_REMIND_CHECKING_RECEIVER) })
-        isRegisterReceiver = true
-    }
 
     /**
      * 是否启用通知图标优化功能
@@ -632,6 +572,14 @@ object SystemUIHooker : YukiBaseHooker() {
             .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(this).self)
             .invoke<StatusBarNotification>()
 
+    /** 注册 */
+    private fun register() {
+        /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
+        onAppLifecycle { registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ -> if (isUsingCachingMethod) refreshStatusBarIcons() } }
+        /** 刷新图标缓存 */
+        SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
+    }
+
     /** 缓存图标数据 */
     private fun cachingIconDatas() {
         iconDatas.clear()
@@ -646,17 +594,25 @@ object SystemUIHooker : YukiBaseHooker() {
     /**
      * 刷新缓存数据
      * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
+     * @return [Boolean] 是否成功
      */
-    private fun recachingPrefs(isRefreshCacheOnly: Boolean = false) {
-        isUsingCachingMethod = true
-        prefs.clearCache()
-        cachingIconDatas()
-        if (isRefreshCacheOnly) return
-        refreshStatusBarIcons()
-        refreshNotificationIcons()
+    private fun recachingPrefs(isRefreshCacheOnly: Boolean = false): Boolean {
+        /** 必要的延迟防止 Sp 存储不刷新 */
+        SystemClock.sleep(100)
+        /** 获取可读写状态 */
+        return prefs.isXSharePrefsReadable.also {
+            isUsingCachingMethod = true
+            prefs.clearCache()
+            cachingIconDatas()
+            if (isRefreshCacheOnly) return@also
+            refreshStatusBarIcons()
+            refreshNotificationIcons()
+        }
     }
 
     override fun onHook() {
+        /** 注册 */
+        register()
         /** 缓存图标数据 */
         cachingIconDatas()
         /** 注入 MIUI 自己增加的一个工具类 */
@@ -737,12 +693,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                 }
                 afterHook {
-                    if (args().first().any() != null) instance<ImageView>().also {
-                        /** 注册壁纸颜色监听 */
-                        registerWallpaperColorChanged(it)
-                        /** 注册广播 */
-                        registerReceiver(it.context)
-                    }
+                    /** 注册壁纸颜色监听 */
+                    if (args().first().any() != null) instance<ImageView>().also { registerWallpaperColorChanged(it) }
                 }
             }
         }
@@ -920,8 +872,6 @@ object SystemUIHooker : YukiBaseHooker() {
                 method { name = "updateTime" }
                 afterHook {
                     instance<View>().context.also {
-                        /** 注册广播 */
-                        registerReceiver(it)
                         /** 注册定时监听 */
                         if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
                             IconAdaptationTool.prepareAutoUpdateIconRule(
