@@ -542,6 +542,34 @@
                     android:textSize="12sp" />
 
                 <LinearLayout
+                    android:id="@+id/notify_icon_force_app_icon_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.view.MaterialSwitch
+                        android:id="@+id/notify_icon_force_app_icon_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="通知栏中的图标强制为 APP 图标"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="此选项默认关闭，开启后下拉通知栏中的通知图标将会被替换为 APP 自身图标，但是不会更改状态栏中的通知图标，这是一个破坏原生通知图标的行为，仅针对部分有需要的用户而添加，我们不推荐开启这个功能，请根据个人偏好进行选择是否需要开启。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/notify_icon_fix_notify_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

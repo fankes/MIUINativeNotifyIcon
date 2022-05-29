@@ -32,6 +32,7 @@ object DataConst {
     val ENABLE_HIDE_ICON = PrefsData("_hide_icon", false)
     val ENABLE_COLOR_ICON_COMPAT = PrefsData("_color_icon_compat", false)
     val ENABLE_NOTIFY_ICON_FIX = PrefsData("_notify_icon_fix", true)
+    val ENABLE_NOTIFY_ICON_FORCE_APP_ICON = PrefsData("_notify_icon_force_app_icon", false)
     val ENABLE_NOTIFY_ICON_FIX_NOTIFY = PrefsData("_notify_icon_fix_notify", true)
     val ENABLE_HOOK_STATUS_ICON_COUNT = PrefsData("_enable_hook_status_icon_count", true)
     val ENABLE_NOTIFY_ICON_FIX_AUTO = PrefsData("_enable_notify_icon_fix_auto", true)
