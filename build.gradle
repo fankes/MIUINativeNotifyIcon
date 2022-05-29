@@ -5,8 +5,8 @@ plugins {
 }
 
 ext {
-    appVersionName = "2.5"
-    appVersionCode = 30
+    appVersionName = "2.6"
+    appVersionCode = 31
     enableR8 = true
 }
 
