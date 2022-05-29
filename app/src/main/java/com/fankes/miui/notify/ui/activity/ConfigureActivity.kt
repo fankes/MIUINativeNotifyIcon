@@ -154,8 +154,19 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         holder.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(it)
                         holder.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
                             if (btn.isPressed.not()) return@setOnCheckedChangeListener
-                            putAppNotifyHookAllOf(it, b)
-                            SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
+                            fun saveState() {
+                                putAppNotifyHookAllOf(it, b)
+                                SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
+                            }
+                            if (b) showDialog {
+                                title = "全部替换"
+                                msg = "此功能仅针对严重不遵守规范的 APP 通知图标才需要开启，例如：APP 推送通知后无法识别出现的黑白块图标。\n\n" +
+                                        "此功能在一般情况下请保持关闭并跟随在线规则的配置，并不要随意改变此配置，" +
+                                        "开启后 APP 的通知图标可能会被规则破坏，你确定还要开启吗？"
+                                confirmButton { saveState() }
+                                cancelButton { btn.isChecked = btn.isChecked.not() }
+                                noCancelable()
+                            } else saveState()
                         }
                     }
                     return cView!!
