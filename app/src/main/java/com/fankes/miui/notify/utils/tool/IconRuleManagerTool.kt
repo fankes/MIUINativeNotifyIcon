@@ -75,9 +75,9 @@ object IconRuleManagerTool {
     /**
      * 从在线地址手动同步规则
      * @param context 实例
-     * @param it 成功后回调
+     * @param callback 成功后回调
      */
-    fun syncByHand(context: Context, it: () -> Unit) =
+    fun syncByHand(context: Context, callback: () -> Unit) =
         context.showDialog {
             title = "同步列表"
             var sourceType = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY)
@@ -116,7 +116,7 @@ object IconRuleManagerTool {
             confirmButton {
                 context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY, sourceType)
                 context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL, customUrl)
-                sync(context, sourceType, customUrl, it)
+                sync(context, sourceType, customUrl, callback)
             }
             cancelButton()
             neutralButton(text = "自定义规则") {
@@ -139,7 +139,7 @@ object IconRuleManagerTool {
                                             )
                                         )
                                         notifyRefresh(context)
-                                        it()
+                                        callback()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
                                 }
@@ -152,7 +152,7 @@ object IconRuleManagerTool {
                                     jsonString.isNotBlank() -> {
                                         params.save(dataJson = jsonString.takeIf { params.isJsonArray(it) } ?: "[$jsonString]")
                                         notifyRefresh(context)
-                                        it()
+                                        callback()
                                     }
                                     else -> context.snake(msg = "请输入有效内容")
                                 }
@@ -169,23 +169,23 @@ object IconRuleManagerTool {
      * @param context 实例
      * @param sourceType 同步地址类型 - 默认自动获取已存储的键值
      * @param customUrl 自定义同步地址 - 默认自动获取已存储的键值
-     * @param it 成功后回调
+     * @param callback 成功后回调
      */
     fun sync(
         context: Context,
         sourceType: Int = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY),
         customUrl: String = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL),
-        it: () -> Unit
+        callback: () -> Unit
     ) {
         when (sourceType) {
             TYPE_SOURCE_SYNC_WAY_1 ->
-                onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", it)
+                onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", callback)
             TYPE_SOURCE_SYNC_WAY_2 ->
-                onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", it)
+                onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", callback)
             TYPE_SOURCE_SYNC_WAY_3 ->
                 if (customUrl.isNotBlank())
                     if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
-                        onRefreshingCustom(context, customUrl, it)
+                        onRefreshingCustom(context, customUrl, callback)
                     else context.snakeOrNotify(title = "同步失败", msg = "同步地址不是一个合法的 URL")
                 else context.snakeOrNotify(title = "同步失败", msg = "同步地址不能为空")
             else -> context.snakeOrNotify(title = "同步异常", msg = "同步类型错误")
@@ -196,14 +196,14 @@ object IconRuleManagerTool {
      * 开始更新数据
      * @param context 实例
      * @param url
-     * @param it 成功后回调
+     * @param callback 成功后回调
      */
-    private fun onRefreshing(context: Context, url: String, it: () -> Unit) = checkingInternetConnect(context) {
-        fun doParse(callback: (Boolean) -> Unit = {}) {
+    private fun onRefreshing(context: Context, url: String, callback: () -> Unit) = checkingInternetConnect(context) {
+        fun doParse(result: (Boolean) -> Unit = {}) {
             wait(context, url = "$url/OS/$OS_TAG/NotifyIconsSupportConfig.json") { isDone1, ctOS ->
-                callback(true)
+                result(true)
                 wait(context, url = "$url/APP/NotifyIconsSupportConfig.json") { isDone2, ctAPP ->
-                    callback(false)
+                    result(false)
                     IconPackParams(context).also { params ->
                         when {
                             isDone1 && isDone2 -> params.splicingJsonArray(ctOS, ctAPP).also {
@@ -216,7 +216,7 @@ object IconRuleManagerTool {
                                         params.save(it)
                                         pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                         notifyRefresh(context)
-                                        it()
+                                        callback()
                                     }
                                     else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
                                 }
@@ -225,7 +225,7 @@ object IconRuleManagerTool {
                                 context.showDialog {
                                     title = "连接失败"
                                     msg = "连接失败，错误如下：\n${if (isDone1.not()) ctOS else ctAPP}"
-                                    confirmButton(text = "再试一次") { syncByHand(context, it) }
+                                    confirmButton(text = "再试一次") { syncByHand(context, callback) }
                                     cancelButton()
                                 }
                             else -> pushNotify(context, title = "同步地址不可用", msg = if (isDone1.not()) ctOS else ctAPP)
@@ -248,12 +248,12 @@ object IconRuleManagerTool {
      * 开始更新数据
      * @param context 实例
      * @param url
-     * @param it 成功后回调
+     * @param callback 成功后回调
      */
-    private fun onRefreshingCustom(context: Context, url: String, it: () -> Unit) = checkingInternetConnect(context) {
-        fun doParse(callback: () -> Unit = {}) {
+    private fun onRefreshingCustom(context: Context, url: String, callback: () -> Unit) = checkingInternetConnect(context) {
+        fun doParse(result: () -> Unit = {}) {
             wait(context, url) { isDone, content ->
-                callback()
+                result()
                 IconPackParams(context).also { params ->
                     when {
                         isDone -> when {
@@ -265,7 +265,7 @@ object IconRuleManagerTool {
                                 params.save(content)
                                 pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                 notifyRefresh(context)
-                                it()
+                                callback()
                             }
                             else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
                         }
@@ -293,16 +293,16 @@ object IconRuleManagerTool {
     /**
      * 检查网络连接情况
      * @param context 实例
-     * @param it 已连接回调
+     * @param callback 已连接回调
      */
-    private fun checkingInternetConnect(context: Context, it: () -> Unit) =
+    private fun checkingInternetConnect(context: Context, callback: () -> Unit) =
         if (context is AppCompatActivity) context.showDialog {
             title = "准备中"
             progressContent = "正在检查网络连接情况"
             noCancelable()
             baseCheckingInternetConnect(context) { isDone ->
                 cancel()
-                if (isDone) it() else
+                if (isDone) callback() else
                     context.showDialog {
                         title = "网络不可用"
                         msg = "无法连接到互联网，请检查你当前的设备是否可以上网，且没有在手机管家中禁用本模块的联网权限。"
@@ -319,24 +319,24 @@ object IconRuleManagerTool {
                     }
             }
         } else baseCheckingInternetConnect(context) { isDone ->
-            if (isDone) it() else pushNotify(context, title = "网络不可用", msg = "无法连接到互联网，无法更新通知图标规则")
+            if (isDone) callback() else pushNotify(context, title = "网络不可用", msg = "无法连接到互联网，无法更新通知图标规则")
         }
 
     /**
      * 检查网络连接情况
      * @param context 实例
-     * @param it 已连接回调
+     * @param result 已连接回调
      */
-    private fun baseCheckingInternetConnect(context: Context, it: (Boolean) -> Unit) =
-        wait(context, url = "https://www.baidu.com") { isDone, _ -> it(isDone) }
+    private fun baseCheckingInternetConnect(context: Context, result: (Boolean) -> Unit) =
+        wait(context, url = "https://www.baidu.com") { isDone, _ -> result(isDone) }
 
     /**
      * 发送 GET 请求内容并等待
      * @param context 实例
      * @param url 请求地址
-     * @param it 回调 - ([Boolean] 是否成功,[String] 成功的内容或失败消息)
+     * @param result 回调 - ([Boolean] 是否成功,[String] 成功的内容或失败消息)
      */
-    private fun wait(context: Context, url: String, it: (Boolean, String) -> Unit) = runCatching {
+    private fun wait(context: Context, url: String, result: (Boolean, String) -> Unit) = runCatching {
         OkHttpClient().newBuilder().apply {
             SSLSocketClient.sSLSocketFactory?.let { sslSocketFactory(it, SSLSocketClient.trustManager) }
             hostnameVerifier(SSLSocketClient.hostnameVerifier)
@@ -347,15 +347,15 @@ object IconRuleManagerTool {
                 .build()
         ).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                (context as? Activity?)?.runOnUiThread { it(false, e.toString()) } ?: it(false, e.toString())
+                (context as? Activity?)?.runOnUiThread { result(false, e.toString()) } ?: result(false, e.toString())
             }
 
             override fun onResponse(call: Call, response: Response) {
                 val bodyString = response.body?.string() ?: ""
-                (context as? Activity?)?.runOnUiThread { it(true, bodyString) } ?: it(true, bodyString)
+                (context as? Activity?)?.runOnUiThread { result(true, bodyString) } ?: result(true, bodyString)
             }
         })
-    }.onFailure { it(false, "URL 无效") }
+    }.onFailure { result(false, "URL 无效") }
 
     /**
      * 推送通知图标更新通知
