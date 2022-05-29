@@ -26,11 +26,12 @@ package com.fankes.miui.notify.ui.activity.base
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
 import androidx.viewbinding.ViewBinding
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.tool.SystemUITool
-import com.gyf.immersionbar.ktx.immersionBar
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
 import java.lang.reflect.ParameterizedType
@@ -61,13 +62,14 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         /** 隐藏系统的标题栏 */
         supportActionBar?.hide()
         /** 初始化沉浸状态栏 */
-        immersionBar {
-            statusBarColor(R.color.colorThemeBackground)
-            autoDarkModeEnable(true)
-            statusBarDarkFont(isNotSystemInDarkMode)
-            navigationBarColor(R.color.colorThemeBackground)
-            navigationBarDarkIcon(isNotSystemInDarkMode)
-            fitsSystemWindows(true)
+        ViewCompat.getWindowInsetsController(window.decorView)?.apply {
+            isAppearanceLightStatusBars = isNotSystemInDarkMode
+            isAppearanceLightNavigationBars = isNotSystemInDarkMode
+        }
+        ResourcesCompat.getColor(resources, R.color.colorThemeBackground, null).also {
+            window?.statusBarColor = it
+            window?.navigationBarColor = it
+            window?.navigationBarDividerColor = it
         }
         /** 注册 */
         SystemUITool.register(context = this)
