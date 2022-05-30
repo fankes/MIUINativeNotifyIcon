@@ -474,7 +474,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 处理自定义通知图标优化 */
             when {
                 prefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) && isEnableHookColorNotifyIcon(isHooking = false) ->
-                    setDefaultNotifyIcon(context.findAppIcon(notifyInstance.compatOpPkgName))
+                    setDefaultNotifyIcon(context.findAppIcon(notifyInstance.nfPkgName))
                 customIcon != null -> iconImageView.apply {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
