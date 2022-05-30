@@ -96,6 +96,12 @@ inline val isUpperOfAndroidS get() = Build.VERSION.SDK_INT > Build.VERSION_CODES
 inline val isLowerAndroidP get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
 
 /**
+ * 系统版本是否低于 Android 11
+ * @return [Boolean] 是否符合条件
+ */
+inline val isLowerAndroidR get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+
+/**
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */

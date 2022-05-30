@@ -40,6 +40,8 @@ object DataConst {
     val NOTIFY_ICON_FIX_AUTO_TIME = PrefsData("_notify_icon_fix_auto_time", "07:00")
     val HOOK_STATUS_ICON_COUNT = PrefsData("_hook_status_icon_count", 5)
 
+    val IGNORED_ANDROID_VERSION_TO_LOW = PrefsData("_ignored_android_version_to_low", false)
+
     val SOURCE_SYNC_WAY = PrefsData("_rule_source_sync_way", HookConst.TYPE_SOURCE_SYNC_WAY_1)
     val SOURCE_SYNC_WAY_CUSTOM_URL = PrefsData("_rule_source_sync_way_custom_url", "")
 }

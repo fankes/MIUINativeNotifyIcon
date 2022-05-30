@@ -123,6 +123,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         cancelButton()
                         noCancelable()
                     }
+                if (isLowerAndroidR && modulePrefs.get(DataConst.IGNORED_ANDROID_VERSION_TO_LOW).not())
+                    showDialog {
+                        title = "Android 版本过低"
+                        msg = "你当前使用的 Android 版本过低，模块的部分功能可能会发生问题，" +
+                                "由于设备有限，无法逐一调试，若有好的建议可向我们贡献代码提交适配请求，建议在 Android 11 及以上版本中使用效果最佳。"
+                        confirmButton(text = "我知道了") { modulePrefs.put(DataConst.IGNORED_ANDROID_VERSION_TO_LOW, value = true) }
+                        noCancelable()
+                    }
                 /** 推广、恰饭 */
                 YukiPromoteTool.promote(context = this)
             }
