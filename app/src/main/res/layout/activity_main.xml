@@ -465,15 +465,13 @@
                 android:elevation="0dp"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingLeft="10dp"
-                android:paddingTop="15dp"
-                android:paddingRight="10dp">
+                android:paddingTop="15dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:gravity="center|start">
 
                     <ImageView
@@ -496,8 +494,8 @@
                     android:id="@+id/notify_icon_fix_switch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:text="启用通知图标优化"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
@@ -506,8 +504,8 @@
                     android:id="@+id/notify_icon_fix_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginRight="3dp"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginRight="13dp"
                     android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_button_round"
                     android:gravity="center"
@@ -520,8 +518,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
@@ -532,8 +530,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
@@ -542,11 +540,90 @@
                     android:textSize="12sp" />
 
                 <LinearLayout
+                    android:id="@+id/notify_icon_custom_corner_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:gravity="center|start"
+                        android:text="调整通知栏中的图标边框圆角大小"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <androidx.appcompat.widget.AppCompatSeekBar
+                        android:id="@+id/notify_icon_custom_corner_seekbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="5dp"
+                        android:max="15"
+                        android:min="0"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:progress="15" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:alpha="0.75"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxWidth="100dp"
+                            android:singleLine="true"
+                            android:text="当前"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="13.5sp" />
+
+                        <TextView
+                            android:id="@+id/notify_icon_custom_corner_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxWidth="100dp"
+                            android:singleLine="true"
+                            android:text="15 dp"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="你可以拖拽滑动条来调整通知栏中图标的边框圆角大小，仅支持 Android 12 风格以及 MIUI 经典样式的通知图标。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/notify_icon_force_app_icon_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:orientation="vertical">
 
                     <com.fankes.miui.notify.ui.view.MaterialSwitch
@@ -573,8 +650,8 @@
                     android:id="@+id/notify_icon_fix_notify_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:orientation="vertical">
 
                     <com.fankes.miui.notify.ui.view.MaterialSwitch
@@ -601,8 +678,8 @@
                     android:id="@+id/notify_icon_auto_sync_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:animateLayoutChanges="true"
                     android:orientation="vertical">
 
