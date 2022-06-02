@@ -24,10 +24,6 @@
 
 package com.fankes.miui.notify.ui.activity
 
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.IconDataBean
@@ -116,46 +112,33 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         binding.configTitleSync.setOnClickListener { onStartRefresh() }
         /** 设置列表元素和 Adapter */
         binding.configListView.apply {
-            adapter = object : BaseAdapter() {
-
-                override fun getCount() = iconDatas.size
-
-                override fun getItem(position: Int) = iconDatas[position]
-
-                override fun getItemId(position: Int) = position.toLong()
-
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-                    var cView = convertView
-                    val holder: AdapterConfigBinding
-                    if (convertView == null) {
-                        holder = AdapterConfigBinding.inflate(LayoutInflater.from(context))
-                        cView = holder.root
-                        cView.tag = holder
-                    } else holder = convertView.tag as AdapterConfigBinding
-                    getItem(position).also {
-                        holder.adpAppIcon.setImageBitmap(it.iconBitmap)
-                        (if (it.iconColor != 0) it.iconColor else resources.getColor(R.color.colorTextGray)).also { color ->
-                            holder.adpAppIcon.setColorFilter(color)
-                            holder.adpAppName.setTextColor(color)
+            bindAdapter {
+                onBindDatas { iconDatas }
+                onBindViews<AdapterConfigBinding> { binding, position ->
+                    iconDatas[position].also { bean ->
+                        binding.adpAppIcon.setImageBitmap(bean.iconBitmap)
+                        (if (bean.iconColor != 0) bean.iconColor else resources.getColor(R.color.colorTextGray)).also { color ->
+                            binding.adpAppIcon.setColorFilter(color)
+                            binding.adpAppName.setTextColor(color)
                         }
-                        holder.adpAppName.text = it.appName
-                        holder.adpAppPkgName.text = it.packageName
-                        holder.adpCbrName.text = "贡献者：" + it.contributorName
-                        isAppNotifyHookOf(it).also { e ->
-                            holder.adpAppOpenSwitch.isChecked = e
-                            holder.adpAppAllSwitch.isEnabled = e
+                        binding.adpAppName.text = bean.appName
+                        binding.adpAppPkgName.text = bean.packageName
+                        binding.adpCbrName.text = "贡献者：" + bean.contributorName
+                        isAppNotifyHookOf(bean).also { e ->
+                            binding.adpAppOpenSwitch.isChecked = e
+                            binding.adpAppAllSwitch.isEnabled = e
                         }
-                        holder.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
+                        binding.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
                             if (btn.isPressed.not()) return@setOnCheckedChangeListener
-                            putAppNotifyHookOf(it, b)
-                            holder.adpAppAllSwitch.isEnabled = b
+                            putAppNotifyHookOf(bean, b)
+                            binding.adpAppAllSwitch.isEnabled = b
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
-                        holder.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(it)
-                        holder.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
+                        binding.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(bean)
+                        binding.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
                             if (btn.isPressed.not()) return@setOnCheckedChangeListener
                             fun saveState() {
-                                putAppNotifyHookAllOf(it, b)
+                                putAppNotifyHookAllOf(bean, b)
                                 SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                             }
                             if (b) showDialog {
@@ -169,7 +152,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             } else saveState()
                         }
                     }
-                    return cView!!
                 }
             }.apply {
                 setOnItemLongClickListener { _, _, p, _ ->
