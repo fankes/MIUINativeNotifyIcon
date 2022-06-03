@@ -43,6 +43,7 @@ import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.data.DataConst
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
@@ -589,6 +590,30 @@ object SystemUIHooker : YukiBaseHooker() {
             .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(this).self)
             .invoke<StatusBarNotification>()
 
+    /**
+     * 根据当前 [ImageView] 的父布局克隆一个新的 [ImageView]
+     * @param initiate 新的 [ImageView] 方法体 - 失败会返回当前 [ImageView]
+     */
+    private fun ImageView.clone(initiate: ImageView.() -> Unit) {
+        (parent as? ViewGroup?)?.also { parent ->
+            /** 将之前的 [ImageView] 调为全透明且隐藏 */
+            alpha = 0f
+            isVisible = false
+            /** 将内容清空 */
+            setImageDrawable(null)
+            setBackgroundColor(Color.TRANSPARENT)
+            /** 创建一个傀儡 */
+            parent.findViewWithTag<ImageView?>("new_view").also { base ->
+                if (base == null) parent.addView(ImageView(context).also { new ->
+                    new.tag = "new_view"
+                    /** 克隆它的 [ViewGroup.LayoutParams] */
+                    new.layoutParams = layoutParams
+                    initiate(new)
+                }) else initiate(base)
+            }
+        } ?: initiate(this)
+    }
+
     /** 注册 */
     private fun register() {
         /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
@@ -802,7 +827,7 @@ object SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "handleAppIcon" }
                 replaceUnit {
-                    field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
+                    field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.clone {
                         compatNotifyIcon(
                             context = context,
                             expandedNf = instance.getRowPair().second.getSbn(),
