@@ -316,7 +316,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，MIUI 默认最多只能显示 3 个图标，其余图标将变成省略号，你可以在下方自定义最多显示的图标个数，修改为 0 则只会显示省略号代表图标个数，为防止发生异常，最大限制 100 个，超出的图标可能会被信号或网速指示器遮挡。"
+                    android:text="此选项默认开启，MIUI 默认最多只能显示 3 个图标，其余图标将变成省略号，你可以在下方自定义最多显示的图标个数，修改为 0 则只会显示省略号代表图标个数，为防止发生异常，最大限制 100 个，超出的图标可能会被信号或网速指示器遮挡。\n请注意：可能无法兼容中置挖孔屏的设备。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
@@ -885,7 +885,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="10dp"
-                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 自身就存在的问题，后期只能等官方修复。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面”(“系统 UI”)选择重新优化。\n(3) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，将不再进行适配。"
+                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 强行设置 APP 图标的问题，暂时没有找到解决方案，强行破坏修复方式会导致原生动画出现问题，后期有解决方案再研究。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面”(“系统 UI”)选择重新优化。\n(3) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，将不再进行适配。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
