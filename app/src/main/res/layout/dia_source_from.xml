@@ -20,31 +20,31 @@
         android:textSize="14sp" />
 
     <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/dia_sf_rd1"
+        android:id="@+id/source_radio_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="从 FastGit 获取" />
 
     <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/dia_sf_rd2"
+        android:id="@+id/source_radio_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="从 Github Raw 获取" />
 
     <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/dia_sf_rd3"
+        android:id="@+id/source_radio_3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="从自定义地址获取" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/dia_sf_text_lin"
+        android:id="@+id/source_from_text_lin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/dia_sf_text"
+            android:id="@+id/source_url_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"

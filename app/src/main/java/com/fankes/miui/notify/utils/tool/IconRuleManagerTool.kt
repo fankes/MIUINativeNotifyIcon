@@ -78,40 +78,38 @@ object IconRuleManagerTool {
      * @param callback 成功后回调
      */
     fun syncByHand(context: Context, callback: () -> Unit) =
-        context.showDialog {
+        context.showDialog<DiaSourceFromBinding> {
             title = "同步列表"
             var sourceType = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY)
             var customUrl = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL)
-            bind<DiaSourceFromBinding>().apply {
-                diaSfText.apply {
-                    if (customUrl.isNotBlank()) {
-                        setText(customUrl)
-                        setSelection(customUrl.length)
-                    }
-                    doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
+            binding.sourceUrlEdit.apply {
+                if (customUrl.isNotBlank()) {
+                    setText(customUrl)
+                    setSelection(customUrl.length)
                 }
-                diaSfTextLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
-                diaSfRd1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
-                diaSfRd2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
-                diaSfRd3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
-                diaSfRd1.setOnClickListener {
-                    diaSfRd2.isChecked = false
-                    diaSfRd3.isChecked = false
-                    diaSfTextLin.isVisible = false
-                    sourceType = TYPE_SOURCE_SYNC_WAY_1
-                }
-                diaSfRd2.setOnClickListener {
-                    diaSfRd1.isChecked = false
-                    diaSfRd3.isChecked = false
-                    diaSfTextLin.isVisible = false
-                    sourceType = TYPE_SOURCE_SYNC_WAY_2
-                }
-                diaSfRd3.setOnClickListener {
-                    diaSfRd1.isChecked = false
-                    diaSfRd2.isChecked = false
-                    diaSfTextLin.isVisible = true
-                    sourceType = TYPE_SOURCE_SYNC_WAY_3
-                }
+                doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
+            }
+            binding.sourceFromTextLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
+            binding.sourceRadio1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
+            binding.sourceRadio2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
+            binding.sourceRadio3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
+            binding.sourceRadio1.setOnClickListener {
+                binding.sourceRadio2.isChecked = false
+                binding.sourceRadio3.isChecked = false
+                binding.sourceFromTextLin.isVisible = false
+                sourceType = TYPE_SOURCE_SYNC_WAY_1
+            }
+            binding.sourceRadio2.setOnClickListener {
+                binding.sourceRadio1.isChecked = false
+                binding.sourceRadio3.isChecked = false
+                binding.sourceFromTextLin.isVisible = false
+                sourceType = TYPE_SOURCE_SYNC_WAY_2
+            }
+            binding.sourceRadio3.setOnClickListener {
+                binding.sourceRadio1.isChecked = false
+                binding.sourceRadio2.isChecked = false
+                binding.sourceFromTextLin.isVisible = true
+                sourceType = TYPE_SOURCE_SYNC_WAY_3
             }
             confirmButton {
                 context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY, sourceType)
@@ -120,15 +118,15 @@ object IconRuleManagerTool {
             }
             cancelButton()
             neutralButton(text = "自定义规则") {
-                context.showDialog {
+                context.showDialog<DiaSourceFromStringBinding> {
                     title = "自定义规则(调试)"
-                    val editText = bind<DiaSourceFromStringBinding>().diaSfsInputEdit.apply {
+                    binding.jsonRuleEdit.apply {
                         requestFocus()
                         invalidate()
                     }
                     IconPackParams(context).also { params ->
                         confirmButton(text = "合并") {
-                            editText.text.toString().also { jsonString ->
+                            binding.jsonRuleEdit.text.toString().also { jsonString ->
                                 when {
                                     jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
                                     jsonString.isNotBlank() -> {
@@ -146,7 +144,7 @@ object IconRuleManagerTool {
                             }
                         }
                         cancelButton(text = "覆盖") {
-                            editText.text.toString().also { jsonString ->
+                            binding.jsonRuleEdit.text.toString().also { jsonString ->
                                 when {
                                     jsonString.isNotBlank() && params.isNotVaildJson(jsonString) -> context.snake(msg = "不是有效的 JSON 数据")
                                     jsonString.isNotBlank() -> {

@@ -25,7 +25,7 @@
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/dia_sfs_input_edit"
+            android:id="@+id/json_rule_edit"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:ellipsize="end"

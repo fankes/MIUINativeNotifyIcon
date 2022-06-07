@@ -14,7 +14,7 @@
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/dia_icon_filter_input_edit"
+            android:id="@+id/icon_filters_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"

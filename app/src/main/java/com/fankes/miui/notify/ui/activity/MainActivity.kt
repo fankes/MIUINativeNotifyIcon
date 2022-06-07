@@ -262,9 +262,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
         /** 修改状态栏通知图标个数按钮点击事件 */
         binding.statusIconCountButton.setOnClickListener {
-            showDialog {
+            showDialog<DiaStatusIconCountBinding> {
                 title = "设置最多显示的图标个数"
-                val editText = bind<DiaStatusIconCountBinding>().diaStatusIconCountInputEdit.apply {
+                binding.iconCountEdit.apply {
                     requestFocus()
                     invalidate()
                     setText(statusBarIconCount.toString())
@@ -272,12 +272,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
                 confirmButton {
                     when {
-                        (runCatching { editText.text.toString().toInt() }.getOrNull() ?: -1)
+                        (runCatching { binding.iconCountEdit.text.toString().toInt() }.getOrNull() ?: -1)
                                 !in 0..100 -> snake(msg = "请输入有效数值")
-                        editText.text.toString().isNotBlank() -> runCatching {
-                            statusBarIconCount = editText.text.toString().trim().toInt()
+                        binding.iconCountEdit.text.toString().isNotBlank() -> runCatching {
+                            statusBarIconCount = binding.iconCountEdit.text.toString().trim().toInt()
                             modulePrefs.put(DataConst.HOOK_STATUS_ICON_COUNT, statusBarIconCount)
-                            binding.statusIconCountText.text = statusBarIconCount.toString()
+                            this@MainActivity.binding.statusIconCountText.text = statusBarIconCount.toString()
                             SystemUITool.showNeedRestartSnake(context)
                         }.onFailure { snake(msg = "数值格式无效") }
                         else -> snake(msg = "请输入有效数值")
@@ -299,7 +299,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             "模块无需保持在后台运行，到达同步时间后会自动启动，如果到达时间后模块正在运行则会自动取消本次计划任务。"
                     confirmButton(text = "保存设置") {
                         notifyIconAutoSyncTime = it
-                        binding.notifyIconAutoSyncText.text = it
+                        this@MainActivity.binding.notifyIconAutoSyncText.text = it
                         modulePrefs.put(DataConst.NOTIFY_ICON_FIX_AUTO_TIME, it)
                         SystemUITool.refreshSystemUI(context, isRefreshCacheOnly = true)
                     }
