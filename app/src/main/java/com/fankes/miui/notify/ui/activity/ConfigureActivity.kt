@@ -81,9 +81,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
         /** 设置过滤按钮点击事件 */
         binding.configTitleFilter.setOnClickListener {
-            showDialog {
+            showDialog<DiaIconFilterBinding> {
                 title = "按条件过滤"
-                val editText = bind<DiaIconFilterBinding>().diaIconFilterInputEdit.apply {
+                binding.iconFiltersEdit.apply {
                     requestFocus()
                     invalidate()
                     if (filterText.isNotBlank()) {
@@ -92,8 +92,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     }
                 }
                 confirmButton {
-                    if (editText.text.toString().isNotBlank()) {
-                        filterText = editText.text.toString().trim()
+                    if (binding.iconFiltersEdit.text.toString().isNotBlank()) {
+                        filterText = binding.iconFiltersEdit.text.toString().trim()
                         refreshAdapterResult()
                     } else {
                         toast(msg = "条件不能为空")

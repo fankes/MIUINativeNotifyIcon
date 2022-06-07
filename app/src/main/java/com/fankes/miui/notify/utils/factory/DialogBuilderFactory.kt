@@ -44,14 +44,6 @@ import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
 
 /**
- * 构造对话框
- * @param isUseBlackTheme 是否使用深色主题
- * @param initiate 对话框方法体
- */
-fun Context.showDialog(isUseBlackTheme: Boolean = false, initiate: DialogBuilder.() -> Unit) =
-    DialogBuilder(context = this, isUseBlackTheme).apply(initiate).show()
-
-/**
  * 显示时间选择对话框
  * @param timeSet 当前时间 - 不写将使用当前时间格式：HH:mm
  * @param result 回调 - 小时与分钟 HH:mm
@@ -60,19 +52,44 @@ fun Context.showTimePicker(timeSet: String = "", result: (String) -> Unit) =
     TimePickerDialog(this, { _, h, m -> result("${h.autoZero}:${m.autoZero}") }, timeSet.hour, timeSet.minute, true).show()
 
 /**
+ * 构造 [VB] 自定义 View 对话框
+ * @param initiate 对话框方法体
+ */
+@JvmName(name = "showDialog-VB")
+inline fun <reified VB : ViewBinding> Context.showDialog(initiate: DialogBuilder<VB>.() -> Unit) =
+    DialogBuilder<VB>(context = this, VB::class.java).apply(initiate).show()
+
+/**
+ * 构造对话框
+ * @param initiate 对话框方法体
+ */
+inline fun Context.showDialog(initiate: DialogBuilder<*>.() -> Unit) = DialogBuilder<ViewBinding>(context = this).apply(initiate).show()
+
+/**
  * 对话框构造器
  * @param context 实例
- * @param isUseBlackTheme 是否使用深色主题 - 对 AndroidX 风格无效
+ * @param bindingClass [ViewBinding] 的 [Class] 实例 or null
  */
-class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) {
+class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingClass: Class<*>? = null) {
 
     private var instanceAndroidX: androidx.appcompat.app.AlertDialog.Builder? = null // 实例对象
     private var instanceAndroid: android.app.AlertDialog.Builder? = null // 实例对象
 
     private var dialogInstance: Dialog? = null // 对话框实例
+    private var customLayoutView: View? = null // 自定义布局
 
-    @CauseProblemsApi
-    var customLayoutView: View? = null // 自定义布局
+    /**
+     * 获取 [DialogBuilder] 绑定布局对象
+     * @return [VB]
+     */
+    val binding by lazy {
+        bindingClass?.method {
+            name = "inflate"
+            param(LayoutInflaterClass)
+        }?.get()?.invoke<VB>(LayoutInflater.from(context))?.apply {
+            customLayoutView = root
+        } ?: error("This dialog maybe not a custom view dialog")
+    }
 
     /**
      * 是否需要使用 AndroidX 风格对话框
@@ -83,12 +100,7 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
     init {
         if (isUsingAndroidX)
             runInSafe { instanceAndroidX = MaterialAlertDialogBuilder(context) }
-        else runInSafe {
-            instanceAndroid = android.app.AlertDialog.Builder(
-                context,
-                if (isUseBlackTheme) android.R.style.Theme_Material_Dialog else android.R.style.Theme_Material_Light_Dialog
-            )
-        }
+        else runInSafe { instanceAndroid = android.app.AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog) }
     }
 
     /** 设置对话框不可关闭 */
@@ -136,18 +148,6 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
         }
 
     /**
-     * 设置对话框自定义布局
-     * @return [ViewBinding]
-     */
-    inline fun <reified T : ViewBinding> bind() =
-        T::class.java.method {
-            name = "inflate"
-            param(LayoutInflaterClass)
-        }.get().invoke<T>(LayoutInflater.from(context))?.apply {
-            customLayoutView = root
-        } ?: error("binding failed")
-
-    /**
      * 设置对话框确定按钮
      * @param text 按钮文本内容
      * @param callback 点击事件
@@ -184,7 +184,10 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
     fun cancel() = dialogInstance?.cancel()
 
     /** 显示对话框 */
-    internal fun show() =
+    @CauseProblemsApi
+    fun show() {
+        /** 若当前自定义 View 的对话框没有调用 [binding] 将会对其手动调用一次以确保显示布局 */
+        if (bindingClass != null) binding
         if (isUsingAndroidX) runInSafe {
             instanceAndroidX?.create()?.apply {
                 customLayoutView?.let { setView(it) }
@@ -196,8 +199,7 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
                 window?.setBackgroundDrawable(
                     GradientDrawable(
                         GradientDrawable.Orientation.TOP_BOTTOM,
-                        if (isUseBlackTheme) intArrayOf(0xFF2D2D2D.toInt(), 0xFF2D2D2D.toInt())
-                        else intArrayOf(Color.WHITE, Color.WHITE)
+                        intArrayOf(Color.WHITE, Color.WHITE)
                     ).apply {
                         shape = GradientDrawable.RECTANGLE
                         gradientType = GradientDrawable.LINEAR_GRADIENT
@@ -206,4 +208,5 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
                 dialogInstance = this
             }?.show()
         }
+    }
 }
