@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,23 +20,31 @@
         android:text="在线规则将不定期更新，建议定期同步列表以适配更多 APP，若无法同步请自行寻找解决方法或魔法上网。"
         android:textSize="14sp" />
 
-    <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/source_radio_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="从 FastGit 获取" />
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/source_radio_2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="从 Github Raw 获取" />
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/source_radio_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="从 FastGit 获取"
+            app:buttonTint="@color/colorPrimaryAccent" />
 
-    <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/source_radio_3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="从自定义地址获取" />
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/source_radio_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="从 Github Raw 获取"
+            app:buttonTint="@color/colorPrimaryAccent" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/source_radio_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="从自定义地址获取"
+            app:buttonTint="@color/colorPrimaryAccent" />
+    </RadioGroup>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/source_from_text_lin"

@@ -94,20 +94,14 @@ object IconRuleManagerTool {
             binding.sourceRadio2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
             binding.sourceRadio3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
             binding.sourceRadio1.setOnClickListener {
-                binding.sourceRadio2.isChecked = false
-                binding.sourceRadio3.isChecked = false
                 binding.sourceFromTextLin.isVisible = false
                 sourceType = TYPE_SOURCE_SYNC_WAY_1
             }
             binding.sourceRadio2.setOnClickListener {
-                binding.sourceRadio1.isChecked = false
-                binding.sourceRadio3.isChecked = false
                 binding.sourceFromTextLin.isVisible = false
                 sourceType = TYPE_SOURCE_SYNC_WAY_2
             }
             binding.sourceRadio3.setOnClickListener {
-                binding.sourceRadio1.isChecked = false
-                binding.sourceRadio2.isChecked = false
                 binding.sourceFromTextLin.isVisible = true
                 sourceType = TYPE_SOURCE_SYNC_WAY_3
             }
