@@ -343,7 +343,7 @@ object IconRuleManagerTool {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val bodyString = response.body?.string() ?: ""
+                val bodyString = response.body.string()
                 (context as? Activity?)?.runOnUiThread { result(true, bodyString) } ?: result(true, bodyString)
             }
         })
