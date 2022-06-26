@@ -103,7 +103,8 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 根据多个版本存在不同的包名相同的类 */
     private val MiuiClockClass = VariousClass(
         "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock"
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock",
+        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.Clock"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
@@ -199,18 +200,6 @@ object SystemUIHooker : YukiBaseHooker() {
         get() = safeOfFalse { NotificationHeaderViewWrapperClass.clazz.hasMethod { name = "handleHeaderViews" } }
 
     /**
-     * 获取是否存在忽略图标色彩处理的方法
-     * @return [Boolean]
-     */
-    private val hasIgnoreStatusBarIconColor
-        get() = safeOfFalse {
-            NotificationUtilClass.clazz.hasMethod {
-                name = "ignoreStatusBarIconColor"
-                param(ExpandedNotificationClass)
-            }
-        }
-
-    /**
      * 处理为圆角图标
      * @return [Drawable]
      */
@@ -288,6 +277,18 @@ object SystemUIHooker : YukiBaseHooker() {
             val targetPkg = notification.extras.getString("target_package") ?: ""
             return xmsfPkg.ifBlank { targetPkg.ifBlank { packageName } }
         }
+
+    /**
+     * 是否为 MIUI 样式通知栏 - 旧版 - 新版一律返回 false
+     * @return [Boolean]
+     */
+    private val isShowMiuiStyle get() = NotificationUtilClass.clazz.method { name = "showMiuiStyle" }.ignoredError().get().boolean()
+
+    /**
+     * 是否没有单独的 MIUI 通知栏样式
+     * @return [Boolean]
+     */
+    private val isNotHasAbsoluteMiuiStyle get() = MiuiNotificationViewWrapperClass.hasClass.not()
 
     /**
      * 获取全局上下文
@@ -584,11 +585,10 @@ object SystemUIHooker : YukiBaseHooker() {
             .get(this).call()?.let {
                 it.javaClass.method {
                     name = "getSbn"
-                }.get(it).invoke<StatusBarNotification>()
+                }.ignoredError().get(it).invoke<StatusBarNotification>()
             } ?: ExpandableNotificationRowClass.clazz
             .method { name = "getStatusBarNotification" }
-            .get(NotificationViewWrapperClass.clazz.field { name = "mRow" }.get(this).self)
-            .invoke<StatusBarNotification>()
+            .get(this).invoke<StatusBarNotification>()
 
     /**
      * 根据当前 [ImageView] 的父布局克隆一个新的 [ImageView]
@@ -714,10 +714,8 @@ object SystemUIHooker : YukiBaseHooker() {
                              * MIUI 12 进行单独判断
                              */
                             field { name = "mCurrentSetColor" }.get(instance).int().also { color ->
-                                if (hasIgnoreStatusBarIconColor) {
-                                    alpha = if (color.isWhite) 0.95f else 0.8f
-                                    setColorFilter(if (color.isWhite) color else Color.BLACK)
-                                } else setColorFilter(color)
+                                alpha = if (color.isWhite) 0.95f else 0.8f
+                                setColorFilter(if (color.isWhite) color else Color.BLACK)
                             }
                         }
                     }
@@ -796,6 +794,9 @@ object SystemUIHooker : YukiBaseHooker() {
                     method { name = "handleHeaderViews" }
                 else method { name = "resolveHeaderViews" }
                 afterHook {
+                    /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
+                    if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return@afterHook
+
                     /** 获取小图标 */
                     val iconImageView =
                         NotificationHeaderViewWrapperClass.clazz
@@ -907,11 +908,11 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                 }
             }
-        }
+        }.ignoredHookClassNotFoundFailure()
         /** 自动检查通知图标优化更新的注入监听 */
         MiuiClockClass.hook {
             injectMember {
-                method { name = "updateTime" }
+                method { name = "updateTime" }.remedys { method { name = "updateClock" } }
                 afterHook {
                     instance<View>().context.also {
                         /** 注册定时监听 */
@@ -923,6 +924,6 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                 }
             }
-        }.ignoredHookClassNotFoundFailure()
+        }
     }
 }
