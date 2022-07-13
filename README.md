@@ -68,6 +68,10 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 但是，这个模块就是为了修复被 MIUI 开发组忽略的图标问题才诞生的，并完美地给 MIUI 修复了黑白块图标的问题。
 
+## 效果展示
+
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/style.jpg"/>
+
 ## 探索历程
 
 原生 Android 的小图标和通知图标具有状态性。<br/><br/>
