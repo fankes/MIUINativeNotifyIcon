@@ -70,7 +70,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 ## 效果展示
 
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/style.jpg"/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/style.png"/>
 
 ## 探索历程
 
