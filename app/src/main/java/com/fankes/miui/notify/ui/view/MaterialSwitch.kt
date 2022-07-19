@@ -30,9 +30,9 @@ import android.graphics.Color
 import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.appcompat.widget.SwitchCompat
-import com.fankes.miui.notify.utils.drawable.drawabletoolbox.DrawableBuilder
 import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
+import top.defaults.drawabletoolbox.DrawableBuilder
 
 class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs) {
 
