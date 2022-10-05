@@ -1,0 +1,71 @@
+name: 通知图标优化适配反馈
+description: 提交通知图标优化适配必须使用此模板提交
+labels: [To be adapted]
+title: "[通知图标优化适配反馈]"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 请在下方填写你需要适配的 APP 通知图标的必要信息。
+        
+        **China and Chinese only.**
+        **仅限中国和中文。**
+
+        以下类型的 APP 不予适配：
+
+        - VPN、翻墙软件
+        - 涉嫌色情、赌博类软件
+        - 申请超限权限、涉嫌泄露国家机密行为的软件
+
+        以下类型的 APP 通知图标暂不适配：
+
+        - 多态彩色图标，状态不唯一，例如 360 极速浏览器
+        - 规范的原生图标，但未被通知图标规则适配的 (将稍后加入白名单)
+  - type: input
+    attributes:
+      label: APP 名称
+      description: 这里填写 APP 的名称，例如：**微信**
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: APP 包名
+      description: 这里填写 APP 的包名，例如：**com.tencent.mm**
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 通知图标颜色 (HEX)
+      description: |
+        这里填写通知图标在下拉通知栏中的图标颜色，要求为 16 进制，例如：**#ff232323**
+        如果不知道什么是 16 进制颜色，可以参考 [这里](https://www.qtccolor.com/tool/hex.aspx) 的取色。
+        留空代表使用系统默认主题色。
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: 下载渠道、来源地址链接
+      description: 请填写我们应该从何处得到你需要适配的这个 APP 的下载链接。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 简单描述适配的通知图标使用场景
+      description: 简单描述一下当前 APP 的通知图标在何时会变成彩色的、不规范的以及可触发推送通知的操作，例如小米推送或 HMS 推送。
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 通知单色图标适配素材 (大小 50x50~72x72)
+      description: 请在这里直接填写我们能够获得这个图标的网址(选填)。
+    validations:
+      required: false
+  - type: checkboxes
+    attributes:
+      label: 确认一下你提交的信息
+      description: |
+        为了确保 issues 的质量和避免浪费不必要的时间，未勾选下方选项的 issues 将直接被关闭。
+        请一定确保你已经**勾选下方的选项**后再提交。
+      options:
+        - label: 我确保上述信息准确无误
+          required: false
