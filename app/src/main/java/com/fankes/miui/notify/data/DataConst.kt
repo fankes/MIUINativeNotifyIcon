@@ -29,7 +29,6 @@ object DataConst {
 
     val ENABLE_MODULE = PrefsData("_enable_module", true)
     val ENABLE_MODULE_LOG = PrefsData("_enable_module_log", false)
-    val ENABLE_HIDE_ICON = PrefsData("_hide_icon", false)
     val ENABLE_COLOR_ICON_COMPAT = PrefsData("_color_icon_compat", false)
     val ENABLE_NOTIFY_ICON_FIX = PrefsData("_notify_icon_fix", true)
     val ENABLE_NOTIFY_ICON_FORCE_APP_ICON = PrefsData("_notify_icon_force_app_icon", false)
