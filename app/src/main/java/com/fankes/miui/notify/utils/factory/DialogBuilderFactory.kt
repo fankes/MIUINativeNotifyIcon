@@ -27,8 +27,6 @@ package com.fankes.miui.notify.utils.factory
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -36,9 +34,10 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.CauseProblemsApi
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
@@ -55,7 +54,7 @@ fun Context.showTimePicker(timeSet: String = "", result: (String) -> Unit) =
  * 构造 [VB] 自定义 View 对话框
  * @param initiate 对话框方法体
  */
-@JvmName(name = "showDialog-VB")
+@JvmName(name = "showDialog_Generics")
 inline fun <reified VB : ViewBinding> Context.showDialog(initiate: DialogBuilder<VB>.() -> Unit) =
     DialogBuilder<VB>(context = this, VB::class.java).apply(initiate).show()
 
@@ -72,11 +71,17 @@ inline fun Context.showDialog(initiate: DialogBuilder<*>.() -> Unit) = DialogBui
  */
 class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingClass: Class<*>? = null) {
 
-    private var instanceAndroidX: androidx.appcompat.app.AlertDialog.Builder? = null // 实例对象
-    private var instanceAndroid: android.app.AlertDialog.Builder? = null // 实例对象
+    /** 实例对象 */
+    private var instance: AlertDialog.Builder? = null
 
-    private var dialogInstance: Dialog? = null // 对话框实例
-    private var customLayoutView: View? = null // 自定义布局
+    /** 对话框取消监听 */
+    private var onCancel: (() -> Unit)? = null
+
+    /** 对话框实例 */
+    private var dialogInstance: Dialog? = null
+
+    /** 自定义布局 */
+    private var customLayoutView: View? = null
 
     /**
      * 获取 [DialogBuilder] 绑定布局对象
@@ -91,41 +96,28 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
         } ?: error("This dialog maybe not a custom view dialog")
     }
 
-    /**
-     * 是否需要使用 AndroidX 风格对话框
-     * @return [Boolean]
-     */
-    private val isUsingAndroidX get() = runCatching { context is AppCompatActivity }.getOrNull() ?: false
-
     init {
-        if (isUsingAndroidX)
-            runInSafe { instanceAndroidX = MaterialAlertDialogBuilder(context) }
-        else runInSafe { instanceAndroid = android.app.AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog) }
+        if (YukiHookAPI.Status.isXposedEnvironment) error("This dialog is not allowed to created in Xposed environment")
+        instance = MaterialAlertDialogBuilder(context)
     }
 
     /** 设置对话框不可关闭 */
     fun noCancelable() {
-        if (isUsingAndroidX)
-            runInSafe { instanceAndroidX?.setCancelable(false) }
-        else runInSafe { instanceAndroid?.setCancelable(false) }
+        instance?.setCancelable(false)
     }
 
     /** 设置对话框标题 */
     var title
         get() = ""
         set(value) {
-            if (isUsingAndroidX)
-                runInSafe { instanceAndroidX?.setTitle(value) }
-            else runInSafe { instanceAndroid?.setTitle(value) }
+            instance?.setTitle(value)
         }
 
     /** 设置对话框消息内容 */
     var msg
         get() = ""
         set(value) {
-            if (isUsingAndroidX)
-                runInSafe { instanceAndroidX?.setMessage(value) }
-            else runInSafe { instanceAndroid?.setMessage(value) }
+            instance?.setMessage(value)
         }
 
     /** 设置进度条对话框消息内容 */
@@ -153,9 +145,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param callback 点击事件
      */
     fun confirmButton(text: String = "确定", callback: () -> Unit = {}) {
-        if (isUsingAndroidX)
-            runInSafe { instanceAndroidX?.setPositiveButton(text) { _, _ -> callback() } }
-        else runInSafe { instanceAndroid?.setPositiveButton(text) { _, _ -> callback() } }
+        instance?.setPositiveButton(text) { _, _ -> callback() }
     }
 
     /**
@@ -164,9 +154,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param callback 点击事件
      */
     fun cancelButton(text: String = "取消", callback: () -> Unit = {}) {
-        if (isUsingAndroidX)
-            runInSafe { instanceAndroidX?.setNegativeButton(text) { _, _ -> callback() } }
-        else runInSafe { instanceAndroid?.setNegativeButton(text) { _, _ -> callback() } }
+        instance?.setNegativeButton(text) { _, _ -> callback() }
     }
 
     /**
@@ -175,9 +163,15 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param callback 点击事件
      */
     fun neutralButton(text: String = "更多", callback: () -> Unit = {}) {
-        if (isUsingAndroidX)
-            runInSafe { instanceAndroidX?.setNeutralButton(text) { _, _ -> callback() } }
-        else runInSafe { instanceAndroid?.setNeutralButton(text) { _, _ -> callback() } }
+        instance?.setNeutralButton(text) { _, _ -> callback() }
+    }
+
+    /**
+     * 当对话框关闭时
+     * @param callback 回调
+     */
+    fun onCancel(callback: () -> Unit) {
+        onCancel = callback
     }
 
     /** 取消对话框 */
@@ -185,28 +179,13 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
 
     /** 显示对话框 */
     @CauseProblemsApi
-    fun show() {
+    fun show() = runInSafe {
         /** 若当前自定义 View 的对话框没有调用 [binding] 将会对其手动调用一次以确保显示布局 */
         if (bindingClass != null) binding
-        if (isUsingAndroidX) runInSafe {
-            instanceAndroidX?.create()?.apply {
-                customLayoutView?.let { setView(it) }
-                dialogInstance = this
-            }?.show()
-        } else runInSafe {
-            instanceAndroid?.create()?.apply {
-                customLayoutView?.let { setView(it) }
-                window?.setBackgroundDrawable(
-                    GradientDrawable(
-                        GradientDrawable.Orientation.TOP_BOTTOM,
-                        intArrayOf(Color.WHITE, Color.WHITE)
-                    ).apply {
-                        shape = GradientDrawable.RECTANGLE
-                        gradientType = GradientDrawable.LINEAR_GRADIENT
-                        cornerRadius = 15.dpFloat(this@DialogBuilder.context)
-                    })
-                dialogInstance = this
-            }?.show()
-        }
+        instance?.create()?.apply {
+            customLayoutView?.let { setView(it) }
+            dialogInstance = this
+            setOnCancelListener { onCancel?.invoke() }
+        }?.show()
     }
 }
