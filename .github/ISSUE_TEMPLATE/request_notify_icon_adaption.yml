@@ -54,10 +54,10 @@ body:
       description: 简单描述一下当前 APP 的通知图标在何时会变成彩色的、不规范的以及可触发推送通知的操作，例如小米推送或 HMS 推送。
     validations:
       required: true
-  - type: input
+  - type: textarea
     attributes:
       label: 通知单色图标适配素材 (大小 50x50~72x72)
-      description: 请在这里直接填写我们能够获得这个图标的网址(选填)。
+      description: 请在这里填写我们能够获得这个图标的网址或在下方的文本框粘贴你需要上传的图标。
     validations:
       required: false
   - type: checkboxes
