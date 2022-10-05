@@ -28,12 +28,10 @@ import android.app.Activity
 import android.app.Notification
 import android.app.Service
 import android.app.WallpaperManager
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PackageInfoFlags
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -52,6 +50,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.content.res.ResourcesCompat
+import com.fankes.miui.notify.BuildConfig
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
@@ -574,3 +573,26 @@ fun Any?.delayedRun(ms: Long = 150, it: () -> Unit) = runInSafe {
     @Suppress("DEPRECATION")
     Handler().postDelayed({ it() }, ms)
 }
+
+/**
+ * 隐藏或显示启动器图标
+ *
+ * - 你可能需要 LSPosed 的最新版本以开启高版本系统中隐藏 APP 桌面图标功能
+ * @param isShow 是否显示
+ */
+fun Context.hideOrShowLauncherIcon(isShow: Boolean) {
+    packageManager?.setComponentEnabledSetting(
+        ComponentName(packageName, "${BuildConfig.APPLICATION_ID}.Home"),
+        if (isShow) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        PackageManager.DONT_KILL_APP
+    )
+}
+
+/**
+ * 获取启动器图标状态
+ * @return [Boolean] 是否显示
+ */
+val Context.isLauncherIconShowing
+    get() = packageManager?.getComponentEnabledSetting(
+        ComponentName(packageName, "${BuildConfig.APPLICATION_ID}.Home")
+    ) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
