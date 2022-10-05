@@ -129,12 +129,12 @@ object IconAdaptationTool {
             )
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
-                setContentTitle("您已安装 ${context.findAppName(packageName)}")
+                setContentTitle("您已安装 ${context.appNameOf(packageName)}")
                 setContentText("尚未适配此应用，点按打开在线规则。")
                 setColor(0xFF2993F0.toInt())
                 setAutoCancel(true)
                 setSmallIcon(Icon.createWithBitmap(smallIcon))
-                setLargeIcon(context.findAppIcon(packageName)?.toBitmap())
+                setLargeIcon(context.appIconOf(packageName)?.toBitmap())
                 setContentIntent(
                     PendingIntent.getActivity(
                         context, packageName.hashCode(),
@@ -146,7 +146,7 @@ object IconAdaptationTool {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }.apply {
                             putExtra("isNewAppSupport", true)
-                            putExtra("appName", context.findAppName(packageName))
+                            putExtra("appName", context.appNameOf(packageName))
                             putExtra("pkgName", packageName)
                         }, if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
                     )

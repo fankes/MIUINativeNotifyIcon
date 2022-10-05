@@ -39,7 +39,7 @@ import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 class HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
-        debugTag = "MIUINativeNotifyIcon"
+        debugLog { tag = "MIUINativeNotifyIcon" }
         isDebug = false
     }
 
