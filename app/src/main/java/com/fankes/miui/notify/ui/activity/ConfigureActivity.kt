@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/30.
  */
-@file:Suppress("SetTextI18n", "InflateParams", "DEPRECATION")
+@file:Suppress("SetTextI18n", "InflateParams")
 
 package com.fankes.miui.notify.ui.activity
 
@@ -67,7 +67,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             return
         }
         /** 返回按钮点击事件 */
-        binding.titleBackIcon.setOnClickListener { onBackPressed() }
+        binding.titleBackIcon.setOnClickListener { callOnBackPressed() }
         /** 刷新适配器结果相关 */
         refreshAdapterResult()
         /** 设置上下按钮点击事件 */
@@ -117,7 +117,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 onBindViews<AdapterConfigBinding> { binding, position ->
                     iconDatas[position].also { bean ->
                         binding.adpAppIcon.setImageBitmap(bean.iconBitmap)
-                        (if (bean.iconColor != 0) bean.iconColor else resources.getColor(R.color.colorTextGray)).also { color ->
+                        (if (bean.iconColor != 0) bean.iconColor else resources.colorOf(R.color.colorTextGray)).also { color ->
                             binding.adpAppIcon.setColorFilter(color)
                             binding.adpAppName.setTextColor(color)
                         }
@@ -203,6 +203,20 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             removeExtra("isNewAppSupport")
             removeExtra("isShowUpdDialog")
         }
+        /** 设置返回监听事件 */
+        addOnBackPressedEvent {
+            if (MainActivity.isActivityLive.not())
+                showDialog {
+                    title = "提示"
+                    msg = "要返回模块主页吗？"
+                    confirmButton {
+                        releaseEventAndBack()
+                        navigate<MainActivity>()
+                    }
+                    cancelButton { releaseEventAndBack() }
+                }
+            else releaseEventAndBack()
+        }
     }
 
     /** 开始手动同步 */
@@ -239,18 +253,4 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         else iconAllDatas.filter {
             it.appName.lowercase().contains(filterText.lowercase()) || it.packageName.lowercase().contains(filterText.lowercase())
         }
-
-    override fun onBackPressed() {
-        if (MainActivity.isActivityLive.not())
-            showDialog {
-                title = "提示"
-                msg = "要返回模块主页吗？"
-                confirmButton {
-                    super.onBackPressed()
-                    navigate<MainActivity>()
-                }
-                cancelButton { super.onBackPressed() }
-            }
-        else super.onBackPressed()
-    }
 }

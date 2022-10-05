@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/1/7.
  */
-@file:Suppress("DEPRECATION", "PrivateApi", "unused", "ObsoleteSdkInt")
+@file:Suppress("unused", "ObsoleteSdkInt")
 
 package com.fankes.miui.notify.utils.factory
 
@@ -34,8 +34,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
@@ -45,19 +46,22 @@ import android.os.Handler
 import android.provider.Settings
 import android.util.Base64
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
+import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
+import com.highcapable.yukihookapi.hook.factory.toClassOrNull
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 /**
  * 系统深色模式是否开启
@@ -84,6 +88,12 @@ val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Confi
 inline val Context.isNotSystemInDarkMode get() = !isSystemInDarkMode
 
 /**
+ * 系统版本是否高于或等于 Android 13
+ * @return [Boolean] 是否符合条件
+ */
+inline val isUpperOfAndroidT get() = Build.VERSION.SDK_INT > Build.VERSION_CODES.S
+
+/**
  * 系统版本是否高于或等于 Android 12
  * @return [Boolean] 是否符合条件
  */
@@ -105,7 +115,7 @@ inline val isLowerAndroidR get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */
-val isMIUI by lazy { ("android.miui.R").hasClass }
+val isMIUI by lazy { "android.miui.R".hasClass() }
 
 /**
  * 当前设备是否不是 MIUI 定制 Android 系统
@@ -199,59 +209,79 @@ val miuiFullVersion
     } else "不是 MIUI 系统"
 
 /**
- * 得到安装包信息
- * @return [PackageInfo]
+ * 获取 [Drawable]
+ * @param resId 属性资源 ID
+ * @return [Drawable]
  */
-val Context.packageInfo get() = packageManager?.getPackageInfo(packageName, 0) ?: PackageInfo()
+fun Resources.drawableOf(@DrawableRes resId: Int) = ResourcesCompat.getDrawable(this, resId, null) ?: error("Invalid resources")
 
 /**
- * 判断应用是否安装
- * @return [Boolean]
- */
-val String.isInstall
-    get() = safeOfFalse {
-        appContext.packageManager.getPackageInfo(
-            this,
-            PackageManager.GET_UNINSTALLED_PACKAGES
-        )
-        true
-    }
-
-/**
- * 得到版本信息
- * @return [String]
- */
-val Context.versionName get() = packageInfo.versionName ?: ""
-
-/**
- * 得到版本号
+ * 获取颜色
+ * @param resId 属性资源 ID
  * @return [Int]
  */
-val Context.versionCode get() = packageInfo.versionCode
+fun Resources.colorOf(@ColorRes resId: Int) = ResourcesCompat.getColor(this, resId, null)
+
+/**
+ * 得到 APP 安装包信息 (兼容)
+ * @param packageName APP 包名
+ * @param flag [PackageInfoFlags]
+ * @return [PackageInfo] or null
+ */
+private fun Context.getPackageInfoCompat(packageName: String, flag: Number = 0) = runCatching {
+    @Suppress("DEPRECATION")
+    if (Build.VERSION.SDK_INT >= 33)
+        packageManager?.getPackageInfo(packageName, PackageInfoFlags.of(flag.toLong()))
+    else packageManager?.getPackageInfo(packageName, flag.toInt())
+}.getOrNull()
+
+/**
+ * 得到 APP 版本号 (兼容 [PackageInfo.getLongVersionCode])
+ * @return [Int]
+ */
+private val PackageInfo.versionCodeCompat get() = PackageInfoCompat.getLongVersionCode(this)
+
+/**
+ * 判断 APP 是否安装
+ * @param packageName APP 包名
+ * @return [Boolean]
+ */
+fun Context.isInstall(packageName: String) = getPackageInfoCompat(packageName)?.let { true } ?: false
+
+/**
+ * 得到 APP 版本信息
+ * @return [String]
+ */
+val Context.appVersionName get() = getPackageInfoCompat(packageName)?.versionName ?: ""
+
+/**
+ * 得到 APP 版本号
+ * @return [Int]
+ */
+val Context.appVersionCode get() = getPackageInfoCompat(packageName)?.versionCodeCompat
 
 /**
  * 得到 APP 名称
- * @param name APP 包名
+ * @param packageName APP 包名 - 默认为当前 APP
  * @return [String]
  */
-fun Context.findAppName(name: String) =
-    safeOfNothing { packageManager?.getPackageInfo(name, 0)?.applicationInfo?.loadLabel(packageManager).toString() }
+fun Context.appNameOf(packageName: String = getPackageName()) =
+    getPackageInfoCompat(packageName)?.applicationInfo?.loadLabel(packageManager)?.toString() ?: ""
 
 /**
  * 得到 APP 图标
- * @param name APP 包名
+ * @param packageName APP 包名 - 默认为当前 APP
  * @return [Drawable] or null
  */
-fun Context.findAppIcon(name: String) =
-    safeOfNull { packageManager?.getPackageInfo(name, 0)?.applicationInfo?.loadIcon(packageManager) }
+fun Context.appIconOf(packageName: String = getPackageName()) = getPackageInfoCompat(packageName)?.applicationInfo?.loadIcon(packageManager)
 
 /**
  * 获取 APP 是否为 DEBUG 版本
- * @param name APP 包名
+ * @param packageName APP 包名
  * @return [Boolean]
  */
-fun Context.isAppDebuggable(name: String) =
-    safeOfFalse { (packageManager?.getPackageInfo(name, 0)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
+fun Context.isAppDebuggable(packageName: String) =
+    safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
 
 /**
  * 对数值自动补零
@@ -291,8 +321,11 @@ val isNotNoificationEnabled get() = !NotificationManagerCompat.from(appContext).
  * 网络连接是否正常
  * @return [Boolean] 网络是否连接
  */
-val isNetWorkSuccess
-    get() = safeOfFalse { appContext.getSystemService<ConnectivityManager>()?.activeNetworkInfo != null }
+val Context.isNetWorkSuccess
+    get() = safeOfFalse {
+        @Suppress("DEPRECATION")
+        getSystemService<ConnectivityManager>()?.activeNetworkInfo != null
+    }
 
 /**
  * dp 转换为 pxInt
@@ -313,7 +346,9 @@ fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetr
  * @return [Int] Android < 12 返回 [wallpaperColor]
  */
 val Context.systemAccentColor
-    get() = safeOf(wallpaperColor) { if (isUpperOfAndroidS) resources.getColor(android.R.color.system_accent1_600) else wallpaperColor }
+    get() = safeOf(wallpaperColor) {
+        if (isUpperOfAndroidS) resources.colorOf(android.R.color.system_accent1_600) else wallpaperColor
+    }
 
 /**
  * 获取系统壁纸颜色
@@ -328,7 +363,7 @@ val Context.wallpaperColor
  * 获取较浅的颜色
  * @return [Int]
  */
-val Int.brighter: Int
+val Int.brighterColor: Int
     get() {
         val hsv = FloatArray(3)
         Color.colorToHSV(this, hsv)
@@ -341,7 +376,7 @@ val Int.brighter: Int
  * 是否为白色
  * @return [Boolean]
  */
-val Int.isWhite
+val Int.isWhiteColor
     get() = safeOfTrue {
         val r = this and 0xff0000 shr 16
         val g = this and 0x00ff00 shr 8
@@ -411,10 +446,10 @@ fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
  * @return [String]
  */
 fun findPropString(key: String, default: String = "") = safeOf(default) {
-    (classOf(name = "android.os.SystemProperties").method {
+    "android.os.SystemProperties".toClassOrNull()?.method {
         name = "get"
         param(StringType, StringType)
-    }.get().invoke(key, default)) ?: default
+    }?.get()?.invoke(key, default) ?: default
 }
 
 /**
@@ -490,7 +525,7 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
  * @param packageName 包名
  */
 fun Context.openSelfSetting(packageName: String = appContext.packageName) = runCatching {
-    if (packageName.isInstall)
+    if (isInstall(packageName))
         startActivity(Intent().apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -535,4 +570,7 @@ fun Long.stampToDate(format: String = "yyyy-MM-dd HH:mm:ss") =
  * @param ms 毫秒 - 默认：150
  * @param it 方法体
  */
-fun Any?.delayedRun(ms: Long = 150, it: () -> Unit) = runInSafe { Handler().postDelayed({ it() }, ms) }
+fun Any?.delayedRun(ms: Long = 150, it: () -> Unit) = runInSafe {
+    @Suppress("DEPRECATION")
+    Handler().postDelayed({ it() }, ms)
+}
