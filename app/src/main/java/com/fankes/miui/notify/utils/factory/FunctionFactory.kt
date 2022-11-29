@@ -122,6 +122,7 @@ val isSupportMiuiVersion
         "12" -> true
         "12.5" -> true
         "13" -> true
+        "14" -> true
         else -> false
     }
 
@@ -146,6 +147,7 @@ val miuiVersion
                 "V125" -> "12.5"
                 "V130" -> "13"
                 "V13" -> "13"
+                "V140" -> "14"
                 else -> it.replace(oldValue = "V", newValue = "")
             }
         }.trim()
