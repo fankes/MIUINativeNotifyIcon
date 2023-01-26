@@ -28,14 +28,14 @@
             android:id="@+id/source_radio_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="从 FastGit 获取"
+            android:text="Github Raw (7ED Services)"
             app:buttonTint="@color/colorPrimaryAccent" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/source_radio_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="从 Github Raw 获取"
+            android:text="Github Raw (直连)"
             app:buttonTint="@color/colorPrimaryAccent" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
