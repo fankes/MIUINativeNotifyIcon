@@ -55,7 +55,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.factory.toClassOrNull
-import com.highcapable.yukihookapi.hook.type.java.StringType
+import com.highcapable.yukihookapi.hook.type.java.StringClass
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 import com.topjohnwu.superuser.Shell
 import java.io.ByteArrayOutputStream
@@ -447,7 +447,7 @@ fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
 fun findPropString(key: String, default: String = "") = safeOf(default) {
     "android.os.SystemProperties".toClassOrNull()?.method {
         name = "get"
-        param(StringType, StringType)
+        param(StringClass, StringClass)
     }?.get()?.invoke(key, default) ?: default
 }
 

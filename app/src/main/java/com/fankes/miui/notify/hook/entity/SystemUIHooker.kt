@@ -641,7 +641,7 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 必要的延迟防止 Sp 存储不刷新 */
         SystemClock.sleep(100)
         /** 获取可读写状态 */
-        return prefs.isXSharePrefsReadable.also {
+        return prefs.isPreferencesAvailable.also {
             isUsingCachingMethod = true
             prefs.clearCache()
             cachingIconDatas()
@@ -907,7 +907,7 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 自动检查通知图标优化更新的注入监听 */
         MiuiClockClass.hook {
             injectMember {
-                method { name = "updateTime" }.remedys { method { name = "updateClock" } }
+                method { name { it == "updateTime" || it == "updateClock" } }
                 afterHook {
                     instance<View>().context.also {
                         /** 注册定时监听 */
