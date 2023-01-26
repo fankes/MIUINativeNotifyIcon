@@ -171,7 +171,7 @@ object IconRuleManagerTool {
     ) {
         when (sourceType) {
             TYPE_SOURCE_SYNC_WAY_1 ->
-                onRefreshing(context, url = "https://raw.fastgit.org/fankes/AndroidNotifyIconAdapt/main", callback)
+                onRefreshing(context, url = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main", callback)
             TYPE_SOURCE_SYNC_WAY_2 ->
                 onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", callback)
             TYPE_SOURCE_SYNC_WAY_3 ->
