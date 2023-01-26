@@ -7,7 +7,7 @@
 [![Blank](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20Repo&logo=Android&style=flat&labelColor=F48FB1&logoColor=ffffff)](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)
 [![Telegram](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/XiaofangInternet)
 <br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png" width = "100" height = "100"/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png?raw=true" width = "100" height = "100"/>
 <br/>
 Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
 修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 12、12.5、13 以及最新版本。
@@ -70,20 +70,20 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 ## 效果展示
 
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/style.png"/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/style.png?raw=true"/>
 
 ## 探索历程
 
 原生 Android 的小图标和通知图标具有状态性。<br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native.jpg" height = "35"/><br/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native.jpg?raw=true" height = "35"/><br/><br/>
 而 MIUI 最近的版本直接破坏了这一状态性，全部设置为 APP 的图标，不仅难看而且你无法下拉通知栏区别这些图标代表什么。<br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui.jpg" height = "40"/><br/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui.jpg?raw=true" height = "40"/><br/><br/>
 同样地，通知面板的图标同样遵守这一状态性。<br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native_n_1.jpg" height = "100"/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native_n_2.jpg" height = "100"/><br/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native_n_1.jpg?raw=true" height = "100"/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/native_n_2.jpg?raw=true" height = "100"/><br/><br/>
 而 MIUI 做了什么呢？<br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui_n_1.jpg" height = "100"/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui_n_2.jpg" height = "100"/><br/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui_n_1.jpg?raw=true" height = "100"/><br/>
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/images/miui_n_2.jpg?raw=true" height = "100"/><br/><br/>
 不曾记得是什么版本开始，MIUI 把通知图标改成了这个鬼样子，寻找开发组提案也是无人问津，最后转念一想，自己干吧。
 
 由于目前大量通知图标都来自 `MIPUSH` 发出的营销通知，而 `MIPUSH` 的图标都是统一的彩色应用图标，很多应用也没有适配这一特性， 在通知栏广告满天飞的情况下，MIUI
@@ -120,7 +120,7 @@ MIUI 再不重写，怕是永远会变成安卓之光。雷军，金凡！！
 ## 捐赠支持
 
 - 工作不易，无意外情况此项目将继续维护下去，提供更多可能，欢迎打赏。<br/><br/>
-  <img src="https://github.com/fankes/YuKiHookAPI/blob/master/img-src/wechat_code.jpg" width = "200" height = "200"/>
+  <img src="https://github.com/fankes/YuKiHookAPI/blob/master/img-src/wechat_code.jpg?raw=true" width = "200" height = "200"/>
 
 ## 隐私政策
 
