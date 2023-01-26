@@ -146,7 +146,7 @@ inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
  */
 val miuiVersion
     get() = if (isMIUI)
-        findPropString(key = "ro.miui.ui.version.name", default = "V无法获取").let {
+        findPropString("ro.miui.ui.version.name", "V无法获取").let {
             when (it) {
                 "V110" -> "11"
                 "V11" -> "11"
@@ -170,7 +170,7 @@ val miuiVersionCode get() = safeOf(default = 0f) { miuiVersion.toFloat() }
  * 获取 MIUI 次版本号
  * @return [String]
  */
-val miuiIncrementalVersion get() = findPropString(key = "ro.system.build.version.incremental").trim()
+val miuiIncrementalVersion get() = findPropString("ro.system.build.version.incremental").trim()
 
 /**
  * 获取 MIUI 完全版本

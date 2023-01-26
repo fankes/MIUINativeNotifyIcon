@@ -92,7 +92,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * @return [String] 拼接后的数据
      */
     fun splicingJsonArray(dataJson1: String, dataJson2: String) = safeOf(default = "[]") {
-        dataJson1.replace(oldValue = "]", newValue = "") + "," + dataJson2.replace(oldValue = "[", newValue = "")
+        dataJson1.replace("]", "") + "," + dataJson2.replace("[", "")
     }
 
     /**
@@ -121,7 +121,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * @param json 数据
      * @return [Boolean]
      */
-    fun isHackString(json: String) = json.contains(other = "Checking your browser before accessing")
+    fun isHackString(json: String) = json.contains("Checking your browser before accessing")
 
     /**
      * 比较图标数据不相等
