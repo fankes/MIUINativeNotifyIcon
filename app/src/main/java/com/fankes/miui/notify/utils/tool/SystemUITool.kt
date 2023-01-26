@@ -59,7 +59,8 @@ object SystemUITool {
      * @param context 实例
      * @param result 成功后回调
      */
-    fun checkingActivated(context: Context, result: (Boolean) -> Unit) = context.dataChannel(SYSTEMUI_PACKAGE_NAME).checkingVersionEquals(result)
+    fun checkingActivated(context: Context, result: (Boolean) -> Unit) =
+        context.dataChannel(SYSTEMUI_PACKAGE_NAME).checkingVersionEquals(result = result)
 
     /**
      * 重启系统界面

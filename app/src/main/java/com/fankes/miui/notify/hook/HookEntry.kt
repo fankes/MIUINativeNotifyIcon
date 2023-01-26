@@ -36,7 +36,7 @@ import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 
 @InjectYukiHookWithXposed(isUsingResourcesHook = false)
-class HookEntry : IYukiHookXposedInit {
+object HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
         debugLog { tag = "MIUINativeNotifyIcon" }
