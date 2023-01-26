@@ -80,27 +80,40 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             isNotMIUI ->
                 showDialog {
                     title = "不是 MIUI 系统"
-                    msg = "此模块专为 MIUI 系统打造，当前无法识别你的系统为 MIUI，所以模块无法工作。\n" +
-                            "如有问题请联系 酷安 @星夜不荟"
-                    confirmButton(text = "退出") { finish() }
+                    msg = "此模块专为 MIUI 系统打造，当前无法识别你的系统为 MIUI，所以模块无法工作。"
+                    confirmButton(text = "查看支持的模块") {
+                        openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt")
+                        finish()
+                    }
+                    cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
             /** 判断最低 Android 系统版本 */
             isLowerAndroidP ->
                 showDialog {
                     title = "Android 系统版本过低"
-                    msg = "此模块最低支持基于 Android 9 的 MIUI 系统，你的系统版本过低不再进行适配。\n" +
-                            "如有问题请联系 酷安 @星夜不荟"
-                    confirmButton(text = "退出") { finish() }
+                    msg = "此模块最低支持基于 Android 9 的 MIUI 系统，你的系统版本过低不再进行适配。\n\n" +
+                            "若有其它疑问，你可以点击下方按钮前往项目地址进行反馈。"
+                    confirmButton(text = "前往项目地址") {
+                        openProjectUrl()
+                        finish()
+                    }
+                    cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断最低 MIUI 版本 */
+            /** 判断支持的 MIUI 版本 */
             isNotSupportMiuiVersion ->
                 showDialog {
-                    title = "MIUI 版本过低"
-                    msg = "此模块最低支持 MIUI 12 系统，你的 MIUI 版本为 ${miuiVersion}，不再进行适配。\n" +
-                            "如有问题请联系 酷安 @星夜不荟"
-                    confirmButton(text = "退出") { finish() }
+                    title = "不支持的 MIUI 版本"
+                    msg = (if (miuiVersion.isNotBlank())
+                        "此模块目前仅支持 MIUI 12~14 系统，你的 MIUI 版本为 ${miuiVersion}，暂不支持。\n\n" +
+                                "如果你的 MIUI 版本识别有误，请检查是否有相关插件修改了系统版本。\n\n"
+                    else "无法获取 MIUI 版本，请检查你是否修改了系统参数或使用非官方系统。\n\n") + "若有其它疑问，你可以点击下方按钮前往项目地址进行反馈。"
+                    confirmButton(text = "前往项目地址") {
+                        openProjectUrl()
+                        finish()
+                    }
+                    cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
             /** 判断是否 Hook */
@@ -306,11 +319,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 重启按钮点击事件 */
         binding.titleRestartIcon.setOnClickListener { SystemUITool.restartSystemUI(context = this) }
         /** 项目地址按钮点击事件 */
-        binding.titleGithubIcon.setOnClickListener { openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon") }
+        binding.titleGithubIcon.setOnClickListener { openProjectUrl() }
         /** 恰饭！ */
         binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
+    }
+
+    /** 前往项目地址 */
+    private fun openProjectUrl() {
+        openBrowser(url = "https://github.com/fankes/MIUINativeNotifyIcon")
     }
 
     /** 刷新模块状态 */

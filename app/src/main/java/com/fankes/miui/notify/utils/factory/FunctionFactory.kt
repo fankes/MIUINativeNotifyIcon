@@ -131,6 +131,7 @@ val isSupportMiuiVersion
         "12" -> true
         "12.5" -> true
         "13" -> true
+        "14" -> true
         else -> false
     }
 
@@ -146,19 +147,17 @@ inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
  */
 val miuiVersion
     get() = if (isMIUI)
-        findPropString("ro.miui.ui.version.name", "V无法获取").let {
+        findPropString("ro.miui.ui.version.name").let {
             when (it) {
-                "V110" -> "11"
-                "V11" -> "11"
-                "V120" -> "12"
-                "V12" -> "12"
+                "V11", "V110" -> "11"
+                "V12", "V120" -> "12"
                 "V125" -> "12.5"
-                "V130" -> "13"
-                "V13" -> "13"
-                else -> it.replace(oldValue = "V", newValue = "")
+                "V13", "V130" -> "13"
+                "V14", "V140" -> "14"
+                else -> it.replace("V", "")
             }
         }.trim()
-    else "NULL"
+    else ""
 
 /**
  * 获取 MIUI 版本号
@@ -178,33 +177,9 @@ val miuiIncrementalVersion get() = findPropString("ro.system.build.version.incre
  */
 val miuiFullVersion
     get() = if (isMIUI) miuiIncrementalVersion.let {
-        if (it.lowercase().contains("a") ||
-            it.lowercase().contains("b") ||
-            it.lowercase().contains("c") ||
-            it.lowercase().contains("d") ||
-            it.lowercase().contains("e") ||
-            it.lowercase().contains("f") ||
-            it.lowercase().contains("g") ||
-            it.lowercase().contains("h") ||
-            it.lowercase().contains("i") ||
-            it.lowercase().contains("j") ||
-            it.lowercase().contains("k") ||
-            it.lowercase().contains("l") ||
-            it.lowercase().contains("m") ||
-            it.lowercase().contains("n") ||
-            it.lowercase().contains("o") ||
-            it.lowercase().contains("p") ||
-            it.lowercase().contains("q") ||
-            it.lowercase().contains("r") ||
-            it.lowercase().contains("s") ||
-            it.lowercase().contains("t") ||
-            it.lowercase().contains("u") ||
-            it.lowercase().contains("v") ||
-            it.lowercase().contains("w") ||
-            it.lowercase().contains("x") ||
-            it.lowercase().contains("y") ||
-            it.lowercase().contains("z")
-        ) "$it 稳定版" else "V$miuiVersion $it 开发版"
+        if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
+            "$it 稳定版"
+        else "V$miuiVersion $it 开发版"
     } else "不是 MIUI 系统"
 
 /**

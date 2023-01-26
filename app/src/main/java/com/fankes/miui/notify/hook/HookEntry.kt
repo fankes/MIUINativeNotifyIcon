@@ -51,7 +51,7 @@ object HookEntry : IYukiHookXposedInit {
                 /** 系统版本低于 Android P 停止 Hook */
                 isLowerAndroidP -> loggerW(msg = "Aborted Hook -> This System is lower than Android P")
                 /** 不是支持的 MIUI 系统停止 Hook */
-                isNotSupportMiuiVersion -> loggerW(msg = "Aborted Hook -> This MIUI Version $miuiVersion not supported")
+                isNotSupportMiuiVersion -> loggerW(msg = "Aborted Hook -> This MIUI Version ${miuiVersion.ifBlank { "unknown" }} not supported")
                 /** Hook 被手动关闭停止 Hook */
                 prefs.get(DataConst.ENABLE_MODULE).not() -> loggerW(msg = "Aborted Hook -> Hook Closed")
                 /** 开始 Hook */
