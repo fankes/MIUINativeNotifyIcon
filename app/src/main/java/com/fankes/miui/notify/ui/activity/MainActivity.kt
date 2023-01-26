@@ -328,14 +328,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 else -> R.mipmap.ic_warn
             }
         )
-        binding.mainTextStatus.text =
-            when {
-                YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
-                YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
-                YukiHookAPI.Status.isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
-                YukiHookAPI.Status.isXposedModuleActive -> "模块已激活"
-                else -> "模块未激活"
-            }
+        binding.mainTextStatus.text = when {
+            YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() && modulePrefs.get(DataConst.ENABLE_MODULE).not() -> "模块已停用"
+            YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
+            YukiHookAPI.Status.isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
+            YukiHookAPI.Status.isXposedModuleActive -> "模块已激活"
+            else -> "模块未激活"
+        }
         binding.mainTextApiWay.isVisible = YukiHookAPI.Status.isXposedModuleActive
         binding.mainTextApiWay.text = "Activated by ${YukiHookAPI.Status.executorName} API ${YukiHookAPI.Status.executorVersion}"
     }
