@@ -32,22 +32,22 @@
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/title_restart_icon"
             style="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
             android:layout_marginEnd="15dp"
             android:alpha="0.85"
-            android:src="@mipmap/ic_restart"
+            android:src="@drawable/ic_restart"
             android:tint="@color/colorTextGray"
             android:tooltipText="重启系统界面" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/title_github_icon"
             style="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_width="27dp"
-            android:layout_height="27dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:layout_marginEnd="5dp"
             android:alpha="0.85"
-            android:src="@mipmap/ic_github"
+            android:src="@drawable/ic_github"
             android:tint="@color/colorTextGray"
             android:tooltipText="项目地址" />
     </LinearLayout>
@@ -70,7 +70,7 @@
             android:layout_height="25dp"
             android:layout_marginStart="25dp"
             android:layout_marginEnd="5dp"
-            android:src="@mipmap/ic_warn"
+            android:src="@drawable/ic_warn"
             android:tint="@color/white" />
 
         <LinearLayout
@@ -186,7 +186,7 @@
                     android:layout_height="15dp"
                     android:layout_marginEnd="10dp"
                     android:alpha="0.85"
-                    android:src="@mipmap/ic_about"
+                    android:src="@drawable/ic_about"
                     android:tint="@color/colorTextDark" />
 
                 <TextView
@@ -220,11 +220,21 @@
                     android:layout_height="wrap_content"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_basic" />
+                        app:cardBackgroundColor="#009688"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2.5dp"
+                            android:src="@drawable/ic_preference" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -286,11 +296,21 @@
                     android:layout_height="wrap_content"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_control" />
+                        app:cardBackgroundColor="#2196F3"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2.5dp"
+                            android:src="@drawable/ic_function" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -441,11 +461,21 @@
                     android:layout_height="wrap_content"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_modify" />
+                        app:cardBackgroundColor="#66BB6A"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2.5dp"
+                            android:src="@drawable/ic_modify" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -497,11 +527,21 @@
                     android:layout_marginRight="15dp"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_notify" />
+                        app:cardBackgroundColor="#FF7043"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2.5dp"
+                            android:src="@drawable/ic_notify" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -558,7 +598,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，开启后将对优化名单内的 APP 通知小图标使用单色调进行修复，特别是通过系统级别推送的通知，它们始终是 APP 默认图标(彩色的 APP 图标)，修复后使得它们的图标看起来更加符合 Android 原生的统一规范。"
+                    android:text="此选项默认开启，开启后将对优化名单内的 APP 通知小图标使用单色调进行修复，特别是通过系统级别推送的通知，它们始终是 APP 默认图标 (彩色的 APP 图标)，修复后使得它们的图标看起来更加符合 Android 原生的统一规范。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
@@ -802,11 +842,21 @@
                     android:layout_height="wrap_content"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_home" />
+                        app:cardBackgroundColor="#FFFF9800"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2.5dp"
+                            android:src="@drawable/ic_home" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -866,11 +916,21 @@
                     android:layout_marginBottom="15dp"
                     android:gravity="center|start">
 
-                    <ImageView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
                         android:layout_marginEnd="10dp"
-                        android:src="@mipmap/ic_help" />
+                        app:cardBackgroundColor="#FF03A9F4"
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:padding="2dp"
+                            android:src="@drawable/ic_info" />
+                    </androidx.cardview.widget.CardView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -898,7 +958,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="10dp"
-                    android:text="Q.如何使用？\nA.模块仅支持 LSPosed，EdXposed 也可以使用但随时停止支持，由于模块涉及到修改系统应用，不支持其它 Hook 框架，在 LSPosed 的作用域中，只需勾选“系统界面”(旧版本为“系统 UI”)即可，应用设置后需要重启系统界面。"
+                    android:text="Q.如何使用？\nA.模块仅支持 LSPosed，EdXposed 也可以使用但随时停止支持，由于模块涉及到修改系统应用，不支持其它 Hook 框架，在 LSPosed 的作用域中，只需勾选“系统界面” (旧版本为“系统 UI”) 即可，应用设置后需要重启系统界面。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
@@ -908,7 +968,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.8"
                     android:lineSpacingExtra="10dp"
-                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 强行设置 APP 图标的问题，暂时没有找到解决方案，强行破坏修复方式会导致原生动画出现问题，后期有解决方案再研究。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面”(“系统 UI”)选择重新优化。\n(3) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，将不再进行适配。"
+                    android:text="Q.哪些是已知问题？\nA.以下是问题描述列表：\n(1) 动态小图标可能会在高版本系统中闪烁，这是 MIUI 强行设置 APP 图标的问题，暂时没有找到解决方案，强行破坏修复方式会导致原生动画出现问题，后期有解决方案再研究。\n(2) 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面” (“系统 UI”) 选择重新优化。\n(3) 部分用户反馈在 MIUI 13、14 初期的 Android 13 内测版系统中可能会出现通知图标反色失败的情况，此问题官方在 “2022-9-29” 的开发版中已经修复，如果你在使用过程中遇到了同样的问题，推荐将系统更新到已修复此问题的最新版本。\n(4) 建议最低从 MIUI 12.5 “2021-5-18” 开发版以后开始使用，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块问题，将不再进行适配。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 

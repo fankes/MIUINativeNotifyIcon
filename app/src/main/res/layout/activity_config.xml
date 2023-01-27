@@ -25,7 +25,7 @@
             android:layout_height="20dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="20dp"
-            android:src="@mipmap/ic_back"
+            android:src="@drawable/ic_back"
             android:tint="@color/colorTextGray"
             android:tooltipText="返回" />
 
@@ -59,19 +59,18 @@
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/config_title_up"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="5dp"
-            android:src="@mipmap/ic_page_top"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:src="@drawable/ic_page_top"
             android:tint="@color/colorTextGray"
             android:tooltipText="滚动到顶部" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/config_title_down"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginEnd="15dp"
-            android:src="@mipmap/ic_page_bottom"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_marginEnd="13dp"
+            android:src="@drawable/ic_page_bottom"
             android:tint="@color/colorTextGray"
             android:tooltipText="滚动到底部" />
 
@@ -80,7 +79,7 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:layout_marginEnd="10dp"
-            android:src="@mipmap/ic_filter"
+            android:src="@drawable/ic_filter"
             android:tint="@color/colorTextGray"
             android:tooltipText="按条件过滤" />
 
@@ -89,7 +88,7 @@
             android:layout_width="23dp"
             android:layout_height="23dp"
             android:layout_marginEnd="10dp"
-            android:src="@mipmap/ic_sync"
+            android:src="@drawable/ic_sync"
             android:tint="@color/colorTextGray"
             android:tooltipText="同步列表" />
     </LinearLayout>
@@ -111,7 +110,7 @@
             android:layout_height="15dp"
             android:layout_marginEnd="10dp"
             android:alpha="0.85"
-            android:src="@mipmap/ic_about"
+            android:src="@drawable/ic_about"
             android:tint="@color/colorTextDark" />
 
         <TextView
