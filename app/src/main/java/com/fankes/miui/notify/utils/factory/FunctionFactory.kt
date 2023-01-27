@@ -128,10 +128,7 @@ inline val isNotMIUI get() = !isMIUI
  */
 val isSupportMiuiVersion
     get() = when (miuiVersion) {
-        "12" -> true
-        "12.5" -> true
-        "13" -> true
-        "14" -> true
+        "11", "12", "12.5", "13", "14" -> true
         else -> false
     }
 

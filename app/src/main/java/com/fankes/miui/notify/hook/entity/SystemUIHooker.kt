@@ -191,15 +191,6 @@ object SystemUIHooker : YukiBaseHooker() {
         } else BitmapCompatTool.isGrayscaleDrawable(drawable)
 
     /**
-     * 是否为旧版本 MIUI 方案
-     *
-     * 拥有 “handleHeaderViews” 方法
-     * @return [Boolean]
-     */
-    private val hasHandleHeaderViews
-        get() = NotificationHeaderViewWrapperClass.toClassOrNull()?.hasMethod { name = "handleHeaderViews" } ?: false
-
-    /**
      * 处理为圆角图标
      * @return [Drawable]
      */
@@ -699,23 +690,25 @@ object SystemUIHooker : YukiBaseHooker() {
         StatusBarIconViewClass.hook {
             /** Hook 状态栏通知图标的颜色 */
             injectMember {
-                method { name = "updateIconColor" }
+                method {
+                    name { it == "updateDecorColor" || it == "updateIconColor" }
+                    emptyParam()
+                }.all()
                 afterHook {
                     instance<ImageView>().also {
-                        if (hasIgnoreStatusBarIconColor(it.context, field { name = "mNotification" }
-                                .get(instance).cast<StatusBarNotification>())) it.apply {
-                            alpha = 1f
-                            colorFilter = null
-                        } else it.apply {
+                        val notification = field { name = "mNotification" }.get(it).cast<StatusBarNotification>()
+                        val currentSetColor = field { name = "mCurrentSetColor" }.get(it).int()
+                        if (hasIgnoreStatusBarIconColor(it.context, notification)) {
+                            it.alpha = 1f
+                            it.colorFilter = null
+                        } else {
                             /**
                              * 防止图标不是纯黑的问题
                              * 图标在任何场景下跟随状态栏其它图标保持半透明
-                             * MIUI 12 进行单独判断
+                             * MIUI 11、12 进行单独判断
                              */
-                            field { name = "mCurrentSetColor" }.get(instance).int().also { color ->
-                                alpha = if (color.isWhiteColor) 0.95f else 0.8f
-                                setColorFilter(if (color.isWhiteColor) color else Color.BLACK)
-                            }
+                            it.alpha = if (currentSetColor.isWhiteColor) 0.95f else 0.8f
+                            it.setColorFilter(if (currentSetColor.isWhiteColor) currentSetColor else Color.BLACK)
                         }
                     }
                 }
@@ -789,9 +782,7 @@ object SystemUIHooker : YukiBaseHooker() {
         NotificationHeaderViewWrapperClass.hook {
             /** 修复下拉通知图标自动设置回 APP 图标的方法 */
             injectMember {
-                if (hasHandleHeaderViews)
-                    method { name = "handleHeaderViews" }
-                else method { name = "resolveHeaderViews" }
+                method { name { it == "resolveHeaderViews" || it == "handleHeaderViews" || it == "resolveViews" } }
                 afterHook {
                     /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
                     if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return@afterHook
