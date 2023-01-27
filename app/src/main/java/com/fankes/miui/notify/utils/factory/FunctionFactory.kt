@@ -179,7 +179,10 @@ val miuiFullVersion
     get() = if (isMIUI) miuiIncrementalVersion.let {
         if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
             "$it 稳定版"
-        else "V$miuiVersion $it 开发版"
+        else when {
+            it.lowercase().endsWith(".dev") -> "$it 开发版"
+            else -> "V$miuiVersion $it 开发版"
+        }
     } else "不是 MIUI 系统"
 
 /**
