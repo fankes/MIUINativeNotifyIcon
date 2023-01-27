@@ -316,9 +316,31 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，MIUI 默认最多只能显示 3 个图标，其余图标将变成省略号，你可以在下方自定义最多显示的图标个数，修改为 0 则只会显示省略号代表图标个数，为防止发生异常，最大限制 100 个，超出的图标可能会被信号或网速指示器遮挡。\n请注意：可能无法兼容中置挖孔屏的设备。"
+                    android:text="此选项默认开启，MIUI 默认最多只能显示 3 个图标，其余图标将变成省略号，你可以在下方自定义最多显示的图标个数，修改为 0 则只会显示省略号代表图标个数，为防止发生异常，最大限制 100 个，超出的图标可能会被信号或网速指示器遮挡。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="此功能针对不同类型的异形屏设备所搭载的 MIUI 会有不同的效果，如果你正在使用的是中置挖孔屏设备，那么通知图标的个数无论多少都不会超过挖孔区域，如果是居左或居右挖孔屏设备则通知图标的个数不会超过右侧信号图标区域。"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="如果你同时使用了拥有相同作用域 (“系统界面” 或 “系统 UI”) 相同功能的模块，请勿与此模块同时打开此功能，会造成冲突导致系统的隐藏通知图标功能失效。"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/warn_s_count_dis_tip"
@@ -327,9 +349,10 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="⚠️ 仅支持 MIUI 12.5 后期开发版以及最新版本"
+                    android:text="⚠️ 你的系统可能不受支持，此功能不支持 MIUI 12.5 (不包含部分 12.5 开发版) 以下系统，修改成功也不会有效。"
                     android:textColor="@color/colorTextDark"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:id="@+id/status_icon_count_child_item"
