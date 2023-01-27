@@ -10,7 +10,7 @@
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png?raw=true" width = "100" height = "100"/>
 <br/>
 Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
-修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 12、12.5、13 以及最新版本。
+修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 11、12、12.5、13、14 以及最新版本。
 
 ## Developer
 
@@ -22,7 +22,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 - 请确保你使用的是 MIUI 官方版本，任何第三方官改包发生的问题，开发者没有义务去解决和修复，请自求多福
 
-- 目前最低支持基于 Android 9 版本的 MIUI 12 或 MIUI 12.5(最低建议)
+- 目前最低支持基于 Android 9 版本的 MIUI 11 或 MIUI 12、12.5 (最低建议)
 
 - 建议最低从 MIUI 12.5 `2021-5-18` 开发版以后开始使用模块，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、黑白块的问题
 
@@ -111,7 +111,7 @@ ContrastColorUtil.getInstance().isGrayscaleIcon(drawable)
 
 ## 后记
 
-近期重新适配了 MIUI 12、12.5、13 版本，每个版本的图标设置方法都不一样，而且改的乱七八糟的，我都要无语了，只能用了很多折中方案，毕竟我也没有那么大精力每个版本去修复，实在是累了。
+近期重新适配了 MIUI 11、12、12.5、13、14 版本，每个版本的图标设置方法都不一样，而且改的乱七八糟的，我都要无语了，只能用了很多折中方案，毕竟我也没有那么大精力每个版本去修复，实在是累了。
 
 特地的把自己能有的小米手机刷成各种 MIUI 版本去为酷友做专项适配，我也是很累了，也希望你们能够多多支持，也能让 MIUI 做得更好。
 
