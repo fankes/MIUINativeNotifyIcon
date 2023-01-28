@@ -61,6 +61,7 @@ import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.type.android.*
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
+import com.highcapable.yukihookapi.hook.type.java.FloatType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import top.defaults.drawabletoolbox.DrawableBuilder
 
@@ -87,6 +88,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 原生存在的类 */
     private const val NotificationChildrenContainerClass =
         "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.NotificationChildrenContainer"
+
+    /** 原生存在的类 */
+    private const val NotificationIconAreaControllerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconAreaController"
 
     /** 原生存在的类 */
     private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
@@ -145,6 +149,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
+
+    /** 当前是否处于深色图标模式 - 跟随 Hook 保存 */
+    private var isDarkIconMode = false
 
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
@@ -543,6 +550,30 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
+     * 更新状态栏通知图标颜色
+     * @param container 当前通知图标容器实例
+     * @param isDarkIconMode 是否为深色图标模式
+     */
+    private fun updateStatusBarIconColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode) {
+        if (container.childCount > 0) container.children.forEach {
+            (it as? ImageView?)?.also { iconView ->
+                val notification = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
+                if (hasIgnoreStatusBarIconColor(iconView.context, notification)) {
+                    iconView.alpha = 1f
+                    iconView.colorFilter = null
+                } else {
+                    /**
+                     * 防止图标不是纯黑的问题
+                     * 图标在任何场景下跟随状态栏其它图标保持半透明
+                     */
+                    iconView.alpha = if (isDarkIconMode) 0.8f else 0.95f
+                    iconView.setColorFilter(if (isDarkIconMode) Color.BLACK else Color.WHITE)
+                }
+            }
+        }
+    }
+
+    /**
      * 从 [NotificationViewWrapperClass] 中获取 [ExpandableNotificationRowClass]
      * @return [Pair] - ([Boolean] 通知是否展开,[Any] 通知 Row 实例)
      */
@@ -686,33 +717,49 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
-        /** 注入状态栏通知图标实例 */
-        StatusBarIconViewClass.hook {
-            /** Hook 状态栏通知图标的颜色 */
+        /** 注入状态栏通知图标容器管理实例 */
+        NotificationIconAreaControllerClass.hook {
+            /** Hook 深色图标模式改变 */
             injectMember {
                 method {
-                    name { it == "updateDecorColor" || it == "updateIconColor" }
-                    emptyParam()
-                }.all()
+                    name = "onDarkChanged"
+                    param(RectClass, FloatType, IntType)
+                }
                 afterHook {
-                    instance<ImageView>().also {
-                        val notification = field { name = "mNotification" }.get(it).cast<StatusBarNotification>()
-                        val currentSetColor = field { name = "mCurrentSetColor" }.get(it).int()
-                        if (hasIgnoreStatusBarIconColor(it.context, notification)) {
-                            it.alpha = 1f
-                            it.colorFilter = null
-                        } else {
-                            /**
-                             * 防止图标不是纯黑的问题
-                             * 图标在任何场景下跟随状态栏其它图标保持半透明
-                             * MIUI 11、12 进行单独判断
-                             */
-                            it.alpha = if (currentSetColor.isWhiteColor) 0.95f else 0.8f
-                            it.setColorFilter(if (currentSetColor.isWhiteColor) currentSetColor else Color.BLACK)
+                    field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
+                        /** 重新设置通知图标容器实例 */
+                        notificationIconContainer = it
+                        when (args(index = 1).float()) {
+                            1.0f -> {
+                                isDarkIconMode = true
+                                updateStatusBarIconColor(it, isDarkIconMode = true)
+                            }
+                            0.0f -> {
+                                isDarkIconMode = false
+                                updateStatusBarIconColor(it, isDarkIconMode = false)
+                            }
+                            else -> updateStatusBarIconColor(it, isDarkIconMode = false)
                         }
                     }
                 }
             }
+            /** Hook 更新通知图标事件 */
+            injectMember {
+                method {
+                    name = "updateNotificationIcons"
+                    paramCount = 1
+                }
+                afterHook {
+                    field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
+                        /** 重新设置通知图标容器实例 */
+                        notificationIconContainer = it
+                        updateStatusBarIconColor(it)
+                    }
+                }
+            }
+        }
+        /** 注入状态栏通知图标实例 */
+        StatusBarIconViewClass.hook {
             /** 注册广播 */
             injectMember {
                 method {
