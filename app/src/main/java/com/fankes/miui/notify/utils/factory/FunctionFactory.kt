@@ -258,6 +258,14 @@ fun Context.isDebugApp(packageName: String) =
     safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
 
 /**
+ * 获取 APP 是否为系统 APP
+ * @param packageName APP 包名
+ * @return [Boolean]
+ */
+fun Context.isSystemApp(packageName: String) =
+    safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM) ?: 0) != 0 }
+
+/**
  * 对数值自动补零
  * @return [String]
  */
