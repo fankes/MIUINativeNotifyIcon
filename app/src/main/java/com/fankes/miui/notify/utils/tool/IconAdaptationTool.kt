@@ -74,7 +74,7 @@ object IconAdaptationTool {
                 setContentText("尚未适配此应用，点按打开在线规则。")
                 setColor(0xFF2993F0.toInt())
                 setAutoCancel(true)
-                setSmallIcon(Icon.createWithResource(BuildConfig.APPLICATION_ID, R.drawable.ic_unsupported))
+                setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_unsupported))
                 setLargeIcon(context.appIconOf(packageName)?.toBitmap())
                 setContentIntent(
                     PendingIntent.getActivity(
