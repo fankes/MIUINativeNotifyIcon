@@ -166,7 +166,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.notifyIconCustomCornerItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX) &&
                 modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON).not() && isLowerAndroidR.not()
         binding.notifyIconForceAppIconItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
-        binding.notifyIconFixNotifyItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX) && isLowerAndroidR.not()
+        binding.notifyIconFixNotifyItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
         binding.notifyIconAutoSyncItem.isVisible = modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)
         binding.statusIconCountSwitch.isChecked = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
         binding.statusIconCountChildItem.isVisible = modulePrefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT)
@@ -226,7 +226,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             binding.notifyIconCustomCornerItem.isVisible = b &&
                     modulePrefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON).not() && isLowerAndroidR.not()
             binding.notifyIconForceAppIconItem.isVisible = b
-            binding.notifyIconFixNotifyItem.isVisible = b && isLowerAndroidR.not()
+            binding.notifyIconFixNotifyItem.isVisible = b
             binding.notifyIconAutoSyncItem.isVisible = b
             SystemUITool.refreshSystemUI(context = this)
         }

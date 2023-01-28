@@ -26,8 +26,10 @@ package com.fankes.miui.notify.hook.entity
 
 import android.app.NotificationManager
 import android.app.WallpaperManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
@@ -100,16 +102,6 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 原生存在的类 */
     private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
-
-    /** 原生存在的类 */
-    private const val PluginManagerImplClass = "$SYSTEMUI_PACKAGE_NAME.shared.plugins.PluginManagerImpl"
-
-    /** 根据多个版本存在不同的包名相同的类 */
-    private val MiuiClockClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.views.MiuiClock",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.MiuiClock",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.policy.Clock"
-    )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val StatusBarNotificationPresenterClass = VariousClass(
@@ -638,8 +630,43 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 注册生命周期 */
     private fun registerLifecycle() {
-        /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
-        onAppLifecycle { registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ -> if (isUsingCachingMethod) refreshStatusBarIcons() } }
+        onAppLifecycle {
+            /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
+            registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ -> if (isUsingCachingMethod) refreshStatusBarIcons() }
+            /** 注册定时监听 */
+            registerReceiver(Intent.ACTION_TIME_TICK) { context, _ ->
+                if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
+                    IconAdaptationTool.prepareAutoUpdateIconRule(context, prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME))
+            }
+            onCreate {
+                /** 注册发送适配新的 APP 图标通知监听 */
+                registerReceiver(object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent?) {
+                        if (isEnableHookColorNotifyIcon()) intent?.also {
+                            if (it.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
+                                it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                            ) return@also
+                            it.data?.schemeSpecificPart?.also { packageName ->
+                                when (it.action) {
+                                    Intent.ACTION_PACKAGE_ADDED -> {
+                                        if (iconDatas.takeIf { e -> e.isNotEmpty() }
+                                                ?.filter { e -> e.packageName == packageName }
+                                                .isNullOrEmpty()
+                                        ) IconAdaptationTool.pushNewAppSupportNotify(context, packageName)
+                                    }
+                                    Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
+                                }
+                            }
+                        }
+                    }
+                }, IntentFilter().apply {
+                    addDataScheme("package")
+                    addAction(Intent.ACTION_PACKAGE_ADDED)
+                    addAction(Intent.ACTION_PACKAGE_REPLACED)
+                    addAction(Intent.ACTION_PACKAGE_REMOVED)
+                })
+            }
+        }
         /** 刷新图标缓存 */
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
     }
@@ -915,49 +942,5 @@ object SystemUIHooker : YukiBaseHooker() {
                 intercept()
             }.ignoredNoSuchMemberFailure()
         }.ignoredHookClassNotFoundFailure()
-        /** 发送适配新的 APP 图标通知 */
-        PluginManagerImplClass.hook {
-            injectMember {
-                method {
-                    name = "onReceive"
-                    param(ContextClass, IntentClass)
-                }
-                afterHook {
-                    if (isEnableHookColorNotifyIcon()) args().last().cast<Intent>()?.also {
-                        if (it.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
-                            it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                        ) return@also
-                        when (it.action) {
-                            Intent.ACTION_PACKAGE_ADDED -> it.data?.schemeSpecificPart?.also { newPkgName ->
-                                if (iconDatas.takeIf { e -> e.isNotEmpty() }
-                                        ?.filter { e -> e.packageName == newPkgName }
-                                        .isNullOrEmpty()
-                                ) IconAdaptationTool.pushNewAppSupportNotify(args().first().cast()!!, newPkgName)
-                            }
-                            Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(
-                                context = args().first().cast()!!,
-                                packageName = it.data?.schemeSpecificPart ?: ""
-                            )
-                        }
-                    }
-                }
-            }
-        }.ignoredHookClassNotFoundFailure()
-        /** 自动检查通知图标优化更新的注入监听 */
-        MiuiClockClass.hook {
-            injectMember {
-                method { name { it == "updateTime" || it == "updateClock" } }
-                afterHook {
-                    instance<View>().context.also {
-                        /** 注册定时监听 */
-                        if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
-                            IconAdaptationTool.prepareAutoUpdateIconRule(
-                                context = it,
-                                timeSet = prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME)
-                            )
-                    }
-                }
-            }
-        }
     }
 }

@@ -119,7 +119,8 @@ object IconAdaptationTool {
      * @param packageName 安装的 APP 包名
      */
     fun pushNewAppSupportNotify(context: Context, packageName: String) {
-        if (context.isDebugApp(packageName)) return
+        if (packageName.startsWith("com.google.android.trichromelibrary")) return
+        if (context.isSystemApp(packageName) || context.isDebugApp(packageName)) return
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
