@@ -639,6 +639,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     IconAdaptationTool.prepareAutoUpdateIconRule(context, prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME))
             }
             onCreate {
+                /** 注入模块资源 */
+                injectModuleAppResources()
                 /** 注册发送适配新的 APP 图标通知监听 */
                 registerReceiver(object : BroadcastReceiver() {
                     override fun onReceive(context: Context, intent: Intent?) {
