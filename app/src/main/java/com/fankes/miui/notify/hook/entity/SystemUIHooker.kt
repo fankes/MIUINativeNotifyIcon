@@ -553,8 +553,9 @@ object SystemUIHooker : YukiBaseHooker() {
      * 更新状态栏通知图标颜色
      * @param container 当前通知图标容器实例
      * @param isDarkIconMode 是否为深色图标模式
+     * @param animColor 动画过渡颜色
      */
-    private fun updateStatusBarIconColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode) {
+    private fun updateStatusBarIconColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
         if (container.childCount > 0) container.children.forEach {
             (it as? ImageView?)?.also { iconView ->
                 val notification = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
@@ -566,8 +567,8 @@ object SystemUIHooker : YukiBaseHooker() {
                      * 防止图标不是纯黑的问题
                      * 图标在任何场景下跟随状态栏其它图标保持半透明
                      */
-                    iconView.alpha = if (isDarkIconMode) 0.8f else 0.95f
-                    iconView.setColorFilter(if (isDarkIconMode) Color.BLACK else Color.WHITE)
+                    iconView.alpha = if (animColor != null) 1f else (if (isDarkIconMode) 0.8f else 0.95f)
+                    iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
                 }
             }
         }
@@ -738,7 +739,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                 isDarkIconMode = false
                                 updateStatusBarIconColor(it, isDarkIconMode = false)
                             }
-                            else -> updateStatusBarIconColor(it, isDarkIconMode = false)
+                            else -> updateStatusBarIconColor(it, isDarkIconMode = false, args().last().int())
                         }
                     }
                 }
