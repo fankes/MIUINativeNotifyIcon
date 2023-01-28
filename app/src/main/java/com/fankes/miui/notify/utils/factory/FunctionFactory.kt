@@ -254,7 +254,7 @@ fun Context.appIconOf(packageName: String = getPackageName()) = getPackageInfoCo
  * @param packageName APP 包名
  * @return [Boolean]
  */
-fun Context.isAppDebuggable(packageName: String) =
+fun Context.isDebugApp(packageName: String) =
     safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
 
 /**
