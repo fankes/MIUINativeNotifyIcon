@@ -26,7 +26,6 @@ package com.fankes.miui.notify.hook.entity
 
 import android.app.NotificationManager
 import android.app.WallpaperManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -638,36 +637,31 @@ object SystemUIHooker : YukiBaseHooker() {
                 if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
                     IconAdaptationTool.prepareAutoUpdateIconRule(context, prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME))
             }
-            onCreate {
-                /** 注入模块资源 */
-                injectModuleAppResources()
-                /** 注册发送适配新的 APP 图标通知监听 */
-                registerReceiver(object : BroadcastReceiver() {
-                    override fun onReceive(context: Context, intent: Intent?) {
-                        if (isEnableHookColorNotifyIcon()) intent?.also {
-                            if (it.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
-                                it.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                            ) return@also
-                            it.data?.schemeSpecificPart?.also { packageName ->
-                                when (it.action) {
-                                    Intent.ACTION_PACKAGE_ADDED -> {
-                                        if (iconDatas.takeIf { e -> e.isNotEmpty() }
-                                                ?.filter { e -> e.packageName == packageName }
-                                                .isNullOrEmpty()
-                                        ) IconAdaptationTool.pushNewAppSupportNotify(context, packageName)
-                                    }
-                                    Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
-                                }
-                            }
+            /** 注册发送适配新的 APP 图标通知监听 */
+            registerReceiver(IntentFilter().apply {
+                addDataScheme("package")
+                addAction(Intent.ACTION_PACKAGE_ADDED)
+                addAction(Intent.ACTION_PACKAGE_REPLACED)
+                addAction(Intent.ACTION_PACKAGE_REMOVED)
+            }) { context, intent ->
+                if (isEnableHookColorNotifyIcon().not()) return@registerReceiver
+                if (intent.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
+                    intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                ) return@registerReceiver
+                intent.data?.schemeSpecificPart?.also { packageName ->
+                    when (intent.action) {
+                        Intent.ACTION_PACKAGE_ADDED -> {
+                            if (iconDatas.takeIf { e -> e.isNotEmpty() }
+                                    ?.filter { e -> e.packageName == packageName }
+                                    .isNullOrEmpty()
+                            ) IconAdaptationTool.pushNewAppSupportNotify(context, packageName)
                         }
+                        Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
                     }
-                }, IntentFilter().apply {
-                    addDataScheme("package")
-                    addAction(Intent.ACTION_PACKAGE_ADDED)
-                    addAction(Intent.ACTION_PACKAGE_REPLACED)
-                    addAction(Intent.ACTION_PACKAGE_REMOVED)
-                })
+                }
             }
+            /** 注入模块资源 */
+            onCreate { injectModuleAppResources() }
         }
         /** 刷新图标缓存 */
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
