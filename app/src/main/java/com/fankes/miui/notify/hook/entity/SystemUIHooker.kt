@@ -685,7 +685,7 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun recachingPrefs(isRefreshCacheOnly: Boolean = false): Boolean {
         /** 必要的延迟防止 Sp 存储不刷新 */
-        SystemClock.sleep(100)
+        SystemClock.sleep(300)
         /** 获取可读写状态 */
         return prefs.isPreferencesAvailable.also {
             isUsingCachingMethod = true
