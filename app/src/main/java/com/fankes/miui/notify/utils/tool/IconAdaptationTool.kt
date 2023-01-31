@@ -50,8 +50,8 @@ object IconAdaptationTool {
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
 
-    /** 已过期的日期 */
-    private val outDateLimits = HashSet<String>()
+    /** 已过期的时间 */
+    private val outTimeLimits = HashSet<String>()
 
     /**
      * 推送新 APP 安装适配通知
@@ -107,27 +107,20 @@ object IconAdaptationTool {
 
     /**
      * 自动更新通知图标优化在线规则
-     *
-     * 一天执行一次
      * @param context 实例
      * @param timeSet 设定的时间
      */
     fun prepareAutoUpdateIconRule(context: Context, timeSet: String) = runInSafe {
         System.currentTimeMillis().also {
-            if (it.stampToDate(format = "HH:mm") == timeSet && (outDateLimits.isEmpty() || outDateLimits.none { each ->
-                    each == it.stampToDate(format = "yyyy-MM-dd")
-                })) {
-                outDateLimits.add(it.stampToDate(format = "yyyy-MM-dd"))
-                context.startActivity(
-                    Intent().apply {
-                        component = ComponentName(
-                            MODULE_PACKAGE_NAME,
-                            "${MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity"
-                        )
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                )
-            }
+            val nowTime = it.stampToDate(format = "HH:mm")
+            if (timeSet != nowTime || outTimeLimits.any { e -> e == nowTime }) return
+            outTimeLimits.add(nowTime)
+            context.startActivity(
+                Intent().apply {
+                    component = ComponentName(MODULE_PACKAGE_NAME, "${MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
         }
     }
 }

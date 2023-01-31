@@ -23,8 +23,12 @@
 package com.fankes.miui.notify.utils.tool
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.delayedRun
+import com.fankes.miui.notify.utils.factory.execShell
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.dataChannel
@@ -98,40 +102,50 @@ object SystemUITool {
      * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
      * @param callback 成功后回调
      */
-    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, callback: () -> Unit = {}) = runInSafe {
-        if (YukiHookAPI.Status.isXposedModuleActive)
-            context?.showDialog {
-                title = "请稍后"
-                progressContent = "正在等待系统界面刷新"
-                /** 是否等待成功 */
-                var isWaited = false
-                /** 设置等待延迟 */
-                delayedRun(ms = 5000) {
-                    if (isWaited) return@delayedRun
-                    cancel()
-                    context.snake(msg = "预计响应超时，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
-                }
-                checkingActivated(context) { isValied ->
-                    when {
-                        isValied.not() -> {
-                            cancel()
-                            isWaited = true
-                            context.snake(msg = "请重启系统界面以生效模块更新", actionText = "立即重启") { restartSystemUI(context) }
-                        }
-                        else -> context.dataChannel(SYSTEMUI_PACKAGE_NAME).with {
-                            wait(CALL_MODULE_REFRESH_RESULT) {
+    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, callback: () -> Unit = {}) {
+        /**
+         * 刷新系统界面
+         * @param result 回调结果
+         */
+        fun doRefresh(result: (Boolean) -> Unit) {
+            context?.dataChannel(SYSTEMUI_PACKAGE_NAME)?.with {
+                wait(CALL_MODULE_REFRESH_RESULT) { result(it) }
+                put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
+            }
+        }
+        when {
+            YukiHookAPI.Status.isXposedModuleActive && context is AppCompatActivity ->
+                context.showDialog {
+                    title = "请稍后"
+                    progressContent = "正在等待系统界面刷新"
+                    /** 是否等待成功 */
+                    var isWaited = false
+                    /** 设置等待延迟 */
+                    delayedRun(ms = 5000) {
+                        if (isWaited) return@delayedRun
+                        cancel()
+                        context.snake(msg = "预计响应超时，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
+                    }
+                    checkingActivated(context) { isValied ->
+                        when {
+                            isValied.not() -> {
+                                cancel()
+                                isWaited = true
+                                context.snake(msg = "请重启系统界面以生效模块更新", actionText = "立即重启") { restartSystemUI(context) }
+                            }
+                            else -> doRefresh {
                                 cancel()
                                 isWaited = true
                                 callback()
                                 if (it.not()) context.snake(msg = "刷新失败，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
                             }
-                            put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
                         }
                     }
+                    noCancelable()
                 }
-                noCancelable()
-            }
-        else context?.snake(msg = "模块没有激活，更改不会生效")
+            YukiHookAPI.Status.isXposedModuleActive.not() && context is AppCompatActivity -> context.snake(msg = "模块没有激活，更改不会生效")
+            else -> doRefresh { callback() }
+        }
     }
 
     /**
