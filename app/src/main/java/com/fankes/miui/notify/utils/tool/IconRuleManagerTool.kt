@@ -206,7 +206,6 @@ object IconRuleManagerTool {
                                         context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
                                     params.isCompareDifferent(it) -> {
                                         params.save(it)
-                                        pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                         notifyRefresh(context)
                                         callback()
                                     }
@@ -255,7 +254,6 @@ object IconRuleManagerTool {
                                 context.snakeOrNotify(title = "同步错误", msg = "目标地址不是有效的 JSON 数据")
                             params.isCompareDifferent(content) -> {
                                 params.save(content)
-                                pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
                                 notifyRefresh(context)
                                 callback()
                             }
@@ -354,8 +352,8 @@ object IconRuleManagerTool {
      * @param context 实例
      */
     private fun notifyRefresh(context: Context) {
-        if (context !is AppCompatActivity) return
-        SystemUITool.refreshSystemUI(context) { context.snake(msg = "通知图标优化名单已完成同步") }
+        if (context !is AppCompatActivity) pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
+        SystemUITool.refreshSystemUI(context) { if (context is AppCompatActivity) context.snake(msg = "已更新通知图标优化名单，点击查看") }
     }
 
     /**
@@ -364,8 +362,7 @@ object IconRuleManagerTool {
      * @param msg 消息内容
      */
     private fun Context.snakeOrNotify(title: String, msg: String) {
-        if (this !is AppCompatActivity)
-            pushNotify(context = this, title, msg)
+        if (this !is AppCompatActivity) pushNotify(context = this, title, msg)
         else snake(msg)
     }
 

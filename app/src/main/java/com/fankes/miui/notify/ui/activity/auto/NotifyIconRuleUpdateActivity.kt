@@ -32,7 +32,6 @@ import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
-import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 
 class NotifyIconRuleUpdateActivity : Activity() {
 
@@ -49,7 +48,7 @@ class NotifyIconRuleUpdateActivity : Activity() {
             return
         }
         /** 拉取云端数据 */
-        IconRuleManagerTool.sync(appContext) {
+        IconRuleManagerTool.sync(context = this) {
             /** 刷新系统界面 */
             SystemUITool.refreshSystemUI()
             /** 结束当前窗口 */
