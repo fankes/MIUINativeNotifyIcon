@@ -161,6 +161,12 @@ object SystemUIHooker : YukiBaseHooker() {
     private var isWallpaperColorListenerSetUp = false
 
     /**
+     * 获取状态栏通知图标透明度
+     * @return [Float]
+     */
+    private val statusBarIconAlpha get() = if (isDarkIconMode) 0.75f else 0.95f
+
+    /**
      * 是否启用通知图标优化功能
      * @param isHooking 是否判断启用通知功能 - 默认：是
      * @return [Boolean]
@@ -559,10 +565,21 @@ object SystemUIHooker : YukiBaseHooker() {
                      * 防止图标不是纯黑的问题
                      * 图标在任何场景下跟随状态栏其它图标保持半透明
                      */
-                    iconView.alpha = if (animColor != null) 1f else (if (isDarkIconMode) 0.8f else 0.95f)
+                    iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
                     iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
                 }
             }
+        }
+    }
+
+    /**
+     * 更新状态栏通知图标透明度
+     * @param container 当前通知图标容器实例
+     */
+    private fun updateStatusBarIconAlpha(container: ViewGroup) {
+        val iconStateMethod = container.current().method { name = "getIconState"; param(StatusBarIconViewClass) }
+        if (container.childCount > 0) container.children.forEach { iconView ->
+            iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(statusBarIconAlpha)
         }
     }
 
@@ -811,6 +828,14 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         /** 注入状态栏通知图标容器实例 */
         NotificationIconContainerClass.hook {
+            injectMember {
+                method { name = "applyIconStates" }
+                afterHook { updateStatusBarIconAlpha(instance()) }
+            }
+            injectMember {
+                method { name = "resetViewStates" }
+                afterHook { updateStatusBarIconAlpha(instance()) }
+            }
             injectMember {
                 method { name = "calculateIconTranslations" }
                 afterHook {
