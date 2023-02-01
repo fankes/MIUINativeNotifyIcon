@@ -472,7 +472,11 @@ object SystemUIHooker : YukiBaseHooker() {
             printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             /** 处理自定义通知图标优化 */
             when {
-                prefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) -> setDefaultNotifyIcon(context.appIconOf(notifyInstance.nfPkgName))
+                prefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) -> {
+                    @Suppress("DEPRECATION")
+                    val miuiAppIcon = notifyInstance.notification?.extras?.getParcelable<Icon?>("miui.appIcon")
+                    setDefaultNotifyIcon(drawable = miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
+                }
                 customIcon != null -> iconImageView.apply {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
