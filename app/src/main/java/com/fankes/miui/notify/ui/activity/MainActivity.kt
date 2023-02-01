@@ -298,7 +298,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             statusBarIconCount = binding.iconCountEdit.text.toString().trim().toInt()
                             modulePrefs.put(DataConst.HOOK_STATUS_ICON_COUNT, statusBarIconCount)
                             this@MainActivity.binding.statusIconCountText.text = statusBarIconCount.toString()
-                            SystemUITool.showNeedRestartSnake(context)
+                            SystemUITool.refreshSystemUI(context) { context.snake(msg = "设置将在新通知推送或状态栏刷新后自动生效") }
                         }.onFailure { snake(msg = "数值格式无效") }
                         else -> snake(msg = "请输入有效数值")
                     }
