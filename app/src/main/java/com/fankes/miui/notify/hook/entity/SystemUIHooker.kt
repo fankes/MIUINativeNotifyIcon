@@ -386,14 +386,14 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param expandedNf 通知实例
      * @param iconImageView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
-     * @param isUseAndroid12Style 是否使用 Android 12 通知图标风格 - 默认跟随系统版本决定
+     * @param isUseMaterial3Style 是否使用 Material 3 通知图标风格 - 默认跟随系统版本决定
      */
     private fun compatNotifyIcon(
         context: Context,
         expandedNf: StatusBarNotification?,
         iconImageView: ImageView,
         isExpanded: Boolean = true,
-        isUseAndroid12Style: Boolean = isUpperOfAndroidS,
+        isUseMaterial3Style: Boolean = isUpperOfAndroidS,
     ) = runInSafe(msg = "compatNotifyIcon") {
         /**
          * 设置默认通知图标
@@ -414,7 +414,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         )
                     }
                 }
-                if (isUseAndroid12Style) {
+                if (isUseMaterial3Style) {
                     /** 清除原生的背景边距 */
                     setPadding(0, 0, 0, 0)
                     /** 清除原生的主题色背景圆圈颜色 */
@@ -445,7 +445,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 通知图标适配颜色 */
             val supportColor = iconColor.let {
                 when {
-                    isUseAndroid12Style -> newStyle
+                    isUseMaterial3Style -> newStyle
                     it == 0 || isExpanded.not() -> oldStyle
                     else -> it
                 }
@@ -465,8 +465,8 @@ object SystemUIHooker : YukiBaseHooker() {
             var customIconColor: Int
             compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).also {
                 customIcon = it.first
-                customIconColor = if (isUseAndroid12Style || isExpanded)
-                    (it.second.takeIf { e -> e != 0 } ?: (if (isUseAndroid12Style) context.systemAccentColor else 0)) else 0
+                customIconColor = if (isUseMaterial3Style || isExpanded)
+                    (it.second.takeIf { e -> e != 0 } ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
             }
             /** 打印日志 */
             printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
@@ -480,16 +480,16 @@ object SystemUIHooker : YukiBaseHooker() {
                     /** 设置自定义小图标 */
                     setImageBitmap(customIcon)
                     /** 上色 */
-                    setColorFilter(if (isUseAndroid12Style || customIconColor == 0) supportColor else customIconColor)
-                    /** Android 12 设置图标外圈颜色 */
-                    if (isUseAndroid12Style && customIconColor != 0)
+                    setColorFilter(if (isUseMaterial3Style || customIconColor == 0) supportColor else customIconColor)
+                    /** 设置图标外圈颜色 */
+                    if (isUseMaterial3Style && customIconColor != 0)
                         background = DrawableBuilder()
                             .rectangle()
                             .cornerRadius(iconCorner.dp(context))
                             .solidColor(if (context.isSystemInDarkMode) customIconColor.brighterColor else customIconColor)
                             .build()
                     /** 设置原生的背景边距 */
-                    if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
+                    if (isUseMaterial3Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
                 }
                 else -> {
                     /** 重新设置图标 - 防止系统更改它 */
@@ -500,9 +500,9 @@ object SystemUIHooker : YukiBaseHooker() {
                         clipToOutline = false
                         /** 设置图标着色 */
                         setColorFilter(supportColor)
-                        /** Android 12 设置图标外圈颜色 */
+                        /** 设置图标外圈颜色 */
                         (if (hasIconColor) iconColor else context.systemAccentColor).also {
-                            if (isUseAndroid12Style)
+                            if (isUseMaterial3Style)
                                 background = DrawableBuilder()
                                     .rectangle()
                                     .cornerRadius(iconCorner.dp(context))
@@ -510,7 +510,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                     .build()
                         }
                         /** 设置原生的背景边距 */
-                        if (isUseAndroid12Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
+                        if (isUseMaterial3Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
                     } else setDefaultNotifyIcon(notifyInstance.compatPushingIcon(context, iconDrawable))
                 }
             }
@@ -919,7 +919,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             context = context,
                             expandedNf = instance.getRowPair().second.getSbn(),
                             iconImageView = this,
-                            isUseAndroid12Style = true
+                            isUseMaterial3Style = true
                         )
                     }
                 }
@@ -937,7 +937,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
                         compatNotifyIcon(context, NotificationChildrenContainerClass.toClassOrNull()?.field {
                             name = "mContainingNotification"
-                        }?.get(instance)?.any()?.getSbn(), iconImageView = this, isUseAndroid12Style = true)
+                        }?.get(instance)?.any()?.getSbn(), iconImageView = this, isUseMaterial3Style = true)
                     }
                 }
             }
