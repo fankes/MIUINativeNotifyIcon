@@ -61,6 +61,7 @@ import com.highcapable.yukihookapi.hook.factory.*
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.type.android.*
+import com.highcapable.yukihookapi.hook.type.defined.VagueType
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.FloatType
 import com.highcapable.yukihookapi.hook.type.java.IntType
@@ -747,7 +748,7 @@ object SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "onDarkChanged"
-                    param(RectClass, FloatType, IntType)
+                    param(VagueType, FloatType, IntType)
                 }
                 afterHook {
                     field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
