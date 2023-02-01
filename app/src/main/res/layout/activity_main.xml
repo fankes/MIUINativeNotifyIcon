@@ -674,11 +674,24 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="15dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
                         android:alpha="0.6"
                         android:lineSpacingExtra="6dp"
-                        android:text="你可以拖拽滑动条来调整通知栏中图标的边框圆角大小，仅支持 Android 12 风格以及 MIUI 经典样式的通知图标。"
+                        android:text="你可以拖拽滑动条来调整通知栏中图标的边框圆角大小。"
                         android:textColor="@color/colorTextDark"
                         android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="此功能仅支持 Android 12 及以上系统的 Material 3 通知图标风格以及 MIUI 后期的经典样式通知图标风格。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
