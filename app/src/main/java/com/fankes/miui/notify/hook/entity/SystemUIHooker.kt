@@ -46,11 +46,11 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.bean.IconDataBean
-import com.fankes.miui.notify.data.DataConst
-import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
-import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
-import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
+import com.fankes.miui.notify.const.PackageName
+import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.params.IconPackParams
+import com.fankes.miui.notify.params.factory.isAppNotifyHookAllOf
+import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
@@ -73,70 +73,68 @@ import top.defaults.drawabletoolbox.DrawableBuilder
 object SystemUIHooker : YukiBaseHooker() {
 
     /** MIUI 新版本存在的类 */
-    private const val SystemUIApplicationClass = "$SYSTEMUI_PACKAGE_NAME.SystemUIApplication"
+    private const val SystemUIApplicationClass = "${PackageName.SYSTEMUI}.SystemUIApplication"
 
     /** MIUI 新版本存在的类 */
-    private const val NotificationHeaderViewWrapperInjectorClass =
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
-
-    /** MIUI 新版本存在的类 */
-    private const val MiuiNotificationViewWrapperClass =
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
+    private const val MiuiNotificationViewWrapperClass = "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper"
 
     /** MIUI 新版本存在的类 */
     private const val MiuiNotificationChildrenContainerClass =
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.MiuiNotificationChildrenContainer"
+        "${PackageName.SYSTEMUI}.statusbar.notification.stack.MiuiNotificationChildrenContainer"
+
+    /** MIUI 新版本存在的类 */
+    private const val NotificationHeaderViewWrapperInjectorClass =
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
     /** 原生存在的类 */
-    private const val NotificationChildrenContainerClass =
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.stack.NotificationChildrenContainer"
+    private const val NotificationChildrenContainerClass = "${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer"
 
     /** 原生存在的类 */
-    private const val NotificationIconAreaControllerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconAreaController"
+    private const val NotificationIconAreaControllerClass = "${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController"
 
     /** 原生存在的类 */
     private const val ContrastColorUtilClass = "com.android.internal.util.ContrastColorUtil"
 
     /** 原生存在的类 */
-    private const val StatusBarIconViewClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.StatusBarIconView"
+    private const val StatusBarIconViewClass = "${PackageName.SYSTEMUI}.statusbar.StatusBarIconView"
 
     /** 原生存在的类 */
-    private const val NotificationIconContainerClass = "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.NotificationIconContainer"
+    private const val NotificationIconContainerClass = "${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconContainer"
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val StatusBarNotificationPresenterClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBarNotificationPresenter",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.phone.StatusBar"
+        "${PackageName.SYSTEMUI}.statusbar.phone.StatusBarNotificationPresenter",
+        "${PackageName.SYSTEMUI}.statusbar.phone.StatusBar"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val ExpandableNotificationRowClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.ExpandableNotificationRow",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.ExpandableNotificationRow"
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.ExpandableNotificationRow",
+        "${PackageName.SYSTEMUI}.statusbar.ExpandableNotificationRow"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val NotificationViewWrapperClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationViewWrapper",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationViewWrapper"
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationViewWrapper",
+        "${PackageName.SYSTEMUI}.statusbar.notification.NotificationViewWrapper"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val NotificationHeaderViewWrapperClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationHeaderViewWrapper"
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
+        "${PackageName.SYSTEMUI}.statusbar.notification.NotificationHeaderViewWrapper"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val NotificationUtilClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.NotificationUtil",
-        "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.notification.NotificationUtil"
+        "${PackageName.SYSTEMUI}.statusbar.notification.NotificationUtil",
+        "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil"
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
     private val ExpandedNotificationClass = VariousClass(
-        "$SYSTEMUI_PACKAGE_NAME.statusbar.notification.ExpandedNotification",
-        "$SYSTEMUI_PACKAGE_NAME.miui.statusbar.ExpandedNotification"
+        "${PackageName.SYSTEMUI}.statusbar.notification.ExpandedNotification",
+        "${PackageName.SYSTEMUI}.miui.statusbar.ExpandedNotification"
     )
 
     /** 缓存的通知图标优化数组 */
@@ -170,14 +168,6 @@ object SystemUIHooker : YukiBaseHooker() {
     private val statusBarIconAlpha get() = if (isDarkIconMode) 0.75f else 0.95f
 
     /**
-     * 是否启用通知图标优化功能
-     * @param isHooking 是否判断启用通知功能 - 默认：是
-     * @return [Boolean]
-     */
-    private fun isEnableHookColorNotifyIcon(isHooking: Boolean = true) =
-        prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX) && (if (isHooking) prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_NOTIFY) else true)
-
-    /**
      * - 这个是修复彩色图标的关键核心代码判断
      *
      * 判断是否为灰度图标 - 反射执行系统方法
@@ -186,7 +176,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean]
      */
     private fun isGrayscaleIcon(context: Context, drawable: Drawable) =
-        if (prefs.get(DataConst.ENABLE_COLOR_ICON_COMPAT).not()) safeOfFalse {
+        if (ConfigData.isEnableColorIconCompat.not()) safeOfFalse {
             ContrastColorUtilClass.toClass().let {
                 it.method {
                     name = "isGrayscaleIcon"
@@ -235,7 +225,7 @@ object SystemUIHooker : YukiBaseHooker() {
         isCustom: Boolean,
         isGrayscale: Boolean
     ) {
-        if (prefs.get(DataConst.ENABLE_MODULE_LOG)) loggerD(
+        if (ConfigData.isEnableModuleLog) loggerD(
             msg = "$tag --> [${context.appNameOf(packageName = expandedNf?.nfPkgName ?: "")}][${expandedNf?.nfPkgName}] " +
                     "custom [$isCustom] " +
                     "grayscale [$isGrayscale] " +
@@ -340,7 +330,7 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun compatCustomIcon(isGrayscaleIcon: Boolean, packageName: String): Pair<Bitmap?, Int> {
         var customPair: Pair<Bitmap?, Int>? = null
-        if (prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX)) run {
+        if (ConfigData.isEnableNotifyIconFix) run {
             iconDatas.takeIf { it.isNotEmpty() }?.forEach {
                 if (packageName == it.packageName && isAppNotifyHookOf(it)) {
                     if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
@@ -436,9 +426,6 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 旧版风格反色 */
             val oldStyle = if (context.isNotSystemInDarkMode) 0xFF707070.toInt() else Color.WHITE
 
-            /** 通知图标边框圆角大小 */
-            val iconCorner = prefs.get(DataConst.NOTIFY_ICON_CORNER)
-
             /** 通知图标原始颜色 */
             val iconColor = notifyInstance.notification.color
 
@@ -475,7 +462,7 @@ object SystemUIHooker : YukiBaseHooker() {
             printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             /** 处理自定义通知图标优化 */
             when {
-                prefs.get(DataConst.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) -> {
+                ConfigData.isEnableNotifyIconForceAppIcon -> {
                     @Suppress("DEPRECATION")
                     val miuiAppIcon = notifyInstance.notification?.extras?.getParcelable<Icon?>("miui.appIcon")
                     setDefaultNotifyIcon(drawable = miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
@@ -491,7 +478,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     if (isUseMaterial3Style && customIconColor != 0)
                         background = DrawableBuilder()
                             .rectangle()
-                            .cornerRadius(iconCorner.dp(context))
+                            .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
                             .solidColor(if (context.isSystemInDarkMode) customIconColor.brighterColor else customIconColor)
                             .build()
                     /** 设置原生的背景边距 */
@@ -511,7 +498,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             if (isUseMaterial3Style)
                                 background = DrawableBuilder()
                                     .rectangle()
-                                    .cornerRadius(iconCorner.dp(context))
+                                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
                                     .solidColor(if (context.isSystemInDarkMode) it.brighterColor else it)
                                     .build()
                         }
@@ -659,8 +646,8 @@ object SystemUIHooker : YukiBaseHooker() {
             registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ -> if (isUsingCachingMethod) refreshStatusBarIcons() }
             /** 注册定时监听 */
             registerReceiver(Intent.ACTION_TIME_TICK) { context, _ ->
-                if (isEnableHookColorNotifyIcon() && prefs.get(DataConst.ENABLE_NOTIFY_ICON_FIX_AUTO))
-                    IconAdaptationTool.prepareAutoUpdateIconRule(context, prefs.get(DataConst.NOTIFY_ICON_FIX_AUTO_TIME))
+                if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixNotify && ConfigData.isEnableNotifyIconFixAuto)
+                    IconAdaptationTool.prepareAutoUpdateIconRule(context, ConfigData.notifyIconFixAutoTime)
             }
             /** 注册发送适配新的 APP 图标通知监听 */
             registerReceiver(IntentFilter().apply {
@@ -669,21 +656,21 @@ object SystemUIHooker : YukiBaseHooker() {
                 addAction(Intent.ACTION_PACKAGE_REPLACED)
                 addAction(Intent.ACTION_PACKAGE_REMOVED)
             }) { context, intent ->
-                if (isEnableHookColorNotifyIcon().not()) return@registerReceiver
                 if (intent.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
                     intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
                 ) return@registerReceiver
-                intent.data?.schemeSpecificPart?.also { packageName ->
-                    when (intent.action) {
-                        Intent.ACTION_PACKAGE_ADDED -> {
-                            if (iconDatas.takeIf { e -> e.isNotEmpty() }
-                                    ?.filter { e -> e.packageName == packageName }
-                                    .isNullOrEmpty()
-                            ) IconAdaptationTool.pushNewAppSupportNotify(context, packageName)
+                if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixNotify)
+                    intent.data?.schemeSpecificPart?.also { packageName ->
+                        when (intent.action) {
+                            Intent.ACTION_PACKAGE_ADDED -> {
+                                if (iconDatas.takeIf { e -> e.isNotEmpty() }
+                                        ?.filter { e -> e.packageName == packageName }
+                                        .isNullOrEmpty()
+                                ) IconAdaptationTool.pushNewAppSupportNotify(context, packageName)
+                            }
+                            Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
                         }
-                        Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
                     }
-                }
             }
             /** 注入模块资源 */
             onCreate { injectModuleAppResources() }
@@ -695,12 +682,7 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 缓存图标数据 */
     private fun cachingIconDatas() {
         iconDatas.clear()
-        IconPackParams(param = this).iconDatas.apply {
-            when {
-                isNotEmpty() -> forEach { iconDatas.add(it) }
-                isEmpty() && isEnableHookColorNotifyIcon(isHooking = false) -> loggerW(msg = "NotifyIconSupportData is empty!")
-            }
-        }
+        IconPackParams(param = this).iconDatas.apply { if (isNotEmpty()) forEach { iconDatas.add(it) } }
     }
 
     /**
@@ -863,8 +845,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     val maxStaticIconsField = field { name = "MAX_STATIC_ICONS" }.get(instance)
                     if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
                     /** 解除状态栏通知图标个数限制 */
-                    if (isShowNotificationIcons && prefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT))
-                        maxStaticIconsField.set(prefs.get(DataConst.HOOK_STATUS_ICON_COUNT).let { if (it in 0..100) it else 5 })
+                    if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
+                        maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
                     else maxStaticIconsField.set(statusBarMaxStaticIcons)
                 }
             }.by { NotificationIconContainerClass.toClassOrNull()?.hasField { name = "MAX_STATIC_ICONS" } ?: false }

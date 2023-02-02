@@ -30,11 +30,11 @@ import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.databinding.ActivityConfigBinding
 import com.fankes.miui.notify.databinding.AdapterConfigBinding
 import com.fankes.miui.notify.databinding.DiaIconFilterBinding
-import com.fankes.miui.notify.hook.factory.isAppNotifyHookAllOf
-import com.fankes.miui.notify.hook.factory.isAppNotifyHookOf
-import com.fankes.miui.notify.hook.factory.putAppNotifyHookAllOf
-import com.fankes.miui.notify.hook.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.params.IconPackParams
+import com.fankes.miui.notify.params.factory.isAppNotifyHookAllOf
+import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
+import com.fankes.miui.notify.params.factory.putAppNotifyHookAllOf
+import com.fankes.miui.notify.params.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool

@@ -24,7 +24,7 @@ package com.fankes.miui.notify.utils.tool
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
+import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.execShell
 import com.fankes.miui.notify.utils.factory.showDialog
@@ -64,7 +64,7 @@ object SystemUITool {
      * @param result 成功后回调
      */
     fun checkingActivated(context: Context, result: (Boolean) -> Unit) =
-        context.dataChannel(SYSTEMUI_PACKAGE_NAME).checkingVersionEquals(result = result)
+        context.dataChannel(PackageName.SYSTEMUI).checkingVersionEquals(result = result)
 
     /**
      * 重启系统界面
@@ -108,7 +108,7 @@ object SystemUITool {
          * @param result 回调结果
          */
         fun doRefresh(result: (Boolean) -> Unit) {
-            context?.dataChannel(SYSTEMUI_PACKAGE_NAME)?.with {
+            context?.dataChannel(PackageName.SYSTEMUI)?.with {
                 wait(CALL_MODULE_REFRESH_RESULT) { result(it) }
                 put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
             }

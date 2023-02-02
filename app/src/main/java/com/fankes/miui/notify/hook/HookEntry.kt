@@ -22,8 +22,8 @@
  */
 package com.fankes.miui.notify.hook
 
-import com.fankes.miui.notify.data.DataConst
-import com.fankes.miui.notify.hook.HookConst.SYSTEMUI_PACKAGE_NAME
+import com.fankes.miui.notify.const.PackageName
+import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.hook.entity.SystemUIHooker
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
 import com.fankes.miui.notify.utils.factory.isNotMIUI
@@ -44,17 +44,13 @@ object HookEntry : IYukiHookXposedInit {
     }
 
     override fun onHook() = encase {
-        loadApp(SYSTEMUI_PACKAGE_NAME) {
+        loadApp(PackageName.SYSTEMUI) {
+            ConfigData.init(instance = this)
             when {
-                /** 不是 MIUI 系统停止 Hook */
                 isNotMIUI -> loggerW(msg = "Aborted Hook -> This System is not MIUI")
-                /** 系统版本低于 Android P 停止 Hook */
                 isLowerAndroidP -> loggerW(msg = "Aborted Hook -> This System is lower than Android P")
-                /** 不是支持的 MIUI 系统停止 Hook */
                 isNotSupportMiuiVersion -> loggerW(msg = "Aborted Hook -> This MIUI Version ${miuiVersion.ifBlank { "unknown" }} not supported")
-                /** Hook 被手动关闭停止 Hook */
-                prefs.get(DataConst.ENABLE_MODULE).not() -> loggerW(msg = "Aborted Hook -> Hook Closed")
-                /** 开始 Hook */
+                ConfigData.isEnableModule.not() -> loggerW(msg = "Aborted Hook -> Hook Closed")
                 else -> loadHooker(SystemUIHooker)
             }
         }

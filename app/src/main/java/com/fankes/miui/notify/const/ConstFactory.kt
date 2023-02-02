@@ -18,17 +18,30 @@
  * and eula along with this software.  If not, see
  * <https://www.gnu.org/licenses/>
  *
- * This file is Created by fankes on 2022/1/24.
+ * This file is Created by fankes on 2023/2/2.
  */
-@file:Suppress("SetWorldReadable")
+package com.fankes.miui.notify.const
 
-package com.fankes.miui.notify.hook
+/**
+ * 包名常量定义类
+ */
+object PackageName {
 
-object HookConst {
+    /** 系统界面 (系统 UI) */
+    const val SYSTEMUI = "com.android.systemui"
+}
 
-    const val TYPE_SOURCE_SYNC_WAY_1 = 1000
-    const val TYPE_SOURCE_SYNC_WAY_2 = 2000
-    const val TYPE_SOURCE_SYNC_WAY_3 = 3000
+/**
+ * 通知图标优化名单同步方式定义类
+ */
+object IconRuleSourceSyncType {
 
-    const val SYSTEMUI_PACKAGE_NAME = "com.android.systemui"
+    /** Github Raw (代理) */
+    const val GITHUB_RAW_PROXY = 1000
+
+    /** Github Raw (直连) */
+    const val GITHUB_RAW_DIRECT = 2000
+
+    /** 自定义地址 */
+    const val CUSTOM_URL = 3000
 }

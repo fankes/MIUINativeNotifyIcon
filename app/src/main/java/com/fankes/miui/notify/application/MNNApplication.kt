@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.application
 
 import androidx.appcompat.app.AppCompatDelegate
+import com.fankes.miui.notify.data.ConfigData
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 
 class MNNApplication : ModuleApplication() {
@@ -33,5 +34,7 @@ class MNNApplication : ModuleApplication() {
         super.onCreate()
         /** 跟随系统夜间模式 */
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        /** 装载存储控制类 */
+        ConfigData.init(instance = this)
     }
 }
