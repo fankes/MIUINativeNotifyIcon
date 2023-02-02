@@ -155,7 +155,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
         }
         binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
-        binding.mainTextMiuiVersion.text = "系统版本：$miuiFullVersion"
+        binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
         binding.notifyIconCustomCornerSeekbar.progress = ConfigData.notifyIconCornerSize
         binding.notifyIconCustomCornerText.text = "${ConfigData.notifyIconCornerSize} dp"
