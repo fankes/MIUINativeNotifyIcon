@@ -201,7 +201,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
             modulePrefs.put(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT, b)
             binding.statusIconCountChildItem.isVisible = b
-            SystemUITool.showNeedRestartSnake(context = this)
+            SystemUITool.refreshSystemUI(context = this) { snake(msg = "设置将在新通知推送或状态栏刷新后自动生效") }
         }
         binding.colorIconCompatSwitch.setOnCheckedChangeListener { btn, b ->
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
