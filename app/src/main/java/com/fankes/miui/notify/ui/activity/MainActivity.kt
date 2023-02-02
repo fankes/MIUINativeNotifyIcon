@@ -37,6 +37,7 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.*
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
+import com.fankes.miui.notify.utils.tool.I18nWarnTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.miui.notify.utils.tool.YukiPromoteTool
 import com.highcapable.yukihookapi.YukiHookAPI
@@ -154,6 +155,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     noCancelable()
                 }
         }
+        I18nWarnTool.checkingOrShowing(context = this)
         binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
         binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
