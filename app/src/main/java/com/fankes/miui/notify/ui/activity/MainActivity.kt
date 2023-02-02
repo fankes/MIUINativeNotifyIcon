@@ -48,18 +48,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 窗口是否启动 */
         internal var isActivityLive = false
 
+        /** 模块是否可用 */
+        internal var isModuleRegular = false
+
+        /** 模块是否有效 */
+        internal var isModuleValied = false
+
         /** 模块版本 */
         private const val moduleVersion = BuildConfig.VERSION_NAME
 
         /** 预发布的版本标识 */
         private const val pendingFlag = ""
     }
-
-    /** 模块是否可用 */
-    private var isModuleRegular = false
-
-    /** 模块是否有效 */
-    private var isModuleValied = false
 
     override fun onCreate() {
         /** 设置可用性 */

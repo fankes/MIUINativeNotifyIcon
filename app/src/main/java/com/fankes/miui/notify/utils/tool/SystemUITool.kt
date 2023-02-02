@@ -25,6 +25,7 @@ package com.fankes.miui.notify.utils.tool
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.const.PackageName
+import com.fankes.miui.notify.ui.activity.MainActivity
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.execShell
 import com.fankes.miui.notify.utils.factory.showDialog
@@ -84,7 +85,8 @@ object SystemUITool {
             title = "重启系统界面"
             msg = "你确定要立即重启系统界面吗？\n\n" +
                     "部分 MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n" +
-                    "重启过程会黑屏并等待进入锁屏重新解锁。"
+                    "重启过程会黑屏并等待进入锁屏重新解锁。" + (if (MainActivity.isModuleRegular && MainActivity.isModuleValied)
+                "\n\n你也可以选择“立即生效”来动态刷新系统界面并生效当前模块设置。" else "")
             confirmButton {
                 execShell(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
@@ -93,6 +95,7 @@ object SystemUITool {
                 }
             }
             cancelButton()
+            if (MainActivity.isModuleRegular && MainActivity.isModuleValied) neutralButton(text = "立即生效") { refreshSystemUI(context) }
         }
     }
 
