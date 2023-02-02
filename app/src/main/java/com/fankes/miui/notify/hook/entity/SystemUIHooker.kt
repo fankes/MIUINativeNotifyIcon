@@ -148,6 +148,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
 
+    /** 状态栏原始通知图标最大个数限制 */
+    private var statusBarMaxStaticIcons = -1
+
     /** 是否已经使用过缓存刷新功能 */
     private var isUsingCachingMethod = false
 
@@ -857,11 +860,12 @@ object SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method { name = "updateState" }
                 beforeHook {
+                    val maxStaticIconsField = field { name = "MAX_STATIC_ICONS" }.get(instance)
+                    if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
                     /** 解除状态栏通知图标个数限制 */
                     if (isShowNotificationIcons && prefs.get(DataConst.ENABLE_HOOK_STATUS_ICON_COUNT))
-                        field { name = "MAX_STATIC_ICONS" }
-                            .get(instance).set(prefs.get(DataConst.HOOK_STATUS_ICON_COUNT)
-                                .let { if (it in 0..100) it else 5 })
+                        maxStaticIconsField.set(prefs.get(DataConst.HOOK_STATUS_ICON_COUNT).let { if (it in 0..100) it else 5 })
+                    else maxStaticIconsField.set(statusBarMaxStaticIcons)
                 }
             }.by { NotificationIconContainerClass.toClassOrNull()?.hasField { name = "MAX_STATIC_ICONS" } ?: false }
             /** 旧版方法 - 新版不存在 */
