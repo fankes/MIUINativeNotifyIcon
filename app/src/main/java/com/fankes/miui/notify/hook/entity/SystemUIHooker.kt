@@ -552,7 +552,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /**
      * 更新状态栏通知图标颜色
-     * @param container 当前通知图标容器实例
+     * @param container 当前 [NotificationIconAreaControllerClass] 的实例
      * @param isDarkIconMode 是否为深色图标模式
      * @param animColor 动画过渡颜色
      */
@@ -577,11 +577,12 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /**
      * 更新状态栏通知图标透明度
-     * @param container 当前通知图标容器实例
+     * @param container 当前 [NotificationIconContainerClass] 的实例
      */
     private fun updateStatusBarIconAlpha(container: ViewGroup) {
         val iconStateMethod = container.current().method { name = "getIconState"; param(StatusBarIconViewClass) }
         if (container.childCount > 0) container.children.forEach { iconView ->
+            iconView.alpha = statusBarIconAlpha
             iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(statusBarIconAlpha)
         }
     }
@@ -799,6 +800,8 @@ object SystemUIHooker : YukiBaseHooker() {
                         /** 重新设置通知图标容器实例 */
                         notificationIconContainer = it
                         updateStatusBarIconColor(it)
+                        /** 延迟防止新添加的通知图标不刷新 */
+                        delayedRun { updateStatusBarIconColor(it) }
                     }
                 }
             }
