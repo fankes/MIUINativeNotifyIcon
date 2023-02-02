@@ -139,6 +139,28 @@ val isSupportMiuiVersion
 inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
 
 /**
+ * 获取 Android 版本代号
+ * @return [String]
+ */
+val androidVersionCodeName
+    get() = when (Build.VERSION.SDK_INT) {
+        33 -> "T"
+        32 -> "S_V2"
+        31 -> "S"
+        30 -> "R"
+        29 -> "Q"
+        28 -> "P"
+        27 -> "O_MR1"
+        26 -> "O"
+        25 -> "N_MR1"
+        24 -> "N"
+        23 -> "M"
+        22 -> "L_MR1"
+        21 -> "L"
+        else -> ""
+    }
+
+/**
  * 获取 MIUI 版本
  * @return [String]
  */
