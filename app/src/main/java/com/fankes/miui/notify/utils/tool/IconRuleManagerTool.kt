@@ -39,18 +39,15 @@ import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.data.DataConst
+import com.fankes.miui.notify.const.IconRuleSourceSyncType
+import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
-import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_1
-import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_2
-import com.fankes.miui.notify.hook.HookConst.TYPE_SOURCE_SYNC_WAY_3
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
 import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
-import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
 import java.io.IOException
@@ -70,7 +67,13 @@ object IconRuleManagerTool {
     private const val OS_TAG = "MIUI"
 
     /** 当前规则的通知图标颜色 */
-    private const val OS_COLOR = 0xFFE06818
+    private const val OS_COLOR = 0xFFE06818.toInt()
+
+    /** 同步地址 - Github Raw (代理) */
+    private const val SYNC_URL_PROXY = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
+
+    /** 同步地址 - Github Raw (直连) */
+    private const val SYNC_URL_DIRECT = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
     /**
      * 从在线地址手动同步规则
@@ -80,8 +83,8 @@ object IconRuleManagerTool {
     fun syncByHand(context: Context, callback: () -> Unit) =
         context.showDialog<DiaSourceFromBinding> {
             title = "同步列表"
-            var sourceType = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY)
-            var customUrl = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL)
+            var sourceType = ConfigData.iconRuleSourceSyncType
+            var customUrl = ConfigData.iconRuleSourceSyncCustomUrl
             binding.sourceUrlEdit.apply {
                 if (customUrl.isNotBlank()) {
                     setText(customUrl)
@@ -89,25 +92,25 @@ object IconRuleManagerTool {
                 }
                 doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
             }
-            binding.sourceFromTextLin.isVisible = sourceType == TYPE_SOURCE_SYNC_WAY_3
-            binding.sourceRadio1.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_1
-            binding.sourceRadio2.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_2
-            binding.sourceRadio3.isChecked = sourceType == TYPE_SOURCE_SYNC_WAY_3
+            binding.sourceFromTextLin.isVisible = sourceType == IconRuleSourceSyncType.CUSTOM_URL
+            binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY
+            binding.sourceRadio2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_DIRECT
+            binding.sourceRadio3.isChecked = sourceType == IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceRadio1.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
-                sourceType = TYPE_SOURCE_SYNC_WAY_1
+                sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY
             }
             binding.sourceRadio2.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
-                sourceType = TYPE_SOURCE_SYNC_WAY_2
+                sourceType = IconRuleSourceSyncType.GITHUB_RAW_DIRECT
             }
             binding.sourceRadio3.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = true
-                sourceType = TYPE_SOURCE_SYNC_WAY_3
+                sourceType = IconRuleSourceSyncType.CUSTOM_URL
             }
             confirmButton {
-                context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY, sourceType)
-                context.modulePrefs.put(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL, customUrl)
+                ConfigData.iconRuleSourceSyncType = sourceType
+                ConfigData.iconRuleSourceSyncCustomUrl = customUrl
                 sync(context, sourceType, customUrl, callback)
             }
             cancelButton()
@@ -165,16 +168,14 @@ object IconRuleManagerTool {
      */
     fun sync(
         context: Context,
-        sourceType: Int = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY),
-        customUrl: String = context.modulePrefs.get(DataConst.SOURCE_SYNC_WAY_CUSTOM_URL),
+        sourceType: Int = ConfigData.iconRuleSourceSyncType,
+        customUrl: String = ConfigData.iconRuleSourceSyncCustomUrl,
         callback: () -> Unit
     ) {
         when (sourceType) {
-            TYPE_SOURCE_SYNC_WAY_1 ->
-                onRefreshing(context, url = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main", callback)
-            TYPE_SOURCE_SYNC_WAY_2 ->
-                onRefreshing(context, url = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main", callback)
-            TYPE_SOURCE_SYNC_WAY_3 ->
+            IconRuleSourceSyncType.GITHUB_RAW_PROXY -> onRefreshing(context, SYNC_URL_PROXY, callback)
+            IconRuleSourceSyncType.GITHUB_RAW_DIRECT -> onRefreshing(context, SYNC_URL_DIRECT, callback)
+            IconRuleSourceSyncType.CUSTOM_URL ->
                 if (customUrl.isNotBlank())
                     if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
                         onRefreshingCustom(context, customUrl, callback)
@@ -384,7 +385,7 @@ object IconRuleManagerTool {
                 notify(0, NotificationCompat.Builder(context, NOTIFY_CHANNEL).apply {
                     setContentTitle(title)
                     setContentText(msg)
-                    color = OS_COLOR.toInt()
+                    color = OS_COLOR
                     setAutoCancel(true)
                     setSmallIcon(R.drawable.ic_nf_icon_update)
                     setSound(null)
