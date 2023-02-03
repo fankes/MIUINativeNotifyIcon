@@ -310,7 +310,7 @@ object IconRuleManagerTool {
                     }
             }
         } else baseCheckingInternetConnect(context) { isDone ->
-            if (isDone) callback() else pushNotify(context, title = "网络不可用", msg = "无法连接到互联网，无法更新通知图标规则")
+            if (isDone) callback() else pushNotify(context, title = "网络不可用", msg = "网络连接失败，无法更新通知图标规则，点击重试", isRetry = true)
         }
 
     /**
@@ -372,8 +372,9 @@ object IconRuleManagerTool {
      * @param context 实例 - 类型为 [AppCompatActivity] 时将不会推送通知
      * @param title 通知标题
      * @param msg 通知消息
+     * @param isRetry 是否发送重试动作 - 默认否
      */
-    private fun pushNotify(context: Context, title: String, msg: String) {
+    private fun pushNotify(context: Context, title: String, msg: String, isRetry: Boolean = false) {
         if (context !is AppCompatActivity)
             context.getSystemService<NotificationManager>()?.apply {
                 createNotificationChannel(
@@ -393,7 +394,9 @@ object IconRuleManagerTool {
                     setContentIntent(
                         PendingIntent.getActivity(
                             context, msg.hashCode(),
-                            Intent(context, ConfigureActivity::class.java).apply { putExtra("isShowUpdDialog", false) },
+                            Intent(context, ConfigureActivity::class.java).apply {
+                                if (isRetry) putExtra("isDirectUpdate", true) else putExtra("isShowUpdDialog", false)
+                            },
                             if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
                         )
                     )
