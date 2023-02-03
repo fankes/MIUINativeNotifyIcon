@@ -196,11 +196,13 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     neutralButton(text = "取消")
                     noCancelable()
                 }
+            intent?.getBooleanExtra("isDirectUpdate", false) == true -> onStartRefresh(isByHand = false)
             intent?.getBooleanExtra("isShowUpdDialog", true) == true -> onStartRefresh()
         }
         /** 清除数据 */
         intent?.apply {
             removeExtra("isNewAppSupport")
+            removeExtra("isDirectUpdate")
             removeExtra("isShowUpdDialog")
         }
         /** 设置返回监听事件 */
@@ -219,12 +221,22 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
     }
 
-    /** 开始手动同步 */
-    private fun onStartRefresh() =
-        IconRuleManagerTool.syncByHand(context = this) {
-            filterText = ""
-            mockLocalData()
-        }
+    /**
+     * 开始同步
+     * @param isByHand 是否手动同步 - 默认是
+     */
+    private fun onStartRefresh(isByHand: Boolean = true) {
+        if (isByHand)
+            IconRuleManagerTool.syncByHand(context = this) {
+                filterText = ""
+                mockLocalData()
+            }
+        else
+            IconRuleManagerTool.sync(context = this) {
+                filterText = ""
+                mockLocalData()
+            }
+    }
 
     /** 装载或刷新本地数据 */
     private fun mockLocalData() {
