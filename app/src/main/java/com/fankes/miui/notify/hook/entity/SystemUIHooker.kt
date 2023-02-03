@@ -512,33 +512,29 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
-     * 判断状态栏小图标颜色以及反射的核心方法
-     *
-     * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
-     * @param context 实例
-     * @param expandedNf 状态栏实例
-     * @return [Boolean] 是否忽略通知图标颜色
+     * 获取 [StatusBarIconViewClass] 实例是否为灰度图标 (单色图标)
+     * @return [Boolean]
      */
-    private fun hasIgnoreStatusBarIconColor(context: Context, expandedNf: StatusBarNotification?) = safeOfFalse {
-        /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
-        expandedNf?.let { notifyInstance ->
-            /** 获取通知小图标 */
-            val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
-                ?: return loggerW(msg = "hasIgnoreStatusBarIconColor got null smallIcon").let { true }
+    private fun ImageView.isGrayscaleIcon(): Boolean {
+        /** 获取 [StatusBarNotification] 实例 */
+        val notifyInstance = current().field { name = "mNotification" }.cast<StatusBarNotification>()
+            ?: return loggerW(msg = "isGrayscaleIcon got null mNotification").let { false }
 
-            /** 判断是否不是灰度图标 */
-            val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable).not()
+        /** 获取通知小图标 */
+        val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
+            ?: return loggerW(msg = "isGrayscaleIcon got null smallIcon").let { false }
 
-            /** 获取目标修复彩色图标的 APP */
-            val isTargetFixApp = compatCustomIcon(isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first != null
-            /**
-             * 只要不是灰度就返回彩色图标
-             * 否则不对颜色进行反色处理防止一些系统图标出现异常
-             */
-            (if (isTargetFixApp) false else isNotGrayscaleIcon).also {
-                printLogcat(tag = "IconColor", context, expandedNf, isTargetFixApp, isNotGrayscaleIcon.not())
-            }
-        } ?: true.also { printLogcat(tag = "IconColor", context, expandedNf = null, isCustom = false, isGrayscale = false) }
+        /** 判断是否不是灰度图标 */
+        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+
+        /** 获取目标修复彩色图标的 APP */
+        val isTargetFixApp = compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).first != null
+        /**
+         * 只要不是灰度就返回彩色图标
+         * 否则不对颜色进行反色处理防止一些系统图标出现异常
+         */
+        printLogcat(tag = "IconColor", context, notifyInstance, isTargetFixApp, isGrayscaleIcon)
+        return isTargetFixApp || isGrayscaleIcon
     }
 
     /**
@@ -548,20 +544,18 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param animColor 动画过渡颜色
      */
     private fun updateStatusBarIconColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
-        if (container.childCount > 0) container.children.forEach {
-            (it as? ImageView?)?.also { iconView ->
-                val notification = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
-                if (hasIgnoreStatusBarIconColor(iconView.context, notification)) {
-                    iconView.alpha = 1f
-                    iconView.colorFilter = null
-                } else {
-                    /**
-                     * 防止图标不是纯黑的问题
-                     * 图标在任何场景下跟随状态栏其它图标保持半透明
-                     */
-                    iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
-                    iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
-                }
+        if (container.childCount > 0) container.children.forEach { iconView ->
+            if (iconView !is ImageView) return@forEach
+            if (iconView.isGrayscaleIcon()) {
+                /**
+                 * 防止图标不是纯黑的问题
+                 * 图标在任何场景下跟随状态栏其它图标保持半透明
+                 */
+                iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
+                iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
+            } else {
+                iconView.alpha = 1f
+                iconView.colorFilter = null
             }
         }
     }
@@ -573,8 +567,8 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun updateStatusBarIconAlpha(container: ViewGroup) {
         val iconStateMethod = container.current().method { name = "getIconState"; param(StatusBarIconViewClass) }
         if (container.childCount > 0) container.children.forEach { iconView ->
-            val notification = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
-            val iconAlpha = if (hasIgnoreStatusBarIconColor(iconView.context, notification)) 1f else statusBarIconAlpha
+            if (iconView !is ImageView) return@forEach
+            val iconAlpha = if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f
             iconView.alpha = iconAlpha
             iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(iconAlpha)
         }
