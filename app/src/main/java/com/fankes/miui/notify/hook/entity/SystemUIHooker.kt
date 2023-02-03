@@ -572,8 +572,10 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun updateStatusBarIconAlpha(container: ViewGroup) {
         val iconStateMethod = container.current().method { name = "getIconState"; param(StatusBarIconViewClass) }
         if (container.childCount > 0) container.children.forEach { iconView ->
-            iconView.alpha = statusBarIconAlpha
-            iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(statusBarIconAlpha)
+            val notification = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
+            val iconAlpha = if (hasIgnoreStatusBarIconColor(iconView.context, notification)) 1f else statusBarIconAlpha
+            iconView.alpha = iconAlpha
+            iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(iconAlpha)
         }
     }
 
