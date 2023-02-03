@@ -245,6 +245,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)
             }
         }
+        binding.statusDarkIconCustomAlphaSeekbar.bind(
+            ConfigData.STATUS_ICON_DARK_ALPHA_LEVEL, binding.statusDarkIconCustomAlphaText, suffix = "%"
+        ) { SystemUITool.refreshSystemUI(context = this) }
+        binding.statusLightIconCustomAlphaSeekbar.bind(
+            ConfigData.STATUS_ICON_LIGHT_ALPHA_LEVEL, binding.statusLightIconCustomAlphaText, suffix = "%"
+        ) { SystemUITool.refreshSystemUI(context = this) }
         binding.notifyIconCustomCornerSeekbar.bind(ConfigData.NOTIFY_ICON_CORNER_SIZE, binding.notifyIconCustomCornerText, suffix = " dp") {
             SystemUITool.refreshSystemUI(context = this)
         }

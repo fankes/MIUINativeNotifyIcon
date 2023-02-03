@@ -51,6 +51,12 @@ object ConfigData {
     /** 启用通知图标兼容模式 */
     val ENABLE_COLOR_ICON_COMPAT = PrefsData("_color_icon_compat", false)
 
+    /** 状态栏中的通知图标暗色透明度 */
+    val STATUS_ICON_DARK_ALPHA_LEVEL = PrefsData("_status_icon_dark_alpha", 75)
+
+    /** 状态栏中的通知图标亮色透明度 */
+    val STATUS_ICON_LIGHT_ALPHA_LEVEL = PrefsData("_status_icon_light_alpha", 95)
+
     /** 通知栏中的通知图标圆角程度 */
     val NOTIFY_ICON_CORNER_SIZE = PrefsData("_notify_icon_corner", 15)
 
@@ -216,6 +222,26 @@ object ConfigData {
         get() = getBoolean(ENABLE_COLOR_ICON_COMPAT)
         set(value) {
             putBoolean(ENABLE_COLOR_ICON_COMPAT, value)
+        }
+
+    /**
+     * 状态栏中的通知图标暗色透明度
+     * @return [Int]
+     */
+    var statusIconDarkAlphaLevel
+        get() = getInt(STATUS_ICON_DARK_ALPHA_LEVEL)
+        set(value) {
+            putInt(STATUS_ICON_DARK_ALPHA_LEVEL, value)
+        }
+
+    /**
+     * 状态栏中的通知图标亮色透明度
+     * @return [Int]
+     */
+    var statusIconLightAlphaLevel
+        get() = getInt(STATUS_ICON_LIGHT_ALPHA_LEVEL)
+        set(value) {
+            putInt(STATUS_ICON_LIGHT_ALPHA_LEVEL, value)
         }
 
     /**

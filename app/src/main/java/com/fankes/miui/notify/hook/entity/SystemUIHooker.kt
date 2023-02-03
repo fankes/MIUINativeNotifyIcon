@@ -165,7 +165,8 @@ object SystemUIHooker : YukiBaseHooker() {
      * 获取状态栏通知图标透明度
      * @return [Float]
      */
-    private val statusBarIconAlpha get() = if (isDarkIconMode) 0.75f else 0.95f
+    private val statusBarIconAlpha
+        get() = (if (isDarkIconMode) ConfigData.statusIconDarkAlphaLevel else ConfigData.statusIconLightAlphaLevel) / 100f
 
     /**
      * - 这个是修复彩色图标的关键核心代码判断
