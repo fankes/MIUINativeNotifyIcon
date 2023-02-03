@@ -159,6 +159,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
         binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
+        binding.warnMiuiNotifyStyleTip.isGone = miuiVersionCode > 12
         binding.notifyIconCustomCornerSeekbar.progress = ConfigData.notifyIconCornerSize
         binding.notifyIconCustomCornerText.text = "${ConfigData.notifyIconCornerSize} dp"
         binding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
@@ -259,6 +260,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
         })
+        /** MIUI 通知显示设置按钮点击事件 */
+        binding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
         /** 通知图标优化名单按钮点击事件 */
         binding.notifyIconFixButton.setOnClickListener { navigate<ConfigureActivity>() }
         /** 修改状态栏通知图标个数按钮点击事件 */

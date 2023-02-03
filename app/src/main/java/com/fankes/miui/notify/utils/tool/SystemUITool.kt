@@ -22,7 +22,9 @@
  */
 package com.fankes.miui.notify.utils.tool
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.ui.activity.MainActivity
@@ -67,20 +69,48 @@ object SystemUITool {
     fun checkingActivated(context: Context, result: (Boolean) -> Unit) =
         context.dataChannel(PackageName.SYSTEMUI).checkingVersionEquals(result = result)
 
+    /** 当 Root 权限获取失败时显示对话框 */
+    private fun Context.showWhenAccessRootFail() =
+        showDialog {
+            title = "获取 Root 权限失败"
+            msg = "当前无法获取 Root 权限，请确认你的设备已经被 Root 且同意授予 Root 权限。\n" +
+                    "如果你正在使用 Magisk 并安装了 Shamiko 模块，" +
+                    "请确认当前是否正处于白名单模式。 (白名单模式将导致无法申请 Root 权限)"
+            confirmButton(text = "我知道了")
+        }
+
+    /**
+     * 打开 MIUI 通知显示设置界面
+     * @param context 实例
+     */
+    fun openMiuiNotificationDisplaySettings(context: Context) {
+        runCatching {
+            context.startActivity(Intent().apply {
+                component = ComponentName(
+                    "com.miui.notification",
+                    "miui.notification.management.activity.NotificationDisplaySettingsActivity"
+                )
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }.onFailure {
+            execShell(
+                cmd = "am start -a" +
+                        "com.miui.notification " +
+                        "com.miui.notification/miui.notification.management.activity.NotificationDisplaySettingsActivity"
+            ).also {
+                when {
+                    it.isBlank() -> context.showWhenAccessRootFail()
+                    else -> context.snake(msg = "已发送请求，如果未打开则是当前系统不支持此功能")
+                }
+            }
+        }
+    }
+
     /**
      * 重启系统界面
      * @param context 实例
      */
     fun restartSystemUI(context: Context) {
-        /** 当 Root 权限获取失败时显示对话框 */
-        fun showWhenAccessRootFail() =
-            context.showDialog {
-                title = "获取 Root 权限失败"
-                msg = "当前无法获取 Root 权限，请确认你的设备已经被 Root 且同意授予 Root 权限。\n" +
-                        "如果你正在使用 Magisk 并安装了 Shamiko 模块，" +
-                        "请确认当前是否正处于白名单模式。 (白名单模式将导致无法申请 Root 权限)"
-                confirmButton(text = "我知道了")
-            }
         context.showDialog {
             title = "重启系统界面"
             msg = "你确定要立即重启系统界面吗？\n\n" +
@@ -91,7 +121,7 @@ object SystemUITool {
                 execShell(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
                         execShell(cmd = "kill -9 $pid")
-                    else showWhenAccessRootFail()
+                    else context.showWhenAccessRootFail()
                 }
             }
             cancelButton()
