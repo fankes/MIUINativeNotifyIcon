@@ -553,6 +553,47 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/miui_notify_style_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="13dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/bg_button_round"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:text="打开 MIUI 通知显示设置"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="点击上方按钮可以直接打开 MIUI 的通知显示设置界面，可以调整当前通知栏显示的通知样式为 MIUI 经典样式或原生样式，如果无法打开则是当前系统不支持此功能。"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/warn_miui_notify_style_tip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="15dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:text="⚠️ 在 MIUI 11、12 上可能需要 Root 权限才能打开。"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
                 <LinearLayout
                     android:id="@+id/notify_icon_custom_corner_item"
                     android:layout_width="match_parent"
