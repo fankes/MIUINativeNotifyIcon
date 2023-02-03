@@ -24,7 +24,6 @@
 
 package com.fankes.miui.notify.ui.activity
 
-import android.widget.SeekBar
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.BuildConfig
@@ -160,8 +159,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
         binding.warnMiuiNotifyStyleTip.isGone = miuiVersionCode > 12
-        binding.notifyIconCustomCornerSeekbar.progress = ConfigData.notifyIconCornerSize
-        binding.notifyIconCustomCornerText.text = "${ConfigData.notifyIconCornerSize} dp"
         binding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
         binding.notifyIconAutoSyncText.text = ConfigData.notifyIconFixAutoTime
         binding.moduleEnableSwitch.bind(ConfigData.ENABLE_MODULE) {
@@ -248,18 +245,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)
             }
         }
-        binding.notifyIconCustomCornerSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                binding.notifyIconCustomCornerText.text = "$progress dp"
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                ConfigData.notifyIconCornerSize = seekBar.progress
-                SystemUITool.refreshSystemUI(context = this@MainActivity)
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-        })
+        binding.notifyIconCustomCornerSeekbar.bind(ConfigData.NOTIFY_ICON_CORNER_SIZE, binding.notifyIconCustomCornerText, suffix = " dp") {
+            SystemUITool.refreshSystemUI(context = this)
+        }
         /** MIUI 通知显示设置按钮点击事件 */
         binding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
         /** 通知图标优化名单按钮点击事件 */
