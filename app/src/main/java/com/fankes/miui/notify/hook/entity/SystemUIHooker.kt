@@ -776,10 +776,7 @@ object SystemUIHooker : YukiBaseHooker() {
             }
             /** Hook 更新通知图标事件 */
             injectMember {
-                method {
-                    name = "updateNotificationIcons"
-                    paramCount = 1
-                }
+                method { name { it == "updateNotificationIcons" || it == "onChanged" } }.all()
                 afterHook {
                     field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
                         /** 重新设置通知图标容器实例 */
