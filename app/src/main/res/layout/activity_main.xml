@@ -980,6 +980,34 @@
                     android:textSize="12sp" />
 
                 <LinearLayout
+                    android:id="@+id/notify_icon_fix_placeholder_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                        android:id="@+id/notify_icon_fix_placeholder_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="使用占位符修补未适配的通知图标"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="此选项默认关闭，当发现未适配的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/notify_icon_fix_notify_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
