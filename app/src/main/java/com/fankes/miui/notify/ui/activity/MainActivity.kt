@@ -164,6 +164,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.moduleEnableSwitch.bind(ConfigData.ENABLE_MODULE) {
             onInitialize {
                 binding.moduleEnableLogSwitch.isVisible = it
+                binding.expAllDebugLogButton.isVisible = it && ConfigData.isEnableModuleLog
                 binding.colorIconHookItem.isVisible = it
                 binding.statusIconCountItem.isVisible = isLowerAndroidR.not() && it
                 binding.notifyStyleConfigItem.isVisible = it
@@ -176,7 +177,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
         binding.moduleEnableLogSwitch.bind(ConfigData.ENABLE_MODULE_LOG) {
-            onChanged { SystemUITool.showNeedRestartSnake(context = this@MainActivity) }
+            onInitialize { binding.expAllDebugLogButton.isVisible = it && ConfigData.isEnableModule }
+            onChanged {
+                reinitialize()
+                SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)
+            }
         }
         binding.statusIconCountSwitch.bind(ConfigData.ENABLE_LIFTED_STATUS_ICON_COUNT) {
             onInitialize { binding.statusIconCountChildItem.isVisible = it }
@@ -275,6 +280,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.notifyIconCustomCornerSeekbar.bind(ConfigData.NOTIFY_ICON_CORNER_SIZE, binding.notifyIconCustomCornerText, suffix = " dp") {
             SystemUITool.refreshSystemUI(context = this)
         }
+        /** 导出全部日志按钮点击事件 */
+        binding.expAllDebugLogButton.setOnClickListener { SystemUITool.obtainAndExportDebugLogs(context = this) }
         /** MIUI 通知显示设置按钮点击事件 */
         binding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
         /** 通知图标优化名单按钮点击事件 */
@@ -339,6 +346,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
             hideOrShowLauncherIcon(b)
         }
+        /** 注册导出调试日志启动器 */
+        SystemUITool.registerExportDebugLogsLauncher(activity = this)
     }
 
     /** 前往项目地址 */

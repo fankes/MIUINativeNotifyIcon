@@ -211,13 +211,13 @@
                 android:elevation="0dp"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingLeft="15dp"
-                android:paddingTop="15dp"
-                android:paddingRight="15dp">
+                android:paddingTop="15dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:gravity="center|start">
 
                     <androidx.cardview.widget.CardView
@@ -250,7 +250,9 @@
                     android:id="@+id/module_enable_switch"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
+                    android:layout_marginLeft="15dp"
                     android:layout_marginTop="5dp"
+                    android:layout_marginRight="15dp"
                     android:text="启用模块"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
@@ -259,14 +261,33 @@
                     android:id="@+id/module_enable_log_switch"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:layout_marginBottom="5dp"
                     android:text="启用调试日志"
                     android:textColor="@color/colorTextGray"
                     android:textSize="15sp" />
 
                 <TextView
+                    android:id="@+id/exp_all_debug_log_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginRight="13dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/bg_button_round"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:text="导出全部调试日志"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
