@@ -30,7 +30,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.BitmapDrawable
@@ -44,6 +43,7 @@ import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.bean.IconDataBean
@@ -343,17 +343,18 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /**
      * 自动适配状态栏、通知栏自定义小图标
+     * @param context 实例
      * @param isGrayscaleIcon 是否为灰度图标
      * @param packageName APP 包名
-     * @return [Pair] - ([Bitmap] 位图,[Int] 颜色)
+     * @return [Pair] - ([Drawable] 小图标,[Int] 颜色)
      */
-    private fun compatCustomIcon(isGrayscaleIcon: Boolean, packageName: String): Pair<Bitmap?, Int> {
-        var customPair: Pair<Bitmap?, Int>? = null
+    private fun compatCustomIcon(context: Context, isGrayscaleIcon: Boolean, packageName: String): Pair<Drawable?, Int> {
+        var customPair: Pair<Drawable?, Int>? = null
         if (ConfigData.isEnableNotifyIconFix) run {
             iconDatas.takeIf { it.isNotEmpty() }?.forEach {
                 if (packageName == it.packageName && isAppNotifyHookOf(it)) {
                     if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
-                        customPair = Pair(it.iconBitmap, it.iconColor)
+                        customPair = Pair(it.iconBitmap.toDrawable(context.resources), it.iconColor)
                     return@run
                 }
             }
@@ -377,12 +378,12 @@ object SystemUIHooker : YukiBaseHooker() {
             val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable, notifyInstance).not()
 
             /** 目标彩色通知 APP 图标 */
-            val customIcon = compatCustomIcon(isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first
+            val customIcon = compatCustomIcon(context, isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first
             /** 打印日志 */
             printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, isNotGrayscaleIcon.not())
             when {
                 /** 处理自定义通知图标优化 */
-                customIcon != null -> Pair(BitmapDrawable(context.resources, customIcon), true)
+                customIcon != null -> Pair(customIcon, true)
                 /** 若不是灰度图标自动处理为圆角 */
                 isNotGrayscaleIcon -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
                 /** 否则返回原始小图标 */
@@ -468,11 +469,11 @@ object SystemUIHooker : YukiBaseHooker() {
             val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
             /** 自定义默认小图标 */
-            var customIcon: Bitmap?
+            var customIcon: Drawable?
 
             /** 自定义默认小图标颜色 */
             var customIconColor: Int
-            compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).also {
+            compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).also {
                 customIcon = it.first
                 customIconColor = if (isUseMaterial3Style || isExpanded)
                     (it.second.takeIf { e -> e != 0 } ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
@@ -490,7 +491,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
                     /** 设置自定义小图标 */
-                    setImageBitmap(customIcon)
+                    setImageDrawable(customIcon)
                     /** 上色 */
                     setColorFilter(if (isUseMaterial3Style || customIconColor == 0) supportColor else customIconColor)
                     /** 设置图标外圈颜色 */
@@ -546,7 +547,7 @@ object SystemUIHooker : YukiBaseHooker() {
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
         /** 获取目标修复彩色图标的 APP */
-        val isTargetFixApp = compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).first != null
+        val isTargetFixApp = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).first != null
         /**
          * 只要不是灰度就返回彩色图标
          * 否则不对颜色进行反色处理防止一些系统图标出现异常
