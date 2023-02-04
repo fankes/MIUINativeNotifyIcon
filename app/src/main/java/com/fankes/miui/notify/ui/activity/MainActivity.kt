@@ -227,12 +227,33 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.notifyIconFixSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX) {
             onInitialize {
                 binding.notifyIconFixButton.isVisible = it
+                binding.notifyIconFixPlaceholderItem.isVisible = it
                 binding.notifyIconFixNotifyItem.isVisible = it
                 binding.notifyIconAutoSyncItem.isVisible = it
             }
             onChanged {
                 reinitialize()
                 SystemUITool.refreshSystemUI(context = this@MainActivity)
+            }
+        }
+        binding.notifyIconFixPlaceholderSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER) {
+            isAutoApplyChanges = false
+            onChanged {
+                /** 应用更改并刷新系统界面 */
+                fun applyChangesAndRefresh() {
+                    applyChanges()
+                    SystemUITool.refreshSystemUI(context = this@MainActivity)
+                }
+                if (it) showDialog {
+                    title = "注意"
+                    msg = "开启这个功能后，当发现未适配的彩色通知图标时，" +
+                            "状态栏中显示的通知图标将会使用预置的占位符图标进行修补，" +
+                            "通知栏中显示的通知图标保持原始图标不变。\n\n" +
+                            "此功能的作用仅为临时修复破坏规范的通知图标，仍然继续开启吗？"
+                    confirmButton { applyChangesAndRefresh() }
+                    cancelButton { cancelChanges() }
+                    noCancelable()
+                } else applyChangesAndRefresh()
             }
         }
         binding.notifyIconFixNotifySwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_NOTIFY) {

@@ -46,6 +46,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.data.ConfigData
@@ -346,20 +347,24 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param context 实例
      * @param isGrayscaleIcon 是否为灰度图标
      * @param packageName APP 包名
-     * @return [Pair] - ([Drawable] 小图标,[Int] 颜色)
+     * @return [Triple] - ([Drawable] 小图标,[Int] 颜色,[Boolean] 是否为占位符图标)
      */
-    private fun compatCustomIcon(context: Context, isGrayscaleIcon: Boolean, packageName: String): Pair<Drawable?, Int> {
-        var customPair: Pair<Drawable?, Int>? = null
+    private fun compatCustomIcon(context: Context, isGrayscaleIcon: Boolean, packageName: String): Triple<Drawable?, Int, Boolean> {
+        /** 防止模块资源注入失败重新注入 */
+        context.injectModuleAppResources()
+        var customPair: Triple<Drawable?, Int, Boolean>? = null
         if (ConfigData.isEnableNotifyIconFix) run {
             iconDatas.takeIf { it.isNotEmpty() }?.forEach {
                 if (packageName == it.packageName && isAppNotifyHookOf(it)) {
                     if (isGrayscaleIcon.not() || isAppNotifyHookAllOf(it))
-                        customPair = Pair(it.iconBitmap.toDrawable(context.resources), it.iconColor)
+                        customPair = Triple(it.iconBitmap.toDrawable(context.resources), it.iconColor, false)
                     return@run
                 }
             }
+            if (isGrayscaleIcon.not() && ConfigData.isEnableNotifyIconFixPlaceholder)
+                customPair = Triple(context.resources.drawableOf(R.drawable.ic_unsupported), 0, true)
         }
-        return customPair ?: Pair(null, 0)
+        return customPair ?: Triple(null, 0, false)
     }
 
     /**
@@ -375,17 +380,17 @@ object SystemUIHooker : YukiBaseHooker() {
         expandedNf?.let { notifyInstance ->
             if (iconDrawable == null) return@let Pair(null, false)
             /** 判断是否不是灰度图标 */
-            val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable, notifyInstance).not()
+            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
             /** 目标彩色通知 APP 图标 */
-            val customIcon = compatCustomIcon(context, isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first
+            val customIcon = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).first
             /** 打印日志 */
-            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, isNotGrayscaleIcon.not())
+            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             when {
                 /** 处理自定义通知图标优化 */
                 customIcon != null -> Pair(customIcon, true)
                 /** 若不是灰度图标自动处理为圆角 */
-                isNotGrayscaleIcon -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
+                isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
                 /** 否则返回原始小图标 */
                 else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
             }
@@ -469,11 +474,13 @@ object SystemUIHooker : YukiBaseHooker() {
             val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
             /** 自定义默认小图标 */
-            var customIcon: Drawable?
+            var customIcon: Drawable? = null
 
             /** 自定义默认小图标颜色 */
-            var customIconColor: Int
+            var customIconColor = 0
             compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).also {
+                /** 不处理占位符图标 */
+                if (it.third) return@also
                 customIcon = it.first
                 customIconColor = if (isUseMaterial3Style || isExpanded)
                     (it.second.takeIf { e -> e != 0 } ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0

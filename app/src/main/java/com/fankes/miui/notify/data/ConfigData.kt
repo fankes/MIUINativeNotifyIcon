@@ -66,6 +66,9 @@ object ConfigData {
     /** 启用通知图标优化 */
     val ENABLE_NOTIFY_ICON_FIX = PrefsData("_notify_icon_fix", true)
 
+    /** 使用占位符修补未适配的通知图标 */
+    val ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER = PrefsData("_notify_icon_fix_placeholder", false)
+
     /** 提醒未适配通知图标的新安装应用 */
     val ENABLE_NOTIFY_ICON_FIX_NOTIFY = PrefsData("_notify_icon_fix_notify", true)
 
@@ -272,6 +275,16 @@ object ConfigData {
         get() = getBoolean(ENABLE_NOTIFY_ICON_FIX)
         set(value) {
             putBoolean(ENABLE_NOTIFY_ICON_FIX, value)
+        }
+
+    /**
+     * 是否使用占位符修补未适配的通知图标
+     * @return [Boolean]
+     */
+    var isEnableNotifyIconFixPlaceholder
+        get() = getBoolean(ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER)
+        set(value) {
+            putBoolean(ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER, value)
         }
 
     /**
