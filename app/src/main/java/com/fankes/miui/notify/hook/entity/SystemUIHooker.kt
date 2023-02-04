@@ -24,6 +24,7 @@
 
 package com.fankes.miui.notify.hook.entity
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.WallpaperManager
 import android.content.Context
@@ -140,6 +141,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
+    /** 已缓存的灰度图标 (单色图标) 判断结果数组 */
+    private val grayscaleIconResults = HashMap<String, Boolean>()
+
     /** 当前是否处于深色图标模式 - 跟随 Hook 保存 */
     private var isDarkIconMode = false
 
@@ -162,77 +166,31 @@ object SystemUIHooker : YukiBaseHooker() {
     private var isWallpaperColorListenerSetUp = false
 
     /**
+     * 获取全局上下文
+     * @return [Context] or null
+     */
+    private val globalContext
+        get() = SystemUIApplicationClass.toClassOrNull()?.method { name = "getContext" }?.ignored()?.get()?.invoke<Context?>() ?: appContext
+
+    /**
+     * 是否为 MIUI 样式通知栏 - 旧版 - 新版一律返回 false
+     * @return [Boolean]
+     */
+    private val isShowMiuiStyle
+        get() = NotificationUtilClass.toClassOrNull()?.method { name = "showMiuiStyle" }?.ignored()?.get()?.boolean() ?: false
+
+    /**
+     * 是否没有单独的 MIUI 通知栏样式
+     * @return [Boolean]
+     */
+    private val isNotHasAbsoluteMiuiStyle get() = MiuiNotificationViewWrapperClass.hasClass().not()
+
+    /**
      * 获取状态栏通知图标透明度
      * @return [Float]
      */
     private val statusBarIconAlpha
         get() = (if (isDarkIconMode) ConfigData.statusIconDarkAlphaLevel else ConfigData.statusIconLightAlphaLevel) / 100f
-
-    /**
-     * - 这个是修复彩色图标的关键核心代码判断
-     *
-     * 判断是否为灰度图标 - 反射执行系统方法
-     * @param context 实例
-     * @param drawable 要判断的图标
-     * @return [Boolean]
-     */
-    private fun isGrayscaleIcon(context: Context, drawable: Drawable) =
-        if (ConfigData.isEnableColorIconCompat.not()) safeOfFalse {
-            ContrastColorUtilClass.toClass().let {
-                it.method {
-                    name = "isGrayscaleIcon"
-                    param(DrawableClass)
-                }.get(it.method {
-                    name = "getInstance"
-                    param(ContextClass)
-                }.get().invoke(context)).boolean(drawable)
-            }
-        } else BitmapCompatTool.isGrayscaleDrawable(drawable)
-
-    /**
-     * 处理为圆角图标
-     * @return [Drawable]
-     */
-    private fun Drawable.rounded(context: Context) =
-        safeOf(default = this) { BitmapDrawable(context.resources, toBitmap().round(10.dpFloat(context))) }
-
-    /**
-     * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
-     *
-     * 适配第三方图标包对系统包管理器更换图标后的彩色图标
-     * @param context 实例
-     * @param iconDrawable 原始图标
-     * @return [Drawable] 适配的图标
-     */
-    private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
-        /** 给 MIPUSH 设置 APP 自己的图标 */
-        if (isXmsf && nfPkgName.isNotBlank())
-            context.appIconOf(xmsfPkgName) ?: iconDrawable
-        else iconDrawable
-    }
-
-    /**
-     * 打印日志
-     * @param tag 标识
-     * @param context 实例
-     * @param expandedNf 通知实例
-     * @param isCustom 是否为通知优化生效图标
-     * @param isGrayscale 是否为灰度图标
-     */
-    private fun printLogcat(
-        tag: String,
-        context: Context,
-        expandedNf: StatusBarNotification?,
-        isCustom: Boolean,
-        isGrayscale: Boolean
-    ) {
-        if (ConfigData.isEnableModuleLog) loggerD(
-            msg = "$tag --> [${context.appNameOf(packageName = expandedNf?.nfPkgName ?: "")}][${expandedNf?.nfPkgName}] " +
-                    "custom [$isCustom] " +
-                    "grayscale [$isGrayscale] " +
-                    "xmsf [${expandedNf?.isXmsf}]"
-        )
-    }
 
     /**
      * 获取推送通知的包名
@@ -269,24 +227,84 @@ object SystemUIHooker : YukiBaseHooker() {
         }
 
     /**
-     * 是否为 MIUI 样式通知栏 - 旧版 - 新版一律返回 false
-     * @return [Boolean]
+     * 打印日志
+     * @param tag 标识
+     * @param context 实例
+     * @param expandedNf 通知实例
+     * @param isCustom 是否为通知优化生效图标
+     * @param isGrayscale 是否为灰度图标
      */
-    private val isShowMiuiStyle
-        get() = NotificationUtilClass.toClassOrNull()?.method { name = "showMiuiStyle" }?.ignored()?.get()?.boolean() ?: false
+    private fun printLogcat(
+        tag: String,
+        context: Context,
+        expandedNf: StatusBarNotification?,
+        isCustom: Boolean,
+        isGrayscale: Boolean
+    ) {
+        if (ConfigData.isEnableModuleLog) loggerD(
+            msg = "$tag --> [${context.appNameOf(packageName = expandedNf?.nfPkgName ?: "")}][${expandedNf?.nfPkgName}] " +
+                    "custom [$isCustom] " +
+                    "grayscale [$isGrayscale] " +
+                    "xmsf [${expandedNf?.isXmsf}]"
+        )
+    }
 
     /**
-     * 是否没有单独的 MIUI 通知栏样式
+     * 判断是否为灰度图标 (单色图标)
+     * @param context 实例
+     * @param drawable 要判断的图标
+     * @param instance 用于标识缓存的实例
      * @return [Boolean]
      */
-    private val isNotHasAbsoluteMiuiStyle get() = MiuiNotificationViewWrapperClass.hasClass().not()
+    private fun isGrayscaleIcon(context: Context, drawable: Drawable, instance: Any): Boolean {
+        /** 从缓存中读取的结果 */
+        val cachedResult = when (instance) {
+            is StatusBarNotification -> grayscaleIconResults[instance.notification.toString()]
+            is Notification -> grayscaleIconResults[instance.toString()]
+            else -> null
+        }
+
+        /** 当前实时获取的结果 */
+        val currentResult = if (ConfigData.isEnableColorIconCompat.not()) safeOfFalse {
+            ContrastColorUtilClass.toClass().let {
+                it.method {
+                    name = "isGrayscaleIcon"
+                    param(DrawableClass)
+                }.get(it.method {
+                    name = "getInstance"
+                    param(ContextClass)
+                }.get().invoke(context)).boolean(drawable)
+            }
+        } else BitmapCompatTool.isGrayscaleDrawable(drawable)
+        return cachedResult ?: currentResult.also {
+            when (instance) {
+                is StatusBarNotification -> grayscaleIconResults[instance.notification.toString()] = it
+                is Notification -> grayscaleIconResults[instance.toString()] = it
+            }
+        }
+    }
 
     /**
-     * 获取全局上下文
-     * @return [Context] or null
+     * 处理为圆角图标
+     * @return [Drawable]
      */
-    private val globalContext
-        get() = SystemUIApplicationClass.toClassOrNull()?.method { name = "getContext" }?.ignored()?.get()?.invoke<Context?>() ?: appContext
+    private fun Drawable.rounded(context: Context) =
+        safeOf(default = this) { BitmapDrawable(context.resources, toBitmap().round(10.dpFloat(context))) }
+
+    /**
+     * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
+     *
+     * 适配第三方图标包对系统包管理器更换图标后的彩色图标
+     * @param context 实例
+     * @param iconDrawable 原始图标
+     * @return [Drawable] 适配的图标
+     */
+    private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
+        /** 给 MIPUSH 设置 APP 自己的图标 */
+        if (isXmsf && nfPkgName.isNotBlank())
+            context.appIconOf(xmsfPkgName) ?: iconDrawable
+        else iconDrawable
+    }
 
     /**
      * 注册主题壁纸改变颜色监听
@@ -356,7 +374,7 @@ object SystemUIHooker : YukiBaseHooker() {
         expandedNf?.let { notifyInstance ->
             if (iconDrawable == null) return@let Pair(null, false)
             /** 判断是否不是灰度图标 */
-            val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable).not()
+            val isNotGrayscaleIcon = notifyInstance.isXmsf || isGrayscaleIcon(context, iconDrawable, notifyInstance).not()
 
             /** 目标彩色通知 APP 图标 */
             val customIcon = compatCustomIcon(isNotGrayscaleIcon.not(), notifyInstance.nfPkgName).first
@@ -447,7 +465,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 ?: return@let loggerW(msg = "compatNotifyIcon got null smallIcon")
 
             /** 判断图标风格 */
-            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
             /** 自定义默认小图标 */
             var customIcon: Bitmap?
@@ -525,7 +543,7 @@ object SystemUIHooker : YukiBaseHooker() {
             ?: return loggerW(msg = "isGrayscaleIcon got null smallIcon").let { false }
 
         /** 判断是否不是灰度图标 */
-        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
         /** 获取目标修复彩色图标的 APP */
         val isTargetFixApp = compatCustomIcon(isGrayscaleIcon, notifyInstance.nfPkgName).first != null
@@ -679,6 +697,7 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 缓存图标数据 */
     private fun cachingIconDatas() {
         iconDatas.clear()
+        grayscaleIconResults.clear()
         IconPackParams(param = this).iconDatas.apply { if (isNotEmpty()) forEach { iconDatas.add(it) } }
     }
 
