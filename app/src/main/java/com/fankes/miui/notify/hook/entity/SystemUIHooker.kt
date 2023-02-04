@@ -841,7 +841,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     /** 解除状态栏通知图标个数限制 */
                     if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
                         maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
-                    else maxStaticIconsField.set(statusBarMaxStaticIcons)
+                    else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
                 }
             }.by { NotificationIconContainerClass.toClassOrNull()?.hasField { name = "MAX_STATIC_ICONS" } ?: false }
             /** 旧版方法 - 新版不存在 */
