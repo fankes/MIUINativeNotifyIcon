@@ -231,22 +231,22 @@ object SystemUIHooker : YukiBaseHooker() {
      * 打印日志
      * @param tag 标识
      * @param context 实例
-     * @param expandedNf 通知实例
+     * @param nf 通知实例
      * @param isCustom 是否为通知优化生效图标
      * @param isGrayscale 是否为灰度图标
      */
-    private fun printLogcat(
-        tag: String,
-        context: Context,
-        expandedNf: StatusBarNotification?,
-        isCustom: Boolean,
-        isGrayscale: Boolean
-    ) {
+    private fun loggerDebug(tag: String, context: Context, nf: StatusBarNotification?, isCustom: Boolean, isGrayscale: Boolean) {
         if (ConfigData.isEnableModuleLog) loggerD(
-            msg = "$tag --> [${context.appNameOf(packageName = expandedNf?.nfPkgName ?: "")}][${expandedNf?.nfPkgName}] " +
-                    "custom [$isCustom] " +
-                    "grayscale [$isGrayscale] " +
-                    "xmsf [${expandedNf?.isXmsf}]"
+            msg = "(Processing $tag) ↓\n" +
+                    "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
+                    "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
+                    "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
+                    "[Package Name]: ${nf?.packageName}\n" +
+                    "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
+                    "[Custom Icon]: $isCustom\n" +
+                    "[Grayscale Icon]: $isGrayscale\n" +
+                    "[From Xmsf]: ${nf?.isXmsf}\n" +
+                    "[String]: ${nf?.notification}"
         )
     }
 
@@ -372,53 +372,55 @@ object SystemUIHooker : YukiBaseHooker() {
      *
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
      * @param context 实例
-     * @param expandedNf 通知实例
+     * @param nf 通知实例
      * @param iconDrawable 小图标 [Drawable]
      * @return [Pair] 回调小图标 - ([Drawable] 小图标,[Boolean] 是否替换)
      */
-    private fun compatStatusIcon(context: Context, expandedNf: StatusBarNotification?, iconDrawable: Drawable?) =
-        expandedNf?.let { notifyInstance ->
-            if (iconDrawable == null) return@let Pair(null, false)
-            /** 判断是否不是灰度图标 */
-            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
+    private fun compatStatusIcon(context: Context, nf: StatusBarNotification?, iconDrawable: Drawable?) = nf?.let { notifyInstance ->
+        if (iconDrawable == null) return@let Pair(null, false)
+        /** 判断是否不是灰度图标 */
+        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable, notifyInstance)
 
-            /** 目标彩色通知 APP 图标 */
-            val customIcon = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).first
-            /** 打印日志 */
-            printLogcat(tag = "StatusIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
-            when {
-                /** 处理自定义通知图标优化 */
-                customIcon != null -> Pair(customIcon, true)
-                /** 若不是灰度图标自动处理为圆角 */
-                isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
-                /** 否则返回原始小图标 */
-                else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
-            }
-        } ?: Pair(null, false)
+        /** 目标彩色通知 APP 图标 */
+        val customTriple = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName)
+
+        /** 是否为通知优化生效图标 */
+        val isCustom = customTriple.first != null && customTriple.third.not()
+        /** 打印日志 */
+        loggerDebug(tag = "Status Bar Icon", context, notifyInstance, isCustom = isCustom, isGrayscaleIcon)
+        when {
+            /** 处理自定义通知图标优化 */
+            customTriple.first != null -> Pair(customTriple.first, true)
+            /** 若不是灰度图标自动处理为圆角 */
+            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
+            /** 否则返回原始小图标 */
+            else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
+        }
+    } ?: Pair(null, false)
 
     /**
      * Hook 通知栏小图标
      *
      * 区分系统版本 - 由于每个系统版本的方法不一样这里单独拿出来进行 Hook
      * @param context 实例
-     * @param expandedNf 通知实例
-     * @param iconImageView 通知图标实例
+     * @param nf 通知实例
+     * @param iconView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isUseMaterial3Style 是否使用 Material 3 通知图标风格 - 默认跟随系统版本决定
      */
     private fun compatNotifyIcon(
         context: Context,
-        expandedNf: StatusBarNotification?,
-        iconImageView: ImageView,
+        nf: StatusBarNotification?,
+        iconView: ImageView,
         isExpanded: Boolean = true,
-        isUseMaterial3Style: Boolean = isUpperOfAndroidS,
+        isUseMaterial3Style: Boolean = isUpperOfAndroidS
     ) = runInSafe(msg = "compatNotifyIcon") {
         /**
          * 设置默认通知图标
          * @param drawable 通知图标
          */
         fun setDefaultNotifyIcon(drawable: Drawable?) {
-            iconImageView.apply {
+            iconView.apply {
                 /** 重新设置图标 */
                 setImageDrawable(drawable)
                 /** 设置裁切到边界 */
@@ -443,7 +445,7 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
-        expandedNf?.let { notifyInstance ->
+        nf?.let { notifyInstance ->
 
             /** 新版风格反色 */
             val newStyle = if (context.isSystemInDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
@@ -486,7 +488,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     (it.second.takeIf { e -> e != 0 } ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
             }
             /** 打印日志 */
-            printLogcat(tag = "NotifyIcon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
+            loggerDebug(tag = "Notification Panel Icon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             /** 处理自定义通知图标优化 */
             when {
                 ConfigData.isEnableNotifyIconForceAppIcon -> {
@@ -494,7 +496,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     val miuiAppIcon = notifyInstance.notification?.extras?.getParcelable<Icon?>("miui.appIcon")
                     setDefaultNotifyIcon(drawable = miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
                 }
-                customIcon != null -> iconImageView.apply {
+                customIcon != null -> iconView.apply {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
                     /** 设置自定义小图标 */
@@ -513,9 +515,9 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
                 else -> {
                     /** 重新设置图标 - 防止系统更改它 */
-                    iconImageView.setImageDrawable(iconDrawable)
+                    iconView.setImageDrawable(iconDrawable)
                     /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                    if (isGrayscaleIcon) iconImageView.apply {
+                    if (isGrayscaleIcon) iconView.apply {
                         /** 设置不要裁切到边界 */
                         clipToOutline = false
                         /** 设置图标着色 */
@@ -559,7 +561,6 @@ object SystemUIHooker : YukiBaseHooker() {
          * 只要不是灰度就返回彩色图标
          * 否则不对颜色进行反色处理防止一些系统图标出现异常
          */
-        printLogcat(tag = "IconColor", context, notifyInstance, isTargetFixApp, isGrayscaleIcon)
         return isTargetFixApp || isGrayscaleIcon
     }
 
@@ -930,8 +931,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.clone {
                         compatNotifyIcon(
                             context = context,
-                            expandedNf = instance.getRowPair().second.getSbn(),
-                            iconImageView = this,
+                            nf = instance.getRowPair().second.getSbn(),
+                            iconView = this,
                             isUseMaterial3Style = true
                         )
                     }
@@ -950,7 +951,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
                         compatNotifyIcon(context, NotificationChildrenContainerClass.toClassOrNull()?.field {
                             name = "mContainingNotification"
-                        }?.get(instance)?.any()?.getSbn(), iconImageView = this, isUseMaterial3Style = true)
+                        }?.get(instance)?.any()?.getSbn(), iconView = this, isUseMaterial3Style = true)
                     }
                 }
             }
