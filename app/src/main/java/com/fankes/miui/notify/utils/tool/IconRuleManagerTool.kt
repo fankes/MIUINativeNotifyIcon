@@ -246,6 +246,8 @@ object IconRuleManagerTool {
         fun doParse(result: () -> Unit = {}) {
             wait(context, url) { isDone, content ->
                 result()
+                /** 延迟重新回调防止对话框无法取消 */
+                delayedRun { result() }
                 IconPackParams(context).also { params ->
                     when {
                         isDone -> when {
