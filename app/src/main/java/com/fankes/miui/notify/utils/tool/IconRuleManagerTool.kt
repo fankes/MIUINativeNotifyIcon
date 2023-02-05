@@ -70,10 +70,10 @@ object IconRuleManagerTool {
     private const val OS_COLOR = 0xFFE06818.toInt()
 
     /** 同步地址 - Github Raw (代理) */
-    private const val SYNC_URL_PROXY = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
+    private const val SYNC_PROXY_URL = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
 
     /** 同步地址 - Github Raw (直连) */
-    private const val SYNC_URL_DIRECT = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
+    private const val SYNC_DIRECT_URL = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
     /**
      * 从在线地址手动同步规则
@@ -173,8 +173,8 @@ object IconRuleManagerTool {
         callback: () -> Unit
     ) {
         when (sourceType) {
-            IconRuleSourceSyncType.GITHUB_RAW_PROXY -> onRefreshing(context, SYNC_URL_PROXY, callback)
-            IconRuleSourceSyncType.GITHUB_RAW_DIRECT -> onRefreshing(context, SYNC_URL_DIRECT, callback)
+            IconRuleSourceSyncType.GITHUB_RAW_PROXY -> onRefreshing(context, SYNC_PROXY_URL, callback)
+            IconRuleSourceSyncType.GITHUB_RAW_DIRECT -> onRefreshing(context, SYNC_DIRECT_URL, callback)
             IconRuleSourceSyncType.CUSTOM_URL ->
                 if (customUrl.isNotBlank())
                     if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
