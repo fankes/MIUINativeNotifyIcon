@@ -354,7 +354,7 @@ object IconRuleManagerTool {
      */
     private fun notifyRefresh(context: Context) {
         if (context !is AppCompatActivity) pushNotify(context, title = "同步完成", msg = "已更新通知图标优化名单，点击查看")
-        SystemUITool.refreshSystemUI(context) { if (context is AppCompatActivity) context.snake(msg = "已更新通知图标优化名单，点击查看") }
+        SystemUITool.refreshSystemUI(context) { if (context is AppCompatActivity) context.snake(msg = "已更新通知图标优化名单") }
     }
 
     /**
