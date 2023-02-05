@@ -45,9 +45,7 @@ import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.databinding.DiaSourceFromStringBinding
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
-import com.fankes.miui.notify.utils.factory.safeOfNull
-import com.fankes.miui.notify.utils.factory.showDialog
-import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.*
 import com.highcapable.yukihookapi.hook.log.loggerD
 import okhttp3.*
 import java.io.IOException
@@ -75,6 +73,18 @@ object IconRuleManagerTool {
     /** 同步地址 - Github Raw (直连) */
     private const val SYNC_DIRECT_URL = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
+    /** 云端规则展示地址 (OS) */
+    private const val RULES_TRAVELER_OS_URL = "https://fankes.github.io/AndroidNotifyIconAdapt/?notify-rules-miui"
+
+    /** 云端规则展示地址 (APP) */
+    private const val RULES_TRAVELER_APP_URL = "https://fankes.github.io/AndroidNotifyIconAdapt/?notify-rules-app"
+
+    /** 请求适配通知图标优化名单地址 */
+    internal const val RULES_FEEDBACK_URL = "https://fankes.github.io/AndroidNotifyIconAdapt/?feedback"
+
+    /** 贡献通知图标优化名单地址 */
+    internal const val RULES_CONTRIBUTING_URL = "https://fankes.github.io/AndroidNotifyIconAdapt/?contribute"
+
     /**
      * 从在线地址手动同步规则
      * @param context 实例
@@ -93,21 +103,27 @@ object IconRuleManagerTool {
                 doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
             }
             binding.sourceFromTextLin.isVisible = sourceType == IconRuleSourceSyncType.CUSTOM_URL
+            binding.sourceTravelerLin.isVisible = sourceType != IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY
             binding.sourceRadio2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_DIRECT
             binding.sourceRadio3.isChecked = sourceType == IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceRadio1.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
+                binding.sourceTravelerLin.isVisible = true
                 sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY
             }
             binding.sourceRadio2.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
+                binding.sourceTravelerLin.isVisible = true
                 sourceType = IconRuleSourceSyncType.GITHUB_RAW_DIRECT
             }
             binding.sourceRadio3.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = true
+                binding.sourceTravelerLin.isVisible = false
                 sourceType = IconRuleSourceSyncType.CUSTOM_URL
             }
+            binding.sourceTravelerOsButton.setOnClickListener { context.openBrowser(RULES_TRAVELER_OS_URL) }
+            binding.sourceTravelerAppButton.setOnClickListener { context.openBrowser(RULES_TRAVELER_APP_URL) }
             confirmButton {
                 ConfigData.iconRuleSourceSyncType = sourceType
                 ConfigData.iconRuleSourceSyncCustomUrl = customUrl
@@ -116,7 +132,7 @@ object IconRuleManagerTool {
             cancelButton()
             neutralButton(text = "自定义规则") {
                 context.showDialog<DiaSourceFromStringBinding> {
-                    title = "自定义规则(调试)"
+                    title = "自定义规则 (调试)"
                     binding.jsonRuleEdit.apply {
                         requestFocus()
                         invalidate()

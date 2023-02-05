@@ -50,6 +50,7 @@
         android:id="@+id/source_from_text_lin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:visibility="gone">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -60,4 +61,58 @@
             android:hint="请输入在线地址 URL"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/source_traveler_lin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8.5dp"
+            android:layout_marginRight="8.5dp"
+            android:layout_marginBottom="15dp"
+            android:singleLine="true"
+            android:text="查看云端规则数据"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6.5dp"
+            android:layout_marginRight="6.5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/source_traveler_os_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button_round"
+                android:gravity="center"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:text="OS"
+                android:textColor="@color/colorTextGray"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/source_traveler_app_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button_round"
+                android:gravity="center"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:text="APP"
+                android:textColor="@color/colorTextGray"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

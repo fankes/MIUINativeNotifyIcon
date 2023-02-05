@@ -173,8 +173,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             showDialog {
                 title = "感谢你的贡献"
                 msg = "通知图标优化名单需要大家的共同维护才能得以完善，请选择你的贡献方式。"
-                confirmButton(text = "贡献规则") { openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt/blob/main/CONTRIBUTING.md") }
-                cancelButton(text = "请求适配") { openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt/issues/new/choose") }
+                confirmButton(text = "贡献规则") { openBrowser(IconRuleManagerTool.RULES_CONTRIBUTING_URL) }
+                cancelButton(text = "请求适配") { openBrowser(IconRuleManagerTool.RULES_FEEDBACK_URL) }
                 neutralButton(text = "暂时不用")
             }
         }
