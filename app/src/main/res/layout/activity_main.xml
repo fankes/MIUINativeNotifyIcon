@@ -767,7 +767,7 @@
                     android:layout_marginRight="15dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="⚠️ 在 MIUI 11、12 上可能需要 Root 权限才能打开。"
+                    android:text="⚠️ 在 MIUI 11 上可能需要 Root 权限才能打开。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp"
                     android:textStyle="bold" />

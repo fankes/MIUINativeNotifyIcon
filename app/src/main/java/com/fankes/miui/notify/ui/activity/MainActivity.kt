@@ -158,7 +158,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainTextVersion.text = "模块版本：$moduleVersion $pendingFlag"
         binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
-        binding.warnMiuiNotifyStyleTip.isGone = miuiVersionCode > 12
+        binding.warnMiuiNotifyStyleTip.isGone = miuiVersionCode > 11
         binding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
         binding.notifyIconAutoSyncText.text = ConfigData.notifyIconFixAutoTime
         binding.moduleEnableSwitch.bind(ConfigData.ENABLE_MODULE) {
