@@ -67,10 +67,10 @@ object IconRuleManagerTool {
     /** 当前规则的通知图标颜色 */
     private const val OS_COLOR = 0xFFE06818.toInt()
 
-    /** 同步地址 - Github Raw (代理) */
+    /** 同步地址 - GitHub Raw (代理) */
     private const val SYNC_PROXY_URL = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
 
-    /** 同步地址 - Github Raw (直连) */
+    /** 同步地址 - GitHub Raw (直连) */
     private const val SYNC_DIRECT_URL = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
     /** 云端规则展示地址 (OS) */

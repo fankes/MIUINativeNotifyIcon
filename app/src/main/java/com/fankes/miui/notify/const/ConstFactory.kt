@@ -36,10 +36,10 @@ object PackageName {
  */
 object IconRuleSourceSyncType {
 
-    /** Github Raw (代理) */
+    /** GitHub Raw (代理) */
     const val GITHUB_RAW_PROXY = 1000
 
-    /** Github Raw (直连) */
+    /** GitHub Raw (直连) */
     const val GITHUB_RAW_DIRECT = 2000
 
     /** 自定义地址 */
