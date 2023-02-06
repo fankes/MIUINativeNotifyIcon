@@ -583,6 +583,37 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
+     * Hook 原生通知包装纸实例内容
+     * @param wrapper 通知包装纸实例
+     */
+    private fun hookNotificationViewWrapper(wrapper: Any) {
+        /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
+        if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return
+
+        /** 获取小图标 */
+        val iconImageView = NotificationHeaderViewWrapperClass.toClassOrNull()
+            ?.field { name = "mIcon" }?.get(wrapper)?.cast<ImageView>() ?: return
+
+        /** 获取 [ExpandableNotificationRowClass] */
+        val rowPair = wrapper.getRowPair()
+
+        /** 获取 [StatusBarNotification] */
+        val expandedNf = rowPair.second.getSbn()
+
+        /** 通知是否展开 */
+        var isExpanded = rowPair.first
+
+        /** 获取优先级 */
+        val importance =
+            (iconImageView.context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
+                ?.getNotificationChannel(expandedNf?.notification?.channelId)?.importance ?: 0
+        /** 非最小化优先级的通知全部设置为展开状态 */
+        if (importance != 1) isExpanded = true
+        /** 执行 Hook */
+        compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
+    }
+
+    /**
      * 从 [NotificationViewWrapperClass] 中获取 [ExpandableNotificationRowClass]
      * @return [Pair] - ([Boolean] 通知是否展开,[Any] 通知 Row 实例)
      */
@@ -871,35 +902,13 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         /** 注入原生通知包装纸实例 */
         NotificationHeaderViewWrapperClass.hook {
-            /** 修复下拉通知图标自动设置回 APP 图标的方法 */
             injectMember {
                 method { name { it == "resolveHeaderViews" || it == "handleHeaderViews" || it == "resolveViews" } }
-                afterHook {
-                    /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
-                    if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return@afterHook
-
-                    /** 获取小图标 */
-                    val iconImageView = NotificationHeaderViewWrapperClass.toClassOrNull()
-                        ?.field { name = "mIcon" }?.get(instance)?.cast<ImageView>() ?: return@afterHook
-
-                    /** 获取 [ExpandableNotificationRowClass] */
-                    val rowPair = instance.getRowPair()
-
-                    /** 获取 [StatusBarNotification] */
-                    val expandedNf = rowPair.second.getSbn()
-
-                    /** 通知是否展开 */
-                    var isExpanded = rowPair.first
-
-                    /** 获取优先级 */
-                    val importance =
-                        (iconImageView.context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
-                            ?.getNotificationChannel(expandedNf?.notification?.channelId)?.importance ?: 0
-                    /** 非最小化优先级的通知全部设置为展开状态 */
-                    if (importance != 1) isExpanded = true
-                    /** 执行 Hook */
-                    compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
-                }
+                afterHook { hookNotificationViewWrapper(instance) }
+            }
+            injectMember {
+                method { name = "onContentUpdated" }
+                afterHook { hookNotificationViewWrapper(instance) }
             }
         }
         /** 修改 MIUI 风格通知栏的通知图标 */
