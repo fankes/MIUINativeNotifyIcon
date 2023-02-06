@@ -63,9 +63,7 @@ import com.highcapable.yukihookapi.hook.factory.*
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.type.android.*
-import com.highcapable.yukihookapi.hook.type.defined.VagueType
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
-import com.highcapable.yukihookapi.hook.type.java.FloatType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import top.defaults.drawabletoolbox.DrawableBuilder
 
@@ -779,7 +777,7 @@ object SystemUIHooker : YukiBaseHooker() {
             injectMember {
                 method {
                     name = "onDarkChanged"
-                    param(VagueType, FloatType, IntType)
+                    paramCount { it > 0 }
                 }
                 afterHook {
                     field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
@@ -794,7 +792,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                 isDarkIconMode = false
                                 updateStatusBarIconColor(it, isDarkIconMode = false)
                             }
-                            else -> updateStatusBarIconColor(it, isDarkIconMode = false, args().last().int())
+                            else -> updateStatusBarIconColor(it, isDarkIconMode = false, args(index = 2).int())
                         }
                     }
                 }
