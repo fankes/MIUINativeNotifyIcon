@@ -343,7 +343,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
             if (isGrayscaleIcon.not() && ConfigData.isEnableNotifyIconFixPlaceholder)
-                customPair = Triple(context.resources.drawableOf(R.drawable.ic_unsupported), 0, true)
+                customPair = Triple(context.resources.drawableOf(R.drawable.ic_message), 0, true)
         }
         return customPair ?: Triple(null, 0, false)
     }
