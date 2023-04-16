@@ -24,7 +24,7 @@ package com.fankes.miui.notify.utils.tool
 
 import android.content.Context
 import com.fankes.miui.notify.utils.factory.showDialog
-import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.xposed.prefs.data.PrefsData
 import java.util.*
 
@@ -41,8 +41,8 @@ object I18nWarnTool {
      * @param context 实例
      */
     fun checkingOrShowing(context: Context) {
-        fun saveReaded() = context.modulePrefs.put(LOCALE_WARN_READED, value = true)
-        if (Locale.getDefault().language.startsWith("zh").not() && context.modulePrefs.get(LOCALE_WARN_READED).not())
+        fun saveReaded() = context.prefs().edit { put(LOCALE_WARN_READED, value = true) }
+        if (Locale.getDefault().language.startsWith("zh").not() && context.prefs().get(LOCALE_WARN_READED).not())
             context.showDialog {
                 title = "Notice of I18n Support"
                 msg = "This Xposed Module is only for Chinese and the Chinese region.\n\n" +

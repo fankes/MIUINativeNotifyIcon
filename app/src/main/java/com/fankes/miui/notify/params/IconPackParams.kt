@@ -29,7 +29,7 @@ import android.graphics.Color
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.utils.factory.*
-import com.highcapable.yukihookapi.hook.factory.modulePrefs
+import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import org.json.JSONArray
 import org.json.JSONObject
@@ -47,7 +47,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * 已存储的 JSON 数据
      * @return [String]
      */
-    internal val storageDataJson get() = (context?.modulePrefs ?: param?.prefs)?.direct()?.get(ConfigData.NOTIFY_ICONS_DATA)
+    internal val storageDataJson get() = (context?.prefs() ?: param?.prefs)?.direct()?.get(ConfigData.NOTIFY_ICONS_DATA)
 
     /**
      * 获取图标数据
@@ -134,5 +134,5 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * 保存图标数据
      * @param dataJson 图标数据 JSON
      */
-    fun save(dataJson: String) = context?.modulePrefs?.put(ConfigData.NOTIFY_ICONS_DATA, dataJson)
+    fun save(dataJson: String) = context?.prefs()?.edit { put(ConfigData.NOTIFY_ICONS_DATA, dataJson) }
 }
