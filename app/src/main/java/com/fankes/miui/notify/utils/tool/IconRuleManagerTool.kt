@@ -67,11 +67,14 @@ object IconRuleManagerTool {
     /** 当前规则的通知图标颜色 */
     private const val OS_COLOR = 0xFFE06818.toInt()
 
-    /** 同步地址 - GitHub Raw (代理) */
-    private const val SYNC_PROXY_URL = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
-
     /** 同步地址 - GitHub Raw (直连) */
     private const val SYNC_DIRECT_URL = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
+
+    /** 同步地址 - GitHub Raw (代理 - GitHub Proxy) */
+    private const val SYNC_PROXY_1_URL = "https://ghproxy.com/$SYNC_DIRECT_URL"
+
+    /** 同步地址 - GitHub Raw (代理 - 7ED Services) */
+    private const val SYNC_PROXY_2_URL = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
 
     /** 云端规则展示地址 (OS) */
     private const val RULES_TRAVELER_OS_URL = "https://fankes.github.io/AndroidNotifyIconAdapt/?notify-rules-miui"
@@ -104,13 +107,19 @@ object IconRuleManagerTool {
             }
             binding.sourceFromTextLin.isVisible = sourceType == IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceTravelerLin.isVisible = sourceType != IconRuleSourceSyncType.CUSTOM_URL
-            binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY
+            binding.sourceRadio0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY_1
+            binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY_2
             binding.sourceRadio2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_DIRECT
             binding.sourceRadio3.isChecked = sourceType == IconRuleSourceSyncType.CUSTOM_URL
+            binding.sourceRadio0.setOnClickListener {
+                binding.sourceFromTextLin.isVisible = false
+                binding.sourceTravelerLin.isVisible = true
+                sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY_1
+            }
             binding.sourceRadio1.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
                 binding.sourceTravelerLin.isVisible = true
-                sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY
+                sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY_2
             }
             binding.sourceRadio2.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
@@ -189,7 +198,8 @@ object IconRuleManagerTool {
         callback: () -> Unit
     ) {
         when (sourceType) {
-            IconRuleSourceSyncType.GITHUB_RAW_PROXY -> onRefreshing(context, SYNC_PROXY_URL, callback)
+            IconRuleSourceSyncType.GITHUB_RAW_PROXY_1 -> onRefreshing(context, SYNC_PROXY_1_URL, callback)
+            IconRuleSourceSyncType.GITHUB_RAW_PROXY_2 -> onRefreshing(context, SYNC_PROXY_2_URL, callback)
             IconRuleSourceSyncType.GITHUB_RAW_DIRECT -> onRefreshing(context, SYNC_DIRECT_URL, callback)
             IconRuleSourceSyncType.CUSTOM_URL ->
                 if (customUrl.isNotBlank())
