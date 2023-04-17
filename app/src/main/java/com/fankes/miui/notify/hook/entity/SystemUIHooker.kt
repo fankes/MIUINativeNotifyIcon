@@ -54,6 +54,7 @@ import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.params.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.tool.ActivationPromptTool
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
@@ -693,11 +694,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 addAction(Intent.ACTION_PACKAGE_REPLACED)
                 addAction(Intent.ACTION_PACKAGE_REMOVED)
             }) { context, intent ->
-                if (intent.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
-                    intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                ) return@registerReceiver
-                if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixNotify)
-                    intent.data?.schemeSpecificPart?.also { packageName ->
+                intent.data?.schemeSpecificPart?.also { packageName ->
+                    if (intent.action.equals(Intent.ACTION_PACKAGE_REPLACED)) ActivationPromptTool.prompt(context, packageName)
+                    if (intent.action.equals(Intent.ACTION_PACKAGE_REPLACED).not() &&
+                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                    ) return@registerReceiver
+                    if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixNotify)
                         when (intent.action) {
                             Intent.ACTION_PACKAGE_ADDED -> {
                                 if (iconDatas.takeIf { e -> e.isNotEmpty() }
@@ -707,7 +709,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             }
                             Intent.ACTION_PACKAGE_REMOVED -> IconAdaptationTool.removeNewAppSupportNotify(context, packageName)
                         }
-                    }
+                }
             }
             /** 注入模块资源 */
             onCreate { injectModuleAppResources() }
