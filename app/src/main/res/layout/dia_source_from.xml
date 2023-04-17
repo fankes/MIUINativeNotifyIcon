@@ -25,6 +25,13 @@
         android:layout_height="wrap_content">
 
         <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/source_radio_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GitHub Raw (GitHub Proxy)"
+            app:buttonTint="@color/colorPrimaryAccent" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/source_radio_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

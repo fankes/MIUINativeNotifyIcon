@@ -85,7 +85,7 @@ object ConfigData {
     val NOTIFY_ICONS_DATA = PrefsData("_notify_icon_datas", "")
 
     /** 通知图标优化名单同步方式 */
-    val ICON_RULE_SOURCE_SYNC_TYPE = PrefsData("_rule_source_sync_way", IconRuleSourceSyncType.GITHUB_RAW_PROXY)
+    val ICON_RULE_SOURCE_SYNC_TYPE = PrefsData("_rule_source_sync_way", IconRuleSourceSyncType.GITHUB_RAW_PROXY_1)
 
     /** 通知图标优化名单同步地址 */
     val ICON_RULE_SOURCE_SYNC_CUSTOM_URL = PrefsData("_rule_source_sync_way_custom_url", "")
