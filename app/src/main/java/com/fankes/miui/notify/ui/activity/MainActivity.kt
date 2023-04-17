@@ -209,9 +209,32 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 } else applyChangesAndRefresh()
             }
         }
+        binding.notifyIconForceSystemColorSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR) {
+            isAutoApplyChanges = false
+            onChanged {
+                /** 应用更改并刷新系统界面 */
+                fun applyChangesAndRefresh() {
+                    applyChangesAndReinitialize()
+                    SystemUITool.refreshSystemUI(context = this@MainActivity)
+                }
+                if (it) showDialog {
+                    title = "破坏性功能警告"
+                    msg = "开启这个功能后，任何通知栏中的通知图标都会忽略图标自身的着色属性，全部使用系统默认颜色 (系统提供的统一色调) 着色。\n\n" +
+                            "此功能仅面向一些追求图标美观度的用户，我们不推荐开启这个功能，且发生任何 BUG 都不会去修复，仍然继续开启吗？"
+                    confirmButton { applyChangesAndRefresh() }
+                    cancelButton { cancelChanges() }
+                    noCancelable()
+                } else applyChangesAndRefresh()
+            }
+        }
         binding.notifyIconForceAppIconSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) {
             isAutoApplyChanges = false
-            onInitialize { binding.notifyIconCustomCornerItem.isVisible = isLowerAndroidR.not() && it.not() }
+            onInitialize {
+                arrayOf(
+                    binding.notifyIconCustomCornerItem,
+                    binding.notifyIconForceSystemColorItem
+                ).forEach { e -> e.isVisible = isLowerAndroidR.not() && it.not() }
+            }
             onChanged {
                 /** 应用更改并刷新系统界面 */
                 fun applyChangesAndRefresh() {

@@ -863,6 +863,34 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/notify_icon_force_system_color_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                        android:id="@+id/notify_icon_force_system_color_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="通知栏中的图标使用系统默认着色"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="此选项默认关闭，开启后下拉通知栏中的通知图标将忽略图标自身的着色属性，全部使用系统默认颜色 (系统提供的统一色调) 着色，这是一个破坏原生通知图标的行为，仅针对部分有需要的用户而添加，我们不推荐开启这个功能，请根据个人偏好进行选择是否需要开启。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
