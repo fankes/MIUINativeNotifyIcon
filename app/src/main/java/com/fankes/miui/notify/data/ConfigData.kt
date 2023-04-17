@@ -60,6 +60,9 @@ object ConfigData {
     /** 通知栏中的通知图标圆角程度 */
     val NOTIFY_ICON_CORNER_SIZE = PrefsData("_notify_icon_corner", 15)
 
+    /** 强制通知栏中的通知图标使用系统着色 */
+    val ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR = PrefsData("_notify_icon_force_system_color", false)
+
     /** 强制通知栏中的通知图标为 APP 图标 */
     val ENABLE_NOTIFY_ICON_FORCE_APP_ICON = PrefsData("_notify_icon_force_app_icon", false)
 
@@ -255,6 +258,16 @@ object ConfigData {
         get() = getInt(NOTIFY_ICON_CORNER_SIZE)
         set(value) {
             putInt(NOTIFY_ICON_CORNER_SIZE, value)
+        }
+
+    /**
+     * 是否强制通知栏中的通知图标使用系统着色
+     * @return [Boolean]
+     */
+    var isEnableNotifyIconForceSystemColor
+        get() = getBoolean(ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR)
+        set(value) {
+            putBoolean(ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR, value)
         }
 
     /**

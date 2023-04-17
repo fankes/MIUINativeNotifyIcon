@@ -438,10 +438,10 @@ object SystemUIHooker : YukiBaseHooker() {
             val iconColor = notifyInstance.notification.color
 
             /** 是否有通知栏图标颜色 */
-            val hasIconColor = iconColor != 0
+            val hasIconColor = iconColor != 0 && ConfigData.isEnableNotifyIconForceSystemColor.not()
 
             /** 通知图标适配颜色 */
-            val supportColor = iconColor.let {
+            val supportColor = (iconColor.takeIf { ConfigData.isEnableNotifyIconForceSystemColor.not() } ?: 0).let {
                 when {
                     isUseMaterial3Style -> newStyle
                     it == 0 || isExpanded.not() -> oldStyle
@@ -466,7 +466,8 @@ object SystemUIHooker : YukiBaseHooker() {
                 if (it.third) return@also
                 customIcon = it.first
                 customIconColor = if (isUseMaterial3Style || isExpanded)
-                    (it.second.takeIf { e -> e != 0 } ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
+                    (it.second.takeIf { e -> e != 0 && ConfigData.isEnableNotifyIconForceSystemColor.not() }
+                        ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
             }
             /** 打印日志 */
             loggerDebug(tag = "Notification Panel Icon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
