@@ -26,6 +26,7 @@ package com.fankes.miui.notify.data
 
 import android.content.Context
 import com.fankes.miui.notify.const.IconRuleSourceSyncType
+import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.log.loggerW
 import com.highcapable.yukihookapi.hook.param.PackageParam
@@ -38,6 +39,9 @@ object ConfigData {
 
     /** 启用模块 */
     val ENABLE_MODULE = PrefsData("_enable_module", true)
+
+    /** 启用数据缓存 */
+    val ENABLE_PREFS_CACHE = PrefsData("_enable_prefs_cache", true)
 
     /** 启用模块日志 */
     val ENABLE_MODULE_LOG = PrefsData("_enable_module_log", false)
@@ -106,6 +110,8 @@ object ConfigData {
             is Context, is PackageParam -> this.instance = instance
             else -> error("Unknown type for init ConfigData")
         }
+        /** 设置是否启用数据缓存 */
+        YukiHookAPI.Configs.isEnablePrefsBridgeCache = isEnablePrefsCache
     }
 
     /**
@@ -188,6 +194,16 @@ object ConfigData {
         get() = getBoolean(ENABLE_MODULE)
         set(value) {
             putBoolean(ENABLE_MODULE, value)
+        }
+
+    /**
+     * 是否启用数据缓存
+     * @return [Boolean]
+     */
+    var isEnablePrefsCache
+        get() = getBoolean(ENABLE_PREFS_CACHE)
+        set(value) {
+            putBoolean(ENABLE_PREFS_CACHE, value)
         }
 
     /**
