@@ -270,68 +270,50 @@
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
-                <com.fankes.miui.notify.ui.widget.MaterialSwitch
-                    android:id="@+id/module_prefs_cache_enable_switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="启用数据缓存"
-                    android:textColor="@color/colorTextGray"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:id="@+id/module_prefs_cache_enable_text"
+                <LinearLayout
+                    android:id="@+id/module_enable_log_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="5dp"
-                    android:alpha="0.6"
-                    android:lineSpacingExtra="6dp"
-                    android:text="此选项默认开启，默认情况下模块会将数据缓存在内存中，防止每次重复读取数据造成卡顿，如果开启此选项后一段时间导致系统界面 (系统 UI) 崩溃 (内存溢出)，你可以尝试关闭此选项，但是这有可能会造成在通知较多时下拉通知栏出现卡顿。"
-                    android:textColor="@color/colorTextDark"
-                    android:textSize="12sp" />
-
-                <com.fankes.miui.notify.ui.widget.MaterialSwitch
-                    android:id="@+id/module_enable_log_switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="5dp"
-                    android:text="启用调试日志"
-                    android:textColor="@color/colorTextGray"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:id="@+id/exp_all_debug_log_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="13dp"
-                    android:layout_marginRight="13dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_button_round"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:singleLine="true"
-                    android:text="导出全部调试日志"
-                    android:textColor="@color/colorTextGray"
-                    android:textSize="15sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/module_enable_log_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_marginBottom="10dp"
-                    android:alpha="0.6"
-                    android:lineSpacingExtra="6dp"
-                    android:text="默认情况下不建议开启此选项，仅在模块故障时开启，此时你可以发送调试日志给开发者帮助我们快速定位问题。"
-                    android:textColor="@color/colorTextDark"
-                    android:textSize="12sp" />
+                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                        android:id="@+id/module_enable_log_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="启用调试日志"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/exp_all_debug_log_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="13dp"
+                        android:layout_marginRight="13dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/bg_button_round"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:singleLine="true"
+                        android:text="导出全部调试日志"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:text="默认情况下不建议开启此选项，仅在模块故障时开启，此时你可以发送调试日志给开发者帮助我们快速定位问题。"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
