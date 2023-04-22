@@ -163,11 +163,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.notifyIconAutoSyncText.text = ConfigData.notifyIconFixAutoTime
         binding.moduleEnableSwitch.bind(ConfigData.ENABLE_MODULE) {
             onInitialize {
-                binding.moduleEnableLogSwitch.isVisible = it
-                binding.moduleEnableLogText.isVisible = it
-                binding.modulePrefsCacheEnableSwitch.isVisible = it
-                binding.modulePrefsCacheEnableText.isVisible = it
-                binding.expAllDebugLogButton.isVisible = it && ConfigData.isEnableModuleLog
+                binding.moduleEnableLogItem.isVisible = it
                 binding.colorIconHookItem.isVisible = it
                 binding.statusIconCountItem.isVisible = isLowerAndroidR.not() && it
                 binding.notifyStyleConfigItem.isVisible = it
@@ -179,11 +175,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 SystemUITool.showNeedRestartSnake(context = this@MainActivity)
             }
         }
-        binding.modulePrefsCacheEnableSwitch.bind(ConfigData.ENABLE_PREFS_CACHE) {
-            onChanged { SystemUITool.showNeedRestartSnake(context = this@MainActivity) }
-        }
         binding.moduleEnableLogSwitch.bind(ConfigData.ENABLE_MODULE_LOG) {
-            onInitialize { binding.expAllDebugLogButton.isVisible = it && ConfigData.isEnableModule }
+            onInitialize { binding.expAllDebugLogButton.isVisible = it }
             onChanged {
                 reinitialize()
                 SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)

@@ -45,6 +45,7 @@ object HookEntry : IYukiHookXposedInit {
             elements(PRIORITY)
         }
         isDebug = false
+        isEnablePrefsBridgeCache = false
     }
 
     override fun onHook() = encase {
