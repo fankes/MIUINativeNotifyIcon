@@ -735,7 +735,6 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 获取可读写状态 */
         return prefs.isPreferencesAvailable.also {
             isUsingCachingMethod = true
-            prefs.clearCache()
             cachingIconDatas()
             if (isRefreshCacheOnly) return@also
             refreshStatusBarIcons()
