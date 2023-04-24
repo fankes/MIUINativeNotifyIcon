@@ -47,7 +47,7 @@ class IconPackParams(private val context: Context? = null, private val param: Pa
      * 已存储的 JSON 数据
      * @return [String]
      */
-    internal val storageDataJson get() = (context?.prefs() ?: param?.prefs)?.direct()?.get(ConfigData.NOTIFY_ICONS_DATA)
+    internal val storageDataJson get() = (context?.prefs() ?: param?.prefs)?.get(ConfigData.NOTIFY_ICONS_DATA)
 
     /**
      * 获取图标数据
