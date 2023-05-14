@@ -752,9 +752,9 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 强制回写系统的状态栏图标样式为原生 */
             injectMember {
                 method {
-                    name = "shouldSubstituteSmallIcon"
-                    param(ExpandedNotificationClass)
-                }
+                    name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
+                    param { it[0] extends StatusBarNotificationClass }
+                }.all()
                 replaceToFalse()
             }
             /** 强制回写系统的状态栏图标样式为原生 */
@@ -762,7 +762,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 var isUseLegacy = false
                 method {
                     name = "getSmallIcon"
-                    param(ExpandedNotificationClass, IntType)
+                    param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
                 }.remedys {
                     method {
                         name = "getSmallIcon"
