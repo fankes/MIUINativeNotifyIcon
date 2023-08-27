@@ -87,6 +87,9 @@ object SystemUIHooker : YukiBaseHooker() {
     private const val NotificationHeaderViewWrapperInjectorClass =
         "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector"
 
+    /** MIUI 新版本存在的类 */
+    private const val NotificationStatClass = "${PackageName.SYSTEMUI}.statusbar.notification.analytics.NotificationStat"
+
     /** 原生存在的类 */
     private const val NotificationChildrenContainerClass = "${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer"
 
@@ -967,6 +970,33 @@ object SystemUIHooker : YukiBaseHooker() {
                     param(ImageViewClass, ExpandedNotificationClass)
                 }
                 intercept()
+            }.ignoredNoSuchMemberFailure()
+        }.ignoredHookClassNotFoundFailure()
+        /**
+         * 尝试修复从 MIUI 14 开始出现的一个崩溃问题
+         * 由于模块注入推送的通知没有对 [StatusBarNotification] 设置 TAG 会导致其空指针
+         * 直接替换掉它自己的实现方法 - 使用自己的方式实现这个功能
+         * ```java
+         * public final boolean isUnimportantEntry(NotificationEntry notificationEntry) {
+         *     return notificationEntry.getSbn().getPackageName().equals("com.android.systemui") &&
+         *         notificationEntry.getSbn().getTag().equals("UNIMPORTANT");
+         * }
+         * ```
+         */
+        NotificationStatClass.hook {
+            injectMember {
+                method {
+                    name = "isUnimportantEntry"
+                    paramCount = 1
+                }
+                replaceAny {
+                    args().first().current(ignored = true).method {
+                        name = "getSbn"
+                        superClass()
+                    }.invoke<StatusBarNotification>()?.let { sbn ->
+                        sbn.packageName == PackageName.SYSTEMUI && sbn.tag == "UNIMPORTANT"
+                    } ?: false
+                }
             }.ignoredNoSuchMemberFailure()
         }.ignoredHookClassNotFoundFailure()
     }
