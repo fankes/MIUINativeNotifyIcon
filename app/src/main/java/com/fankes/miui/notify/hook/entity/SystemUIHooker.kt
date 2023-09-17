@@ -20,7 +20,7 @@
  *
  * This file is Created by fankes on 2022/3/25.
  */
-@file:Suppress("StaticFieldLeak")
+@file:Suppress("StaticFieldLeak", "ConstPropertyName")
 
 package com.fankes.miui.notify.hook.entity
 
@@ -53,17 +53,41 @@ import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.params.factory.isAppNotifyHookAllOf
 import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.appIconOf
+import com.fankes.miui.notify.utils.factory.appNameOf
+import com.fankes.miui.notify.utils.factory.brighterColor
+import com.fankes.miui.notify.utils.factory.delayedRun
+import com.fankes.miui.notify.utils.factory.dp
+import com.fankes.miui.notify.utils.factory.dpFloat
+import com.fankes.miui.notify.utils.factory.drawableOf
+import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
+import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
+import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
+import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
+import com.fankes.miui.notify.utils.factory.round
+import com.fankes.miui.notify.utils.factory.runInSafe
+import com.fankes.miui.notify.utils.factory.safeOf
+import com.fankes.miui.notify.utils.factory.safeOfFalse
+import com.fankes.miui.notify.utils.factory.systemAccentColor
 import com.fankes.miui.notify.utils.tool.ActivationPromptTool
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.hook.bean.VariousClass
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
-import com.highcapable.yukihookapi.hook.factory.*
+import com.highcapable.yukihookapi.hook.factory.MembersType
+import com.highcapable.yukihookapi.hook.factory.current
+import com.highcapable.yukihookapi.hook.factory.extends
+import com.highcapable.yukihookapi.hook.factory.field
+import com.highcapable.yukihookapi.hook.factory.hasField
+import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
+import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.log.loggerW
-import com.highcapable.yukihookapi.hook.type.android.*
+import com.highcapable.yukihookapi.hook.type.android.ContextClass
+import com.highcapable.yukihookapi.hook.type.android.DrawableClass
+import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
+import com.highcapable.yukihookapi.hook.type.android.StatusBarNotificationClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import top.defaults.drawabletoolbox.DrawableBuilder
@@ -237,15 +261,15 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun loggerDebug(tag: String, context: Context, nf: StatusBarNotification?, isCustom: Boolean, isGrayscale: Boolean) {
         if (ConfigData.isEnableModuleLog) loggerD(
             msg = "(Processing $tag) ↓\n" +
-                    "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
-                    "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
-                    "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
-                    "[Package Name]: ${nf?.packageName}\n" +
-                    "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
-                    "[Custom Icon]: $isCustom\n" +
-                    "[Grayscale Icon]: $isGrayscale\n" +
-                    "[From Xmsf]: ${nf?.isXmsf}\n" +
-                    "[String]: ${nf?.notification}"
+                "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
+                "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
+                "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
+                "[Package Name]: ${nf?.packageName}\n" +
+                "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
+                "[Custom Icon]: $isCustom\n" +
+                "[Grayscale Icon]: $isGrayscale\n" +
+                "[From Xmsf]: ${nf?.isXmsf}\n" +
+                "[String]: ${nf?.notification}"
         )
     }
 

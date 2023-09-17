@@ -26,7 +26,7 @@ import android.content.Context
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.xposed.prefs.data.PrefsData
-import java.util.*
+import java.util.Locale
 
 /**
  * I18n 适配警告提示工具类
@@ -46,8 +46,8 @@ object I18nWarnTool {
             context.showDialog {
                 title = "Notice of I18n Support"
                 msg = "This Xposed Module is only for Chinese and the Chinese region.\n\n" +
-                        "Currently, there will be no internationalization adaptation.\n\n" +
-                        "There may be plans for internationalization adaptation in the future, so stay tuned."
+                    "Currently, there will be no internationalization adaptation.\n\n" +
+                    "There may be plans for internationalization adaptation in the future, so stay tuned."
                 confirmButton(text = "Got It") { saveReaded() }
                 noCancelable()
             }

@@ -27,12 +27,20 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.icu.util.TimeZone
-import com.fankes.miui.notify.utils.factory.*
-import okhttp3.*
+import com.fankes.miui.notify.utils.factory.isNetWorkSuccess
+import com.fankes.miui.notify.utils.factory.openBrowser
+import com.fankes.miui.notify.utils.factory.openSelfSetting
+import com.fankes.miui.notify.utils.factory.runInSafe
+import com.fankes.miui.notify.utils.factory.showDialog
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 import java.io.Serializable
-import java.util.*
+import java.util.Locale
 
 /**
  * 获取 GitHub Release 最新版本工具类
@@ -71,7 +79,7 @@ object GithubReleaseTool {
                         fun showUpdate() = context.showDialog {
                             title = "最新版本 $name"
                             msg = "发布于 $date\n\n" +
-                                    "更新日志\n\n" + content
+                                "更新日志\n\n" + content
                             confirmButton(text = "更新") { context.openBrowser(htmlUrl) }
                             cancelButton()
                         }
