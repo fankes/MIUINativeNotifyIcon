@@ -47,13 +47,15 @@ data class IconDataBean(
 ) : Serializable {
     fun toEnabledName() = ("$appName$packageName").base64 + "_enable"
     fun toEnabledAllName() = ("$appName$packageName").base64 + "_enable_all"
-    override fun toString() = "{\n" +
-            "    \"appName\": \"$appName\",\n" +
-            "    \"packageName\": \"$packageName\",\n" +
-            "    \"iconBitmap\": \"${iconBitmap.base64}\",\n" +
-            "    \"iconColor\": \"#${Integer.toHexString(iconColor)}\",\n" +
-            "    \"contributorName\": \"$contributorName\",\n" +
-            "    \"isEnabled\": $isEnabled,\n" +
-            "    \"isEnabledAll\": $isEnabledAll\n" +
-            "  }"
+    override fun toString() = """
+      {
+        "appName": "$appName",
+        "packageName": "$packageName",
+        "iconBitmap": "${iconBitmap.base64}",
+        "iconColor": "#${Integer.toHexString(iconColor)}",
+        "contributorName": "$contributorName",
+        "isEnabled": $isEnabled,
+        "isEnabledAll": $isEnabledAll
+      }
+    """.trimIndent()
 }

@@ -37,7 +37,16 @@ import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
 import com.fankes.miui.notify.params.factory.putAppNotifyHookAllOf
 import com.fankes.miui.notify.params.factory.putAppNotifyHookOf
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.addOnBackPressedEvent
+import com.fankes.miui.notify.utils.factory.bindAdapter
+import com.fankes.miui.notify.utils.factory.callOnBackPressed
+import com.fankes.miui.notify.utils.factory.colorOf
+import com.fankes.miui.notify.utils.factory.copyToClipboard
+import com.fankes.miui.notify.utils.factory.navigate
+import com.fankes.miui.notify.utils.factory.openBrowser
+import com.fankes.miui.notify.utils.factory.showDialog
+import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.toast
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.yukihookapi.YukiHookAPI
@@ -145,8 +154,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             if (b) showDialog {
                                 title = "全部替换"
                                 msg = "此功能仅针对严重不遵守规范的 APP 通知图标才需要开启，例如：APP 推送通知后无法识别出现的黑白块图标。\n\n" +
-                                        "此功能在一般情况下请保持关闭并跟随在线规则的配置，并不要随意改变此配置，" +
-                                        "开启后 APP 的通知图标可能会被规则破坏，你确定还要开启吗？"
+                                    "此功能在一般情况下请保持关闭并跟随在线规则的配置，并不要随意改变此配置，" +
+                                    "开启后 APP 的通知图标可能会被规则破坏，你确定还要开启吗？"
                                 confirmButton { saveState() }
                                 cancelButton { btn.isChecked = btn.isChecked.not() }
                                 noCancelable()
@@ -188,10 +197,10 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     val pkgName = intent?.getStringExtra("pkgName") ?: ""
                     title = "新安装应用通知图标适配"
                     msg = "你已安装 $appName($pkgName)\n\n" +
-                            "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
-                            "可随时点击本页面下方的“贡献通知图标优化名单”按钮提交贡献或请求适配。\n\n" +
-                            "若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n" +
-                            "你可以现在立即同步适配列表，以获取最新的适配数据。"
+                        "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
+                        "可随时点击本页面下方的“贡献通知图标优化名单”按钮提交贡献或请求适配。\n\n" +
+                        "若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n" +
+                        "你可以现在立即同步适配列表，以获取最新的适配数据。"
                     confirmButton(text = "同步列表") { onStartRefresh() }
                     cancelButton(text = "复制名称+包名") { copyToClipboard(content = "$appName($pkgName)") }
                     neutralButton(text = "取消")
@@ -250,7 +259,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         onChanged?.invoke()
         binding.configTitleCountText.text =
             if (filterText.isBlank()) "已适配 ${iconDatas.size} 个 APP 的通知图标"
-            else "“${filterText}” 匹配到 ${iconDatas.size} 个结果"
+            else "“$filterText” 匹配到 ${iconDatas.size} 个结果"
         binding.configListNoDataView.apply {
             text = if (iconAllDatas.isEmpty()) "噫，竟然什么都没有~\n请点击右上角同步按钮获取云端数据" else "噫，竟然什么都没找到~"
             isVisible = iconDatas.isEmpty()

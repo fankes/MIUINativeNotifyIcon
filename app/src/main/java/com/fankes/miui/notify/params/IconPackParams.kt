@@ -28,7 +28,11 @@ import android.content.Context
 import android.graphics.Color
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.data.ConfigData
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.bitmap
+import com.fankes.miui.notify.utils.factory.safeOf
+import com.fankes.miui.notify.utils.factory.safeOfNan
+import com.fankes.miui.notify.utils.factory.safeOfNull
+import com.fankes.miui.notify.utils.factory.snake
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import org.json.JSONArray
