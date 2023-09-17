@@ -1,20 +1,25 @@
 # MIUI 原生通知图标
 
-[![Blank](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/fankes/MIUINativeNotifyIcon)
-[![Blank](https://img.shields.io/badge/license-AGPL3.0-blue)](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/LICENSE)
-[![Blank](https://img.shields.io/badge/version-v2.101-green)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
-[![Blank](https://img.shields.io/github/downloads/fankes/MIUINativeNotifyIcon/total?label=Release)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
-[![Blank](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20Repo&logo=Android&style=flat&labelColor=F48FB1&logoColor=ffffff)](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)
-[![Telegram](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/XiaofangInternet)
-<br/><br/>
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/app/src/main/ic_launcher-playstore.png?raw=true" width = "100" height = "100"/>
-<br/>
-Fix the native notification bar icon function abandoned by the MIUI development team.<br/>
+[![GitHub license](https://img.shields.io/github/license/fankes/MIUINativeNotifyIcon?color=blue)](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/LICENSE)
+[![GitHub CI](https://img.shields.io/github/actions/workflow/status/fankes/MIUINativeNotifyIcon/commit_ci.yml?label=CI%20builds)](https://github.com/fankes/MIUINativeNotifyIcon/actions/workflows/commit_ci.yml)
+[![GitHub release](https://img.shields.io/github/v/release/fankes/MIUINativeNotifyIcon?display_name=release&logo=github&color=green)](https://github.com/fankes/MIUINativeNotifyIcon/releases)
+![GitHub all releases](https://img.shields.io/github/downloads/fankes/MIUINativeNotifyIcon/total?label=downloads)
+![GitHub all releases](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20downloads&labelColor=F48FB1)
+
+[![Telegram CI](https://img.shields.io/badge/CI%20builds-Telegram-blue.svg?logo=telegram)](https://t.me/MIUINativeNotifyIcon_CI)
+[![Telegram](https://img.shields.io/badge/discussion-Telegram-blue.svg?logo=telegram)](https://t.me/XiaofangInternet)
+[![QQ](https://img.shields.io/badge/discussion-QQ-blue.svg?logo=tencent-qq&logoColor=red)](https://qm.qq.com/cgi-bin/qm/qr?k=dp2h5YhWiga9WWb_Oh7kSHmx01X8I8ii&jump_from=webapi&authKey=Za5CaFP0lk7+Zgsk2KpoBD7sSaYbeXbsDgFjiWelOeH4VSionpxFJ7V0qQBSqvFM)
+[![QQ 频道](https://img.shields.io/badge/discussion-QQ%20频道-blue.svg?logo=tencent-qq&logoColor=red)](https://pd.qq.com/s/44gcy28h)
+
+<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/img-src/icon.png?raw=true" width = "100" height = "100" alt="LOGO"/>
+
+Fix the native notification bar icon function abandoned by the MIUI development team.
+
 修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 11、12、12.5、13、14 以及最新版本。
 
-## Developer
+## For Non-Chinese Users
 
-[酷安 @星夜不荟](http://www.coolapk.com/u/876977)
+This project will not be adapted i18n, please stay tuned for my new projects in the future.
 
 ## 项目迁移公告
 
@@ -24,7 +29,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 ## 适配说明
 
-- 此模块仅支持 <b>LSPosed</b>(作用域“系统界面”)、<b>~~EdXposed(随时停止支持)~~</b>、不支持<b>太极、无极</b>
+- 此模块仅支持 **LSPosed** (作用域“系统界面”)、**~~EdXposed(随时停止支持)~~**、不支持**太极、无极**
 
 - 请确保你使用的是 MIUI 官方版本，任何第三方官改包发生的问题，开发者没有义务去解决和修复，请自求多福
 
@@ -32,7 +37,7 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 - 建议最低从 MIUI 12.5 `2021-5-18` 开发版以后开始使用模块，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、图标黑白块的问题
 
-- 请始终保持最新版本的 LSPosed，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面”(“系统 UI”)选择重新优化
+- 请始终保持最新版本的 **LSPosed**，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面” (“系统 UI”) 选择重新优化
 
 ## 历史背景
 
@@ -46,15 +51,14 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 - [Android 通知图标规范适配计划](https://github.com/fankes/AndroidNotifyIconAdapt)
 
-## 请勿用于非法用途
-
-- 本模块完全开源免费，如果好用你可以打赏支持开发，但是请不要用于非法用途。
-
 ## 发行渠道说明
 
 - [Automatic Build on Commit](https://github.com/fankes/MIUINativeNotifyIcon/actions/workflows/commit_ci.yml)
 
-上述更新为代码 `commit` 后自动触发，具体更新内容可点击上方的文字前往 **GitHub Actions** 进行查看，本更新由开源的流程自动编译发布，**不保证其稳定性**，所发布的版本**仅供测试**，且不会特殊说明甚至可能会变更版本号或保持与当前稳定版相同的版本号。
+上述更新为代码 `commit` 后自动触发，具体更新内容可点击上方的文字前往 **GitHub Actions** 进行查看，本更新由开源的流程自动编译发布，
+**不保证其稳定性**， 所发布的版本**仅供测试**，且不会特殊说明甚至可能会变更版本号或保持与当前稳定版相同的版本号。
+
+如果你需要直接下载 CI 自动构建打包的安装包，请点击顶部的 `CI builds | Telegram` 标签加入 Telegram CI 自动构建频道。
 
 - [Release](https://github.com/fankes/MIUINativeNotifyIcon/releases)
 - [Xposed-Modules-Repo](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases)
@@ -63,24 +67,29 @@ Fix the native notification bar icon function abandoned by the MIUI development 
 
 上述更新为手动发布的稳定版，具体更新内容可点击上方的文字前往指定的发布页面查看，稳定版的更新将会同时发布到上述地址中，同步更新。
 
-## 发行状态说明
+本模块发布地址仅限于上述所列出的地址，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
 
-![Blank](https://img.shields.io/badge/build-passing-brightgreen)
+## 请勿用于非法用途
 
-上述状态为当前稳定版与自动构建版本一致或当前代码改动与稳定版无功能差异。
+- 本模块完全开源免费，如果好用你可以打赏支持开发，但是请不要用于非法用途。
 
-![Blank](https://img.shields.io/badge/build-pending-dbab09)
+## 项目推广
 
-上述状态为存在自动构建版本和新功能的更新但当前并未发布稳定版，处于预发行状态。
+如果你正在寻找一个可以自动管理 Gradle 项目依赖的 Gradle 插件，你可以了解一下 [SweetDependency](https://github.com/HighCapable/SweetDependency) 项目。
 
-![Blank](https://img.shields.io/badge/build-problem-red)
+如果你正在寻找一个可以自动生成属性键值的 Gradle 插件，你可以了解一下 [SweetProperty](https://github.com/HighCapable/SweetProperty) 项目。
 
-上述状态为当前发行的稳定版可能存在严重问题但并未及时进行修复且并未发布稳定版。
+本项目同样使用了 **SweetDependency** 和 **SweetProperty**。
 
 ## 捐赠支持
 
-- 工作不易，无意外情况此项目将继续维护下去，提供更多可能，欢迎打赏。<br/><br/>
-  <img src="https://github.com/fankes/YuKiHookAPI/blob/master/img-src/wechat_code.jpg?raw=true" width = "200" height = "200"/>
+工作不易，无意外情况此项目将继续维护下去，提供更多可能，欢迎打赏。
+
+<img src="https://github.com/fankes/fankes/blob/main/img-src/payment_code.jpg?raw=true" width = "500" alt="Payment Code"/>
+
+## Star History
+
+![Star History Chart](https://api.star-history.com/svg?repos=fankes/MIUINativeNotifyIcon&type=Date)
 
 ## 隐私政策
 
@@ -104,7 +113,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
 Powered by [YukiHookAPI](https://github.com/fankes/YukiHookAPI)
