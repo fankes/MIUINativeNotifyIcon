@@ -158,6 +158,7 @@ inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
  */
 val androidVersionCodeName
     get() = when (Build.VERSION.SDK_INT) {
+        34 -> "U"
         33 -> "T"
         32 -> "S_V2"
         31 -> "S"
@@ -171,7 +172,7 @@ val androidVersionCodeName
         23 -> "M"
         22 -> "L_MR1"
         21 -> "L"
-        else -> ""
+        else -> "?"
     }
 
 /**
