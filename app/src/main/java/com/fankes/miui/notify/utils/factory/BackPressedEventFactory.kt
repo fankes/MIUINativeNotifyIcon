@@ -18,7 +18,7 @@
  * and eula along with this software.  If not, see
  * <https://www.gnu.org/licenses/>
  *
- * This file is Created by fankes on 2022/10/6.
+ * This file is created by fankes on 2022/10/6.
  */
 package com.fankes.miui.notify.utils.factory
 
