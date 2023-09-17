@@ -39,6 +39,7 @@
     public static *** throwUninitializedPropertyAccessException(...);
 }
 
+-keep class * extends android.app.Activity
 -keepclassmembers class * implements androidx.viewbinding.ViewBinding {
     *** inflate(android.view.LayoutInflater);
 }
