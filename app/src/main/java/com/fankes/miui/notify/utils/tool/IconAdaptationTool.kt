@@ -32,10 +32,15 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
-import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookEntry
-import com.fankes.miui.notify.utils.factory.*
+import com.fankes.miui.notify.utils.factory.appIconOf
+import com.fankes.miui.notify.utils.factory.appNameOf
+import com.fankes.miui.notify.utils.factory.isDebugApp
+import com.fankes.miui.notify.utils.factory.isSystemApp
+import com.fankes.miui.notify.utils.factory.runInSafe
+import com.fankes.miui.notify.utils.factory.stampToDate
+import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 
 /**
  * 通知图标适配推送通知类
@@ -45,7 +50,7 @@ import com.fankes.miui.notify.utils.factory.*
 object IconAdaptationTool {
 
     /** 当前模块的包名 */
-    private const val MODULE_PACKAGE_NAME = BuildConfig.APPLICATION_ID
+    private const val MODULE_PACKAGE_NAME = BuildConfigWrapper.APPLICATION_ID
 
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
@@ -82,7 +87,7 @@ object IconAdaptationTool {
                         Intent().apply {
                             component = ComponentName(
                                 MODULE_PACKAGE_NAME,
-                                "${MODULE_PACKAGE_NAME}.ui.activity.ConfigureActivity"
+                                "$MODULE_PACKAGE_NAME.ui.activity.ConfigureActivity"
                             )
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }.apply {
@@ -117,7 +122,7 @@ object IconAdaptationTool {
             outTimeLimits.add(nowTime)
             context.startActivity(
                 Intent().apply {
-                    component = ComponentName(MODULE_PACKAGE_NAME, "${MODULE_PACKAGE_NAME}.ui.activity.auto.NotifyIconRuleUpdateActivity")
+                    component = ComponentName(MODULE_PACKAGE_NAME, "$MODULE_PACKAGE_NAME.ui.activity.auto.NotifyIconRuleUpdateActivity")
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
             )

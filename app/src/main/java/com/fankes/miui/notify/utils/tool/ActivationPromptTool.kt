@@ -32,9 +32,9 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
-import com.fankes.miui.notify.BuildConfig
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.appIconOf
+import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 
 /**
  * 模块更新激活提醒通知工具类
@@ -42,7 +42,7 @@ import com.fankes.miui.notify.utils.factory.appIconOf
 object ActivationPromptTool {
 
     /** 当前模块的包名 */
-    private const val MODULE_PACKAGE_NAME = BuildConfig.APPLICATION_ID
+    private const val MODULE_PACKAGE_NAME = BuildConfigWrapper.APPLICATION_ID
 
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "activationPromptId"
@@ -53,7 +53,7 @@ object ActivationPromptTool {
      * @param packageName 当前 APP 包名
      */
     fun prompt(context: Context, packageName: String) {
-        if (packageName != BuildConfig.APPLICATION_ID) return
+        if (packageName != BuildConfigWrapper.APPLICATION_ID) return
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
@@ -73,7 +73,7 @@ object ActivationPromptTool {
                     PendingIntent.getActivity(
                         context, packageName.hashCode(),
                         Intent().apply {
-                            component = ComponentName(MODULE_PACKAGE_NAME, "${MODULE_PACKAGE_NAME}.ui.activity.MainActivity")
+                            component = ComponentName(MODULE_PACKAGE_NAME, "$MODULE_PACKAGE_NAME.ui.activity.MainActivity")
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }, if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
                     )

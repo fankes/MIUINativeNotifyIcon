@@ -20,7 +20,12 @@
  *
  * This file is Created by fankes on 2023/2/2.
  */
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.fankes.miui.notify.const
+
+import com.fankes.miui.notify.generated.AppProperties
+import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 
 /**
  * 包名常量定义类
@@ -47,4 +52,27 @@ object IconRuleSourceSyncType {
 
     /** 自定义地址 */
     const val CUSTOM_URL = 3000
+}
+
+/**
+ * 模块版本常量定义类
+ */
+object ModuleVersion {
+
+    /** 当前 GitHub 提交的 ID (CI 自动构建) */
+    const val GITHUB_COMMIT_ID = AppProperties.GITHUB_CI_COMMIT_ID
+
+    /** 版本名称 */
+    const val NAME = BuildConfigWrapper.VERSION_NAME
+
+    /** 版本号 */
+    const val CODE = BuildConfigWrapper.VERSION_CODE
+
+    /** 是否为 CI 自动构建版本 */
+    val isCiMode = GITHUB_COMMIT_ID.isNotBlank()
+
+    /** 当前版本名称后缀 */
+    val suffix = GITHUB_COMMIT_ID.let { if (it.isNotBlank()) "-$it" else "" }
+
+    override fun toString() = "$NAME$suffix($CODE)"
 }
