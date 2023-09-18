@@ -62,9 +62,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: ${{ env.DEBUG_APK_PATH }}
-          name: TSBattery-debug-${{ github.event.head_commit.id }}
+          name: MIUINativeNotifyIcon-debug-${{ github.event.head_commit.id }}
       - name: Upload Artifacts (Release)
         uses: actions/upload-artifact@v3
         with:
           path: ${{ env.RELEASE_APK_PATH }}
-          name: TSBattery-release-${{ github.event.head_commit.id }}
+          name: MIUINativeNotifyIcon-release-${{ github.event.head_commit.id }}
