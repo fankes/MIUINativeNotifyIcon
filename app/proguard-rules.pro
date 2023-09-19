@@ -32,7 +32,7 @@
 -adaptresourcefilecontents
 
 -renamesourcefileattribute P
--keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,Signature,LineNumberTable
 
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static *** throwUninitializedProperty(...);
@@ -40,6 +40,7 @@
 }
 
 -keep class * extends android.app.Activity
--keepclassmembers class * implements androidx.viewbinding.ViewBinding {
+-keep class * implements androidx.viewbinding.ViewBinding {
+    <init>();
     *** inflate(android.view.LayoutInflater);
 }
