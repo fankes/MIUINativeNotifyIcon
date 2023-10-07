@@ -50,7 +50,7 @@ import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
-import com.highcapable.yukihookapi.hook.log.loggerD
+import com.highcapable.yukihookapi.hook.log.YLog
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -477,11 +477,11 @@ object IconRuleManagerTool {
             get() = object : X509TrustManager {
 
                 override fun checkClientTrusted(chain: Array<X509Certificate?>?, authType: String?) {
-                    loggerD(msg = "TrustX509 --> $authType")
+                    YLog.debug("TrustX509 --> $authType")
                 }
 
                 override fun checkServerTrusted(chain: Array<X509Certificate?>?, authType: String?) {
-                    loggerD(msg = "TrustX509 --> $authType")
+                    YLog.debug("TrustX509 --> $authType")
                 }
 
                 override fun getAcceptedIssuers() = arrayOf<X509Certificate>()
