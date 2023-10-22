@@ -67,6 +67,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.hasClass
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.factory.toClassOrNull
+import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.type.java.StringClass
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 import com.topjohnwu.superuser.Shell
@@ -497,7 +498,11 @@ fun execShell(cmd: String, isSu: Boolean = true) = safeOfNothing {
  * 弹出 [Toast]
  * @param msg 提示内容
  */
-fun toast(msg: String) = Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
+fun toast(msg: String) {
+    runCatching {
+        Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
+    }.onFailure { YLog.warn(msg) }
+}
 
 /**
  * 跳转到指定页面
