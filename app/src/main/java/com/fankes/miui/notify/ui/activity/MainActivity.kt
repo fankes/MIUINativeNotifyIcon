@@ -39,10 +39,13 @@ import com.fankes.miui.notify.utils.factory.hideOrShowLauncherIcon
 import com.fankes.miui.notify.utils.factory.isLauncherIconShowing
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
 import com.fankes.miui.notify.utils.factory.isLowerAndroidR
-import com.fankes.miui.notify.utils.factory.isNotMIUI
+import com.fankes.miui.notify.utils.factory.isMIOS
+import com.fankes.miui.notify.utils.factory.isMIUI
+import com.fankes.miui.notify.utils.factory.isNotMiSystem
 import com.fankes.miui.notify.utils.factory.isNotNoificationEnabled
-import com.fankes.miui.notify.utils.factory.isNotSupportMiuiVersion
-import com.fankes.miui.notify.utils.factory.miuiFullVersion
+import com.fankes.miui.notify.utils.factory.isNotSupportMiSystemVersion
+import com.fankes.miui.notify.utils.factory.isUpperOfAndroidU
+import com.fankes.miui.notify.utils.factory.miSystemVersion
 import com.fankes.miui.notify.utils.factory.miuiVersion
 import com.fankes.miui.notify.utils.factory.miuiVersionCode
 import com.fankes.miui.notify.utils.factory.navigate
@@ -51,6 +54,7 @@ import com.fankes.miui.notify.utils.factory.openNotifySetting
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.showTimePicker
 import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.I18nWarnTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
@@ -83,11 +87,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
         when {
-            /** 判断是否为 MIUI 系统 */
-            isNotMIUI ->
+            /** 判断是否为小米系统 */
+            isNotMiSystem ->
                 showDialog {
-                    title = "不是 MIUI 系统"
-                    msg = "此模块专为 MIUI 系统打造，当前无法识别你的系统为 MIUI，所以模块无法工作。"
+                    title = "不是 MIUI 或 HyperOS 系统"
+                    msg = "此模块专为 MIUI、HyperOS 系统打造，当前无法识别你的系统为其中任意之一，所以模块无法工作。"
                     confirmButton(text = "查看支持的模块") {
                         openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt")
                         finish()
@@ -108,14 +112,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断支持的 MIUI 版本 */
-            isNotSupportMiuiVersion ->
+            /** 判断支持的系统版本 */
+            isNotSupportMiSystemVersion ->
                 showDialog {
-                    title = "不支持的 MIUI 版本"
-                    msg = (if (miuiVersion.isNotBlank())
-                        "此模块目前支持 MIUI 11~14 系统，你的 MIUI 版本为 $miuiVersion，暂不支持。\n\n" +
-                            "如果你的 MIUI 版本识别有误，请检查是否有相关插件修改了系统版本。\n\n"
-                    else "无法获取 MIUI 版本，请检查你是否修改了系统参数或使用非官方系统。\n\n") + "若有其它疑问，你可以点击下方按钮前往项目地址进行反馈。"
+                    title = "不支持的系统版本"
+                    msg = (if (miSystemVersion.isNotBlank())
+                        "此模块目前支持 MIUI 11~14 和 HyperOS 1.0 系统，你的系统版本为 $miSystemVersion，暂不支持。\n\n" +
+                            "如果你的系统版本识别有误，请检查是否有相关插件修改了系统版本。\n\n"
+                    else "无法获取系统版本，请检查你是否修改了系统参数或使用非官方系统。\n\n") + "若有其它疑问，你可以点击下方按钮前往项目地址进行反馈。"
                     confirmButton(text = "前往项目地址") {
                         openProjectUrl()
                         finish()
@@ -149,6 +153,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             "由于设备有限，无法逐一调试，若有好的建议可向我们贡献代码提交适配请求，建议在 Android 11 及以上版本中使用效果最佳。"
                         confirmButton(text = "我知道了") { ConfigData.isIgnoredAndroidVersionToLow = true }
                         noCancelable()
+                    }
+                // TODO: 适配 MIUI 14 Android 14 和 HyperOS 1.0
+                if (isMIOS || isMIUI && miuiVersion == "14" && isUpperOfAndroidU)
+                    showDialog {
+                        title = "暂未适配的系统"
+                        msg = "从基于 MIUI 14 的 Android 14 以及 HyperOS 1.0 开始，" +
+                            "官方对系统界面部分进行了大量重写，模块功能现处于损坏状态，开发者正在努力进行适配，" +
+                            "可能无法第一时间完成，适配成功后此弹窗将被移除。\n\n" +
+                            "你可以订阅 Telegram CI 频道，第一时间获取版本更新。"
+                        confirmButton(text = "我知道了")
+                        cancelButton(text = "CI 频道") { openBrowser(url = "https://t.me/MIUINativeNotifyIcon_CI") }
                     }
                 /** 推广、恰饭 */
                 ProjectPromote.show(activity = this, ModuleVersion.toString())
@@ -184,7 +199,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     }
                 }
             }
-        binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $miuiFullVersion"
+        binding.mainTextMiuiVersion.text = "系统版本：[$androidVersionCodeName] $systemFullVersion"
         binding.warnSCountDisTip.isGone = miuiVersionCode > 12.5
         binding.warnMiuiNotifyStyleTip.isGone = miuiVersionCode > 11
         binding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()

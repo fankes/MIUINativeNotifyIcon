@@ -24,6 +24,7 @@
 
 package com.fankes.miui.notify.utils.factory
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Notification
 import android.app.Service
@@ -102,16 +103,22 @@ val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Confi
 inline val Context.isNotSystemInDarkMode get() = !isSystemInDarkMode
 
 /**
+ * 系统版本是否高于或等于 Android 14
+ * @return [Boolean] 是否符合条件
+ */
+inline val isUpperOfAndroidU get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+
+/**
  * 系统版本是否高于或等于 Android 13
  * @return [Boolean] 是否符合条件
  */
-inline val isUpperOfAndroidT get() = Build.VERSION.SDK_INT > Build.VERSION_CODES.S
+inline val isUpperOfAndroidT get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
 /**
  * 系统版本是否高于或等于 Android 12
  * @return [Boolean] 是否符合条件
  */
-inline val isUpperOfAndroidS get() = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
+inline val isUpperOfAndroidS get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 /**
  * 系统版本是否低于 Android 9
@@ -126,10 +133,28 @@ inline val isLowerAndroidP get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
 inline val isLowerAndroidR get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
 
 /**
+ * 当前设备是否是 MIUI、HyperOS 定制 Android 系统
+ * @return [Boolean] 是否符合条件
+ */
+val isMiSystem get() = isMIUI || isMIOS
+
+/**
+ * 当前设备是否不是 MIUI、HyperOS 定制 Android 系统
+ * @return [Boolean] 是否符合条件
+ */
+val isNotMiSystem get() = !isMiSystem
+
+/**
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */
 val isMIUI by lazy { "android.miui.R".hasClass() }
+
+/**
+ * 当前设备是否是 HyperOS 定制 Android 系统
+ * @return [Boolean] 是否符合条件
+ */
+val isMIOS get() = isMIUI && miuiVersion == "816"
 
 /**
  * 当前设备是否不是 MIUI 定制 Android 系统
@@ -138,20 +163,33 @@ val isMIUI by lazy { "android.miui.R".hasClass() }
 inline val isNotMIUI get() = !isMIUI
 
 /**
- * 是否为支持的 MIUI 版本
+ * 当前设备是否不是 HyperOS 定制 Android 系统
+ * @return [Boolean] 是否符合条件
+ */
+inline val isNotMIOS get() = !isMIOS
+
+/**
+ * 是否为支持的 MIUI、HyperOS 版本
  * @return [Boolean]
  */
-val isSupportMiuiVersion
-    get() = when (miuiVersion) {
-        "11", "12", "12.5", "13", "14" -> true
+val isSupportMiSystemVersion
+    get() = when {
+        isMIOS -> when (miosVersion) {
+            "1.0" -> true
+            else -> false
+        }
+        isMIUI -> when (miuiVersion) {
+            "11", "12", "12.5", "13", "14" -> true
+            else -> false
+        }
         else -> false
     }
 
 /**
- * 是否不为支持的 MIUI 版本
+ * 是否不为支持的 MIUI、HyperOS 版本
  * @return [Boolean]
  */
-inline val isNotSupportMiuiVersion get() = !isSupportMiuiVersion
+inline val isNotSupportMiSystemVersion get() = !isSupportMiSystemVersion
 
 /**
  * 获取 Android 版本代号
@@ -177,6 +215,28 @@ val androidVersionCodeName
     }
 
 /**
+ * 获取 MIUI、HyperOS 版本
+ * @return [String]
+ */
+val miSystemVersion
+    get() = when {
+        isMIOS -> miosVersion
+        isMIUI -> miuiVersion
+        else -> ""
+    }
+
+/**
+ * 获取 MIUI、HyperOS 版本号
+ * @return [Float]
+ */
+val miSystemVersionCode
+    get() = when {
+        isMIOS -> miosVersionCode
+        isMIUI -> miuiVersionCode
+        else -> 0f
+    }
+
+/**
  * 获取 MIUI 版本
  * @return [String]
  */
@@ -195,10 +255,27 @@ val miuiVersion
     else ""
 
 /**
+ * 获取 HyperOS 版本
+ * @return [String]
+ */
+val miosVersion
+    get() = if (isMIOS)
+        findPropString("ro.mi.os.version.name").let {
+            if (it.startsWith("OS")) it.replaceFirst("OS", "") else it
+        }.trim()
+    else ""
+
+/**
  * 获取 MIUI 版本号
  * @return [Float]
  */
-val miuiVersionCode get() = safeOf(default = 0f) { miuiVersion.toFloat() }
+val miuiVersionCode get() = miuiVersion.toFloatOrNull() ?: 0f
+
+/**
+ * 获取 HyperOS 版本号
+ * @return [Float]
+ */
+val miosVersionCode get() = findPropString("ro.mi.os.version.code").toFloatOrNull() ?: 0f
 
 /**
  * 获取 MIUI 次版本号
@@ -207,18 +284,35 @@ val miuiVersionCode get() = safeOf(default = 0f) { miuiVersion.toFloat() }
 val miuiIncrementalVersion get() = findPropString("ro.system.build.version.incremental").trim()
 
 /**
- * 获取 MIUI 完全版本
+ * 获取 HyperOS 次版本号
  * @return [String]
  */
-val miuiFullVersion
-    get() = if (isMIUI) miuiIncrementalVersion.let {
-        if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
-            "$it 稳定版"
-        else when {
-            it.lowercase().endsWith(".dev") -> "$it 开发版"
-            else -> "V$miuiVersion $it 开发版"
+val miosIncrementalVersion get() = findPropString("ro.mi.os.version.incremental").trim()
+
+/**
+ * 获取 MIUI、HyperOS 完全版本
+ * @return [String]
+ */
+val systemFullVersion
+    get() = when {
+        isMIOS -> "HyperOS " + miosIncrementalVersion.let {
+            if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
+                "${it.replaceFirst("OS", "")} 稳定版"
+            else when {
+                it.lowercase().endsWith(".dev") -> "${it.replaceFirst("OS", "")} 开发版"
+                else -> "$miosVersion $it 开发版"
+            }
         }
-    } else "不是 MIUI 系统"
+        isMIUI -> miuiIncrementalVersion.let {
+            if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
+                "$it 稳定版"
+            else when {
+                it.lowercase().endsWith(".dev") -> "$it 开发版"
+                else -> "V$miuiVersion $it 开发版"
+            }
+        }
+        else -> "不是 MIUI 或 HyperOS 系统"
+    }
 
 /**
  * 获取 [Drawable]
@@ -366,6 +460,7 @@ fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetr
  * @return [Int] Android < 12 返回 [wallpaperColor]
  */
 val Context.systemAccentColor
+    @SuppressLint("InlinedApi")
     get() = safeOf(wallpaperColor) {
         if (isUpperOfAndroidS) resources.colorOf(android.R.color.system_accent1_600) else wallpaperColor
     }

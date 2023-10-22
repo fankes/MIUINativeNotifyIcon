@@ -26,9 +26,9 @@ import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.hook.entity.SystemUIHooker
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
-import com.fankes.miui.notify.utils.factory.isNotMIUI
-import com.fankes.miui.notify.utils.factory.isNotSupportMiuiVersion
-import com.fankes.miui.notify.utils.factory.miuiVersion
+import com.fankes.miui.notify.utils.factory.isNotMiSystem
+import com.fankes.miui.notify.utils.factory.isNotSupportMiSystemVersion
+import com.fankes.miui.notify.utils.factory.miSystemVersion
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
@@ -51,9 +51,9 @@ object HookEntry : IYukiHookXposedInit {
         loadApp(PackageName.SYSTEMUI) {
             ConfigData.init(instance = this)
             when {
-                isNotMIUI -> YLog.warn("Aborted Hook -> This System is not MIUI")
+                isNotMiSystem -> YLog.warn("Aborted Hook -> This System is not MIUI or HyperOS")
                 isLowerAndroidP -> YLog.warn("Aborted Hook -> This System is lower than Android P")
-                isNotSupportMiuiVersion -> YLog.warn("Aborted Hook -> This MIUI Version ${miuiVersion.ifBlank { "unknown" }} not supported")
+                isNotSupportMiSystemVersion -> YLog.warn("Aborted Hook -> This System Version ${miSystemVersion.ifBlank { "unknown" }} not supported")
                 ConfigData.isEnableModule.not() -> YLog.warn("Aborted Hook -> Hook Closed")
                 else -> loadHooker(SystemUIHooker)
             }
