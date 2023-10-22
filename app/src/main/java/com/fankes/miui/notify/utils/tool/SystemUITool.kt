@@ -34,9 +34,10 @@ import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.ui.activity.MainActivity
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.execShell
-import com.fankes.miui.notify.utils.factory.miuiFullVersion
+import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
+import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.hook.factory.dataChannel
@@ -101,7 +102,7 @@ object SystemUITool {
                         "[Display]: ${Build.DISPLAY}\n" +
                         "[Android Version]: ${Build.VERSION.RELEASE}\n" +
                         "[Android API Level]: ${Build.VERSION.SDK_INT}\n" +
-                        "[MIUI Version]: $miuiFullVersion\n" +
+                        "[${if (isMIOS) "HyperOS" else "MIUI"} Version]: $systemFullVersion\n" +
                         "[System Locale]: ${Locale.getDefault()}\n\n" + YLog.contents(debugLogs).trim()
                     activity.contentResolver?.openOutputStream(e)?.apply { write(content.toByteArray()) }?.close()
                     activity.snake(msg = "导出完成")
