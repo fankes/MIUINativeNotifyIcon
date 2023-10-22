@@ -1,6 +1,6 @@
 name: 问题与 BUG 反馈
 description: 问题反馈必须使用此模板进行提交
-labels: [bug]
+labels: [ bug ]
 title: "[问题与 BUG 反馈] (在这里简要描述问题原因)"
 body:
   - type: markdown
@@ -8,7 +8,7 @@ body:
       value: |
         ### 请在下方填写问题发生的具体原因和复现步骤。
         
-        我们只接受 MIUI 正规官方版本系统，如果你正在使用 MIUI 官改(第三方修改版)请不要提交任何 BUG 与问题，我们无义务去解决，请自求多福。
+        我们只接受 MIUI 或 HyperOS 正规官方版本系统，如果你正在使用官改 (第三方修改版) 请不要提交任何 BUG 与问题，我们无义务去解决，请自求多福。
         
         发生异常、崩溃、闪退或功能性问题，必须提交问题 Log (日志)，没有 Log 的 issues 将直接被关闭。
   - type: input
@@ -19,16 +19,16 @@ body:
       required: true
   - type: input
     attributes:
-      label: MIUI 版本
+      label: 系统版本
       description: |
-        这里填写当前的 MIUI 版本，例如：**13.0.1**
-        开发版需要标注具体的版本号，例如：**13 22.9.27**
+        这里填写当前的系统，例如：**MIUI 13.0.1** 或 **HyperOS 1.0**
+        开发版需要标注具体的版本号，例如：**MIUI 13 22.9.27** 或 **HyperOS 1.0 22.9.27**
     validations:
       required: true
   - type: dropdown
     attributes:
-      label: MIUI 版本类型
-      description: 请选择你使用的 MIUI 版本类型。
+      label: 系统版本类型
+      description: 请选择你使用的系统版本类型。
       options:
         - 稳定版
         - 稳定内测版
