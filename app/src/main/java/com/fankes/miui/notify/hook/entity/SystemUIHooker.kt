@@ -79,7 +79,6 @@ import com.highcapable.yukihookapi.hook.factory.constructor
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.extends
 import com.highcapable.yukihookapi.hook.factory.field
-import com.highcapable.yukihookapi.hook.factory.hasField
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -623,6 +622,20 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
+     * Hook 状态栏通知图标最大数量
+     * @param fieldName 最大通知图标数量 的变量名
+     * @param instance 被 Hook 的 Method 的实例
+     */
+    private fun hookStatusBarMaxStaticIcons(fieldName: String, instance: Any) {
+        val maxStaticIconsField = NotificationIconContainerClass.field { name = fieldName }.get(instance)
+        if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
+        /** 解除状态栏通知图标个数限制 */
+        if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
+            maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
+        else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
+    }
+
+    /**
      * Hook 原生通知包装纸实例内容
      * @param wrapper 通知包装纸实例
      */
@@ -888,18 +901,14 @@ object SystemUIHooker : YukiBaseHooker() {
                         instance<ViewGroup>().layoutParams.width = 9999
                 }
             }
+            /** 旧版方法 A13MIUI - 新版不存在 */
             method {
                 name = "updateState"
-            }.hook {
-                before {
-                    val maxStaticIconsField = NotificationIconContainerClass.field { name = "MAX_STATIC_ICONS" }.get(instance)
-                    if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
-                    /** 解除状态栏通知图标个数限制 */
-                    if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
-                        maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
-                    else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
-                }
-            }.by { NotificationIconContainerClass.hasField { name = "MAX_STATIC_ICONS" } }
+            }.ignored().hook().before { hookStatusBarMaxStaticIcons("MAX_STATIC_ICONS", instance) }
+            /** 新版方法 A14MIUI14/A14HyperOS - 旧版不存在 */
+            method {
+                name = "onMeasure"
+            }.ignored().hook().before { hookStatusBarMaxStaticIcons("mMaxStaticIcons", instance) }
             /** 旧版方法 - 新版不存在 */
             method {
                 name = "setMaxStaticIcons"
