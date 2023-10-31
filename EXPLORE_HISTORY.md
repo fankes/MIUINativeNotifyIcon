@@ -12,6 +12,8 @@
 
 但是，这个模块就是为了修复被 MIUI 开发组忽略的图标问题才诞生的，并完美地给 MIUI 修复了黑白块图标的问题。
 
+补充：现在这个 [开发文档](https://dev.mi.com/distribute/doc/details?pId=1582) 竟然还在，那就放在这里鞭个尸吧。
+
 ## 效果展示
 
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/img-src/style.png?raw=true" alt="Screenshot"/>
