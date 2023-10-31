@@ -900,6 +900,18 @@ object SystemUIHooker : YukiBaseHooker() {
                     else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
                 }
             }.by { NotificationIconContainerClass.hasField { name = "MAX_STATIC_ICONS" } }
+            method {
+                name = "onMeasure"
+            }.hook {
+                before {
+                    val maxStaticIconsField = NotificationIconContainerClass.field { name = "mMaxStaticIcons" }.get(instance)
+                    if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
+                    /** 解除状态栏通知图标个数限制 */
+                    if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
+                        maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
+                    else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
+                }
+            }.by { NotificationIconContainerClass.hasField { name = "mMaxStaticIcons" } }
             /** 旧版方法 - 新版不存在 */
             method {
                 name = "setMaxStaticIcons"
