@@ -931,9 +931,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         /** 修改 MIUI 风格通知栏的通知图标 */
         MiuiNotificationViewWrapperClass?.apply {
-            method {
-                name = "handleAppIcon"
-            }.hook().replaceUnit {
+            constructor().hook().after {
                 field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.clone {
                     compatNotifyIcon(
                         context = context,
