@@ -46,6 +46,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.const.PackageName
@@ -60,6 +61,7 @@ import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.dpFloat
 import com.fankes.miui.notify.utils.factory.drawableOf
+import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
@@ -426,13 +428,15 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param iconView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isUseMaterial3Style 是否使用 Material 3 通知图标风格 - 默认跟随系统版本决定
+     * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
      */
     private fun compatNotifyIcon(
         context: Context,
         nf: StatusBarNotification?,
         iconView: ImageView,
         isExpanded: Boolean = true,
-        isUseMaterial3Style: Boolean = isUpperOfAndroidS
+        isUseMaterial3Style: Boolean = isUpperOfAndroidS,
+        isMiuiPanel: Boolean = false
     ) = runInSafe(msg = "compatNotifyIcon") {
         /**
          * 设置默认通知图标
@@ -530,8 +534,12 @@ object SystemUIHooker : YukiBaseHooker() {
                             .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
                             .solidColor(if (context.isSystemInDarkMode) customIconColor.brighterColor else customIconColor)
                             .build()
-                    /** 设置原生的背景边距 */
-                    if (isUseMaterial3Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
+                    when {
+                        /** 缩小 HyperOS 的通知图标 */
+                        isMIOS && isMiuiPanel -> setPadding(7.dp(context))
+                        /** 设置原生的背景边距 */
+                        isUseMaterial3Style -> setPadding(4.dp(context))
+                    }
                 }
                 else -> {
                     /** 重新设置图标 - 防止系统更改它 */
@@ -551,8 +559,12 @@ object SystemUIHooker : YukiBaseHooker() {
                                     .solidColor(if (context.isSystemInDarkMode) it.brighterColor else it)
                                     .build()
                         }
-                        /** 设置原生的背景边距 */
-                        if (isUseMaterial3Style) setPadding(4.dp(context), 4.dp(context), 4.dp(context), 4.dp(context))
+                        when {
+                            /** 缩小 HyperOS 的通知图标 */
+                            isMIOS && isMiuiPanel -> setPadding(7.dp(context))
+                            /** 设置原生的背景边距 */
+                            isUseMaterial3Style -> setPadding(4.dp(context))
+                        }
                     } else setDefaultNotifyIcon(notifyInstance.compatPushingIcon(context, iconDrawable))
                 }
             }
@@ -938,7 +950,8 @@ object SystemUIHooker : YukiBaseHooker() {
                         context = context,
                         nf = instance.getRowPair().second.getSbn(),
                         iconView = this,
-                        isUseMaterial3Style = true
+                        isUseMaterial3Style = true,
+                        isMiuiPanel = true
                     )
                 }
             }
@@ -951,9 +964,15 @@ object SystemUIHooker : YukiBaseHooker() {
                 param(BooleanType)
             }.hook().after {
                 field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
-                    compatNotifyIcon(context, NotificationChildrenContainerClass.field {
-                        name = "mContainingNotification"
-                    }.get(instance).any()?.getSbn(), iconView = this, isUseMaterial3Style = true)
+                    compatNotifyIcon(
+                        context = context,
+                        nf = NotificationChildrenContainerClass.field {
+                            name = "mContainingNotification"
+                        }.get(instance).any()?.getSbn(),
+                        iconView = this,
+                        isUseMaterial3Style = true,
+                        isMiuiPanel = true
+                    )
                 }
             }
         }
