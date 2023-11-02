@@ -683,8 +683,9 @@ object SystemUIHooker : YukiBaseHooker() {
         }.get(this).any()?.also {
             isExpanded = ExpandableNotificationRowClass.method {
                 name = "isExpanded"
+                param(BooleanType)
                 returnType = BooleanType
-            }.get(it).boolean()
+            }.get(it).boolean(false)
         }
         return Pair(isExpanded, row)
     }
@@ -698,8 +699,8 @@ object SystemUIHooker : YukiBaseHooker() {
             .method { name = "getEntry" }
             .get(this).call()
             ?.current(ignored = true)
-            ?.method { name = "getSbn" }
-            ?.invoke<StatusBarNotification>()
+            ?.field { name = "mSbn" }
+            ?.cast<StatusBarNotification>()
             ?: ExpandableNotificationRowClass
                 .method { name = "getStatusBarNotification" }
                 .get(this).invoke<StatusBarNotification>()
