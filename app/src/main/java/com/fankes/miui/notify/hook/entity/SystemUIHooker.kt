@@ -590,12 +590,10 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun ImageView.isGrayscaleIcon(): Boolean {
         /** 获取 [StatusBarNotification] 实例 */
-        val notifyInstance = current().field { name = "mNotification" }.cast<StatusBarNotification>()
-            ?: return YLog.warn("isGrayscaleIcon got null mNotification").let { false }
+        val notifyInstance = current().field { name = "mNotification" }.cast<StatusBarNotification>() ?: return false
 
         /** 获取通知小图标 */
-        val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
-            ?: return YLog.warn("isGrayscaleIcon got null smallIcon").let { false }
+        val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context) ?: return false
 
         /** 判断是否不是灰度图标 */
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
@@ -615,20 +613,29 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param isDarkIconMode 是否为深色图标模式
      * @param animColor 动画过渡颜色
      */
-    private fun updateStatusBarIconColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
+    private fun updateStatusBarIconsColor(container: ViewGroup, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
         if (container.childCount > 0) container.children.forEach { iconView ->
             if (iconView !is ImageView) return@forEach
-            if (iconView.isGrayscaleIcon()) {
-                /**
-                 * 防止图标不是纯黑的问题
-                 * 图标在任何场景下跟随状态栏其它图标保持半透明
-                 */
-                iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
-                iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
-            } else {
-                iconView.alpha = 1f
-                iconView.colorFilter = null
-            }
+            updateStatusBarIconColor(iconView, isDarkIconMode, animColor)
+        }
+    }
+
+    /**
+     * 更新状态栏每个通知图标的颜色
+     * @param isDarkIconMode 是否为深色图标模式
+     * @param animColor 动画过渡颜色
+     */
+    private fun updateStatusBarIconColor(iconView: ImageView, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
+        if (iconView.isGrayscaleIcon()) {
+            /**
+             * 防止图标不是纯黑的问题
+             * 图标在任何场景下跟随状态栏其它图标保持半透明
+             */
+            iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
+            iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
+        } else {
+            iconView.alpha = 1f
+            iconView.colorFilter = null
         }
     }
 
@@ -636,7 +643,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * 更新状态栏通知图标透明度
      * @param container 当前 [NotificationIconContainerClass] 的实例
      */
-    private fun updateStatusBarIconAlpha(container: ViewGroup) {
+    private fun updateStatusBarIconsAlpha(container: ViewGroup) {
         val iconStatesMap = container.current().field { name = "mIconStates" }.cast<HashMap<View, Any>>()
         if (container.childCount > 0) container.children.forEach { iconView ->
             if (iconView !is ImageView) return@forEach
@@ -851,11 +858,26 @@ object SystemUIHooker : YukiBaseHooker() {
                     /** Hook 状态栏小图标 */
                     compatStatusIcon(
                         context = context,
-                        expandedNf,
-                        result<Icon>()?.loadDrawable(context)
+                        nf = expandedNf,
+                        iconDrawable = result<Icon>()?.loadDrawable(context)
                     ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                 }
             }
+        }
+        /** 注入状态栏通知图标实例 */
+        StatusBarIconViewClass.method {
+            name = "updateIconColor"
+            emptyParam()
+        }.hook().after {
+            val iconView = instance<ImageView>()
+            val expandedNf = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
+            /** Hook 状态栏小图标 */
+            compatStatusIcon(
+                context = iconView.context,
+                nf = expandedNf,
+                iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
+            ).also { pair -> iconView.setImageDrawable(pair.first) }
+            updateStatusBarIconColor(iconView)
         }
         /** 注入状态栏通知图标容器管理实例 */
         NotificationIconAreaControllerClass.apply {
@@ -870,13 +892,13 @@ object SystemUIHooker : YukiBaseHooker() {
                     when (args(index = 1).float()) {
                         1.0f -> {
                             isDarkIconMode = true
-                            updateStatusBarIconColor(it, isDarkIconMode = true)
+                            updateStatusBarIconsColor(it, isDarkIconMode = true)
                         }
                         0.0f -> {
                             isDarkIconMode = false
-                            updateStatusBarIconColor(it, isDarkIconMode = false)
+                            updateStatusBarIconsColor(it, isDarkIconMode = false)
                         }
-                        else -> updateStatusBarIconColor(it, isDarkIconMode = false, args(index = 2).int())
+                        else -> updateStatusBarIconsColor(it, isDarkIconMode = false, args(index = 2).int())
                     }
                 }
             }
@@ -887,9 +909,9 @@ object SystemUIHooker : YukiBaseHooker() {
                 field { name = "mNotificationIcons" }.get(instance).cast<ViewGroup>()?.also {
                     /** 重新设置通知图标容器实例 */
                     notificationIconContainer = it
-                    updateStatusBarIconColor(it)
+                    updateStatusBarIconsColor(it)
                     /** 延迟防止新添加的通知图标不刷新 */
-                    delayedRun { updateStatusBarIconColor(it) }
+                    delayedRun { updateStatusBarIconsColor(it) }
                 }
             }
         }
@@ -914,10 +936,10 @@ object SystemUIHooker : YukiBaseHooker() {
         NotificationIconContainerClass.apply {
             method {
                 name = "applyIconStates"
-            }.hook().after { updateStatusBarIconAlpha(instance()) }
+            }.hook().after { updateStatusBarIconsAlpha(instance()) }
             method {
                 name = "resetViewStates"
-            }.hook().after { updateStatusBarIconAlpha(instance()) }
+            }.hook().after { updateStatusBarIconsAlpha(instance()) }
             method {
                 name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
             }.hook().after {
