@@ -81,6 +81,7 @@ import com.highcapable.yukihookapi.hook.factory.constructor
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.extends
 import com.highcapable.yukihookapi.hook.factory.field
+import com.highcapable.yukihookapi.hook.factory.hasMethod
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -111,6 +112,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 新版本存在的类 */
     private val NotificationHeaderViewWrapperInjectorClass
         by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
+
+    /** MIUI 未确定版本存在的类 */
+    private val SettingsManagerClass by lazyClassOrNull("com.miui.systemui.SettingsManager")
 
     /** MIUI 新版本存在的类 */
     private val NotificationStatClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.analytics.NotificationStat")
@@ -198,6 +202,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 通知栏通知控制器 */
     private var notificationPresenter: Any? = null
+
+    /** 设置管理器 */
+    private var settingsManager: Any? = null
 
     /** 仅监听一次主题壁纸颜色变化 */
     private var isWallpaperColorListenerSetUp = false
@@ -357,10 +364,16 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 刷新通知小图标 */
     private fun refreshNotificationIcons() = runInSafe {
-        notificationPresenter?.current()?.method {
-            name = "updateNotificationsOnDensityOrFontScaleChanged"
-            emptyParam()
-        }?.call()
+        val updateNotificationMethodName = "updateNotificationsOnDensityOrFontScaleChanged"
+        if (StatusBarNotificationPresenterClass.hasMethod { name = updateNotificationMethodName })
+            notificationPresenter?.current(ignored = true)?.method {
+                name = updateNotificationMethodName
+                emptyParam()
+            }?.call()
+        else settingsManager?.current {
+            field { name = "notifStyle" }.set(-100)
+            method { name = "onNotifStyleChanged" }.call()
+        }
     }
 
     /**
@@ -893,6 +906,8 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 注册壁纸颜色监听 */
             if (args().first().any() != null) instance<ImageView>().also { registerWallpaperColorChanged(it) }
         }
+        /** 注入设置管理器实例 */
+        SettingsManagerClass?.constructor()?.hookAll()?.after { settingsManager = instance }
         /** 注入通知控制器实例 */
         StatusBarNotificationPresenterClass.constructor().hookAll().after { notificationPresenter = instance }
         /** 注入状态栏通知图标容器实例 */
