@@ -891,7 +891,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "resetViewStates"
             }.hook().after { updateStatusBarIconAlpha(instance()) }
             method {
-                name = "calculateIconTranslations"
+                name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
             }.hook().after {
                 /** 缓存实例 */
                 notificationIconContainer = instance<ViewGroup>()
