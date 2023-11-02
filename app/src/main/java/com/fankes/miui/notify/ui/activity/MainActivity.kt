@@ -39,14 +39,10 @@ import com.fankes.miui.notify.utils.factory.hideOrShowLauncherIcon
 import com.fankes.miui.notify.utils.factory.isLauncherIconShowing
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
 import com.fankes.miui.notify.utils.factory.isLowerAndroidR
-import com.fankes.miui.notify.utils.factory.isMIOS
-import com.fankes.miui.notify.utils.factory.isMIUI
 import com.fankes.miui.notify.utils.factory.isNotMiSystem
 import com.fankes.miui.notify.utils.factory.isNotNoificationEnabled
 import com.fankes.miui.notify.utils.factory.isNotSupportMiSystemVersion
-import com.fankes.miui.notify.utils.factory.isUpperOfAndroidU
 import com.fankes.miui.notify.utils.factory.miSystemVersion
-import com.fankes.miui.notify.utils.factory.miuiVersion
 import com.fankes.miui.notify.utils.factory.miuiVersionCode
 import com.fankes.miui.notify.utils.factory.navigate
 import com.fankes.miui.notify.utils.factory.openBrowser
@@ -153,17 +149,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             "由于设备有限，无法逐一调试，若有好的建议可向我们贡献代码提交适配请求，建议在 Android 11 及以上版本中使用效果最佳。"
                         confirmButton(text = "我知道了") { ConfigData.isIgnoredAndroidVersionToLow = true }
                         noCancelable()
-                    }
-                // TODO: 适配 MIUI 14 Android 14 和 HyperOS 1.0
-                if (isMIOS || isMIUI && miuiVersion == "14" && isUpperOfAndroidU)
-                    showDialog {
-                        title = "暂未适配的系统"
-                        msg = "从基于 MIUI 14 的 Android 14 以及 HyperOS 1.0 开始，" +
-                            "官方对系统界面部分进行了大量重写，模块功能现处于损坏状态，开发者正在努力进行适配，" +
-                            "可能无法第一时间完成，适配成功后此弹窗将被移除。\n\n" +
-                            "你可以订阅 Telegram CI 频道，第一时间获取版本更新。"
-                        confirmButton(text = "我知道了")
-                        cancelButton(text = "CI 频道") { openBrowser(url = "https://t.me/MIUINativeNotifyIcon_CI") }
                     }
                 /** 推广、恰饭 */
                 ProjectPromote.show(activity = this, ModuleVersion.toString())
