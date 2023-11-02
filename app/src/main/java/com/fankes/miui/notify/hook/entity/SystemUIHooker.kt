@@ -612,12 +612,12 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param container 当前 [NotificationIconContainerClass] 的实例
      */
     private fun updateStatusBarIconAlpha(container: ViewGroup) {
-        val iconStateMethod = container.current().method { name = "getIconState"; param(StatusBarIconViewClass) }
+        val iconStatesMap = container.current().field { name = "mIconStates" }.cast<HashMap<View, Any>>()
         if (container.childCount > 0) container.children.forEach { iconView ->
             if (iconView !is ImageView) return@forEach
             val iconAlpha = if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f
             iconView.alpha = iconAlpha
-            iconStateMethod.call(iconView)?.current()?.field { name = "alpha"; superClass() }?.set(iconAlpha)
+            iconStatesMap?.get(iconView)?.current()?.field { name { it == "alpha" || it == "mAlpha" }; superClass() }?.set(iconAlpha)
         }
     }
 
