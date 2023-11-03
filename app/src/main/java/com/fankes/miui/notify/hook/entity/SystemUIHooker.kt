@@ -868,7 +868,7 @@ object SystemUIHooker : YukiBaseHooker() {
         StatusBarIconViewClass.method {
             name = "updateIconColor"
             emptyParam()
-        }.hook().after {
+        }.ignored().hook().after {
             val iconView = instance<ImageView>()
             val expandedNf = iconView.current().field { name = "mNotification" }.cast<StatusBarNotification>()
             /** Hook 状态栏小图标 */
@@ -955,7 +955,7 @@ object SystemUIHooker : YukiBaseHooker() {
             method {
                 name = "updateState"
             }.ignored().hook().before { hookStatusBarMaxStaticIcons("MAX_STATIC_ICONS", instance) }
-            /** 新版方法 A14MIUI14/A14HyperOS - 旧版不存在 */
+            /** 新版方法 (A14 MIUI14 / A14 HyperOS) - 旧版不存在 */
             method {
                 name = "onMeasure"
             }.ignored().hook().before { hookStatusBarMaxStaticIcons("mMaxStaticIcons", instance) }
