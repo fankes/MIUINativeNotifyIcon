@@ -884,6 +884,34 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/miui_notify_icon_replacement_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                        android:id="@+id/miui_notify_icon_replacement_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="替换经典样式通知栏的通知图标"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="此选项默认开启，开启后经典 (MIUI) 样式的下拉通知栏中的通知图标将同样应用替换后的通知图标，否则将保持系统自己设置的图标。(此功能无法对所有系统版本兼容)"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/notify_icon_force_system_color_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
