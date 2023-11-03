@@ -60,6 +60,9 @@ object ConfigData {
     /** 通知栏中的通知图标圆角程度 */
     val NOTIFY_ICON_CORNER_SIZE = PrefsData("_notify_icon_corner", 15)
 
+    /** 替换 MIUI 样式通知栏的通知图标 */
+    val ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON = PrefsData("_replace_miui_style_notify_icon", true)
+
     /** 强制通知栏中的通知图标使用系统着色 */
     val ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR = PrefsData("_notify_icon_force_system_color", false)
 
@@ -258,6 +261,16 @@ object ConfigData {
         get() = getInt(NOTIFY_ICON_CORNER_SIZE)
         set(value) {
             putInt(NOTIFY_ICON_CORNER_SIZE, value)
+        }
+
+    /**
+     * 是否替换 MIUI 样式通知栏的通知图标
+     * @return [Boolean]
+     */
+    var isEnableReplaceMiuiStyleNotifyIcon
+        get() = getBoolean(ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON)
+        set(value) {
+            putBoolean(ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON, value)
         }
 
     /**

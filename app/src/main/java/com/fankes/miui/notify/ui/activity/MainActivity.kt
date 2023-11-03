@@ -238,6 +238,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 } else applyChangesAndRefresh()
             }
         }
+        binding.miuiNotifyIconReplacementSwitch.bind(ConfigData.ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
+        }
         binding.notifyIconForceSystemColorSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR) {
             isAutoApplyChanges = false
             onChanged {
@@ -263,6 +266,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     binding.notifyIconCustomCornerItem,
                     binding.notifyIconForceSystemColorItem
                 ).forEach { e -> e.isVisible = isLowerAndroidR.not() && it.not() }
+                binding.miuiNotifyIconReplacementItem.isVisible = it.not()
             }
             onChanged {
                 /** 应用更改并刷新系统界面 */

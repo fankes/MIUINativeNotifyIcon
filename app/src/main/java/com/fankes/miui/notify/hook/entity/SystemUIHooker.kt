@@ -270,6 +270,13 @@ object SystemUIHooker : YukiBaseHooker() {
         }
 
     /**
+     * 获取 MIUI 自己设置的通知图标
+     * @return [Icon] or null
+     */
+    @Suppress("DEPRECATION")
+    private val StatusBarNotification.miuiAppIcon get() = notification?.extras?.getParcelable<Icon?>("miui.appIcon")
+
+    /**
      * 打印日志
      * @param tag 标识
      * @param context 实例
@@ -528,11 +535,8 @@ object SystemUIHooker : YukiBaseHooker() {
             loggerDebug(tag = "Notification Panel Icon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
             /** 处理自定义通知图标优化 */
             when {
-                ConfigData.isEnableNotifyIconForceAppIcon -> {
-                    @Suppress("DEPRECATION")
-                    val miuiAppIcon = notifyInstance.notification?.extras?.getParcelable<Icon?>("miui.appIcon")
-                    setDefaultNotifyIcon(drawable = miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
-                }
+                ConfigData.isEnableNotifyIconForceAppIcon ->
+                    setDefaultNotifyIcon(drawable = notifyInstance.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
                 customIcon != null -> iconView.apply {
                     /** 设置不要裁切到边界 */
                     clipToOutline = false
@@ -982,14 +986,11 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 修改 MIUI 风格通知栏的通知图标 */
         MiuiNotificationViewWrapperClass?.apply {
             constructor().hook().after {
+                val nf = instance.getRowPair().second.getSbn() ?: return@after
                 field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.clone {
-                    compatNotifyIcon(
-                        context = context,
-                        nf = instance.getRowPair().second.getSbn(),
-                        iconView = this,
-                        isUseMaterial3Style = true,
-                        isMiuiPanel = true
-                    )
+                    if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
+                        compatNotifyIcon(context, nf, iconView = this, isUseMaterial3Style = true, isMiuiPanel = true)
+                    else setImageDrawable(nf.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(nf.packageName))
                 }
             }
         }
@@ -1001,15 +1002,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 param(BooleanType)
             }.hook().after {
                 field { name = "mAppIcon" }.get(instance).cast<ImageView>()?.apply {
-                    compatNotifyIcon(
-                        context = context,
-                        nf = NotificationChildrenContainerClass.field {
-                            name = "mContainingNotification"
-                        }.get(instance).any()?.getSbn(),
-                        iconView = this,
-                        isUseMaterial3Style = true,
-                        isMiuiPanel = true
-                    )
+                    val nf = NotificationChildrenContainerClass.field {
+                        name = "mContainingNotification"
+                    }.get(instance).any()?.getSbn() ?: return@after
+                    if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
+                        compatNotifyIcon(context, nf, iconView = this, isUseMaterial3Style = true, isMiuiPanel = true)
+                    else setImageDrawable(nf.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(nf.packageName))
                 }
             }
         }
