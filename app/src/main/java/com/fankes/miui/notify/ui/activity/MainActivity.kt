@@ -39,6 +39,7 @@ import com.fankes.miui.notify.utils.factory.hideOrShowLauncherIcon
 import com.fankes.miui.notify.utils.factory.isLauncherIconShowing
 import com.fankes.miui.notify.utils.factory.isLowerAndroidP
 import com.fankes.miui.notify.utils.factory.isLowerAndroidR
+import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isNotMiSystem
 import com.fankes.miui.notify.utils.factory.isNotNoificationEnabled
 import com.fankes.miui.notify.utils.factory.isNotSupportMiSystemVersion
@@ -165,6 +166,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
         }
         I18nWarnTool.checkingOrShowing(context = this)
+        if (isMIOS) binding.mainTitle.text = binding.mainTitle.text.toString().replace("MIUI", "HyperOS")
         binding.mainTextVersion.text = "模块版本：${ModuleVersion.NAME}"
         /** 设置 CI 自动构建标识 */
         if (ModuleVersion.isCiMode)
