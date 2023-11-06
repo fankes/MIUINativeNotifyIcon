@@ -732,9 +732,9 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun Any?.getSbn() =
         ExpandableNotificationRowClass
-            .method { name = "getEntry" }
-            .get(this).call()
-            ?.current(ignored = true)
+            .field { name = "mEntry" }
+            .get(this)
+            .current(ignored = true)
             ?.field { name = "mSbn" }
             ?.cast<StatusBarNotification>()
             ?: ExpandableNotificationRowClass
@@ -843,30 +843,34 @@ object SystemUIHooker : YukiBaseHooker() {
                 param { it[0] extends StatusBarNotificationClass }
             }.hookAll().replaceToFalse()
             var isUseLegacy = false
-            /** 强制回写系统的状态栏图标样式为原生 */
-            method {
-                name = "getSmallIcon"
-                param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
-            }.remedys {
+            /**
+             * 强制回写系统的状态栏图标样式为原生
+             * 部分系统没有 "getSmallIcon" 这个方法 - 所以直接忽略
+             */
+            if (hasMethod { name = "getSmallIcon" })
                 method {
                     name = "getSmallIcon"
-                    param(ExpandedNotificationClass)
+                    param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
+                }.remedys {
+                    method {
+                        name = "getSmallIcon"
+                        param(ExpandedNotificationClass)
+                    }
+                    method {
+                        name = "getSmallIcon"
+                        param(ContextClass, ExpandedNotificationClass)
+                    }.onFind { isUseLegacy = true }
+                }.hook().after {
+                    (globalContext ?: args().first().cast())?.also { context ->
+                        val expandedNf = args(if (isUseLegacy) 1 else 0).cast<StatusBarNotification?>()
+                        /** Hook 状态栏小图标 */
+                        compatStatusIcon(
+                            context = context,
+                            nf = expandedNf,
+                            iconDrawable = result<Icon>()?.loadDrawable(context)
+                        ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
+                    }
                 }
-                method {
-                    name = "getSmallIcon"
-                    param(ContextClass, ExpandedNotificationClass)
-                }.onFind { isUseLegacy = true }
-            }.hook().after {
-                (globalContext ?: args().first().cast())?.also { context ->
-                    val expandedNf = args(if (isUseLegacy) 1 else 0).cast<StatusBarNotification?>()
-                    /** Hook 状态栏小图标 */
-                    compatStatusIcon(
-                        context = context,
-                        nf = expandedNf,
-                        iconDrawable = result<Icon>()?.loadDrawable(context)
-                    ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
-                }
-            }
         }
         /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.method {
