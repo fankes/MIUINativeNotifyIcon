@@ -11,7 +11,7 @@
 [![QQ](https://img.shields.io/badge/discussion-QQ-blue.svg?logo=tencent-qq&logoColor=red)](https://qm.qq.com/cgi-bin/qm/qr?k=dp2h5YhWiga9WWb_Oh7kSHmx01X8I8ii&jump_from=webapi&authKey=Za5CaFP0lk7+Zgsk2KpoBD7sSaYbeXbsDgFjiWelOeH4VSionpxFJ7V0qQBSqvFM)
 [![QQ 频道](https://img.shields.io/badge/discussion-QQ%20频道-blue.svg?logo=tencent-qq&logoColor=red)](https://pd.qq.com/s/44gcy28h)
 
-<img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/img-src/icon.png?raw=true" width = "100" height = "100" alt="LOGO"/>
+<img src="img-src/icon.png" width = "100" height = "100" alt="LOGO"/>
 
 Fix the native notification bar icon function abandoned by the MIUI development team.
 
@@ -43,7 +43,7 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 点击下方的链接查看此模块的历史背景与探索历程。
 
-- [EXPLORE_HISTORY](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/EXPLORE_HISTORY.md)
+- [EXPLORE_HISTORY](EXPLORE_HISTORY.md)
 
 ## 贡献通知图标优化名单
 
@@ -93,7 +93,7 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 ## 隐私政策
 
-- [PRIVACY](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/PRIVACY.md)
+- [PRIVACY](PRIVACY.md)
 
 ## 许可证
 
