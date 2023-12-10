@@ -68,14 +68,13 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 | <img src="https://github.com/fankes/fankes/assets/37344460/82113d3c-aa7b-4dd1-95c7-cda650065c12" width = "30" height = "30" alt="LOGO"/> | [123 云盘 **(密码：62ll)**](https://www.123pan.com/s/5SlUVv-W8DBh.html) | 正式版 (稳定版) |
 |------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-----------|
 
-| <img src="https://github.com/fankes/fankes/assets/37344460/3cd43efd-785e-411d-a5c3-a8c9dc02308a" width = "30" height = "30" alt="LOGO"/> | [酷安应用市场](https://www.coolapk.com/apk/com.fankes.miui.notify) | 正式版 (稳定版) |
-|------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------|
-
 本模块发布地址仅限于上述所列出的地址，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
 
 ## 请勿用于非法用途
 
-- 本模块完全开源免费，如果好用你可以打赏支持开发，但是请不要用于非法用途。
+<h3>1.&nbsp本软件免费、由兴趣使然、仅供学习交流而开发，如果你是从其他不明来源的渠道付费得到本软件，则你已上当受骗，若发现欢迎向我们举报。</h3>
+
+<h3>2.&nbsp未经本人许可，禁止转载、搬运本软件的安装包及源代码到 GitHub 以外的平台并提供下载链接。</h3>
 
 ## 项目推广
 
@@ -87,12 +86,6 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
     <h3>所有项目免费、开源，遵循对应开源许可协议。</h3>
     <h1><a href="https://github.com/fankes/fankes/blob/main/project-promote/README-zh-CN.md">→ 查看更多关于我的项目，请点击这里 ←</a></h1>
 </div>
-
-## 捐赠支持
-
-工作不易，无意外情况此项目将继续维护下去，提供更多可能，欢迎打赏。
-
-<img src="https://github.com/fankes/fankes/blob/main/img-src/payment_code.jpg?raw=true" width = "500" alt="Payment Code"/>
 
 ## Star History
 
