@@ -191,9 +191,6 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
 
-    /** 状态栏原始通知图标最大个数限制 */
-    private var statusBarMaxStaticIcons = -1
-
     /** 是否已经使用过缓存刷新功能 */
     private var isUsingCachingMethod = false
 
@@ -663,12 +660,13 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param instance 被 Hook 的 Method 的实例
      */
     private fun hookStatusBarMaxStaticIcons(fieldName: String, instance: Any) {
+        if (!ConfigData.isEnableLiftedStatusIconCount)
+            return
         val maxStaticIconsField = NotificationIconContainerClass.field { name = fieldName }.get(instance)
-        if (statusBarMaxStaticIcons == -1) statusBarMaxStaticIcons = maxStaticIconsField.int()
         /** 解除状态栏通知图标个数限制 */
-        if (isShowNotificationIcons && ConfigData.isEnableLiftedStatusIconCount)
+        if (isShowNotificationIcons)
             maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
-        else maxStaticIconsField.set(if (isShowNotificationIcons) statusBarMaxStaticIcons else 0)
+        else maxStaticIconsField.set(0)
     }
 
     /**
