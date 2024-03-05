@@ -191,6 +191,12 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 是否显示通知图标 - 跟随 Hook 保存 */
     private var isShowNotificationIcons = true
 
+    /** 状态栏原始通知图标最大个数限制 */
+    private var statusBarMaxStaticIcons = -1
+
+    /** 模块上次设置的通知图标最大个数限制 */
+    private var moduleLastSetStatusBarMaxStaticIcons = -1
+
     /** 是否已经使用过缓存刷新功能 */
     private var isUsingCachingMethod = false
 
@@ -660,13 +666,29 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param instance 被 Hook 的 Method 的实例
      */
     private fun hookStatusBarMaxStaticIcons(fieldName: String, instance: Any) {
-        if (!ConfigData.isEnableLiftedStatusIconCount)
-            return
         val maxStaticIconsField = NotificationIconContainerClass.field { name = fieldName }.get(instance)
+        if (statusBarMaxStaticIcons == -1 ||
+            /** 系统设置内修改，模块同步更新 */
+            moduleLastSetStatusBarMaxStaticIcons != maxStaticIconsField.int()) {
+            statusBarMaxStaticIcons = maxStaticIconsField.int()
+        }
+        if (!ConfigData.isEnableLiftedStatusIconCount) {
+            /** 还原一次系统设置 */
+            if (statusBarMaxStaticIcons != -1) {
+                maxStaticIconsField.set(statusBarMaxStaticIcons)
+                statusBarMaxStaticIcons = -1
+            }
+            return
+        }
+
         /** 解除状态栏通知图标个数限制 */
-        if (isShowNotificationIcons)
-            maxStaticIconsField.set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
-        else maxStaticIconsField.set(0)
+        if (isShowNotificationIcons) {
+            moduleLastSetStatusBarMaxStaticIcons = ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 }
+            maxStaticIconsField.set(moduleLastSetStatusBarMaxStaticIcons)
+        } else {
+            maxStaticIconsField.set(0)
+            moduleLastSetStatusBarMaxStaticIcons = 0
+        }
     }
 
     /**
@@ -945,7 +967,11 @@ object SystemUIHooker : YukiBaseHooker() {
             }.hook().after { updateStatusBarIconsAlpha(instance()) }
             method {
                 name = "resetViewStates"
-            }.hook().after { updateStatusBarIconsAlpha(instance()) }
+            }.hook().after {
+                updateStatusBarIconsAlpha(instance())
+                /** HyperOS系统设置修改通知图标个数触发此方法 */
+                hookStatusBarMaxStaticIcons("mMaxStaticIcons", instance)
+            }
             method {
                 name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
             }.hook().after {
