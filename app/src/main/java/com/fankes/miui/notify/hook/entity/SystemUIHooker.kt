@@ -673,11 +673,7 @@ object SystemUIHooker : YukiBaseHooker() {
             statusBarMaxStaticIcons = maxStaticIconsField.int()
         }
         if (!ConfigData.isEnableLiftedStatusIconCount) {
-            /** 还原一次系统设置 */
-            if (statusBarMaxStaticIcons != -1) {
-                maxStaticIconsField.set(statusBarMaxStaticIcons)
-                statusBarMaxStaticIcons = -1
-            }
+            maxStaticIconsField.set(statusBarMaxStaticIcons)
             return
         }
 
