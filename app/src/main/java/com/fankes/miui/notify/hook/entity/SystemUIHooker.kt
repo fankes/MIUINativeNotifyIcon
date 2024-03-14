@@ -874,6 +874,10 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                     method {
                         name = "getSmallIcon"
+                        param(ExpandedNotificationClass, IntType, BooleanType)
+                    }
+                    method {
+                        name = "getSmallIcon"
                         param(ContextClass, ExpandedNotificationClass)
                     }.onFind { isUseLegacy = true }
                 }.hook().after {
