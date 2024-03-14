@@ -857,6 +857,11 @@ object SystemUIHooker : YukiBaseHooker() {
             method {
                 name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
                 param { it[0] extends StatusBarNotificationClass }
+            }.remedys {
+                method {
+                    name = "shouldSubstituteSmallIcon"
+                    param(ExpandedNotificationClass)
+                }
             }.hookAll().replaceToFalse()
             var isUseLegacy = false
             /**
