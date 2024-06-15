@@ -662,11 +662,19 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /**
      * Hook 状态栏通知图标最大数量
-     * @param fieldName 最大通知图标数量 的变量名
      * @param instance 被 Hook 的 Method 的实例
      */
-    private fun hookStatusBarMaxStaticIcons(fieldName: String, instance: Any) {
-        val maxStaticIconsField = NotificationIconContainerClass.field { name = fieldName }.get(instance)
+    private fun hookStatusBarMaxStaticIcons(instance: Any) {
+        val maxStaticIconsField = NotificationIconContainerClass.field {
+            name {
+                /** 旧版名称 */
+                val oldVersion = it == "mMaxStaticIcons"
+
+                /** 新版本名称 */
+                val newVersion = it == "MAX_STATIC_ICONS"
+                oldVersion || newVersion
+            }
+        }.get(instance)
         if (statusBarMaxStaticIcons == -1 ||
             /** 系统设置内修改，模块同步更新 */
             moduleLastSetStatusBarMaxStaticIcons != maxStaticIconsField.int()) {
@@ -676,7 +684,6 @@ object SystemUIHooker : YukiBaseHooker() {
             maxStaticIconsField.set(statusBarMaxStaticIcons)
             return
         }
-
         /** 解除状态栏通知图标个数限制 */
         if (isShowNotificationIcons) {
             moduleLastSetStatusBarMaxStaticIcons = ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 }
@@ -966,7 +973,7 @@ object SystemUIHooker : YukiBaseHooker() {
             }.hook().after {
                 updateStatusBarIconsAlpha(instance())
                 /** HyperOS系统设置修改通知图标个数触发此方法 */
-                hookStatusBarMaxStaticIcons("mMaxStaticIcons", instance)
+                hookStatusBarMaxStaticIcons(instance)
             }
             method {
                 name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
@@ -979,14 +986,14 @@ object SystemUIHooker : YukiBaseHooker() {
                         instance<ViewGroup>().layoutParams.width = 9999
                 }
             }
-            /** 旧版方法 A13MIUI - 新版不存在 */
+            /** 旧版方法 (A13 MIUI) - 新版不存在 */
             method {
                 name = "updateState"
-            }.ignored().hook().before { hookStatusBarMaxStaticIcons("MAX_STATIC_ICONS", instance) }
+            }.ignored().hook().before { hookStatusBarMaxStaticIcons(instance) }
             /** 新版方法 (A14 MIUI14 / A14 HyperOS) - 旧版不存在 */
             method {
                 name = "onMeasure"
-            }.ignored().hook().before { hookStatusBarMaxStaticIcons("mMaxStaticIcons", instance) }
+            }.ignored().hook().before { hookStatusBarMaxStaticIcons(instance) }
             /** 旧版方法 - 新版不存在 */
             method {
                 name = "setMaxStaticIcons"
