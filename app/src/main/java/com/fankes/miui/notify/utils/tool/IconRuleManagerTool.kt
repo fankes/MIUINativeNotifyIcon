@@ -248,7 +248,7 @@ object IconRuleManagerTool {
                                         notifyRefresh(context)
                                         callback()
                                     }
-                                    else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
+                                    else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新") else Unit)
                                 }
                             }
                             context is AppCompatActivity ->
@@ -298,7 +298,7 @@ object IconRuleManagerTool {
                                 notifyRefresh(context)
                                 callback()
                             }
-                            else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新"))
+                            else -> (if (context is AppCompatActivity) context.snake(msg = "列表数据已是最新") else Unit)
                         }
                         context is AppCompatActivity ->
                             context.showDialog {
