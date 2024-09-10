@@ -42,6 +42,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
+import android.widget.RemoteViews
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.children
@@ -88,6 +89,8 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.type.android.ContextClass
 import com.highcapable.yukihookapi.hook.type.android.DrawableClass
 import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
+import com.highcapable.yukihookapi.hook.type.android.NotificationClass
+import com.highcapable.yukihookapi.hook.type.android.RemoteViewsClass
 import com.highcapable.yukihookapi.hook.type.android.StatusBarNotificationClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
@@ -112,6 +115,10 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 新版本存在的类 */
     private val NotificationHeaderViewWrapperInjectorClass
         by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
+
+    /** MIUI 未确定版本存在的类 */
+    private val NotificationContentInflaterInjectorClass
+        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationContentInflaterInjector")
 
     /** MIUI 未确定版本存在的类 */
     private val SettingsManagerClass by lazyClassOrNull("com.miui.systemui.SettingsManager")
@@ -792,7 +799,11 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun registerLifecycle() {
         onAppLifecycle {
             /** 解锁后重新刷新状态栏图标防止系统重新设置它 */
-            registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ -> if (isUsingCachingMethod) refreshStatusBarIcons() }
+            registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ ->
+                if (isUsingCachingMethod) refreshStatusBarIcons()
+                /** 每次解锁时都对通知栏的图标进行刷新以响应 [RemoteViews] 阶段的图标改变 */
+                refreshNotificationIcons()
+            }
             /** 注册定时监听 */
             registerReceiver(Intent.ACTION_TIME_TICK) { context, _ ->
                 if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixNotify && ConfigData.isEnableNotifyIconFixAuto)
@@ -1058,6 +1069,10 @@ object SystemUIHooker : YukiBaseHooker() {
                 param(ImageViewClass, ExpandedNotificationClass)
             }.ignored().hook().intercept()
         }
+        NotificationContentInflaterInjectorClass?.method {
+            name = "handleAppIcon"
+            param(RemoteViewsClass, NotificationClass)
+        }?.ignored()?.hook()?.intercept()
         /**
          * 尝试修复从 MIUI 14 开始出现的一个崩溃问题
          * 由于模块注入推送的通知没有对 [StatusBarNotification] 设置 TAG 会导致其空指针
