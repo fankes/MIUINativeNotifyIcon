@@ -1071,8 +1071,12 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         NotificationContentInflaterInjectorClass?.method {
             name = "handleAppIcon"
-            param(RemoteViewsClass, NotificationClass)
-        }?.ignored()?.hook()?.intercept()
+            /**
+             * MIUI 14 ([RemoteViewsClass], [NotificationClass])
+             * HyperOS ([RemoteViewsClass], [NotificationClass], [ContextClass])
+             */
+            paramCount(numRange = 2..3)
+        }?.hook()?.intercept()
         /**
          * 尝试修复从 MIUI 14 开始出现的一个崩溃问题
          * 由于模块注入推送的通知没有对 [StatusBarNotification] 设置 TAG 会导致其空指针
