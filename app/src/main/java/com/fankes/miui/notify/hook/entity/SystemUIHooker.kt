@@ -922,7 +922,7 @@ object SystemUIHooker : YukiBaseHooker() {
             ).also { pair -> iconView.setImageDrawable(pair.first) }
             updateStatusBarIconColor(iconView)
         }
-        /** 注入状态栏通知图标容器管理实例 */
+        /** 注入状态栏通知图标容器管理实例 (A15 HyperOS 已移除) */
         NotificationIconAreaControllerClass.apply {
             /** Hook 深色图标模式改变 */
             method {
