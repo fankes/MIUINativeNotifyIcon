@@ -177,7 +177,8 @@ object SystemUIHooker : YukiBaseHooker() {
     private val NotificationUtilClass by lazyClass(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.NotificationUtil",
-            "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil"
+            "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil",
+            "${PackageName.SYSTEMUI}.statusbar.notification.utils.NotifImageUtil"
         )
     )
 
@@ -892,7 +893,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                     method {
                         name = "getSmallIcon"
-                        param(ContextClass, ExpandedNotificationClass)
+                        param { it[0] == ContextClass && it[1] extends StatusBarNotificationClass }
                     }.onFind { isUseLegacy = true }
                 }.hook().after {
                     (globalContext ?: args().first().cast())?.also { context ->
@@ -1010,7 +1011,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "setMaxStaticIcons"
                 param(IntType)
             }.ignored().hook().before { isShowNotificationIcons = args().first().int() > 0 }
-            /** 新版方法 - 旧版不存在 */
+            /** 旧版方法 - 新版 (A15 HyperOS) 不存在 */
             method {
                 name = "miuiShowNotificationIcons"
                 param(BooleanType)
