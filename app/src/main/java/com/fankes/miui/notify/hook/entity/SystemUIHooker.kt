@@ -678,9 +678,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 /** 旧版名称 */
                 val oldVersion = it == "mMaxStaticIcons"
 
+                /** 旧版名称 */
+                val oldVersion2 = it == "MAX_STATIC_ICONS"
+
                 /** 新版本名称 */
                 val newVersion = it == "MAX_STATIC_ICONS"
-                oldVersion || newVersion
+                oldVersion || oldVersion2 || newVersion
             }
         }.get(instance)
         if (statusBarMaxStaticIcons == -1 ||
