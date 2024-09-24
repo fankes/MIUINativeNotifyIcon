@@ -177,7 +177,8 @@ object SystemUIHooker : YukiBaseHooker() {
     private val NotificationUtilClass by lazyClass(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.NotificationUtil",
-            "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil"
+            "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil",
+            "${PackageName.SYSTEMUI}.statusbar.notification.utils.NotifImageUtil"
         )
     )
 
@@ -677,9 +678,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 /** 旧版名称 */
                 val oldVersion = it == "mMaxStaticIcons"
 
+                /** 旧版名称 */
+                val oldVersion2 = it == "MAX_STATIC_ICONS"
+
                 /** 新版本名称 */
-                val newVersion = it == "MAX_STATIC_ICONS"
-                oldVersion || newVersion
+                val newVersion = it == "mMaxIcons"
+                oldVersion || oldVersion2 || newVersion
             }
         }.get(instance)
         if (statusBarMaxStaticIcons == -1 ||
@@ -892,7 +896,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                     method {
                         name = "getSmallIcon"
-                        param(ContextClass, ExpandedNotificationClass)
+                        param { it[0] == ContextClass && it[1] extends StatusBarNotificationClass }
                     }.onFind { isUseLegacy = true }
                 }.hook().after {
                     (globalContext ?: args().first().cast())?.also { context ->
@@ -921,7 +925,7 @@ object SystemUIHooker : YukiBaseHooker() {
             ).also { pair -> iconView.setImageDrawable(pair.first) }
             updateStatusBarIconColor(iconView)
         }
-        /** 注入状态栏通知图标容器管理实例 */
+        /** 注入状态栏通知图标容器管理实例 (A15 HyperOS 已移除) */
         NotificationIconAreaControllerClass.apply {
             /** Hook 深色图标模式改变 */
             method {
@@ -1010,7 +1014,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "setMaxStaticIcons"
                 param(IntType)
             }.ignored().hook().before { isShowNotificationIcons = args().first().int() > 0 }
-            /** 新版方法 - 旧版不存在 */
+            /** 旧版方法 - 新版 (A15 HyperOS) 不存在 */
             method {
                 name = "miuiShowNotificationIcons"
                 param(BooleanType)
