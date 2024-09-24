@@ -175,7 +175,7 @@ inline val isNotMIOS get() = !isMIOS
 val isSupportMiSystemVersion
     get() = when {
         isMIOS -> when (miosVersion) {
-            "1.0" -> true
+            "1.0", "1.1" -> true
             else -> false
         }
         isMIUI -> when (miuiVersion) {
