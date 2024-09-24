@@ -682,7 +682,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val oldVersion2 = it == "MAX_STATIC_ICONS"
 
                 /** 新版本名称 */
-                val newVersion = it == "MAX_STATIC_ICONS"
+                val newVersion = it == "mMaxIcons"
                 oldVersion || oldVersion2 || newVersion
             }
         }.get(instance)
