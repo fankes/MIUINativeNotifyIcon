@@ -88,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:hint="请输入Github Proxy地址 URL"
+            android:hint="请输入 GitHub Proxy URL"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
