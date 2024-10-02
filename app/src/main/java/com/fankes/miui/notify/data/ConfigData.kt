@@ -93,6 +93,9 @@ object ConfigData {
     /** 通知图标优化名单同步地址 */
     val ICON_RULE_SOURCE_SYNC_CUSTOM_URL = PrefsData("_rule_source_sync_way_custom_url", "")
 
+    /** 通知图标优化名单同步镜像地址 */
+    val ICON_RULE_SOURCE_SYNC_PROXY_URL = PrefsData("_rule_source_sync_way_proxy_url", "")
+
     /** 忽略 Android 版本过低提示 */
     val IGNORED_ANDROID_VERSION_TO_LOW = PrefsData("_ignored_android_version_to_low", false)
 
@@ -361,6 +364,16 @@ object ConfigData {
         get() = getString(ICON_RULE_SOURCE_SYNC_CUSTOM_URL)
         set(value) {
             putString(ICON_RULE_SOURCE_SYNC_CUSTOM_URL, value)
+        }
+
+    /**
+     * 通知图标优化名单同步镜像地址
+     * @return [String]
+     */
+    var iconRuleSourceSyncProxyUrl
+        get() = getString(ICON_RULE_SOURCE_SYNC_PROXY_URL)
+        set(value) {
+            putString(ICON_RULE_SOURCE_SYNC_PROXY_URL, value)
         }
 
     /**

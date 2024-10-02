@@ -49,6 +49,13 @@
             android:id="@+id/source_radio_3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="GitHub Proxy (自定义)"
+            app:buttonTint="@color/colorPrimaryAccent" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/source_radio_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="从自定义地址获取"
             app:buttonTint="@color/colorPrimaryAccent" />
     </RadioGroup>
@@ -66,6 +73,22 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:hint="请输入在线地址 URL"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/source_from_text_lin_proxy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/source_url_edit_proxy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:hint="请输入 GitHub Proxy URL"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 

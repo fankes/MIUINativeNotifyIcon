@@ -50,6 +50,9 @@ object IconRuleSourceSyncType {
     /** GitHub Raw (直连) */
     const val GITHUB_RAW_DIRECT = 2000
 
+    /** GitHub Raw (自定义) */
+    const val GITHUB_RAW_PROXY = 4000
+
     /** 自定义地址 */
     const val CUSTOM_URL = 3000
 }
