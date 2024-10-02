@@ -110,7 +110,6 @@ object IconRuleManagerTool {
             title = "同步列表"
             var sourceType = ConfigData.iconRuleSourceSyncType
             var customUrl = ConfigData.iconRuleSourceSyncCustomUrl
-            var proxyUrl = ConfigData.iconRuleSourceSyncProxyUrl
             binding.sourceUrlEdit.apply {
                 if (customUrl.isNotBlank()) {
                     setText(customUrl)
@@ -118,48 +117,29 @@ object IconRuleManagerTool {
                 }
                 doOnTextChanged { text, _, _, _ -> customUrl = text.toString() }
             }
-            binding.sourceUrlEditProxy.apply {
-                if (proxyUrl.isNotBlank()) {
-                    setText(proxyUrl)
-                    setSelection(proxyUrl.length)
-                }
-                doOnTextChanged { text, _, _, _ -> proxyUrl = text.toString() }
-            }
             binding.sourceFromTextLin.isVisible = sourceType == IconRuleSourceSyncType.CUSTOM_URL
-            binding.sourceFromTextLinProxy.isVisible = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY
             binding.sourceTravelerLin.isVisible = sourceType != IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceRadio0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY_1
             binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY_2
             binding.sourceRadio2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_DIRECT
-            binding.sourceRadio3.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_RAW_PROXY
-            binding.sourceRadio4.isChecked = sourceType == IconRuleSourceSyncType.CUSTOM_URL
+            binding.sourceRadio3.isChecked = sourceType == IconRuleSourceSyncType.CUSTOM_URL
             binding.sourceRadio0.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
-                binding.sourceFromTextLinProxy.isVisible = false
                 binding.sourceTravelerLin.isVisible = true
                 sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY_1
             }
             binding.sourceRadio1.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
-                binding.sourceFromTextLinProxy.isVisible = false
                 binding.sourceTravelerLin.isVisible = true
                 sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY_2
             }
             binding.sourceRadio2.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = false
-                binding.sourceFromTextLinProxy.isVisible = false
                 binding.sourceTravelerLin.isVisible = true
                 sourceType = IconRuleSourceSyncType.GITHUB_RAW_DIRECT
             }
             binding.sourceRadio3.setOnClickListener {
-                binding.sourceFromTextLin.isVisible = false
-                binding.sourceFromTextLinProxy.isVisible = true
-                binding.sourceTravelerLin.isVisible = true
-                sourceType = IconRuleSourceSyncType.GITHUB_RAW_PROXY
-            }
-            binding.sourceRadio4.setOnClickListener {
                 binding.sourceFromTextLin.isVisible = true
-                binding.sourceFromTextLinProxy.isVisible = false
                 binding.sourceTravelerLin.isVisible = false
                 sourceType = IconRuleSourceSyncType.CUSTOM_URL
             }
@@ -168,8 +148,7 @@ object IconRuleManagerTool {
             confirmButton {
                 ConfigData.iconRuleSourceSyncType = sourceType
                 ConfigData.iconRuleSourceSyncCustomUrl = customUrl
-                ConfigData.iconRuleSourceSyncProxyUrl = proxyUrl
-                sync(context, sourceType, customUrl, proxyUrl, callback)
+                sync(context, sourceType, customUrl, callback)
             }
             cancelButton()
             neutralButton(text = "自定义规则") {
@@ -228,14 +207,12 @@ object IconRuleManagerTool {
         context: Context,
         sourceType: Int = ConfigData.iconRuleSourceSyncType,
         customUrl: String = ConfigData.iconRuleSourceSyncCustomUrl,
-        proxyUrl: String = ConfigData.iconRuleSourceSyncProxyUrl,
         callback: () -> Unit
     ) {
         when (sourceType) {
             IconRuleSourceSyncType.GITHUB_RAW_PROXY_1 -> onRefreshing(context, SYNC_PROXY_1_URL, callback)
             IconRuleSourceSyncType.GITHUB_RAW_PROXY_2 -> onRefreshing(context, SYNC_PROXY_2_URL, callback)
             IconRuleSourceSyncType.GITHUB_RAW_DIRECT -> onRefreshing(context, SYNC_DIRECT_URL, callback)
-            IconRuleSourceSyncType.GITHUB_RAW_PROXY -> onRefreshing(context, "$proxyUrl/$SYNC_DIRECT_URL", callback)
             IconRuleSourceSyncType.CUSTOM_URL ->
                 if (customUrl.isNotBlank())
                     if (customUrl.startsWith("http://") || customUrl.startsWith("https://"))
