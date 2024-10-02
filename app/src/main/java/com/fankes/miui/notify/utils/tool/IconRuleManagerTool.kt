@@ -83,7 +83,7 @@ object IconRuleManagerTool {
     private const val SYNC_DIRECT_URL = "https://raw.githubusercontent.com/fankes/AndroidNotifyIconAdapt/main"
 
     /** 同步地址 - GitHub Raw (代理 - GitHub Proxy) */
-    private const val SYNC_PROXY_1_URL = "https://ghproxy.com/$SYNC_DIRECT_URL"
+    private const val SYNC_PROXY_1_URL = "https://ghp.ci/$SYNC_DIRECT_URL"
 
     /** 同步地址 - GitHub Raw (代理 - 7ED Services) */
     private const val SYNC_PROXY_2_URL = "https://raw.githubusercontentS.com/fankes/AndroidNotifyIconAdapt/main"
