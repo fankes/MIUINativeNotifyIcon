@@ -129,8 +129,8 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 原生存在的类 */
     private val NotificationChildrenContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
 
-    /** 原生存在的类 */
-    private val NotificationIconAreaControllerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController")
+    /** 原生存在的类 (A15 HyperOS 已变成 `interface`) */
+    private val NotificationIconAreaControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController")
 
     /** 原生存在的类 */
     private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
@@ -925,8 +925,12 @@ object SystemUIHooker : YukiBaseHooker() {
             ).also { pair -> iconView.setImageDrawable(pair.first) }
             updateStatusBarIconColor(iconView)
         }
-        /** 注入状态栏通知图标容器管理实例 (A15 HyperOS 已移除) */
-        NotificationIconAreaControllerClass.apply {
+        /**
+         * 注入状态栏通知图标容器管理实例
+         * 在 Android 15 中，这个类被移除变成了 `interface`，所以判断并跳过 Hook 行为
+         */
+        val isPlaceholder = NotificationIconAreaControllerClass?.isInterface == true
+        if (!isPlaceholder) NotificationIconAreaControllerClass?.apply {
             /** Hook 深色图标模式改变 */
             method {
                 name = "onDarkChanged"
@@ -962,17 +966,37 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         /** 注入状态栏通知图标实例 */
-        StatusBarIconViewClass.method {
-            name = "setNotification"
-            param(StatusBarNotificationClass)
-        }.remedys {
+        StatusBarIconViewClass.apply {
             method {
                 name = "setNotification"
-                param(ExpandedNotificationClass)
+                param(StatusBarNotificationClass)
+            }.remedys {
+                method {
+                    name = "setNotification"
+                    param(ExpandedNotificationClass)
+                }
+            }.hook().after {
+                /** 注册壁纸颜色监听 */
+                if (args().first().any() != null) instance<ImageView>().also { registerWallpaperColorChanged(it) }
             }
-        }.hook().after {
-            /** 注册壁纸颜色监听 */
-            if (args().first().any() != null) instance<ImageView>().also { registerWallpaperColorChanged(it) }
+            /** Hook 深色图标模式改变 */
+            if (isPlaceholder) method {
+                name = "onDarkChanged"
+                paramCount { it > 4 }
+            }.hook().after {
+                val self = instance<ImageView>()
+                when (args(index = 1).float()) {
+                    1.0f -> {
+                        isDarkIconMode = true
+                        updateStatusBarIconColor(self, isDarkIconMode = true)
+                    }
+                    0.0f -> {
+                        isDarkIconMode = false
+                        updateStatusBarIconColor(self, isDarkIconMode = false)
+                    }
+                    else -> updateStatusBarIconColor(self, isDarkIconMode = false, args(index = 2).int())
+                }
+            }
         }
         /** 注入设置管理器实例 */
         SettingsManagerClass?.constructor()?.hookAll()?.after { settingsManager = instance }
