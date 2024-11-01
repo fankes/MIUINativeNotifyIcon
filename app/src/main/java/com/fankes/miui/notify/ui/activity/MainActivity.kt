@@ -114,7 +114,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 showDialog {
                     title = "不支持的系统版本"
                     msg = (if (miSystemVersion.isNotBlank())
-                        "此模块目前支持 MIUI 11~14 和 HyperOS 1.0 系统，你的系统版本为 $miSystemVersion，暂不支持。\n\n" +
+                        "此模块目前支持 MIUI 11~14 和 HyperOS 1.0~2.0 系统，你的系统版本为 $miSystemVersion，暂不支持。\n\n" +
                             "如果你的系统版本识别有误，请检查是否有相关插件修改了系统版本。\n\n"
                     else "无法获取系统版本，请检查你是否修改了系统参数或使用非官方系统。\n\n") + "若有其它疑问，你可以点击下方按钮前往项目地址进行反馈。"
                     confirmButton(text = "前往项目地址") {
