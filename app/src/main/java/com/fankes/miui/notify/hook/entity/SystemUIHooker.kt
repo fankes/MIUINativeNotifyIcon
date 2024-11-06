@@ -1102,8 +1102,9 @@ object SystemUIHooker : YukiBaseHooker() {
             /**
              * MIUI 14 ([RemoteViewsClass], [NotificationClass])
              * HyperOS ([RemoteViewsClass], [NotificationClass], [ContextClass])
+             * HyperOS 2.0 ([RemoteViewsClass], [NotificationClass], [ContextClass], [BooleanClass])
              */
-            paramCount(numRange = 2..3)
+            paramCount(numRange = 2..4)
         }?.hook()?.intercept()
         /**
          * 尝试修复从 MIUI 14 开始出现的一个崩溃问题
