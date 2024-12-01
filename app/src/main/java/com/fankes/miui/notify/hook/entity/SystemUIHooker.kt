@@ -999,9 +999,6 @@ object SystemUIHooker : YukiBaseHooker() {
                         nf = expandedNf,
                         iconDrawable = result<Icon>()?.loadDrawable(context)
                     ).also { pair ->
-                        // 设置颜色过滤器，仅对非透明部分着色
-                        pair.first?.alpha = 1
-                        pair.first?.colorFilter = PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
                         if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap())
                     }
                 }
