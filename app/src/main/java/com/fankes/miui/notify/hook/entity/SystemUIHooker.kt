@@ -974,6 +974,11 @@ object SystemUIHooker : YukiBaseHooker() {
             method{
                 name = "getStatusBarTickerDarkIcon"
                 param(StatusBarNotificationClass)
+            }.remedys {
+                method {
+                    name = "getStatusBarTickerDarkIcon"
+                    param(ExpandedNotificationClass)
+                }
             }.hook().after {
                 (globalContext ?: args().first().cast())?.also { context ->
                     val expandedNf = args(0).cast<StatusBarNotification?>()
@@ -990,6 +995,11 @@ object SystemUIHooker : YukiBaseHooker() {
             method{
                 name = "getStatusBarTickerIcon"
                 param(StatusBarNotificationClass)
+            }.remedys {
+                method {
+                    name = "getStatusBarTickerIcon"
+                    param(ExpandedNotificationClass)
+                }
             }.hook().after {
                 (globalContext ?: args().first().cast())?.also { context ->
                     val expandedNf = args(0).cast<StatusBarNotification?>()
