@@ -30,7 +30,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.BitmapDrawable
@@ -900,7 +899,9 @@ object SystemUIHooker : YukiBaseHooker() {
                     val ct = args(1).cast<Context>()
                     val smail = nf?.smallIcon?.loadDrawable(ct)?.toBitmap()
                     if (smail != null && !smail.isRecycled) {
-                        result =  BitmapDrawable(Resources.getSystem(), smail)
+                        if (ct != null) {
+                            result =  BitmapDrawable(ct.resources, smail)
+                        }
                     } else {
                         result = null
                     }
