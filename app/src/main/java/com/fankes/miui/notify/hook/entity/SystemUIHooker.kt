@@ -31,10 +31,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.graphics.Bitmap
 import android.graphics.Outline
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -70,6 +67,7 @@ import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
+import com.fankes.miui.notify.utils.factory.replaceColor
 import com.fankes.miui.notify.utils.factory.round
 import com.fankes.miui.notify.utils.factory.runInSafe
 import com.fankes.miui.notify.utils.factory.safeOf
@@ -95,6 +93,7 @@ import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
 import com.highcapable.yukihookapi.hook.type.android.NotificationClass
 import com.highcapable.yukihookapi.hook.type.android.RemoteViewsClass
 import com.highcapable.yukihookapi.hook.type.android.StatusBarNotificationClass
+import com.highcapable.yukihookapi.hook.type.java.BooleanClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import top.defaults.drawabletoolbox.DrawableBuilder
@@ -185,9 +184,6 @@ object SystemUIHooker : YukiBaseHooker() {
         )
     )
 
-    /** 澎湃系统焦点通知的用到的库 */
-    private val FocusUtils by lazyClass("com.android.systemui.statusbar.notification.utils.FocusUtils")
-
     /** 根据多个版本存在不同的包名相同的类 */
     private val ExpandedNotificationClass by lazyClass(
         VariousClass(
@@ -195,6 +191,10 @@ object SystemUIHooker : YukiBaseHooker() {
             "${PackageName.SYSTEMUI}.miui.statusbar.ExpandedNotification"
         )
     )
+
+    /** HyperOS 焦点通知的用到的库 */
+    private val FocusUtils by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.utils.FocusUtils")
+
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
@@ -873,55 +873,6 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
-    /** 图标颜色替换工具
-     *  @param oldBitmap 原始 Bitmap
-     *  @param oldColor 要替换的颜色（忽略透明度部分，仅匹配 RGB）
-     *  @param newColor 新颜色（将替换原颜色的 RGB 部分，保留原透明度）
-     *  @param tolerance 容差范围（0-255），默认0（完全匹配）
-     *  @return 替换颜色后的 Bitmap
-     */
-    private fun replaceBitmapColor(oldBitmap: Bitmap, oldColor: Int, newColor: Int, tolerance: Int = 0): Bitmap {
-        // 创建一个可变的副本
-        val mBitmap = oldBitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val mBitmapWidth = mBitmap.width
-        val mBitmapHeight = mBitmap.height
-
-        // 获取目标颜色的 RGB 值
-        val oldR = Color.red(oldColor)
-        val oldG = Color.green(oldColor)
-        val oldB = Color.blue(oldColor)
-
-        // 获取替换颜色的 RGB 值
-        val newR = Color.red(newColor)
-        val newG = Color.green(newColor)
-        val newB = Color.blue(newColor)
-
-        // 遍历每个像素点
-        for (i in 0 until mBitmapHeight) {
-            for (j in 0 until mBitmapWidth) {
-                val color = mBitmap.getPixel(j, i)
-
-                // 当前像素的 RGB 值
-                val r = Color.red(color)
-                val g = Color.green(color)
-                val b = Color.blue(color)
-
-                // 判断颜色是否接近目标颜色（模糊匹配）
-                if (Math.abs(r - oldR) <= tolerance &&
-                    Math.abs(g - oldG) <= tolerance &&
-                    Math.abs(b - oldB) <= tolerance
-                ) {
-                    // 保留原始透明度
-                    val alpha = Color.alpha(color)
-                    // 替换 RGB 并保留透明度
-                    val replacedColor = Color.argb(alpha, newR, newG, newB)
-                    mBitmap.setPixel(j, i, replacedColor)
-                }
-            }
-        }
-        return mBitmap
-    }
-
     override fun onHook() {
         /** 注册生命周期 */
         registerLifecycle()
@@ -968,10 +919,9 @@ object SystemUIHooker : YukiBaseHooker() {
                     }
                 }
         }
-
         /** 去他妈的焦点通知彩色图标 */
-        FocusUtils.apply {
-            method{
+        FocusUtils?.apply {
+            method {
                 name = "getStatusBarTickerDarkIcon"
                 param(StatusBarNotificationClass)
             }.remedys {
@@ -988,11 +938,13 @@ object SystemUIHooker : YukiBaseHooker() {
                         nf = expandedNf,
                         iconDrawable = result<Icon>()?.loadDrawable(context)
                     ).also { pair ->
-                        if (pair.second) result = Icon.createWithBitmap(pair.first?.let { replaceBitmapColor(it.toBitmap(),Color.WHITE,Color.BLACK,210) })
+                        if (!pair.second) return@after
+                        val bitmap = pair.first?.toBitmap()?.replaceColor(Color.WHITE, Color.BLACK, tolerance = 210)
+                        result = Icon.createWithBitmap(bitmap)
                     }
                 }
             }
-            method{
+            method {
                 name = "getStatusBarTickerIcon"
                 param(StatusBarNotificationClass)
             }.remedys {
@@ -1014,7 +966,6 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
-
         /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.method {
             name = "updateIconColor"
