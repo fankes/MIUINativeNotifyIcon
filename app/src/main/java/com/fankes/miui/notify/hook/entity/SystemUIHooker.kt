@@ -30,6 +30,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.BitmapDrawable
@@ -887,10 +888,29 @@ object SystemUIHooker : YukiBaseHooker() {
             }.hookAll().replaceToFalse()
             var isUseLegacy = false
             /**
+             * 强制修改 getCustomAppIcon 获取的图标为 smallIcon
+             * 部分系统没有 "getCustomAppIcon" 这个方法 - 所以直接忽略
+             */
+            if (hasMethod { name = "getCustomAppIcon" }){
+                method{
+                    name = "getCustomAppIcon"
+                    param(NotificationClass, ContextClass)
+                }.hook().after {
+                    val nf = args(0).cast<Notification>()
+                    val ct = args(1).cast<Context>()
+                    val smail = nf?.smallIcon?.loadDrawable(ct)?.toBitmap()
+                    if (smail != null && !smail.isRecycled) {
+                        result =  BitmapDrawable(Resources.getSystem(), smail)
+                    } else {
+                        result = null
+                    }
+                }
+            }
+            /**
              * 强制回写系统的状态栏图标样式为原生
              * 部分系统没有 "getSmallIcon" 这个方法 - 所以直接忽略
              */
-            if (hasMethod { name = "getSmallIcon" })
+            if (hasMethod { name = "getSmallIcon" }){
                 method {
                     name = "getSmallIcon"
                     param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
@@ -898,10 +918,6 @@ object SystemUIHooker : YukiBaseHooker() {
                     method {
                         name = "getSmallIcon"
                         param(ExpandedNotificationClass)
-                    }
-                    method {
-                        name = "getSmallIcon"
-                        param { it[0] == ContextClass && it[1] extends SystemUIApplicationClass && it[2] == IntType && it[3] == BooleanType }
                     }
                     method {
                         name = "getSmallIcon"
@@ -918,6 +934,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                     }
                 }
+            }
         }
         /** 去他妈的焦点通知彩色图标 */
         FocusUtils?.apply {
