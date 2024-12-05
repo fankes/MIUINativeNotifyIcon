@@ -77,6 +77,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 /**
  * 系统深色模式是否开启
@@ -553,6 +554,48 @@ fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
             }
         }
     }
+}
+
+/** 替换位图颜色
+ *  @param oldColor 要替换的颜色 (忽略透明度部分，仅匹配 RGB)
+ *  @param newColor 新颜色 (将替换原颜色的 RGB 部分，保留原透明度)
+ *  @param tolerance 容差范围 (0-255)，默认 0 (完全匹配)
+ *  @return [Bitmap] 替换颜色后的位图
+ */
+fun Bitmap.replaceColor(oldColor: Int, newColor: Int, tolerance: Int = 0): Bitmap {
+    // 创建一个可变的副本
+    val nBitmap = copy(Bitmap.Config.ARGB_8888, true)
+    val nBitmapWidth = nBitmap.width
+    val nBitmapHeight = nBitmap.height
+    // 获取目标颜色的 RGB 值
+    val oldR = Color.red(oldColor)
+    val oldG = Color.green(oldColor)
+    val oldB = Color.blue(oldColor)
+    // 获取替换颜色的 RGB 值
+    val newR = Color.red(newColor)
+    val newG = Color.green(newColor)
+    val newB = Color.blue(newColor)
+    // 遍历每个像素点
+    for (i in 0 until nBitmapHeight) {
+        for (j in 0 until nBitmapWidth) {
+            val color = nBitmap.getPixel(j, i)
+            // 当前像素的 RGB 值
+            val r = Color.red(color)
+            val g = Color.green(color)
+            val b = Color.blue(color)
+            // 判断颜色是否接近目标颜色 (模糊匹配)
+            if (abs(r - oldR) <= tolerance &&
+                abs(g - oldG) <= tolerance &&
+                abs(b - oldB) <= tolerance
+            ) {
+                // 保留原始透明度
+                val alpha = Color.alpha(color)
+                // 替换 RGB 并保留透明度
+                val replacedColor = Color.argb(alpha, newR, newG, newB)
+                nBitmap.setPixel(j, i, replacedColor)
+            }
+        }
+    }; return nBitmap
 }
 
 /**
