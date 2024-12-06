@@ -32,7 +32,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.Outline
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -341,7 +340,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [Drawable]
      */
     private fun Drawable.rounded(context: Context) =
-        safeOf(default = this) { BitmapDrawable(context.resources, toBitmap().round(10.dpFloat(context))) }
+        safeOf(default = this) { toBitmap().round(10.dpFloat(context)).toDrawable(context.resources) }
 
     /**
      * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
@@ -890,28 +889,23 @@ object SystemUIHooker : YukiBaseHooker() {
              * 强制修改 getCustomAppIcon 获取的图标为 smallIcon
              * 部分系统没有 "getCustomAppIcon" 这个方法 - 所以直接忽略
              */
-            if (hasMethod { name = "getCustomAppIcon" }){
-                method{
+            if (hasMethod { name = "getCustomAppIcon" })
+                method {
                     name = "getCustomAppIcon"
                     param(NotificationClass, ContextClass)
                 }.hook().after {
-                    val nf = args(0).cast<Notification>()
-                    val ct = args(1).cast<Context>()
-                    val smail = nf?.smallIcon?.loadDrawable(ct)?.toBitmap()
-                    if (smail != null && !smail.isRecycled) {
-                        if (ct != null) {
-                            result =  BitmapDrawable(ct.resources, smail)
-                        }
-                    } else {
-                        result = null
-                    }
+                    val nf = args().first().cast<Notification>()
+                    val context = args(index = 1).cast<Context>()
+                    val iconBitmap = nf?.smallIcon?.loadDrawable(context)?.toBitmap()
+                    result = if (context != null && iconBitmap != null && !iconBitmap.isRecycled)
+                        iconBitmap.toDrawable(context.resources)
+                    else null
                 }
-            }
             /**
              * 强制回写系统的状态栏图标样式为原生
              * 部分系统没有 "getSmallIcon" 这个方法 - 所以直接忽略
              */
-            if (hasMethod { name = "getSmallIcon" }){
+            if (hasMethod { name = "getSmallIcon" })
                 method {
                     name = "getSmallIcon"
                     param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
@@ -935,7 +929,6 @@ object SystemUIHooker : YukiBaseHooker() {
                         ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                     }
                 }
-            }
         }
         /** 去他妈的焦点通知彩色图标 */
         FocusUtils?.apply {
@@ -948,8 +941,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     param(ExpandedNotificationClass)
                 }
             }.hook().after {
-                (globalContext ?: args().first().cast())?.also { context ->
-                    val expandedNf = args(0).cast<StatusBarNotification?>()
+                globalContext?.also { context ->
+                    val expandedNf = args().first().cast<StatusBarNotification?>()
                     /** Hook 状态栏小图标 */
                     compatStatusIcon(
                         context = context,
