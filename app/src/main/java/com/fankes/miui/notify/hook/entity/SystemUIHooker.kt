@@ -93,7 +93,6 @@ import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
 import com.highcapable.yukihookapi.hook.type.android.NotificationClass
 import com.highcapable.yukihookapi.hook.type.android.RemoteViewsClass
 import com.highcapable.yukihookapi.hook.type.android.StatusBarNotificationClass
-import com.highcapable.yukihookapi.hook.type.java.BooleanClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import top.defaults.drawabletoolbox.DrawableBuilder
@@ -127,6 +126,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** MIUI 新版本存在的类 */
     private val NotificationStatClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.analytics.NotificationStat")
+
+    /** MIUI 未确定版本存在的类 */
+    private val MiuiClockClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.views.MiuiClock")
 
     /** 原生存在的类 */
     private val NotificationChildrenContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
@@ -890,8 +892,8 @@ object SystemUIHooker : YukiBaseHooker() {
              * 强制修改 getCustomAppIcon 获取的图标为 smallIcon
              * 部分系统没有 "getCustomAppIcon" 这个方法 - 所以直接忽略
              */
-            if (hasMethod { name = "getCustomAppIcon" }){
-                method{
+            if (hasMethod { name = "getCustomAppIcon" })
+                method {
                     name = "getCustomAppIcon"
                     param(NotificationClass, ContextClass)
                 }.hook().after {
@@ -899,19 +901,15 @@ object SystemUIHooker : YukiBaseHooker() {
                     val ct = args(1).cast<Context>()
                     val smail = nf?.smallIcon?.loadDrawable(ct)?.toBitmap()
                     if (smail != null && !smail.isRecycled) {
-                        if (ct != null) {
-                            result =  BitmapDrawable(ct.resources, smail)
-                        }
-                    } else {
-                        result = null
-                    }
+                        if (ct != null)
+                            result = BitmapDrawable(ct.resources, smail)
+                    } else result = null
                 }
-            }
             /**
              * 强制回写系统的状态栏图标样式为原生
              * 部分系统没有 "getSmallIcon" 这个方法 - 所以直接忽略
              */
-            if (hasMethod { name = "getSmallIcon" }){
+            if (hasMethod { name = "getSmallIcon" })
                 method {
                     name = "getSmallIcon"
                     param { it[0] extends StatusBarNotificationClass && it[1] == IntType }
@@ -935,7 +933,6 @@ object SystemUIHooker : YukiBaseHooker() {
                         ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                     }
                 }
-            }
         }
         /** 去他妈的焦点通知彩色图标 */
         FocusUtils?.apply {
@@ -1036,6 +1033,26 @@ object SystemUIHooker : YukiBaseHooker() {
                     updateStatusBarIconsColor(it)
                     /** 延迟防止新添加的通知图标不刷新 */
                     delayedRun { updateStatusBarIconsColor(it) }
+                }
+            }
+        }
+        if (isPlaceholder) MiuiClockClass?.apply {
+            method {
+                name = "onDarkChanged"
+                paramCount { it > 4 }
+            }.hook().after {
+                notificationIconContainer?.let {
+                    when (args(index = 1).float()) {
+                        1.0f -> {
+                            isDarkIconMode = true
+                            updateStatusBarIconsColor(it, isDarkIconMode = true)
+                        }
+                        0.0f -> {
+                            isDarkIconMode = false
+                            updateStatusBarIconsColor(it, isDarkIconMode = false)
+                        }
+                        else -> updateStatusBarIconsColor(it, isDarkIconMode = false, args(index = 2).int())
+                    }
                 }
             }
         }
@@ -1176,7 +1193,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /**
              * MIUI 14 ([RemoteViewsClass], [NotificationClass])
              * HyperOS ([RemoteViewsClass], [NotificationClass], [ContextClass])
-             * HyperOS 2.0 ([RemoteViewsClass], [NotificationClass], [ContextClass], [BooleanClass])
+             * HyperOS 2.0 ([RemoteViewsClass], [NotificationClass], [ContextClass], [Boolean])
              */
             paramCount(numRange = 2..4)
         }?.hook()?.intercept()
