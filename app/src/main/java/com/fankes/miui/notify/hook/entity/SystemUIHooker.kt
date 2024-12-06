@@ -124,6 +124,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 未确定版本存在的类 */
     private val SettingsManagerClass by lazyClassOrNull("com.miui.systemui.SettingsManager")
 
+    /** MIUI 未确定版本存在的类 */
+    private val MiuiClockClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.views.MiuiClock")
+
     /** MIUI 新版本存在的类 */
     private val NotificationStatClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.analytics.NotificationStat")
 
@@ -1029,6 +1032,25 @@ object SystemUIHooker : YukiBaseHooker() {
                     updateStatusBarIconsColor(it)
                     /** 延迟防止新添加的通知图标不刷新 */
                     delayedRun { updateStatusBarIconsColor(it) }
+                }
+            }
+        } else MiuiClockClass?.apply {
+            method {
+                name = "onDarkChanged"
+                paramCount { it > 4 }
+            }.hook().after {
+                notificationIconContainer?.let {
+                    when (args(index = 1).float()) {
+                        1.0f -> {
+                            isDarkIconMode = true
+                            updateStatusBarIconsColor(it, isDarkIconMode = true)
+                        }
+                        0.0f -> {
+                            isDarkIconMode = false
+                            updateStatusBarIconsColor(it, isDarkIconMode = false)
+                        }
+                        else -> updateStatusBarIconsColor(it, isDarkIconMode = false, args(index = 2).int())
+                    }
                 }
             }
         }
