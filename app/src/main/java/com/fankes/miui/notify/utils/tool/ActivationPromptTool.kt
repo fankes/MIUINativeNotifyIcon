@@ -31,6 +31,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.appIconOf
@@ -68,7 +69,9 @@ object ActivationPromptTool {
                 setColor(0xFFE06818.toInt())
                 setAutoCancel(true)
                 setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_notify_update))
-                setLargeIcon(context.appIconOf(packageName)?.toBitmap())
+                setExtras(Bundle().apply {
+                    putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
+                })
                 setContentIntent(
                     PendingIntent.getActivity(
                         context, packageName.hashCode(),

@@ -31,6 +31,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookEntry
@@ -80,7 +81,9 @@ object IconAdaptationTool {
                 setColor(0xFF2993F0.toInt())
                 setAutoCancel(true)
                 setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_unsupported))
-                setLargeIcon(context.appIconOf(packageName)?.toBitmap())
+                setExtras(Bundle().apply {
+                    putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
+                })
                 setContentIntent(
                     PendingIntent.getActivity(
                         context, packageName.hashCode(),
