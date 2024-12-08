@@ -944,18 +944,18 @@ object SystemUIHooker : YukiBaseHooker() {
                     param(ExpandedNotificationClass)
                 }
             }.hook().after {
-                globalContext?.also { context ->
+                (globalContext ?: args().first().cast())?.also { context ->
                     val expandedNf = args().first().cast<StatusBarNotification?>()
+                    val small = expandedNf?.notification?.smallIcon?.loadDrawable(context)
+                    val icon = small?.toBitmap()
                     /** Hook 状态栏小图标 */
                     compatStatusIcon(
                         context = context,
                         nf = expandedNf,
-                        iconDrawable = result<Icon>()?.loadDrawable(context)
-                    ).also { pair ->
-                        if (!pair.second) return@after
-                        val bitmap = pair.first?.toBitmap()?.replaceColor(Color.WHITE, Color.BLACK, tolerance = 210)
-                        result = Icon.createWithBitmap(bitmap)
-                    }
+                        iconDrawable = icon?.toDrawable(context.resources)
+                    ).also { pair -> if (!pair.second) return@after
+                        val bitmap = pair.first?.toBitmap()?.replaceColor(Color.WHITE, Color.BLACK, tolerance = 90)
+                        result = Icon.createWithBitmap(bitmap)}
                 }
             }
             method {
@@ -969,14 +969,16 @@ object SystemUIHooker : YukiBaseHooker() {
             }.hook().after {
                 (globalContext ?: args().first().cast())?.also { context ->
                     val expandedNf = args(0).cast<StatusBarNotification?>()
+                    val small = expandedNf?.notification?.smallIcon?.loadDrawable(context)
+                    val icon = small?.toBitmap()
                     /** Hook 状态栏小图标 */
                     compatStatusIcon(
                         context = context,
                         nf = expandedNf,
-                        iconDrawable = result<Icon>()?.loadDrawable(context)
-                    ).also { pair ->
-                        if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap())
-                    }
+                        iconDrawable = icon?.toDrawable(context.resources)
+                    ).also { pair -> if (!pair.second) return@after
+                        val bitmap = pair.first?.toBitmap()?.replaceColor(Color.BLACK, Color.WHITE, tolerance = 90)
+                        result = Icon.createWithBitmap(bitmap)}
                 }
             }
         }
