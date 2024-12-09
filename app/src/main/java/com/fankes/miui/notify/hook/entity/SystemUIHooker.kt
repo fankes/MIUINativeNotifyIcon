@@ -929,7 +929,16 @@ object SystemUIHooker : YukiBaseHooker() {
                             context = context,
                             nf = expandedNf,
                             iconDrawable = result<Icon>()?.loadDrawable(context)
-                        ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
+                        ).also { pair ->
+                            /** 针对澎湃老版本适配*/
+                            if (pair.second){
+                                if (!isDarkIconMode) {
+                                    result = Icon.createWithBitmap(pair.first?.toBitmap()?.replaceColor(Color.BLACK, Color.WHITE, tolerance = 90))
+                                } else {
+                                    result = Icon.createWithBitmap(pair.first?.toBitmap()?.replaceColor(Color.WHITE, Color.BLACK, tolerance = 90))
+                                }
+                            }
+                        }
                     }
                 }
         }
@@ -994,7 +1003,16 @@ object SystemUIHooker : YukiBaseHooker() {
                 context = iconView.context,
                 nf = expandedNf,
                 iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
-            ).also { pair -> iconView.setImageDrawable(pair.first) }
+            ).also { pair ->
+                if (pair.second){
+                    /** 针对澎湃老版本适配*/
+                    if (!isDarkIconMode) {
+                        result = iconView.setImageDrawable(pair.first?.toBitmap()?.replaceColor(Color.BLACK, Color.WHITE, tolerance = 90)?.toDrawable(iconView.resources))
+                    } else {
+                        result = iconView.setImageDrawable(pair.first?.toBitmap()?.replaceColor(Color.WHITE, Color.BLACK, tolerance = 90)?.toDrawable(iconView.resources))
+                    }
+                }
+            }
             updateStatusBarIconColor(iconView)
         }
         /**
