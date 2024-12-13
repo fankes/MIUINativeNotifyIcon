@@ -87,6 +87,7 @@ import com.highcapable.yukihookapi.hook.factory.hasMethod
 import com.highcapable.yukihookapi.hook.factory.injectModuleAppResources
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.log.YLog
+import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.hook.type.android.ContextClass
 import com.highcapable.yukihookapi.hook.type.android.DrawableClass
 import com.highcapable.yukihookapi.hook.type.android.ImageViewClass
@@ -982,24 +983,41 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         /** 去他妈的焦点通知彩色图标 */
-        FocusUtilsClass?.method {
-            name { it == "getStatusBarTickerDarkIcon" || it == "getStatusBarTickerIcon" }
-            param { (it[0] == StatusBarNotificationClass || it[0] == ExpandedNotificationClass) && it.size == 1 }
-        }?.hookAll()?.after {
-            (globalContext ?: args().first().cast())?.also { context ->
-                val expandedNf = args().first().cast<StatusBarNotification?>()
-                val small = expandedNf?.notification?.smallIcon
-                /** Hook 状态栏小图标 */
-                compatStatusIcon(
-                    context = context,
-                    nf = expandedNf,
-                    iconDrawable = small?.loadDrawable(context)
-                ).also { pair ->
-                    val originalBitmap = pair.first?.toBitmap()
-                    val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                    result = Icon.createWithBitmap(bitmap).apply { setTint(Color.BLACK) }
+        FocusUtilsClass?.apply {
+            fun HookParam.hookTickerDarkIcon(isDark: Boolean) {
+                (globalContext ?: args().first().cast())?.also { context ->
+                    val expandedNf = args().first().cast<StatusBarNotification?>()
+                    val small = expandedNf?.notification?.smallIcon
+                    /** Hook 状态栏小图标 */
+                    compatStatusIcon(
+                        context = context,
+                        nf = expandedNf,
+                        iconDrawable = small?.loadDrawable(context)
+                    ).also { pair ->
+                        val originalBitmap = pair.first?.toBitmap()
+                        val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
+                        result = Icon.createWithBitmap(bitmap).apply { setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                    }
                 }
             }
+            method {
+                name = "getStatusBarTickerDarkIcon"
+                param(StatusBarNotificationClass)
+            }.remedys {
+                method {
+                    name = "getStatusBarTickerDarkIcon"
+                    param(ExpandedNotificationClass)
+                }
+            }.hook().after { hookTickerDarkIcon(isDark = true) }
+            method {
+                name = "getStatusBarTickerIcon"
+                param(StatusBarNotificationClass)
+            }.remedys {
+                method {
+                    name = "getStatusBarTickerIcon"
+                    param(ExpandedNotificationClass)
+                }
+            }.hook().after { hookTickerDarkIcon(isDark = false) }
         }
         /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.method {
@@ -1124,7 +1142,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "resetViewStates"
             }.hook().after {
                 updateStatusBarIconsAlpha(instance())
-                /** HyperOS系统设置修改通知图标个数触发此方法 */
+                /** HyperOS 系统设置修改通知图标个数触发此方法 */
                 hookStatusBarMaxStaticIcons(instance)
             }
             method {
