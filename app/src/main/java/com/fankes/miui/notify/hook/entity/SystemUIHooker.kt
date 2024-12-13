@@ -96,8 +96,8 @@ import com.highcapable.yukihookapi.hook.type.android.StatusBarNotificationClass
 import com.highcapable.yukihookapi.hook.type.java.ArrayListClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanType
+import com.highcapable.yukihookapi.hook.type.java.FloatType
 import com.highcapable.yukihookapi.hook.type.java.IntType
-import de.robv.android.xposed.XposedHelpers
 import top.defaults.drawabletoolbox.DrawableBuilder
 
 /**
@@ -197,10 +197,10 @@ object SystemUIHooker : YukiBaseHooker() {
         )
     )
 
-    /** HyperOS 焦点通知的用到的库 */
+    /** HyperOS 焦点通知的用到的 API */
     private val FocusUtilsClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.utils.FocusUtils")
 
-    /** HyperOS 焦点通知的用到的库 */
+    /** HyperOS 焦点通知的用到的 API */
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
 
     /** 缓存的通知图标优化数组 */
@@ -308,45 +308,45 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param isCustom 是否为通知优化生效图标
      * @param isGrayscale 是否为灰度图标
      */
+    @Suppress("DEPRECATION")
     private fun loggerDebug(tag: String, context: Context, nf: StatusBarNotification?, isCustom: Boolean, isGrayscale: Boolean) {
-        if (ConfigData.isEnableModuleLog){
-            val focusticker = nf?.notification?.extras?.getString("miui.focus.ticker","")
-            val focusiconId = nf?.notification?.extras?.getInt(" miui.focus.iconId",0)
-            val focusrv = nf?.notification?.extras?.getParcelable<RemoteViews>("miui.focus.rv")
-            val focus = nf?.notification?.extras?.getString("miui.focus.param","")
-            if (focusticker != "" ){
+        if (ConfigData.isEnableModuleLog) {
+            val focusTicker = nf?.notification?.extras?.getString("miui.focus.ticker")
+            val focusIconId = nf?.notification?.extras?.getInt("miui.focus.iconId", -1)
+            val focusRv = nf?.notification?.extras?.getParcelable<RemoteViews?>("miui.focus.rv")
+            val focusParam = nf?.notification?.extras?.getString("miui.focus.param")
+            if (!focusTicker.isNullOrBlank())
                 YLog.debug(
-                    msg = "(Focus open,Processing $tag) ↓\n" +
-                      "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
-                      "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
-                      "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
-                      "[Package Name]: ${nf?.packageName}\n" +
-                      "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
-                      "[Custom Icon]: $isCustom\n" +
-                      "[Grayscale Icon]: $isGrayscale\n" +
-                      "[From Xmsf]: ${nf?.isXmsf}\n" +
-                      "[String]: ${nf?.notification}\n" +
-                      "[Focus IconId]: $focusiconId\n" +
-                      "[Focus String] : ${focus}\n" +
-                      "[Focus rv  String] : ${focusrv}\n" +
-                      "[Focus ticker String] : ${focusticker}\n" +
-                      "[Dark mode] ${isDarkIconMode} "
+                    msg = "(Processing $tag with Focus Notification) ↓\n" +
+                        "[Title]: ${nf.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
+                        "[Content]: ${nf.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
+                        "[App Name]: ${context.appNameOf(packageName = nf.packageName ?: "")}\n" +
+                        "[Package Name]: ${nf.packageName}\n" +
+                        "[Sender Package Name]: ${nf.compatOpPkgName}\n" +
+                        "[Custom Icon]: $isCustom\n" +
+                        "[Grayscale Icon]: $isGrayscale\n" +
+                        "[From Xmsf]: ${nf.isXmsf}\n" +
+                        "[String]: ${nf.notification}\n" +
+                        "[Focus IconId]: $focusIconId\n" +
+                        "[Focus String]: ${focusParam}\n" +
+                        "[Focus rv String]: ${focusRv}\n" +
+                        "[Focus Ticker String]: ${focusTicker}\n" +
+                        "[Dark Icon Mode]: $isDarkIconMode"
                 )
-            } else {
-            YLog.debug(
-            msg = "(Processing $tag) ↓\n" +
-                "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
-                "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
-                "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
-                "[Package Name]: ${nf?.packageName}\n" +
-                "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
-                "[Custom Icon]: $isCustom\n" +
-                "[Grayscale Icon]: $isGrayscale\n" +
-                "[From Xmsf]: ${nf?.isXmsf}\n" +
-                "[String]: ${nf?.notification}\n"+
-                "[Dark mode] $isDarkIconMode "
-        )
-            }
+            else
+                YLog.debug(
+                    msg = "(Processing $tag) ↓\n" +
+                        "[Title]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
+                        "[Content]: ${nf?.notification?.extras?.getString(Notification.EXTRA_TEXT)}\n" +
+                        "[App Name]: ${context.appNameOf(packageName = nf?.packageName ?: "")}\n" +
+                        "[Package Name]: ${nf?.packageName}\n" +
+                        "[Sender Package Name]: ${nf?.compatOpPkgName}\n" +
+                        "[Custom Icon]: $isCustom\n" +
+                        "[Grayscale Icon]: $isGrayscale\n" +
+                        "[From Xmsf]: ${nf?.isXmsf}\n" +
+                        "[String]: ${nf?.notification}\n" +
+                        "[Dark Icon Mode]: $isDarkIconMode"
+                )
         }
     }
 
@@ -962,84 +962,42 @@ object SystemUIHooker : YukiBaseHooker() {
                             context = context,
                             nf = expandedNf,
                             iconDrawable = result<Icon>()?.loadDrawable(context)
-                        ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap())
-                        }
+                        ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
                     }
                 }
-            }
+        }
         /** 焦点通知深色模式切换点 */
         FocusedNotifPromptViewClass?.apply {
             method {
                 name = "onDarkChanged"
-                param(ArrayListClass, Float::class.java, IntType, IntType, IntType, BooleanType)
+                param(ArrayListClass, FloatType, IntType, IntType, IntType, BooleanType)
             }.hook().after {
-                val isdark = args(index = 1).float()
-                val mIcon = field { name = "mIcon" }.get(instance).any()
-                if (ConfigData.isEnableModuleLog){
-                    YLog.debug("FocusedNotifPromptView debug $isdark ${mIcon}")
-                }
-                if (miosVersion == "1.0" || miosVersion == "1.1"){
-                    if (isdark <= 0.5f ) {
-                        XposedHelpers.callMethod(mIcon, "setColorFilter", Color.WHITE)
-                    } else {
-                        XposedHelpers.callMethod(mIcon, "setColorFilter", Color.BLACK)
-                    }
-                }
+                val isDark = args(index = 1).float()
+                val mIcon = field { name = "mIcon" }.get(instance)
+                if (ConfigData.isEnableModuleLog)
+                    YLog.debug("FocusedNotifPromptView DEBUG $isDark ${mIcon.any()}")
+                /** HyperOS 1.x 旧版本适配 */
+                if (miosVersion == "1.0" || miosVersion == "1.1")
+                    mIcon.current()?.method { name = "setColorFilter" }?.call(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
             }
         }
-
         /** 去他妈的焦点通知彩色图标 */
-        FocusUtilsClass?.apply {
-            method {
-                name = "getStatusBarTickerDarkIcon"
-                param(StatusBarNotificationClass)
-            }.remedys {
-                method {
-                    name = "getStatusBarTickerDarkIcon"
-                    param(ExpandedNotificationClass)
-                }
-            }.hook().after {
-                (globalContext ?: args().first().cast())?.also { context ->
-                    val expandedNf = args().first().cast<StatusBarNotification?>()
-                    val small = expandedNf?.notification?.smallIcon
-                    /** Hook 状态栏小图标 */
-                    compatStatusIcon(
-                        context = context,
-                        nf = expandedNf,
-                        iconDrawable = small?.loadDrawable(context)
-                    ).also { pair ->
-                        val originalBitmap = pair.first?.toBitmap()
-                        val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                        val icon = Icon.createWithBitmap(bitmap)
-                        icon.setTint(Color.BLACK)
-                        result = icon
-                    }
-                }
-            }
-            method {
-                name = "getStatusBarTickerIcon"
-                param(StatusBarNotificationClass)
-            }.remedys {
-                method {
-                    name = "getStatusBarTickerIcon"
-                    param(ExpandedNotificationClass)
-                }
-            }.hook().after {
-                (globalContext ?: args().first().cast())?.also { context ->
-                    val expandedNf = args(0).cast<StatusBarNotification?>()
-                    val small = expandedNf?.notification?.smallIcon
-                    /** Hook 状态栏小图标 */
-                    compatStatusIcon(
-                        context = context,
-                        nf = expandedNf,
-                        iconDrawable = small?.loadDrawable(context)
-                    ).also { pair ->
-                        val originalBitmap = pair.first?.toBitmap()
-                        val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                        val icon = Icon.createWithBitmap(bitmap)
-                        icon.setTint(Color.WHITE)
-                        result = icon
-                    }
+        FocusUtilsClass?.method {
+            name { it == "getStatusBarTickerDarkIcon" || it == "getStatusBarTickerIcon" }
+            param { (it[0] == StatusBarNotificationClass || it[0] == ExpandedNotificationClass) && it.size == 1 }
+        }?.hookAll()?.after {
+            (globalContext ?: args().first().cast())?.also { context ->
+                val expandedNf = args().first().cast<StatusBarNotification?>()
+                val small = expandedNf?.notification?.smallIcon
+                /** Hook 状态栏小图标 */
+                compatStatusIcon(
+                    context = context,
+                    nf = expandedNf,
+                    iconDrawable = small?.loadDrawable(context)
+                ).also { pair ->
+                    val originalBitmap = pair.first?.toBitmap()
+                    val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
+                    result = Icon.createWithBitmap(bitmap).apply { setTint(Color.BLACK) }
                 }
             }
         }
@@ -1056,9 +1014,8 @@ object SystemUIHooker : YukiBaseHooker() {
                 nf = expandedNf,
                 iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
             ).also { pair ->
-                if (pair.second){
+                if (pair.second)
                     result = iconView.setImageDrawable(pair.first?.toBitmap()?.toDrawable(iconView.resources))
-                }
             }
             updateStatusBarIconColor(iconView)
         }
