@@ -316,7 +316,7 @@ object SystemUIHooker : YukiBaseHooker() {
             val focusIconId = nf?.notification?.extras?.getInt("miui.focus.iconId", -1)
             val focusRv = nf?.notification?.extras?.getParcelable<RemoteViews?>("miui.focus.rv")
             val focusParam = nf?.notification?.extras?.getString("miui.focus.param")
-            if (!focusTicker.isNullOrBlank())
+            if (focusRv != null)
                 YLog.debug(
                     msg = "(Processing $tag with Focus Notification) ↓\n" +
                         "[Title]: ${nf.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
@@ -996,7 +996,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     ).also { pair ->
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                        result = Icon.createWithBitmap(bitmap).apply { setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
                     }
                 }
             }
