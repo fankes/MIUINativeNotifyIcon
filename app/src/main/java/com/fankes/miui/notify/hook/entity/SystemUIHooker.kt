@@ -979,7 +979,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark ${mIcon.any()}")
                 /** HyperOS 1.x 旧版本适配 */
                 if (miosVersion == "1.0" || miosVersion == "1.1")
-                    mIcon.current()?.superClass()!!.method { name = "setColorFilter" }.call(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+                    mIcon.current()?.superClass()?.method { name = "setColorFilter" }?.call(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
             }
         }
         /** 去他妈的焦点通知彩色图标 */
