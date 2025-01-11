@@ -13,7 +13,7 @@ sweetProperty {
     global {
         all {
             permanentKeyValues("GITHUB_CI_COMMIT_ID" to "")
-            generateFrom(ROOT_PROJECT)
+            generateFrom(ROOT_PROJECT, SYSTEM_ENV)
         }
         sourcesCode { includeKeys("GITHUB_CI_COMMIT_ID") }
     }
