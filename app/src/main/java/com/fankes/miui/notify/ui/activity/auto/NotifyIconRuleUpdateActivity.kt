@@ -1,6 +1,6 @@
 /*
  * MIUINativeNotifyIcon - Fix the native notification bar icon function abandoned by the MIUI development team.
- * Copyright (C) 2017-2024 Fankes Studio(qzmmcn@163.com)
+ * Copyright (C) 2017 Fankes Studio(qzmmcn@163.com)
  * https://github.com/fankes/MIUINativeNotifyIcon
  *
  * This software is non-free but opensource software: you can redistribute it
