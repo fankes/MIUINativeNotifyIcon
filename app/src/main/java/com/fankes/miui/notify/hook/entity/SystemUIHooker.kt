@@ -996,7 +996,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     ).also { pair ->
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                        result = Icon.createWithBitmap(bitmap).apply { setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
                     }
                 }
             }
