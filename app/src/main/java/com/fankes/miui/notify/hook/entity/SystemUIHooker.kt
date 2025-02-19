@@ -1,6 +1,6 @@
 /*
  * MIUINativeNotifyIcon - Fix the native notification bar icon function abandoned by the MIUI development team.
- * Copyright (C) 2017-2024 Fankes Studio(qzmmcn@163.com)
+ * Copyright (C) 2017 Fankes Studio(qzmmcn@163.com)
  * https://github.com/fankes/MIUINativeNotifyIcon
  *
  * This software is non-free but opensource software: you can redistribute it
@@ -316,7 +316,7 @@ object SystemUIHooker : YukiBaseHooker() {
             val focusIconId = nf?.notification?.extras?.getInt("miui.focus.iconId", -1)
             val focusRv = nf?.notification?.extras?.getParcelable<RemoteViews?>("miui.focus.rv")
             val focusParam = nf?.notification?.extras?.getString("miui.focus.param")
-            if (!focusTicker.isNullOrBlank())
+            if (focusRv != null)
                 YLog.debug(
                     msg = "(Processing $tag with Focus Notification) ↓\n" +
                         "[Title]: ${nf.notification?.extras?.getString(Notification.EXTRA_TITLE)}\n" +
@@ -977,9 +977,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = field { name = "mIcon" }.get(instance)
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark ${mIcon.any()}")
-                /** HyperOS 1.x 旧版本适配 */
-                if (miosVersion == "1.0" || miosVersion == "1.1")
-                    mIcon.current()?.method { name = "setColorFilter" }?.call(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+                mIcon.current()?.superClass()?.method { name = "setColorFilter" }?.call(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
             }
         }
         /** 去他妈的焦点通知彩色图标 */
