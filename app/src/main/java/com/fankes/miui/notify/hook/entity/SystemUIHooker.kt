@@ -66,7 +66,6 @@ import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
-import com.fankes.miui.notify.utils.factory.miosVersion
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
 import com.fankes.miui.notify.utils.factory.round
 import com.fankes.miui.notify.utils.factory.runInSafe
@@ -994,7 +993,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     ).also { pair ->
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.let { Bitmap.createScaledBitmap(it, 50, 50, true) }
-                        result = Icon.createWithBitmap(bitmap)
+                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
                     }
                 }
             }
