@@ -81,8 +81,6 @@ dependencies {
     compileOnly(de.robv.android.xposed.api)
     implementation(com.highcapable.yukihookapi.api)
     ksp(com.highcapable.yukihookapi.ksp.xposed)
-    implementation(com.highcapable.kavaref.kavaref.core)
-    implementation(com.highcapable.kavaref.kavaref.extension)
     implementation(com.fankes.projectpromote.project.promote)
     implementation(com.github.topjohnwu.libsu.core)
     implementation(com.github.duanhong169.drawabletoolbox)
