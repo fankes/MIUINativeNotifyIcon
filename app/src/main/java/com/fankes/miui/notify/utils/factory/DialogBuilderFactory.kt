@@ -68,7 +68,6 @@ inline fun Context.showDialog(initiate: DialogBuilder<*>.() -> Unit) = DialogBui
  * @param context 实例
  * @param bindingClass [ViewBinding] 的 [Class] 实例 or null
  */
-@Suppress("DEPRECATION")
 class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingClass: Class<*>? = null) {
 
     /** 实例对象 */

@@ -20,20 +20,21 @@
  *
  * This file is created by fankes on 2022/1/30.
  */
+@file:Suppress("DEPRECATION")
+
 package com.fankes.miui.notify.ui.activity.base
 
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.WindowCompat
 import androidx.viewbinding.ViewBinding
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
-import com.highcapable.kavaref.KavaRef.Companion.resolve
-import com.highcapable.kavaref.extension.genericSuperclassTypeArguments
-import com.highcapable.kavaref.extension.toClassOrNull
+import com.highcapable.yukihookapi.hook.factory.current
+import com.highcapable.yukihookapi.hook.factory.method
+import com.highcapable.yukihookapi.hook.type.android.LayoutInflaterClass
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
@@ -49,11 +50,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         isMainThreadRunning = true
-        val bindingClass = javaClass.genericSuperclassTypeArguments().firstOrNull()?.toClassOrNull()
-        binding = bindingClass?.resolve()?.optional()?.firstMethodOrNull {
+        binding = current().generic()?.argument()?.method {
             name = "inflate"
-            parameters(LayoutInflater::class)
-        }?.invoke<VB>(layoutInflater) ?: error("binding failed")
+            param(LayoutInflaterClass)
+        }?.get()?.invoke<VB>(layoutInflater) ?: error("binding failed")
         if (Build.VERSION.SDK_INT >= 35) binding.root.fitsSystemWindows = true
         setContentView(binding.root)
         /** 隐藏系统的标题栏 */
@@ -63,7 +63,6 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
             isAppearanceLightStatusBars = isNotSystemInDarkMode
             isAppearanceLightNavigationBars = isNotSystemInDarkMode
         }
-        @Suppress("DEPRECATION")
         ResourcesCompat.getColor(resources, R.color.colorThemeBackground, null).also {
             window?.statusBarColor = it
             window?.navigationBarColor = it

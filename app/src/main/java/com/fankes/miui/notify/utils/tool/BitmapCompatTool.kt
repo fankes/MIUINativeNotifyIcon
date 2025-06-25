@@ -32,7 +32,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.VectorDrawable
 import android.util.ArrayMap
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.utils.factory.safeOfFalse
 import kotlin.math.abs
@@ -78,7 +77,7 @@ object BitmapCompatTool {
             var width = bitmap.width
             if (height > 64 || width > 64) {
                 if (tempCompactBitmap == null) {
-                    tempCompactBitmap = createBitmap(64, 64)
+                    tempCompactBitmap = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888)
                         .also { tempCompactBitmapCanvas = Canvas(it) }
                     tempCompactBitmapPaint = Paint(Paint.FILTER_BITMAP_FLAG).apply { isFilterBitmap = true }
                 }
@@ -92,12 +91,11 @@ object BitmapCompatTool {
             val size = height * width
             ensureBufferSize(size)
             tempCompactBitmap?.getPixels(tempBuffer, 0, width, 0, 0, width, height)
-            for (i in 0 until size) {
+            for (i in 0 until size)
                 if (isGrayscaleColor(tempBuffer[i]).not()) {
                     cachedBitmapGrayscales[bitmap.generationId] = false
                     return@let false
                 }
-            }
             cachedBitmapGrayscales[bitmap.generationId] = true
             true
         }

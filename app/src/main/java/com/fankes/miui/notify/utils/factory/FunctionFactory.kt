@@ -63,8 +63,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.createBitmap
-import androidx.core.net.toUri
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.yukihookapi.hook.factory.hasClass
@@ -150,7 +148,6 @@ val isNotMiSystem get() = !isMiSystem
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */
-@Suppress("DEPRECATION")
 val isMIUI by lazy { "android.miui.R".hasClass() }
 
 /**
@@ -544,7 +541,7 @@ val String.bitmap: Bitmap get() = unbase64.bitmap
  * @return [Bitmap] 圆角后的位图 - 失败会返回处理之前的位图
  */
 fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
-    createBitmap(width, height).also { out ->
+    Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { out ->
         Canvas(out).also { canvas ->
             Paint().also { paint ->
                 paint.isAntiAlias = true
@@ -564,7 +561,6 @@ fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
  * @param default 默认值
  * @return [String]
  */
-@Suppress("DEPRECATION")
 fun findPropString(key: String, default: String = "") = safeOf(default) {
     "android.os.SystemProperties".toClassOrNull()?.method {
         name = "get"
@@ -638,7 +634,7 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
     startActivity(Intent().apply {
         if (packageName.isNotBlank()) setPackage(packageName)
         action = Intent.ACTION_VIEW
-        data = url.toUri()
+        data = Uri.parse(url)
         /** 防止顶栈一样重叠在自己的 APP 中 */
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     })
