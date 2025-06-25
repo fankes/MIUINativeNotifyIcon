@@ -64,6 +64,7 @@ class BaseAdapterCreater(val context: Context) {
      * 绑定 [BaseAdapter] 到 [ListView]
      * @param bindViews 回调 - ([VB] 每项,[Int] 下标)
      */
+    @Suppress("DEPRECATION")
     inline fun <reified VB : ViewBinding> onBindViews(crossinline bindViews: (binding: VB, position: Int) -> Unit) {
         baseAdapter = object : BaseAdapter() {
             override fun getCount() = listDataCallback?.let { it() }?.size ?: 0
