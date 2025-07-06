@@ -77,6 +77,7 @@ import com.fankes.miui.notify.utils.tool.ActivationPromptTool
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.MethodCondition
 import com.highcapable.kavaref.extension.VariousClass
@@ -424,11 +425,11 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 刷新通知小图标 */
     private fun refreshNotificationIcons() = runInSafe {
         val updateNotificationMethodName = "updateNotificationsOnDensityOrFontScaleChanged"
-        val result = notificationPresenter?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+        val result = notificationPresenter?.asResolver()?.optional(silent = true)?.firstMethodOrNull {
             name = updateNotificationMethodName
             emptyParameters()
         }?.invoke()
-        if (result == null) settingsManager?.resolve()?.optional(silent = true)?.apply {
+        if (result == null) settingsManager?.asResolver()?.optional(silent = true)?.apply {
             firstFieldOrNull { name = "notifStyle" }?.set(-100)
             firstMethodOrNull { name = "onNotifStyleChanged" }?.invoke()
         }
@@ -645,7 +646,7 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun ImageView.isGrayscaleIcon(): Boolean {
         /** 获取 [StatusBarNotification] 实例 */
-        val notifyInstance = resolve().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>() ?: return false
+        val notifyInstance = asResolver().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>() ?: return false
 
         /** 获取通知小图标 */
         val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context) ?: return false
@@ -699,12 +700,12 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param container 当前 [NotificationIconContainerClass] 的实例
      */
     private fun updateStatusBarIconsAlpha(container: ViewGroup) {
-        val iconStatesMap = container.resolve().optional().firstFieldOrNull { name = "mIconStates" }?.get<HashMap<View, Any>>()
+        val iconStatesMap = container.asResolver().optional().firstFieldOrNull { name = "mIconStates" }?.get<HashMap<View, Any>>()
         if (container.isNotEmpty()) container.children.forEach { iconView ->
             if (iconView !is ImageView) return@forEach
             val iconAlpha = if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f
             iconView.alpha = iconAlpha
-            iconStatesMap?.get(iconView)?.resolve()?.optional()?.firstFieldOrNull {
+            iconStatesMap?.get(iconView)?.asResolver()?.optional()?.firstFieldOrNull {
                 name { it == "alpha" || it == "mAlpha" }
                 superclass()
             }?.set(iconAlpha)
@@ -811,7 +812,7 @@ object SystemUIHooker : YukiBaseHooker() {
             .optional(silent = true)
             .firstFieldOrNull {
                 name = "mEntry"
-            }?.of(this)?.get()?.resolve()
+            }?.of(this)?.get()?.asResolver()
             ?.optional(silent = true)
             ?.firstFieldOrNull { name = "mSbn" }
             ?.get<StatusBarNotification>()
@@ -984,7 +985,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
-                mIcon?.resolve()?.optional()?.firstMethodOrNull {
+                mIcon?.asResolver()?.optional()?.firstMethodOrNull {
                     name = "setColorFilter"
                     superclass()
                 }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
@@ -1029,7 +1030,7 @@ object SystemUIHooker : YukiBaseHooker() {
             emptyParameters()
         }?.hook()?.after {
             val iconView = instance<ImageView>()
-            val expandedNf = iconView.resolve().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>()
+            val expandedNf = iconView.asResolver().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>()
             /** Hook 状态栏小图标 */
             compatStatusIcon(
                 context = iconView.context,
@@ -1253,7 +1254,7 @@ object SystemUIHooker : YukiBaseHooker() {
             name = "isUnimportantEntry"
             parameterCount = 1
         }?.hook()?.replaceAny {
-            args().first().resolve().optional().firstMethodOrNull {
+            args().first().any()?.asResolver()?.optional()?.firstMethodOrNull {
                 name = "getSbn"
                 superclass()
             }?.invoke<StatusBarNotification>()?.let { sbn ->
