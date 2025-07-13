@@ -101,6 +101,7 @@ import top.defaults.drawabletoolbox.DrawableBuilder
  */
 object SystemUIHooker : YukiBaseHooker() {
 
+    /** 用来同步是否需要焦点图标染色 */
     private var focusedicon :Boolean = false
 
     /** MIUI 新版本存在的类 */
@@ -1001,6 +1002,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
+                if (focusedicon && ConfigData.isEnableNotifyIconFix )
                 mIcon?.asResolver()?.optional()?.firstMethodOrNull {
                     name = "setColorFilter"
                     superclass()
@@ -1022,7 +1024,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         focusedicon == pair.second
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.scale(50, 50)
-                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second && ConfigData.isEnableNotifyIconFix ) setTint(if (isDark) Color.BLACK else Color.WHITE) }
                     }
                 }
             }
