@@ -101,6 +101,8 @@ import top.defaults.drawabletoolbox.DrawableBuilder
  */
 object SystemUIHooker : YukiBaseHooker() {
 
+    private var focusedicon :Boolean = false
+
     /** MIUI 新版本存在的类 */
     private val SystemUIApplicationClass by lazyClassOrNull("${PackageName.SYSTEMUI}.SystemUIApplication")
 
@@ -495,7 +497,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 处理自定义通知图标优化 */
             customTriple.first != null -> Pair(customTriple.first, true)
             /** 若不是灰度图标自动处理为圆角 */
-            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
+            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), false)
             /** 否则返回原始小图标 */
             else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
         }
@@ -1017,6 +1019,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         nf = expandedNf,
                         iconDrawable = small?.loadDrawable(context)
                     ).also { pair ->
+                        focusedicon == pair.second
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.scale(50, 50)
                         result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
