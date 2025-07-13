@@ -30,6 +30,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
@@ -37,6 +38,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.SystemClock
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -92,6 +94,7 @@ import com.highcapable.yukihookapi.hook.type.android.NotificationClass
 import com.highcapable.yukihookapi.hook.type.android.RemoteViewsClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanClass
 import top.defaults.drawabletoolbox.DrawableBuilder
+
 
 /**
  * 系统界面核心 Hook 类
@@ -195,6 +198,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** HyperOS 焦点通知的用到的 API */
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
+
+    /** MIUI Config */
+    private val MiuiConfigsClass by lazyClassOrNull("com.miui.utils.configs.MiuiConfigs")
 
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
@@ -474,8 +480,12 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 判断是否不是灰度图标 */
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
 
+        /** 读取通知是否附加包名，如果没有则使用通知包名 */
+        val extras = notifyInstance.notification.extras
+        val pkgname = extras.getString("app_package")?.takeIf { it.isNotBlank() } ?: notifyInstance.nfPkgName
+
         /** 目标彩色通知 APP 图标 */
-        val customTriple = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName)
+        val customTriple = compatCustomIcon(context, isGrayscaleIcon, pkgname)
 
         /** 是否为通知优化生效图标 */
         val isCustom = customTriple.first != null && customTriple.third.not()
@@ -573,9 +583,13 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 自定义默认小图标 */
             var customIcon: Drawable? = null
 
+            /** 读取通知是否附加包名，如果没有则使用通知包名 */
+            val extras = notifyInstance.notification.extras
+            val pkgname = extras.getString("app_package")?.takeIf { it.isNotBlank() } ?: notifyInstance.nfPkgName
+
             /** 自定义默认小图标颜色 */
             var customIconColor = 0
-            compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).also {
+            compatCustomIcon(context, isGrayscaleIcon, pkgname).also {
                 /** 不处理占位符图标 */
                 if (it.third) return@also
                 customIcon = it.first
