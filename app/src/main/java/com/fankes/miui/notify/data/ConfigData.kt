@@ -72,6 +72,9 @@ object ConfigData {
     /** 启用通知图标优化 */
     val ENABLE_NOTIFY_ICON_FIX = PrefsData("_notify_icon_fix", true)
 
+    /** 强制启用焦点通知反色 */
+    val ENABLE_FOCUS_NOTIFICATION_FIX = PrefsData("_enable_focus_notification_fix", false)
+
     /** 使用占位符修补未适配的通知图标 */
     val ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER = PrefsData("_notify_icon_fix_placeholder", false)
 
@@ -301,6 +304,16 @@ object ConfigData {
         get() = getBoolean(ENABLE_NOTIFY_ICON_FIX)
         set(value) {
             putBoolean(ENABLE_NOTIFY_ICON_FIX, value)
+        }
+
+
+    /**
+     * 是否强制启用焦点通知反色
+     * @return [Boolean]*/
+    var isEnableFocusNotificationFix
+        get() = getBoolean(ENABLE_FOCUS_NOTIFICATION_FIX)
+        set(value) {
+            putBoolean(ENABLE_FOCUS_NOTIFICATION_FIX, value)
         }
 
     /**

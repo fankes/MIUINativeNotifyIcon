@@ -1106,6 +1106,34 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/miui_focus_notify_icon_fix_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                        android:id="@+id/miui_focus_notify_icon_fix_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="是否强制启用焦点通知反色"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="是否强制启用焦点通知反色，由于无法准确判断反色，所以给了个强制开关。(默认关闭)"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/notify_icon_fix_notify_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

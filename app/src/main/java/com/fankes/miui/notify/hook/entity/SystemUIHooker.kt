@@ -498,7 +498,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 处理自定义通知图标优化 */
             customTriple.first != null -> Pair(customTriple.first, true)
             /** 若不是灰度图标自动处理为圆角 */
-            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), false)
+            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
             /** 否则返回原始小图标 */
             else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
         }
@@ -1002,7 +1002,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
-                if (focusedicon && ConfigData.isEnableNotifyIconFix )
+                if (focusedicon || ConfigData.isEnableFocusNotificationFix )
                 mIcon?.asResolver()?.optional()?.firstMethodOrNull {
                     name = "setColorFilter"
                     superclass()
@@ -1024,7 +1024,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         focusedicon == pair.second
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.scale(50, 50)
-                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second && ConfigData.isEnableNotifyIconFix ) setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second || ConfigData.isEnableFocusNotificationFix ) setTint(if (isDark) Color.BLACK else Color.WHITE) }
                     }
                 }
             }

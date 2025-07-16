@@ -241,6 +241,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.miuiNotifyIconReplacementSwitch.bind(ConfigData.ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
+        binding.miuiFocusNotifyIconFixSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFICATION_FIX) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
+        }
         binding.notifyIconForceSystemColorSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR) {
             isAutoApplyChanges = false
             onChanged {
