@@ -226,6 +226,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 仅监听一次主题壁纸颜色变化 */
     private var isWallpaperColorListenerSetUp = false
 
+    /** 用来同步是否需要焦点图标染色 */
+    private var focusedIcon = false
+
     /**
      * 获取全局上下文
      * @return [Context] or null
@@ -474,8 +477,12 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 判断是否不是灰度图标 */
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
 
+        /** 读取通知是否附加包名，如果没有则使用通知包名 */
+        val extras = notifyInstance.notification.extras
+        val pkgname = extras.getString("app_package")?.takeIf { it.isNotBlank() } ?: notifyInstance.nfPkgName
+
         /** 目标彩色通知 APP 图标 */
-        val customTriple = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName)
+        val customTriple = compatCustomIcon(context, isGrayscaleIcon, pkgname)
 
         /** 是否为通知优化生效图标 */
         val isCustom = customTriple.first != null && customTriple.third.not()
@@ -573,9 +580,13 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 自定义默认小图标 */
             var customIcon: Drawable? = null
 
+            /** 读取通知是否附加包名，如果没有则使用通知包名 */
+            val extras = notifyInstance.notification.extras
+            val pkgname = extras.getString("app_package")?.takeIf { it.isNotBlank() } ?: notifyInstance.nfPkgName
+
             /** 自定义默认小图标颜色 */
             var customIconColor = 0
-            compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).also {
+            compatCustomIcon(context, isGrayscaleIcon, pkgname).also {
                 /** 不处理占位符图标 */
                 if (it.third) return@also
                 customIcon = it.first
@@ -985,10 +996,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
-                mIcon?.asResolver()?.optional()?.firstMethodOrNull {
-                    name = "setColorFilter"
-                    superclass()
-                }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+                if (focusedIcon || ConfigData.isEnableFocusNotificationFix)
+                    mIcon?.asResolver()?.optional()?.firstMethodOrNull {
+                        name = "setColorFilter"
+                        superclass()
+                    }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
             }
         }
         /** 去他妈的焦点通知彩色图标 */
@@ -1003,9 +1015,13 @@ object SystemUIHooker : YukiBaseHooker() {
                         nf = expandedNf,
                         iconDrawable = small?.loadDrawable(context)
                     ).also { pair ->
+                        focusedIcon = pair.second
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.scale(50, 50)
-                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second) setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply {
+                            if (pair.second || ConfigData.isEnableFocusNotificationFix)
+                                setTint(if (isDark) Color.BLACK else Color.WHITE)
+                        }
                     }
                 }
             }
