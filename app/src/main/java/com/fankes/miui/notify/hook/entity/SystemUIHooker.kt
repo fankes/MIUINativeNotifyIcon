@@ -30,7 +30,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
@@ -38,7 +37,6 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.SystemClock
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -95,14 +93,10 @@ import com.highcapable.yukihookapi.hook.type.android.RemoteViewsClass
 import com.highcapable.yukihookapi.hook.type.java.BooleanClass
 import top.defaults.drawabletoolbox.DrawableBuilder
 
-
 /**
  * 系统界面核心 Hook 类
  */
 object SystemUIHooker : YukiBaseHooker() {
-
-    /** 用来同步是否需要焦点图标染色 */
-    private var focusedicon :Boolean = false
 
     /** MIUI 新版本存在的类 */
     private val SystemUIApplicationClass by lazyClassOrNull("${PackageName.SYSTEMUI}.SystemUIApplication")
@@ -202,9 +196,6 @@ object SystemUIHooker : YukiBaseHooker() {
     /** HyperOS 焦点通知的用到的 API */
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
 
-    /** MIUI Config */
-    private val MiuiConfigsClass by lazyClassOrNull("com.miui.utils.configs.MiuiConfigs")
-
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
@@ -234,6 +225,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 仅监听一次主题壁纸颜色变化 */
     private var isWallpaperColorListenerSetUp = false
+
+    /** 用来同步是否需要焦点图标染色 */
+    private var focusedIcon = false
 
     /**
      * 获取全局上下文
@@ -1002,11 +996,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
                 if (ConfigData.isEnableModuleLog)
                     YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
-                if (focusedicon || ConfigData.isEnableFocusNotificationFix )
-                mIcon?.asResolver()?.optional()?.firstMethodOrNull {
-                    name = "setColorFilter"
-                    superclass()
-                }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+                if (focusedIcon || ConfigData.isEnableFocusNotificationFix)
+                    mIcon?.asResolver()?.optional()?.firstMethodOrNull {
+                        name = "setColorFilter"
+                        superclass()
+                    }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
             }
         }
         /** 去他妈的焦点通知彩色图标 */
@@ -1021,10 +1015,13 @@ object SystemUIHooker : YukiBaseHooker() {
                         nf = expandedNf,
                         iconDrawable = small?.loadDrawable(context)
                     ).also { pair ->
-                        focusedicon == pair.second
+                        focusedIcon = pair.second
                         val originalBitmap = pair.first?.toBitmap()
                         val bitmap = originalBitmap?.scale(50, 50)
-                        result = Icon.createWithBitmap(bitmap).apply { if (pair.second || ConfigData.isEnableFocusNotificationFix ) setTint(if (isDark) Color.BLACK else Color.WHITE) }
+                        result = Icon.createWithBitmap(bitmap).apply {
+                            if (pair.second || ConfigData.isEnableFocusNotificationFix)
+                                setTint(if (isDark) Color.BLACK else Color.WHITE)
+                        }
                     }
                 }
             }
