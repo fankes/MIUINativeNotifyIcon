@@ -178,7 +178,7 @@ inline val isNotMIOS get() = !isMIOS
 val isSupportMiSystemVersion
     get() = when {
         isMIOS -> when (miosVersion) {
-            "1.0", "1.1", "2.0" -> true
+            "1.0", "1.1", "2.0" , "3.0"-> true
             else -> false
         }
         isMIUI -> when (miuiVersion) {
@@ -200,6 +200,7 @@ inline val isNotSupportMiSystemVersion get() = !isSupportMiSystemVersion
  */
 val androidVersionCodeName
     get() = when (Build.VERSION.SDK_INT) {
+        36 -> "W"
         35 -> "V"
         34 -> "U"
         33 -> "T"
