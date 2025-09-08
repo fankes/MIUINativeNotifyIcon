@@ -20,10 +20,11 @@
  *
  * This file is created by fankes on 2022/3/25.
  */
-@file:Suppress("StaticFieldLeak", "ConstPropertyName")
+@file:Suppress("ConstPropertyName")
 
 package com.fankes.miui.notify.hook.entity
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.WallpaperManager
@@ -67,6 +68,7 @@ import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
+import com.fankes.miui.notify.utils.factory.miosVersionCode
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
 import com.fankes.miui.notify.utils.factory.round
 import com.fankes.miui.notify.utils.factory.runInSafe
@@ -215,6 +217,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private var isUsingCachingMethod = false
 
     /** 状态栏通知图标容器 */
+    @SuppressLint("StaticFieldLeak")
     private var notificationIconContainer: ViewGroup? = null
 
     /** 通知栏通知控制器 */
@@ -659,8 +662,10 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 获取 [StatusBarNotification] 实例 */
         val notifyInstance = asResolver().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>() ?: return false
 
+        val appContext = context.createPackageContext(notifyInstance.nfPkgName, Context.CONTEXT_IGNORE_SECURITY)
+
         /** 获取通知小图标 */
-        val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context) ?: return false
+        val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(appContext) ?: return false
 
         /** 判断是否不是灰度图标 */
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
@@ -693,6 +698,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param animColor 动画过渡颜色
      */
     private fun updateStatusBarIconColor(iconView: ImageView, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
+        if (miosVersionCode >= 3) return
         if (iconView.isGrayscaleIcon()) {
             /**
              * 防止图标不是纯黑的问题
@@ -947,11 +953,15 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameters(Notification::class, Context::class)
             }?.hook()?.after {
                 val nf = args().first().cast<Notification>()
+                val appname = nf?.extras?.getString("miui.opPkg")
                 val context = args(index = 1).cast<Context>()
-                val iconBitmap = nf?.smallIcon?.loadDrawable(context)?.toBitmap()
-                result = if (context != null && iconBitmap != null && !iconBitmap.isRecycled)
-                    iconBitmap.toDrawable(context.resources)
-                else null
+                if (appname != null) {
+                    val appContext = context?.createPackageContext(appname, Context.CONTEXT_IGNORE_SECURITY)
+                    val iconBitmap = nf.smallIcon?.loadDrawable(appContext)?.toBitmap()
+                    result = if (context != null && iconBitmap != null && !iconBitmap.isRecycled)
+                        iconBitmap.toDrawable(context.resources)
+                    else null
+                }
             }
             /**
              * 强制回写系统的状态栏图标样式为原生
@@ -986,59 +996,61 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
-        /** 焦点通知深色模式切换点 */
-        FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
-            firstMethodOrNull {
-                name = "onDarkChanged"
-                parameters(ArrayList::class, Float::class, Int::class, Int::class, Int::class, Boolean::class)
-            }?.hook()?.after {
-                val isDark = args(index = 1).float()
-                val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
-                if (ConfigData.isEnableModuleLog)
-                    YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
-                if (focusedIcon || ConfigData.isEnableFocusNotificationFix)
-                    mIcon?.asResolver()?.optional()?.firstMethodOrNull {
-                        name = "setColorFilter"
-                        superclass()
-                    }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+        if (miosVersionCode < 3) {
+            /** 焦点通知深色模式切换点 */
+            FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
+                firstMethodOrNull {
+                    name = "onDarkChanged"
+                    parameters(ArrayList::class, Float::class, Int::class, Int::class, Int::class, Boolean::class)
+                }?.hook()?.after {
+                    val isDark = args(index = 1).float()
+                    val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
+                    if (ConfigData.isEnableModuleLog)
+                        YLog.debug("FocusedNotifPromptView DEBUG $isDark $mIcon")
+                    if (focusedIcon || ConfigData.isEnableFocusNotificationFix)
+                        mIcon?.asResolver()?.optional()?.firstMethodOrNull {
+                            name = "setColorFilter"
+                            superclass()
+                        }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
+                }
             }
-        }
-        /** 去他妈的焦点通知彩色图标 */
-        FocusUtilsClass?.resolve()?.optional()?.apply {
-            fun HookParam.hookTickerDarkIcon(isDark: Boolean) {
-                (globalContext ?: args().first().cast())?.also { context ->
-                    val expandedNf = args().first().cast<StatusBarNotification?>()
-                    val small = expandedNf?.notification?.smallIcon
-                    /** Hook 状态栏小图标 */
-                    compatStatusIcon(
-                        context = context,
-                        nf = expandedNf,
-                        iconDrawable = small?.loadDrawable(context)
-                    ).also { pair ->
-                        focusedIcon = pair.second
-                        val originalBitmap = pair.first?.toBitmap()
-                        val bitmap = originalBitmap?.scale(50, 50)
-                        result = Icon.createWithBitmap(bitmap).apply {
-                            if (pair.second || ConfigData.isEnableFocusNotificationFix)
-                                setTint(if (isDark) Color.BLACK else Color.WHITE)
+            /** 去他妈的焦点通知彩色图标 */
+            FocusUtilsClass?.resolve()?.optional()?.apply {
+                fun HookParam.hookTickerDarkIcon(isDark: Boolean) {
+                    (globalContext ?: args().first().cast())?.also { context ->
+                        val expandedNf = args().first().cast<StatusBarNotification?>()
+                        val small = expandedNf?.notification?.smallIcon
+                        /** Hook 状态栏小图标 */
+                        compatStatusIcon(
+                            context = context,
+                            nf = expandedNf,
+                            iconDrawable = small?.loadDrawable(context)
+                        ).also { pair ->
+                            focusedIcon = pair.second
+                            val originalBitmap = pair.first?.toBitmap()
+                            val bitmap = originalBitmap?.scale(50, 50)
+                            result = Icon.createWithBitmap(bitmap).apply {
+                                if (pair.second || ConfigData.isEnableFocusNotificationFix)
+                                    setTint(if (isDark) Color.BLACK else Color.WHITE)
+                            }
                         }
                     }
                 }
+                firstMethodOrNull {
+                    name = "getStatusBarTickerDarkIcon"
+                    parameters {
+                        (it.first() == classOf<StatusBarNotification>() ||
+                            it.first() == ExpandedNotificationClass) && it.size == 1
+                    }
+                }?.hook()?.after { hookTickerDarkIcon(isDark = true) }
+                firstMethodOrNull {
+                    name = "getStatusBarTickerIcon"
+                    parameters {
+                        (it.first() == classOf<StatusBarNotification>() ||
+                            it.first() == ExpandedNotificationClass) && it.size == 1
+                    }
+                }?.hook()?.after { hookTickerDarkIcon(isDark = false) }
             }
-            firstMethodOrNull {
-                name = "getStatusBarTickerDarkIcon"
-                parameters {
-                    (it.first() == classOf<StatusBarNotification>() ||
-                        it.first() == ExpandedNotificationClass) && it.size == 1
-                }
-            }?.hook()?.after { hookTickerDarkIcon(isDark = true) }
-            firstMethodOrNull {
-                name = "getStatusBarTickerIcon"
-                parameters {
-                    (it.first() == classOf<StatusBarNotification>() ||
-                        it.first() == ExpandedNotificationClass) && it.size == 1
-                }
-            }?.hook()?.after { hookTickerDarkIcon(isDark = false) }
         }
         /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.resolve().optional().firstMethodOrNull {
