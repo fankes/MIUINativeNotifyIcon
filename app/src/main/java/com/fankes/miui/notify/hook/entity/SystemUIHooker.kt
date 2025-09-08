@@ -20,10 +20,11 @@
  *
  * This file is created by fankes on 2022/3/25.
  */
-@file:Suppress("StaticFieldLeak", "ConstPropertyName")
+@file:Suppress("ConstPropertyName")
 
 package com.fankes.miui.notify.hook.entity
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.WallpaperManager
@@ -216,6 +217,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private var isUsingCachingMethod = false
 
     /** 状态栏通知图标容器 */
+    @SuppressLint("StaticFieldLeak")
     private var notificationIconContainer: ViewGroup? = null
 
     /** 通知栏通知控制器 */
@@ -661,6 +663,7 @@ object SystemUIHooker : YukiBaseHooker() {
         val notifyInstance = asResolver().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>() ?: return false
 
         val appContext = context.createPackageContext(notifyInstance.nfPkgName, Context.CONTEXT_IGNORE_SECURITY)
+
         /** 获取通知小图标 */
         val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(appContext) ?: return false
 
@@ -695,18 +698,17 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param animColor 动画过渡颜色
      */
     private fun updateStatusBarIconColor(iconView: ImageView, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
-        if (miosVersionCode < 3 ){
-            if (iconView.isGrayscaleIcon()) {
-                /**
-                 * 防止图标不是纯黑的问题
-                 * 图标在任何场景下跟随状态栏其它图标保持半透明
-                 */
-                iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
-                iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
-            } else {
-                iconView.alpha = 1f
-                iconView.colorFilter = null
-            }
+        if (miosVersionCode >= 3) return
+        if (iconView.isGrayscaleIcon()) {
+            /**
+             * 防止图标不是纯黑的问题
+             * 图标在任何场景下跟随状态栏其它图标保持半透明
+             */
+            iconView.alpha = if (animColor != null) 1f else statusBarIconAlpha
+            iconView.setColorFilter(animColor ?: (if (isDarkIconMode) Color.BLACK else Color.WHITE))
+        } else {
+            iconView.alpha = 1f
+            iconView.colorFilter = null
         }
     }
 
@@ -953,7 +955,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val nf = args().first().cast<Notification>()
                 val appname = nf?.extras?.getString("miui.opPkg")
                 val context = args(index = 1).cast<Context>()
-                if (appname != null ) {
+                if (appname != null) {
                     val appContext = context?.createPackageContext(appname, Context.CONTEXT_IGNORE_SECURITY)
                     val iconBitmap = nf.smallIcon?.loadDrawable(appContext)?.toBitmap()
                     result = if (context != null && iconBitmap != null && !iconBitmap.isRecycled)
@@ -994,7 +996,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
         }
-        if (miosVersionCode < 3){
+        if (miosVersionCode < 3) {
             /** 焦点通知深色模式切换点 */
             FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
                 firstMethodOrNull {
@@ -1038,19 +1040,18 @@ object SystemUIHooker : YukiBaseHooker() {
                     name = "getStatusBarTickerDarkIcon"
                     parameters {
                         (it.first() == classOf<StatusBarNotification>() ||
-                          it.first() == ExpandedNotificationClass) && it.size == 1
+                            it.first() == ExpandedNotificationClass) && it.size == 1
                     }
                 }?.hook()?.after { hookTickerDarkIcon(isDark = true) }
                 firstMethodOrNull {
                     name = "getStatusBarTickerIcon"
                     parameters {
                         (it.first() == classOf<StatusBarNotification>() ||
-                          it.first() == ExpandedNotificationClass) && it.size == 1
+                            it.first() == ExpandedNotificationClass) && it.size == 1
                     }
                 }?.hook()?.after { hookTickerDarkIcon(isDark = false) }
             }
         }
-
         /** 注入状态栏通知图标实例 */
         StatusBarIconViewClass.resolve().optional().firstMethodOrNull {
             name = "updateIconColor"
