@@ -66,6 +66,7 @@ dependencies {
     ksp(libs.yukihookapi.ksp.xposed)
     implementation(libs.kavaref.core)
     implementation(libs.kavaref.extension)
+    implementation(libs.betterandroid.ui.extension)
     implementation(libs.project.promote)
     implementation(libs.libsu)
     implementation(libs.drawabletoolbox)

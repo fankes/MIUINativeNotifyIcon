@@ -56,6 +56,7 @@ import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.I18nWarnTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.projectpromote.ProjectPromote
+import com.highcapable.betterandroid.ui.extension.view.isUnderline
 import com.highcapable.yukihookapi.YukiHookAPI
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
@@ -396,6 +397,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         /** 项目地址按钮点击事件 */
         binding.titleGithubIcon.setOnClickListener { openProjectUrl() }
         /** 恰饭！ */
+        binding.linkWithFollowMe.isUnderline = true
         binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
