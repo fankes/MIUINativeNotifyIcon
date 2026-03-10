@@ -128,6 +128,8 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 新版本存在的类 */
     private val NotificationStatClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.analytics.NotificationStat")
 
+    private val MiuiDozeServiceClass by lazyClassOrNull("com.android.keyguard.doze.MiuiDozeService")
+
     /** 原生存在的类 */
     private val NotificationChildrenContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
 
@@ -475,7 +477,9 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param iconDrawable 小图标 [Drawable]
      * @return [Pair] 回调小图标 - ([Drawable] 小图标,[Boolean] 是否替换)
      */
-    private fun compatStatusIcon(context: Context, nf: StatusBarNotification?, iconDrawable: Drawable?) = nf?.let { notifyInstance ->
+    private fun compatStatusIcon(
+        context: Context, nf: StatusBarNotification?, iconDrawable: Drawable?, tag: String = "Status Bar Icon"
+    ) = nf?.let { notifyInstance ->
         if (iconDrawable == null) return@let Pair(null, false)
         /** 判断是否不是灰度图标 */
         val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
@@ -490,7 +494,7 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 是否为通知优化生效图标 */
         val isCustom = customTriple.first != null && customTriple.third.not()
         /** 打印日志 */
-        loggerDebug(tag = "Status Bar Icon", context, notifyInstance, isCustom = isCustom, isGrayscaleIcon)
+        loggerDebug(tag = tag, context, notifyInstance, isCustom = isCustom, isGrayscaleIcon)
         when {
             /** 处理自定义通知图标优化 */
             customTriple.first != null -> Pair(customTriple.first, true)
@@ -1288,6 +1292,57 @@ object SystemUIHooker : YukiBaseHooker() {
             }?.invoke<StatusBarNotification>()?.let { sbn ->
                 sbn.packageName == PackageName.SYSTEMUI && sbn.tag == "UNIMPORTANT"
             } ?: false
+        }
+        @Suppress("LocalVariableName")
+        MiuiDozeServiceClass?.resolve()?.optional()?.apply {
+            firstMethodOrNull { name = "onPluginConnected" }?.hook()?.before {
+                val plugin = args(0).any()
+                    ?: return@before YLog.warn("AOD got null plugin")
+                val pluginClassLoader = plugin::class.java.classLoader
+
+                /**
+                 * AOD 是插件，用传入的 ClassLoader 去解析
+                 */
+                val NotificationControllerClass = "com.miui.aod.notification.NotificationController".toClassOrNull(pluginClassLoader)
+                val NotificationDataClass = $$"com.miui.aod.notification.NotificationController$NotificationData".toClassOrNull(pluginClassLoader)
+                val NotificationDataIconDrawableField = NotificationDataClass?.resolve()?.firstFieldOrNull { name = "mIconDrawable" }
+
+                if (NotificationControllerClass == null || NotificationDataClass == null || NotificationDataIconDrawableField == null) {
+                    return@before YLog.warn("AOD got null NotificationControllerClass or NotificationDataClass")
+                }
+
+                NotificationControllerClass.resolve().firstMethodOrNull {
+                    name = "fillNotificationData"
+                    parameters(
+                        NotificationDataClass,
+                        StatusBarNotification::class,
+                        Boolean::class,
+                        Boolean::class,
+                        Boolean::class,
+                    )
+                }?.hook()?.after {
+                    val context = instance.asResolver().firstFieldOrNull { name = "mContext" }?.get<Context>()
+                        ?: return@after YLog.warn("fillNotificationData got null context")
+
+                    val notificationData = args(0).any()
+                        ?: return@after YLog.warn("fillNotificationData got null notificationData")
+                    val notifyInstance = args(1).cast<StatusBarNotification>()
+                        ?: return@after YLog.warn("fillNotificationData got null notifyInstance")
+
+                    val iconDrawableField = notificationData.asResolver().firstFieldOrNull { name = "mIconDrawable" }
+                        ?: return@after YLog.warn("fillNotificationData got null iconDrawableField")
+
+                    val smallIconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
+
+                    compatStatusIcon(context, notifyInstance, smallIconDrawable, "AOD Icon").also { pair ->
+                        if (pair.second) {
+                            iconDrawableField.set(pair.first)
+                        } else {
+                            iconDrawableField.set(smallIconDrawable)
+                        }
+                    }
+                }
+            }
         }
     }
 }
