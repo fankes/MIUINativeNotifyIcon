@@ -4,15 +4,15 @@ ksp = "2.3.7"
 project-promote = "1.0.1"
 rovo89-xposed-api = "82"
 yukihookapi = "1.3.1"
-kavaref-core = "1.0.2"
-kavaref-extension = "1.0.2"
-betterandroid-ui-extension = "1.0.9"
+kavaref-bom = "1.0.3"
+betterandroid = "1.1.0"
 libsu = "5.2.2"
 drawabletoolbox = "1.0.7"
 okhttp = "5.3.2"
 androidx-core-ktx = "1.18.0"
 androidx-appcompat = "1.7.1"
-material = "1.13.0"
+# noinspection GradleDependency
+material = "1.11.0"
 androidx-constraintlayout = "2.2.1"
 junit = "4.13.2"
 androidx-test-junit = "1.3.0"
@@ -27,9 +27,10 @@ project-promote = { group = "com.fankes.projectpromote", name = "project-promote
 rovo89-xposed-api = { group = "de.robv.android.xposed", name = "api", version.ref = "rovo89-xposed-api" }
 yukihookapi = { group = "com.highcapable.yukihookapi", name = "api", version.ref = "yukihookapi" }
 yukihookapi-ksp-xposed = { group = "com.highcapable.yukihookapi", name = "ksp-xposed", version.ref = "yukihookapi" }
-kavaref-core = { group = "com.highcapable.kavaref", name = "kavaref-core", version.ref = "kavaref-core" }
-kavaref-extension = { group = "com.highcapable.kavaref", name = "kavaref-extension", version.ref = "kavaref-extension" }
-betterandroid-ui-extension = { group = "com.highcapable.betterandroid", name = "ui-extension", version.ref = "betterandroid-ui-extension" }
+kavaref-bom = { group = "com.highcapable.kavaref", name = "kavaref-bom", version.ref = "kavaref-bom" }
+kavaref-core = { group = "com.highcapable.kavaref", name = "kavaref-core" }
+kavaref-extension = { group = "com.highcapable.kavaref", name = "kavaref-extension" }
+betterandroid-ui-extension = { group = "com.highcapable.betterandroid", name = "ui-extension", version.ref = "betterandroid" }
 libsu = { group = "com.github.topjohnwu.libsu", name = "core", version.ref = "libsu" }
 drawabletoolbox = { group = "com.github.duanhong169", name = "drawabletoolbox", version.ref = "drawabletoolbox" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
