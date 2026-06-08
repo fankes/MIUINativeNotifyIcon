@@ -80,14 +80,13 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 <h3>3.&nbsp;我们鼓励在遵守 AGPL 3.0 条款的前提下进行自由传播和改进，但请尊重作者署名权，勿冒用原作者名义。</h3>
 
-## 项目推广
+## 更多项目
 
 <!--suppress HtmlDeprecatedAttribute -->
 <div align="center">
     <h2>嘿，还请君留步！👋</h2>
-    <h3>这里有 Android 开发工具、UI 设计、Gradle 插件、Xposed 模块和实用软件等相关项目。</h3>
-    <h3>如果下方的项目能为你提供帮助，不妨为我点个 star 吧！</h3>
-    <h3>所有项目免费、开源，遵循对应开源许可协议。</h3>
+    <h3>如果你觉得这个项目能给你提供帮助，不妨继续往下看看我的更多项目吧！</h3>
+    <h3>如果这些项目能为你提供帮助，不妨为我点个关注或者 star ⭐️ 吧！</h3>
     <h1><a href="https://github.com/fankes/fankes/blob/main/project-promote/README-zh-CN.md">→ 查看更多关于我的项目，请点击这里 ←</a></h1>
 </div>
 
