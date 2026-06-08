@@ -16,14 +16,14 @@ dependencyResolutionManagement {
     }
 }
 plugins {
-    id("com.highcapable.gropify") version "1.0.1"
+    id("com.highcapable.gropify") version "1.0.2"
 }
 gropify {
     global {
         common {
             includeKeys(
                 "GITHUB_CI_COMMIT_ID",
-                "^project\\..*\$".toRegex()
+                "^project\\..*$".toRegex()
             )
             permanentKeyValues("GITHUB_CI_COMMIT_ID" to "")
             locations(GropifyLocation.RootProject, GropifyLocation.SystemEnv)

@@ -65,6 +65,7 @@ dependencies {
     ksp(libs.yukihookapi.ksp.xposed)
     implementation(platform(libs.kavaref.bom))
     implementation(libs.kavaref.core)
+    implementation(libs.kavaref.android)
     implementation(libs.kavaref.extension)
     implementation(libs.betterandroid.ui.extension)
     implementation(libs.project.promote)
