@@ -92,7 +92,7 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 ## Star History
 
-![Star History Chart](https://api.star-history.com/svg?repos=fankes/MIUINativeNotifyIcon&type=Date)
+[![Star History Chart](https://api.star-history.com/chart?repos=fankes/MIUINativeNotifyIcon&type=date&legend=top-left&sealed_token=e08B7CwtCWLIhfayg8iVh4-3aBIVSVi2eNIWy2MbhxI2KND4ObyRmak37WHM3IGMOmmlFV8qaYfrTpqFA6IPjYuhCPNOlSCUeQ2Jj3Kt1bU--xm6e3Q6uQ)](https://www.star-history.com/?repos=fankes%2FMIUINativeNotifyIcon&type=date&legend=top-left)
 
 ## 隐私政策
 
