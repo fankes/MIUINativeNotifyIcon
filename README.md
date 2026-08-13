@@ -92,7 +92,7 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 ## Star History
 
-![Star History Chart](https://api.star-history.com/svg?repos=fankes/MIUINativeNotifyIcon&type=Date)
+![Star History Chart](https://star-history.dera.page/svg?repos=fankes/MIUINativeNotifyIcon&type=Date)
 
 ## 隐私政策
 
