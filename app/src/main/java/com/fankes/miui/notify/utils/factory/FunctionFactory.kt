@@ -176,14 +176,17 @@ inline val isNotMIOS get() = !isMIOS
  * @return [Boolean]
  */
 val isSupportMiSystemVersion
-    get() = isSupportedMiSystemVersion(isMIOS, miosVersion, isMIUI, miuiVersion)
-
-/** 判断指定的 MIUI、HyperOS 版本是否受支持 */
-internal fun isSupportedMiSystemVersion(isMios: Boolean, miosVersion: String, isMiui: Boolean, miuiVersion: String) = when {
-    isMios -> miosVersion in setOf("1.0", "1.1", "2.0", "3.0", "4.0")
-    isMiui -> miuiVersion in setOf("11", "12", "12.5", "13", "14")
-    else -> false
-}
+    get() = when {
+        isMIOS -> when (miosVersion) {
+            "1.0", "1.1", "2.0", "3.0", "4.0" -> true
+            else -> false
+        }
+        isMIUI -> when (miuiVersion) {
+            "11", "12", "12.5", "13", "14" -> true
+            else -> false
+        }
+        else -> false
+    }
 
 /**
  * 是否不为支持的 MIUI、HyperOS 版本
