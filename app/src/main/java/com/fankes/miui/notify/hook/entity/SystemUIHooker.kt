@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.SystemClock
+import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.view.View
 import android.view.ViewGroup
@@ -74,6 +75,7 @@ import com.fankes.miui.notify.utils.factory.round
 import com.fankes.miui.notify.utils.factory.runInSafe
 import com.fankes.miui.notify.utils.factory.safeOf
 import com.fankes.miui.notify.utils.factory.safeOfFalse
+import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.systemAccentColor
 import com.fankes.miui.notify.utils.tool.ActivationPromptTool
 import com.fankes.miui.notify.utils.tool.BitmapCompatTool
@@ -505,6 +507,20 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     } ?: Pair(null, false)
 
+    /** 在 SystemUI 更新 Drawable 或颜色后重新应用状态栏通知图标 */
+    private fun refreshStatusBarIconView(iconView: ImageView) {
+        val expandedNf = iconView.asResolver().optional()
+            .firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>()
+        compatStatusIcon(
+            context = iconView.context,
+            nf = expandedNf,
+            iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
+        ).also { pair ->
+            if (pair.second) iconView.setImageDrawable(pair.first?.toBitmap()?.toDrawable(iconView.resources))
+        }
+        updateStatusBarIconColor(iconView)
+    }
+
     /**
      * Hook 通知栏小图标
      *
@@ -775,6 +791,9 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param wrapper 通知包装纸实例
      */
     private fun hookNotificationViewWrapper(wrapper: Any) {
+        /** HyperOS 4 原生样式会直接显示此图标，未强制着色时保留系统的彩色图标 */
+        if (isMIOS && miosVersionCode >= 4 && isShowMiuiStyle.not() &&
+            ConfigData.isEnableNotifyIconForceSystemColor.not() && ConfigData.isEnableNotifyIconForceAppIcon.not()) return
         /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
         if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return
 
@@ -792,11 +811,9 @@ object SystemUIHooker : YukiBaseHooker() {
         var isExpanded = rowPair.first
 
         /** 获取优先级 */
-        val importance =
-            (iconImageView.context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
-                ?.getNotificationChannel(expandedNf?.notification?.channelId)?.importance ?: 0
+        val importance = rowPair.second.getNotificationImportance(iconImageView.context, expandedNf)
         /** 非最小化优先级的通知全部设置为展开状态 */
-        if (importance != 1) isExpanded = true
+        if (importance != NotificationManager.IMPORTANCE_MIN) isExpanded = true
         /** 执行 Hook */
         compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
     }
@@ -816,12 +833,57 @@ object SystemUIHooker : YukiBaseHooker() {
         val row = NotificationViewWrapperClass.resolve().optional().firstFieldOrNull {
             name = "mRow"
         }?.of(this)?.get()?.also {
-            isExpanded = ExpandableNotificationRowClass.resolve().optional().firstMethodOrNull {
+            val resolver = ExpandableNotificationRowClass.resolve().optional(silent = true)
+            isExpanded = resolver.firstMethodOrNull {
                 name = "isExpanded"
                 parameters(Boolean::class)
                 returnType = Boolean::class
             }?.of(it)?.invoke<Boolean>(false) == true
+            if (!isExpanded) isExpanded = resolver.firstMethodOrNull {
+                name { name -> name == "isExpanded" || name == "isExpanded\$1" }
+                emptyParameters()
+                returnType = Boolean::class
+            }?.of(it)?.invoke<Boolean>() == true
         }; return isExpanded to row
+    }
+
+    /**
+     * 从 [ExpandableNotificationRowClass] 中获取通知 Entry 或 EntryAdapter
+     * @return Entry 实例 or null
+     */
+    private fun Any?.getNotificationEntry() = this?.let { row ->
+        ExpandableNotificationRowClass.resolve().optional(silent = true).let { resolver ->
+            resolver.firstMethodOrNull {
+                name = "getEntry"
+                emptyParameters()
+            }?.of(row)?.invoke<Any>()
+                ?: resolver.firstFieldOrNull { name = "mEntry" }?.of(row)?.get()
+                ?: resolver.firstMethodOrNull {
+                    name = "getEntryAdapter"
+                    emptyParameters()
+                }?.of(row)?.invoke<Any>()
+                ?: resolver.firstFieldOrNull { name = "mEntryAdapter" }?.of(row)?.get()
+        }
+    }
+
+    /**
+     * 从通知 Ranking 中获取优先级，Android 17 不再允许 SystemUI 查询其它包的 Channel
+     * @return 通知优先级 or null
+     */
+    private fun Any?.getNotificationImportance(context: Context, sbn: StatusBarNotification?): Int? {
+        val ranking = getNotificationEntry()?.asResolver()?.optional(silent = true)?.let { resolver ->
+            resolver.firstMethodOrNull {
+                name = "getRanking"
+                emptyParameters()
+            }?.invoke<NotificationListenerService.Ranking>()
+                ?: resolver.firstFieldOrNull { name = "mRanking" }?.get<NotificationListenerService.Ranking>()
+        }
+        safeOfNull { ranking?.channel?.importance }?.let { return it }
+        if (Build.VERSION.SDK_INT >= 37) return null
+        return safeOfNull {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
+                ?.getNotificationChannel(sbn?.notification?.channelId)?.importance
+        }
     }
 
     /**
@@ -829,14 +891,13 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [StatusBarNotification] or null
      */
     private fun Any?.getSbn() =
-        ExpandableNotificationRowClass.resolve()
-            .optional(silent = true)
-            .firstFieldOrNull {
-                name = "mEntry"
-            }?.of(this)?.get()?.asResolver()
-            ?.optional(silent = true)
-            ?.firstFieldOrNull { name = "mSbn" }
-            ?.get<StatusBarNotification>()
+        getNotificationEntry()?.asResolver()?.optional(silent = true)?.let { resolver ->
+            resolver.firstMethodOrNull {
+                name = "getSbn"
+                emptyParameters()
+            }?.invoke<StatusBarNotification>()
+                ?: resolver.firstFieldOrNull { name = "mSbn" }?.get<StatusBarNotification>()
+        }
             ?: ExpandableNotificationRowClass.resolve()
                 .optional(silent = true)
                 .firstMethodOrNull { name = "getStatusBarNotification" }
@@ -1057,28 +1118,24 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         /** 注入状态栏通知图标实例 */
-        StatusBarIconViewClass.resolve().optional().firstMethodOrNull {
-            name = "updateIconColor"
-            emptyParameters()
-        }?.hook()?.after {
-            val iconView = instance<ImageView>()
-            val expandedNf = iconView.asResolver().optional().firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>()
-            /** Hook 状态栏小图标 */
-            compatStatusIcon(
-                context = iconView.context,
-                nf = expandedNf,
-                iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
-            ).also { pair ->
-                if (pair.second)
-                    result = iconView.setImageDrawable(pair.first?.toBitmap()?.toDrawable(iconView.resources))
+        StatusBarIconViewClass.resolve().optional().apply {
+            firstMethodOrNull {
+                name = "updateIconColor"
+                emptyParameters()
+            }?.hook()?.after { refreshStatusBarIconView(instance()) }
+            if (isMIOS && miosVersionCode >= 4) {
+                /** HyperOS 4 会在 updateIconColor 后再次更新 Drawable，需要在最终写入后重新应用图标 */
+                firstMethodOrNull {
+                    name = "updateDrawable"
+                    parameters(Boolean::class)
+                }?.hook()?.after { refreshStatusBarIconView(instance()) }
             }
-            updateStatusBarIconColor(iconView)
         }
         /**
          * 注入状态栏通知图标容器管理实例
          * 在 Android 15 中，这个类被移除变成了 `interface`，所以判断并跳过 Hook 行为
          */
-        val isPlaceholder = NotificationIconAreaControllerClass?.isInterface == true
+        val isPlaceholder = NotificationIconAreaControllerClass == null || NotificationIconAreaControllerClass?.isInterface == true
         if (!isPlaceholder) NotificationIconAreaControllerClass?.resolve()?.optional()?.apply {
             /** Hook 深色图标模式改变 */
             firstMethodOrNull {
@@ -1116,7 +1173,7 @@ object SystemUIHooker : YukiBaseHooker() {
         } else MiuiClockClass?.resolve()?.optional()?.apply {
             firstMethodOrNull {
                 name = "onDarkChanged"
-                parameterCount { it > 4 }
+                parameterCount { it >= 3 }
             }?.hook()?.after {
                 notificationIconContainer?.let {
                     when (args(index = 1).float()) {
@@ -1148,7 +1205,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** Hook 深色图标模式改变 */
             if (isPlaceholder) firstMethodOrNull {
                 name = "onDarkChanged"
-                parameterCount { it > 4 }
+                parameterCount { it >= 3 }
             }?.hook()?.after {
                 val self = instance<ImageView>()
                 when (args(index = 1).float()) {
