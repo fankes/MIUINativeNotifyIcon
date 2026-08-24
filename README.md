@@ -15,7 +15,7 @@
 
 Fix the native notification bar icon function abandoned by the MIUI development team.
 
-修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 11~14 以及 HyperOS 1.0。
+修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 11-14 以及 HyperOS 1.0-4.0。
 
 ## For Non-Chinese Users
 
