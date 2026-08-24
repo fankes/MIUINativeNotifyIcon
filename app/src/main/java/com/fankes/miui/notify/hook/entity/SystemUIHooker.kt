@@ -522,7 +522,14 @@ object SystemUIHooker : YukiBaseHooker() {
             nf = expandedNf,
             iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
         ).also { pair ->
-            if (pair.second) iconView.setImageDrawable(pair.first?.toBitmap()?.toDrawable(iconView.resources))
+            if (pair.second) pair.first?.also { drawable ->
+                iconView.setImageDrawable(drawable.toBitmap().toDrawable(iconView.resources))
+                /** HyperOS 3 起会保留系统着色，彩色图标写入后需要同时清除两层 Tint */
+                if (isGrayscaleIcon(iconView.context, drawable).not()) {
+                    iconView.imageTintList = null
+                    iconView.colorFilter = null
+                }
+            }
         }
         updateStatusBarIconColor(iconView)
     }
