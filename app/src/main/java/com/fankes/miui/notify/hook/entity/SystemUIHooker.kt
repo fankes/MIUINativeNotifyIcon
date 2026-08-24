@@ -66,7 +66,6 @@ import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.dpFloat
 import com.fankes.miui.notify.utils.factory.drawableOf
 import com.fankes.miui.notify.utils.factory.isMIOS
-import com.fankes.miui.notify.utils.factory.isNotSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
 import com.fankes.miui.notify.utils.factory.miosVersionCode
@@ -137,6 +136,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 原生存在的类 (A15 HyperOS 已变成 `interface`) */
     private val NotificationIconAreaControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController")
+
+    /** Android 17 原生通知图标样式提供器 */
+    private val NotificationIconStyleProviderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.icon.NotificationIconStyleProviderImpl")
 
     /** 原生存在的类 */
     private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
@@ -572,11 +574,14 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的 */
         nf?.let { notifyInstance ->
 
+            /** OS4 的通知 View 使用强制夜间 Context，统一读取 SystemUI Application 的真实日夜配置 */
+            val isDarkMode = globalContext?.isSystemInDarkMode ?: context.isSystemInDarkMode
+
             /** 新版风格反色 */
-            val newStyle = if (context.isSystemInDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
+            val newStyle = if (isDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
 
             /** 旧版风格反色 */
-            val oldStyle = if (context.isNotSystemInDarkMode) 0xFF707070.toInt() else Color.WHITE
+            val oldStyle = if (isDarkMode.not()) 0xFF707070.toInt() else Color.WHITE
 
             /** 通知图标原始颜色 */
             val iconColor = notifyInstance.notification.color
@@ -635,7 +640,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         background = DrawableBuilder()
                             .rectangle()
                             .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
-                            .solidColor(if (context.isSystemInDarkMode) customIconColor.brighterColor else customIconColor)
+                            .solidColor(if (isDarkMode) customIconColor.brighterColor else customIconColor)
                             .build()
                     when {
                         /** 缩小 HyperOS 的通知图标 */
@@ -659,7 +664,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                 background = DrawableBuilder()
                                     .rectangle()
                                     .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
-                                    .solidColor(if (context.isSystemInDarkMode) it.brighterColor else it)
+                                    .solidColor(if (isDarkMode) it.brighterColor else it)
                                     .build()
                         }
                         when {
@@ -798,9 +803,6 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param wrapper 通知包装纸实例
      */
     private fun hookNotificationViewWrapper(wrapper: Any) {
-        /** HyperOS 4 原生样式会直接显示此图标，未强制着色时保留系统的彩色图标 */
-        if (isMIOS && miosVersionCode >= 4 && isShowMiuiStyle.not() &&
-            ConfigData.isEnableNotifyIconForceSystemColor.not() && ConfigData.isEnableNotifyIconForceAppIcon.not()) return
         /** 忽略较旧版本 - 在没有 MIUI 通知栏样式的时候可能出现奇怪的问题 */
         if (isNotHasAbsoluteMiuiStyle && isShowMiuiStyle) return
 
@@ -1009,6 +1011,14 @@ object SystemUIHooker : YukiBaseHooker() {
         registerLifecycle()
         /** 缓存图标数据 */
         cachingIconDatas()
+        /**
+         * Android 17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标，
+         * 强制返回 false 以让折叠和展开模板都继续使用通知 smallIcon
+         */
+        NotificationIconStyleProviderImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "shouldShowAppIcon"
+            parameters(Context::class, StatusBarNotification::class)
+        }?.hook()?.replaceToFalse()
         /** 注入 MIUI 自己增加的一个工具类 */
         NotificationUtilClass.apply {
             /** 强制回写系统的状态栏图标样式为原生 */
