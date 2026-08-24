@@ -1335,9 +1335,9 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         /** 修改新版本经典样式通知栏的通知图标 - 折叠通知组 */
         NotificationChildrenContainerInjectorImplClass?.resolve()?.optional()?.apply {
-            /** 系统会在此处为折叠通知组单独回写 APP 图标 */
+            /** OS3 使用 updateAppIcon，OS4 更名为 updateIconArea，系统会在此处为折叠通知组单独回写 APP 图标 */
             firstMethodOrNull {
-                name = "updateIconArea"
+                name { it == "updateAppIcon" || it == "updateIconArea" }
                 parameters(Boolean::class)
             }?.hook()?.after {
                 val iconView = firstFieldOrNull { name = "mAppIcon" }?.of(instance)?.get<ImageView>() ?: return@after
