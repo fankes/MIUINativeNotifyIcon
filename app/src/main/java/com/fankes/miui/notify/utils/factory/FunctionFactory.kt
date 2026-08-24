@@ -200,6 +200,7 @@ inline val isNotSupportMiSystemVersion get() = !isSupportMiSystemVersion
  */
 val androidVersionCodeName
     get() = when (Build.VERSION.SDK_INT) {
+        37 -> "C"
         36 -> "W"
         35 -> "V"
         34 -> "U"
