@@ -112,6 +112,10 @@ object SystemUIHooker : YukiBaseHooker() {
     private val MiuiNotificationChildrenContainerClass
         by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.MiuiNotificationChildrenContainer")
 
+    /** HyperOS 新版本存在的经典通知组容器注入器 */
+    private val NotificationChildrenContainerInjectorImplClass
+        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainerInjectorImpl")
+
     /** MIUI 新版本存在的类 */
     private val NotificationHeaderViewWrapperInjectorClass
         by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
@@ -1320,6 +1324,23 @@ object SystemUIHooker : YukiBaseHooker() {
                         compatNotifyIcon(context, nf, iconView = this, isUseMaterial3Style = true, isMiuiPanel = true)
                     else setImageDrawable(nf.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(nf.packageName))
                 }
+            }
+        }
+        /** 修改新版本经典样式通知栏的通知图标 - 折叠通知组 */
+        NotificationChildrenContainerInjectorImplClass?.resolve()?.optional()?.apply {
+            /** 系统会在此处为折叠通知组单独回写 APP 图标 */
+            firstMethodOrNull {
+                name = "updateIconArea"
+                parameters(Boolean::class)
+            }?.hook()?.after {
+                val iconView = firstFieldOrNull { name = "mAppIcon" }?.of(instance)?.get<ImageView>() ?: return@after
+                val container = firstFieldOrNull { name = "view" }?.of(instance)?.get<ViewGroup>() ?: return@after
+                val nf = NotificationChildrenContainerClass.resolve().optional().firstFieldOrNull {
+                    name = "mContainingNotification"
+                }?.of(container)?.get()?.getSbn() ?: return@after
+                if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
+                    compatNotifyIcon(iconView.context, nf, iconView, isUseMaterial3Style = true, isMiuiPanel = true)
+                else iconView.setImageDrawable(nf.miuiAppIcon?.loadDrawable(iconView.context) ?: iconView.context.appIconOf(nf.packageName))
             }
         }
         /** 干掉下拉通知图标自动设置回 APP 图标的方法 */
