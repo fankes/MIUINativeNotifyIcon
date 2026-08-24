@@ -52,7 +52,7 @@ object ConfigData {
     val ENABLE_COLOR_ICON_COMPAT = PrefsData("_color_icon_compat", false)
 
     /** 状态栏中的通知图标暗色透明度 */
-    val STATUS_ICON_DARK_ALPHA_LEVEL = PrefsData("_status_icon_dark_alpha", 75)
+    val STATUS_ICON_DARK_ALPHA_LEVEL = PrefsData("_status_icon_dark_alpha", 95)
 
     /** 状态栏中的通知图标亮色透明度 */
     val STATUS_ICON_LIGHT_ALPHA_LEVEL = PrefsData("_status_icon_light_alpha", 95)
