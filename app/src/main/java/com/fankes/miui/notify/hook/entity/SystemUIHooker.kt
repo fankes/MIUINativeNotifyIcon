@@ -742,10 +742,17 @@ object SystemUIHooker : YukiBaseHooker() {
             if (iconView !is ImageView) return@forEach
             val iconAlpha = if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f
             iconView.alpha = iconAlpha
-            iconStatesMap?.get(iconView)?.asResolver()?.optional()?.firstFieldOrNull {
+            val iconStateResolver = iconStatesMap?.get(iconView)?.asResolver()?.optional()
+            iconStateResolver?.firstFieldOrNull {
                 name { it == "alpha" || it == "mAlpha" }
                 superclass()
             }?.set(iconAlpha)
+            /** HyperOS 4 使用独立的 Folme 状态应用透明度，需要与原生 ViewState 同步 */
+            iconStateResolver?.firstFieldOrNull { name = "mIconState" }?.get<Any>()
+                ?.asResolver()?.optional()?.firstFieldOrNull {
+                    name = "alpha"
+                    superclass()
+                }?.set(iconAlpha)
         }
     }
 
@@ -993,6 +1000,7 @@ object SystemUIHooker : YukiBaseHooker() {
             if (isRefreshCacheOnly) return@also
             refreshStatusBarIcons()
             refreshNotificationIcons()
+            notificationIconContainer?.let { updateStatusBarIconsAlpha(it) }
         }
     }
 
