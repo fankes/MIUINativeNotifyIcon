@@ -31,6 +31,7 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
@@ -44,6 +45,7 @@ import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.RemoteViews
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
@@ -101,28 +103,28 @@ import top.defaults.drawabletoolbox.DrawableBuilder
  */
 object SystemUIHooker : YukiBaseHooker() {
 
+    private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
+
+    private val foldEntranceIconContext = ThreadLocal<Pair<List<StatusBarNotification>, Int>>()
+
     /** MIUI 新版本存在的类 */
     private val SystemUIApplicationClass by lazyClassOrNull("${PackageName.SYSTEMUI}.SystemUIApplication")
 
     /** MIUI 新版本存在的类 */
-    private val MiuiNotificationViewWrapperClass
-        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper")
+    private val MiuiNotificationViewWrapperClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper")
 
     /** MIUI 新版本存在的类 */
-    private val MiuiNotificationChildrenContainerClass
-        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.MiuiNotificationChildrenContainer")
+    private val MiuiNotificationChildrenContainerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.MiuiNotificationChildrenContainer")
 
     /** HyperOS 新版本存在的经典通知组容器注入器 */
-    private val NotificationChildrenContainerInjectorImplClass
-        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainerInjectorImpl")
+    private val NotificationChildrenContainerInjectorImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainerInjectorImpl")
 
     /** MIUI 新版本存在的类 */
     private val NotificationHeaderViewWrapperInjectorClass
         by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
 
     /** MIUI 未确定版本存在的类 */
-    private val NotificationContentInflaterInjectorClass
-        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationContentInflaterInjector")
+    private val NotificationContentInflaterInjectorClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationContentInflaterInjector")
 
     /** MIUI 未确定版本存在的类 */
     private val SettingsManagerClass by lazyClassOrNull("com.miui.systemui.SettingsManager")
@@ -143,6 +145,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** Android 17 原生通知图标样式提供器 */
     private val NotificationIconStyleProviderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.icon.NotificationIconStyleProviderImpl")
+
+    /** HyperOS 3、4 的更多通知入口控制器 */
+    private val FoldNotifControllerImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.history.FoldNotifControllerImpl")
 
     /** 原生存在的类 */
     private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
@@ -286,7 +291,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * 判断通知是否来自 MIPUSH
      * @return [Boolean]
      */
-    private val StatusBarNotification.isXmsf get() = compatOpPkgName == "com.xiaomi.xmsf"
+    private val StatusBarNotification.isXmsf get() = compatOpPkgName == XMSF_PACKAGE_NAME
 
     /**
      * 获取推送通知的包名
@@ -397,16 +402,14 @@ object SystemUIHooker : YukiBaseHooker() {
         safeOf(default = this) { toBitmap().round(10.dpFloat(context)).toDrawable(context.resources) }
 
     /**
-     * 适配通知栏、状态栏来自系统推送的彩色 APP 图标
-     *
-     * 适配第三方图标包对系统包管理器更换图标后的彩色图标
+     * 适配通知栏、状态栏来自系统推送的彩色图标
      * @param context 实例
      * @param iconDrawable 原始图标
      * @return [Drawable] 适配的图标
      */
     private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
-        /** 给 MIPUSH 设置 APP 自己的图标 */
-        if (isXmsf && nfPkgName.isNotBlank())
+        /** 只有 XMSF 自身的资源占位图才回退 APP 图标，目标应用提供的彩色 smallIcon 必须保留 */
+        if (isXmsf && notification.smallIcon?.resPackage == XMSF_PACKAGE_NAME && nfPkgName.isNotBlank())
             context.appIconOf(xmsfPkgName) ?: iconDrawable
         else iconDrawable
     }
@@ -489,8 +492,8 @@ object SystemUIHooker : YukiBaseHooker() {
         context: Context, nf: StatusBarNotification?, iconDrawable: Drawable?, tag: String = "Status Bar Icon"
     ) = nf?.let { notifyInstance ->
         if (iconDrawable == null) return@let Pair(null, false)
-        /** 判断是否不是灰度图标 */
-        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+        /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+        val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
         /** 读取通知是否附加包名，如果没有则使用通知包名 */
         val extras = notifyInstance.notification.extras
@@ -613,8 +616,8 @@ object SystemUIHooker : YukiBaseHooker() {
             val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
                 ?: return@let YLog.warn("compatNotifyIcon got null smallIcon")
 
-            /** 判断图标风格 */
-            val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+            /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+            val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
             /** 自定义默认小图标 */
             var customIcon: Drawable? = null
@@ -690,6 +693,24 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
+    private fun StatusBarNotification.createFoldEntranceIcon(context: Context, size: Int) = safeOfNull {
+        val iconView = ImageView(context)
+        compatNotifyIcon(
+            context = context,
+            nf = this,
+            iconView = iconView,
+            isUseMaterial3Style = true,
+            isMiuiPanel = true
+        )
+        if (iconView.drawable == null) return@safeOfNull null
+        val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
+        iconView.measure(sizeSpec, sizeSpec)
+        iconView.layout(0, 0, size, size)
+        createBitmap(size, size).also { iconView.draw(Canvas(it)) }
+            .round(5.dpFloat(context))
+            .toDrawable(context.resources)
+    }
+
     /**
      * 获取 [StatusBarIconViewClass] 实例是否为灰度图标 (单色图标)
      * @return [Boolean]
@@ -703,8 +724,8 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 获取通知小图标 */
         val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(appContext) ?: return false
 
-        /** 判断是否不是灰度图标 */
-        val isGrayscaleIcon = notifyInstance.isXmsf.not() && isGrayscaleIcon(context, iconDrawable)
+        /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+        val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
         /** 获取目标修复彩色图标的 APP */
         val isTargetFixApp = compatCustomIcon(context, isGrayscaleIcon, notifyInstance.nfPkgName).first != null
@@ -1030,6 +1051,34 @@ object SystemUIHooker : YukiBaseHooker() {
             name = "shouldShowAppIcon"
             parameters(Context::class, StatusBarNotification::class)
         }?.hook()?.replaceToFalse()
+        /**
+         * OS3、OS4 的更多通知入口只接收 Drawable 并在控制器内立即合成 Bitmap，没有可单独处理的
+         * ImageView；而 getCustomAppIcon 同时还被其它通知区域调用。用 ThreadLocal 仅标记同步生成入口
+         * 的这段调用，并保存 Notification 到 StatusBarNotification 的映射，随后复用通知面板方案离屏绘制。
+         */
+        FoldNotifControllerImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "sendFoldNotification"
+            parameterCount = 2
+        }?.hook()?.apply {
+            before {
+                foldEntranceIconContext.remove()
+                instance.runInSafe(msg = "Collect fold entrance notifications") {
+                    val controllerResolver = instance.asResolver().optional(silent = true)
+                    val notifications = controllerResolver.firstFieldOrNull { name = "pipeline" }?.get()
+                        ?.asResolver()?.optional(silent = true)?.firstMethodOrNull {
+                            name = "getAllNotifs"
+                            emptyParameters()
+                        }?.invoke<Collection<Any?>>()?.mapNotNull { entry ->
+                            entry?.asResolver()?.optional(silent = true)
+                                ?.firstFieldOrNull { name = "mSbn" }?.get<StatusBarNotification>()
+                        }.orEmpty()
+                    val iconSize = controllerResolver.firstFieldOrNull { name = "iconSize" }?.get<Int>()
+                        ?: return@runInSafe
+                    foldEntranceIconContext.set(notifications to iconSize)
+                }
+            }
+            after { foldEntranceIconContext.remove() }
+        }
         /** 注入 MIUI 自己增加的一个工具类 */
         NotificationUtilClass.apply {
             /** 强制回写系统的状态栏图标样式为原生 */
@@ -1046,13 +1095,19 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "getCustomAppIcon"
                 parameters(Notification::class, Context::class)
             }?.hook()?.after {
-                val nf = args().first().cast<Notification>()
-                val appname = nf?.extras?.getString("miui.opPkg")
-                val context = args(index = 1).cast<Context>()
+                val nf = args().first().cast<Notification>() ?: return@after
+                val context = args(index = 1).cast<Context>() ?: return@after
+                foldEntranceIconContext.get()?.also { (notifications, iconSize) ->
+                    notifications.firstOrNull { it.notification === nf }
+                        ?.createFoldEntranceIcon(context, iconSize)
+                        ?.also { result = it }
+                    return@after
+                }
+                val appname = nf.extras?.getString("miui.opPkg")
                 if (appname != null) {
-                    val appContext = context?.createPackageContext(appname, Context.CONTEXT_IGNORE_SECURITY)
+                    val appContext = context.createPackageContext(appname, Context.CONTEXT_IGNORE_SECURITY)
                     val iconBitmap = nf.smallIcon?.loadDrawable(appContext)?.toBitmap()
-                    result = if (context != null && iconBitmap != null && !iconBitmap.isRecycled)
+                    result = if (iconBitmap != null && !iconBitmap.isRecycled)
                         iconBitmap.toDrawable(context.resources)
                     else null
                 }
