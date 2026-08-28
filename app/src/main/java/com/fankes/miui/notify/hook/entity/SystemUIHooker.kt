@@ -431,19 +431,6 @@ object SystemUIHooker : YukiBaseHooker() {
         safeOf(default = this) { toBitmap().round(10.dpFloat(context)).toDrawable(context.resources) }
 
     /**
-     * 适配通知栏、状态栏来自系统推送的彩色图标
-     * @param context 实例
-     * @param iconDrawable 原始图标
-     * @return [Drawable] 适配的图标
-     */
-    private fun StatusBarNotification.compatPushingIcon(context: Context, iconDrawable: Drawable) = safeOf(iconDrawable) {
-        /** 只有 XMSF 自身的资源占位图才回退 APP 图标，目标应用提供的彩色 smallIcon 必须保留 */
-        if (isXmsf && notification.smallIcon?.resPackage == XMSF_PACKAGE_NAME && nfPkgName.isNotBlank())
-            context.appIconOf(xmsfPkgName) ?: iconDrawable
-        else iconDrawable
-    }
-
-    /**
      * 注册主题壁纸改变颜色监听
      *
      *  - 仅限在 Android 12 以下注册
@@ -521,7 +508,7 @@ object SystemUIHooker : YukiBaseHooker() {
         context: Context, nf: StatusBarNotification?, iconDrawable: Drawable?, tag: String = "Status Bar Icon"
     ) = nf?.let { notifyInstance ->
         if (iconDrawable == null) return@let Pair(null, false)
-        /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+        /** 图标样式只根据 smallIcon 的实际像素内容判断 */
         val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
         /** 读取通知是否附加包名，如果没有则使用通知包名 */
@@ -539,7 +526,7 @@ object SystemUIHooker : YukiBaseHooker() {
             /** 处理自定义通知图标优化 */
             customTriple.first != null -> Pair(customTriple.first, true)
             /** 若不是灰度图标自动处理为圆角 */
-            isGrayscaleIcon.not() -> Pair(notifyInstance.compatPushingIcon(context, iconDrawable).rounded(context), true)
+            isGrayscaleIcon.not() -> Pair(iconDrawable.rounded(context), true)
             /** 否则返回原始小图标 */
             else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
         }
@@ -652,7 +639,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 )
             } ?: return@let YLog.warn("compatNotifyIcon got null smallIcon")
 
-            /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+            /** 图标样式只根据 smallIcon 的实际像素内容判断 */
             val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
             /**
@@ -772,7 +759,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                 isUseMaterial3Style -> setPadding(4.dp(context))
                             }
                         }
-                    } else setDefaultNotifyIcon(notifyInstance.compatPushingIcon(context, iconDrawable))
+                    } else setDefaultNotifyIcon(iconDrawable)
                 }
             }
         }
@@ -813,7 +800,7 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 获取通知小图标 */
         val iconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(appContext) ?: return false
 
-        /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
+        /** 图标样式只根据 smallIcon 的实际像素内容判断 */
         val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
 
         /** 获取目标修复彩色图标的 APP */
