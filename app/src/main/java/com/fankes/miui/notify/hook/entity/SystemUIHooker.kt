@@ -149,6 +149,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** HyperOS 3、4 的更多通知入口控制器 */
     private val FoldNotifControllerImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.history.FoldNotifControllerImpl")
 
+    /** HyperOS 新版本的通知样式设置工具 */
+    private val NotificationSettingsHelperClass by lazyClassOrNull("com.miui.systemui.notification.NotificationSettingsHelper")
+
     /** 原生存在的类 */
     private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
 
@@ -257,13 +260,15 @@ object SystemUIHooker : YukiBaseHooker() {
             ?.invoke<Context?>() ?: appContext
 
     /**
-     * 是否为 MIUI 样式通知栏 - 旧版 - 新版一律返回 false
+     * 是否为 MIUI 样式通知栏
      * @return [Boolean]
      */
     private val isShowMiuiStyle
-        get() = NotificationUtilClass.resolve().optional(silent = true)
+        get() = (NotificationUtilClass.resolve().optional(silent = true)
             .firstMethodOrNull { name = "showMiuiStyle" }
-            ?.invoke<Boolean>() == true
+            ?.invoke<Boolean>() ?: NotificationSettingsHelperClass?.resolve()?.optional(silent = true)
+            ?.firstMethodOrNull { name = "showMiuiStyle" }
+            ?.invoke<Boolean>()) == true
 
     /**
      * 是否没有单独的 MIUI 通知栏样式
@@ -694,20 +699,24 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun StatusBarNotification.createFoldEntranceIcon(context: Context, size: Int) = safeOfNull {
+        val isMiuiPanel = isShowMiuiStyle
+        if (isMiuiPanel && ConfigData.isEnableReplaceMiuiStyleNotifyIcon.not() && ConfigData.isEnableNotifyIconForceAppIcon.not())
+            return@safeOfNull null
         val iconView = ImageView(context)
         compatNotifyIcon(
             context = context,
             nf = this,
             iconView = iconView,
-            isUseMaterial3Style = true,
-            isMiuiPanel = true
+            isMiuiPanel = isMiuiPanel
         )
         if (iconView.drawable == null) return@safeOfNull null
+        /** 离屏 ImageView 不预先使用通知面板的固定轮廓裁切，最终合成统一跟随模块圆角设置 */
+        iconView.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
         iconView.measure(sizeSpec, sizeSpec)
         iconView.layout(0, 0, size, size)
         createBitmap(size, size).also { iconView.draw(Canvas(it)) }
-            .round(5.dpFloat(context))
+            .round(ConfigData.notifyIconCornerSize.dpFloat(context))
             .toDrawable(context.resources)
     }
 
