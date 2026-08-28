@@ -36,6 +36,7 @@ import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.SystemClock
 import android.service.notification.NotificationListenerService
@@ -102,10 +103,6 @@ import top.defaults.drawabletoolbox.DrawableBuilder
  * 系统界面核心 Hook 类
  */
 object SystemUIHooker : YukiBaseHooker() {
-
-    private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
-
-    private val foldEntranceIconContext = ThreadLocal<Pair<List<StatusBarNotification>, Int>>()
 
     /** MIUI 新版本存在的类 */
     private val SystemUIApplicationClass by lazyClassOrNull("${PackageName.SYSTEMUI}.SystemUIApplication")
@@ -216,6 +213,10 @@ object SystemUIHooker : YukiBaseHooker() {
     /** HyperOS 焦点通知的用到的 API */
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
 
+    private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
+
+    private val foldEntranceIconContext = ThreadLocal<Pair<List<StatusBarNotification>, Int>>()
+
     /** 缓存的通知图标优化数组 */
     private var iconDatas = ArrayList<IconDataBean>()
 
@@ -269,6 +270,29 @@ object SystemUIHooker : YukiBaseHooker() {
             ?.invoke<Boolean>() ?: NotificationSettingsHelperClass?.resolve()?.optional(silent = true)
             ?.firstMethodOrNull { name = "showMiuiStyle" }
             ?.invoke<Boolean>()) == true
+
+    private val Notification.isPromotedOngoingCompat
+        get() = asResolver().optional(silent = true).firstMethodOrNull {
+            name = "isPromotedOngoing"
+            emptyParameters()
+        }?.invoke<Boolean>() == true
+
+    /**
+     * OS3 会清除部分焦点通知的 promoted 标记，但仍保留 ongoing 和短关键文本，
+     * 使用这两个公开通知特征恢复其焦点通知语义，确保 progress 模板继续执行外圈绘制。
+     */
+    private val Notification.isLegacyPromotedOngoingCompat
+        get() = flags and Notification.FLAG_ONGOING_EVENT != 0 &&
+            extras.getCharSequence("android.shortCriticalText").isNullOrBlank().not()
+
+    private val StatusBarNotification.isFocusNotificationCompat
+        get() = notification.isPromotedOngoingCompat || notification.isLegacyPromotedOngoingCompat ||
+            asResolver().optional(silent = true).let { resolver ->
+                resolver.firstFieldOrNull { name = "mIsFocusNotification" }?.get<Boolean>() == true ||
+                    resolver.firstFieldOrNull { name = "mIsPromotedOngoing" }?.get<Boolean>() == true
+            } || notification.extras.let {
+                it.getBoolean("miui.focus.isFocus") || it.getParcelable<RemoteViews>("miui.focus.rv") != null
+            }
 
     /**
      * 是否没有单独的 MIUI 通知栏样式
@@ -617,12 +641,55 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
 
-            /** 获取通知小图标 */
-            val iconDrawable = notifyInstance.notification.smallIcon.loadDrawable(context)
-                ?: return@let YLog.warn("compatNotifyIcon got null smallIcon")
+            /**
+             * OS3 的部分 RemoteViews 使用 SystemUI 的受限 Context，无法直接解析通知包内的资源型 smallIcon，
+             * 首次加载失败后切换到通知包 Context，避免面板只留下空白图标占位。
+             */
+            val smallIcon = notifyInstance.notification.smallIcon
+            val iconDrawable = smallIcon.loadDrawable(context) ?: safeOfNull {
+                smallIcon.loadDrawable(
+                    context.createPackageContext(notifyInstance.nfPkgName, Context.CONTEXT_IGNORE_SECURITY)
+                )
+            } ?: return@let YLog.warn("compatNotifyIcon got null smallIcon")
 
             /** Mi Push 的 smallIcon 同样可能是合规单色图标，必须按图标内容判断 */
             val isGrayscaleIcon = isGrayscaleIcon(context, iconDrawable)
+
+            /**
+             * Android 16 起的 PROMOTED_ONGOING 焦点通知仍使用 smallIcon 作为有色外圈内的前景，
+             * 但部分图标会被系统灰度检测误判为彩色；通知面板中需要固定沿用单色图标绘制语义。
+             */
+            val isMonochromePanelIcon = isGrayscaleIcon || notifyInstance.isFocusNotificationCompat
+
+            val isUsePromotedOngoingComposedIcon =
+                notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
+
+            /**
+             * OS4 的焦点通知会忽略 RemoteViews 中 android:id/icon 的 background，
+             * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
+             */
+            fun setPromotedOngoingComposedIcon(drawable: Drawable, foregroundColor: Int, backgroundColor: Int) {
+                val inset = 7.dp(context)
+                val backgroundDrawable = DrawableBuilder()
+                    .rectangle()
+                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                    .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
+                    .build()
+                val foregroundDrawable = (drawable.constantState?.newDrawable(context.resources) ?: drawable).mutate().apply {
+                    setTint(foregroundColor)
+                }
+                val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
+                    setLayerInset(1, inset, inset, inset, inset)
+                }
+                iconView.apply {
+                    clipToOutline = false
+                    background = null
+                    setPadding(0)
+                    colorFilter = null
+                    imageTintList = null
+                    setImageDrawable(composedDrawable)
+                }
+            }
 
             /** 自定义默认小图标 */
             var customIcon: Drawable? = null
@@ -642,55 +709,68 @@ object SystemUIHooker : YukiBaseHooker() {
                         ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
             }
             /** 打印日志 */
-            loggerDebug(tag = "Notification Panel Icon", context, notifyInstance, isCustom = customIcon != null, isGrayscaleIcon)
+            loggerDebug(
+                tag = "Notification Panel Icon",
+                context,
+                notifyInstance,
+                isCustom = customIcon != null,
+                isGrayscale = isMonochromePanelIcon
+            )
             /** 处理自定义通知图标优化 */
             when {
                 ConfigData.isEnableNotifyIconForceAppIcon ->
                     setDefaultNotifyIcon(drawable = notifyInstance.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(notifyInstance.nfPkgName))
-                customIcon != null -> iconView.apply {
-                    /** 设置不要裁切到边界 */
-                    clipToOutline = false
-                    /** 设置自定义小图标 */
-                    setImageDrawable(customIcon)
-                    /** 上色 */
-                    setColorFilter(if (isUseMaterial3Style || customIconColor == 0) supportColor else customIconColor)
-                    /** 设置图标外圈颜色 */
-                    if (isUseMaterial3Style && customIconColor != 0)
-                        background = DrawableBuilder()
-                            .rectangle()
-                            .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
-                            .solidColor(if (isDarkMode) customIconColor.brighterColor else customIconColor)
-                            .build()
-                    when {
-                        /** 缩小 HyperOS 的通知图标 */
-                        isMIOS && isMiuiPanel -> setPadding(7.dp(context))
-                        /** 设置原生的背景边距 */
-                        isUseMaterial3Style -> setPadding(4.dp(context))
-                    }
-                }
-                else -> {
-                    /** 重新设置图标 - 防止系统更改它 */
-                    iconView.setImageDrawable(iconDrawable)
-                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
-                    if (isGrayscaleIcon) iconView.apply {
+                customIcon != null -> customIcon.also { drawable ->
+                    if (isUsePromotedOngoingComposedIcon && customIconColor != 0)
+                        setPromotedOngoingComposedIcon(drawable, supportColor, customIconColor)
+                    else iconView.apply {
                         /** 设置不要裁切到边界 */
                         clipToOutline = false
-                        /** 设置图标着色 */
-                        setColorFilter(supportColor)
+                        /** 设置自定义小图标 */
+                        setImageDrawable(drawable)
+                        /** 上色 */
+                        setColorFilter(if (isUseMaterial3Style || customIconColor == 0) supportColor else customIconColor)
                         /** 设置图标外圈颜色 */
-                        (if (hasIconColor) iconColor else context.systemAccentColor).also {
-                            if (isUseMaterial3Style)
-                                background = DrawableBuilder()
-                                    .rectangle()
-                                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
-                                    .solidColor(if (isDarkMode) it.brighterColor else it)
-                                    .build()
-                        }
+                        if (isUseMaterial3Style && customIconColor != 0)
+                            background = DrawableBuilder()
+                                .rectangle()
+                                .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                                .solidColor(if (isDarkMode) customIconColor.brighterColor else customIconColor)
+                                .build()
                         when {
                             /** 缩小 HyperOS 的通知图标 */
                             isMIOS && isMiuiPanel -> setPadding(7.dp(context))
                             /** 设置原生的背景边距 */
                             isUseMaterial3Style -> setPadding(4.dp(context))
+                        }
+                    }
+                }
+                else -> {
+                    /** 判断如果是灰度图标就给他设置一个白色颜色遮罩 */
+                    if (isMonochromePanelIcon) {
+                        val backgroundColor = if (hasIconColor) iconColor else context.systemAccentColor
+                        if (isUsePromotedOngoingComposedIcon)
+                            setPromotedOngoingComposedIcon(iconDrawable, supportColor, backgroundColor)
+                        else iconView.apply {
+                            /** 重新设置图标 - 防止系统更改它 */
+                            setImageDrawable(iconDrawable)
+                            /** 设置不要裁切到边界 */
+                            clipToOutline = false
+                            /** 设置图标着色 */
+                            setColorFilter(supportColor)
+                            /** 设置图标外圈颜色 */
+                            if (isUseMaterial3Style)
+                                background = DrawableBuilder()
+                                    .rectangle()
+                                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                                    .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
+                                    .build()
+                            when {
+                                /** 缩小 HyperOS 的通知图标 */
+                                isMIOS && isMiuiPanel -> setPadding(7.dp(context))
+                                /** 设置原生的背景边距 */
+                                isUseMaterial3Style -> setPadding(4.dp(context))
+                            }
                         }
                     } else setDefaultNotifyIcon(notifyInstance.compatPushingIcon(context, iconDrawable))
                 }
@@ -1047,6 +1127,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
+    @SuppressLint("DiscouragedApi")
     override fun onHook() {
         /** 注册生命周期 */
         registerLifecycle()
@@ -1368,6 +1449,26 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethodOrNull {
                 name = "onContentUpdated"
             }?.hook()?.after { hookNotificationViewWrapper(instance) }
+        }
+        /**
+         * OS3 会丢失降级焦点通知的 promoted 标记，OS4 经典面板也可能按普通模板创建焦点通知，
+         * 在系统选定最终包装类后统一处理根布局中的可见图标。
+         */
+        NotificationViewWrapperClass.resolve().optional().firstMethodOrNull {
+            name = "wrap"
+            parameterCount = 3
+        }?.hook()?.after {
+            val row = args(2).any()
+            val nf = row.getSbn()
+            if (nf?.isFocusNotificationCompat != true) return@after
+            val rootView = args(1).cast<View>() ?: return@after
+            val focusIconId = nf.notification.extras.getInt("miui.focus.iconId")
+            val focusIcon = focusIconId.takeIf { it != 0 }?.let { rootView.findViewById<ImageView>(it) }
+
+            @Suppress("DiscouragedApi")
+            val frameworkIconId = rootView.resources.getIdentifier("icon", "id", "android")
+            val rootIcon = focusIcon ?: rootView.findViewById(frameworkIconId) ?: return@after
+            compatNotifyIcon(rootIcon.context, nf, rootIcon, isUseMaterial3Style = true)
         }
         /** 修改 MIUI 风格通知栏的通知图标 */
         MiuiNotificationViewWrapperClass?.resolve()?.optional()?.apply {
