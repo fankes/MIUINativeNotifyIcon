@@ -117,8 +117,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private val NotificationChildrenContainerInjectorImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainerInjectorImpl")
 
     /** MIUI 新版本存在的类 */
-    private val NotificationHeaderViewWrapperInjectorClass
-        by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
+    private val NotificationHeaderViewWrapperInjectorClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapperInjector")
 
     /** MIUI 未确定版本存在的类 */
     private val NotificationContentInflaterInjectorClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationContentInflaterInjector")
@@ -140,7 +139,7 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 原生存在的类 (A15 HyperOS 已变成 `interface`) */
     private val NotificationIconAreaControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController")
 
-    /** Android 17 原生通知图标样式提供器 */
+    /** Android 16、17 原生通知图标样式提供器 */
     private val NotificationIconStyleProviderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.icon.NotificationIconStyleProviderImpl")
 
     /** HyperOS 3、4 的更多通知入口控制器 */
@@ -936,6 +935,20 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
+     * OS3、OS4 的 IM 私有通知模板会额外向 mAppImIcon 写入右下角徽标；经典面板统一只保留并处理
+     * mAppIcon，在系统每次刷新内容后隐藏次要徽标，避免 OS3 将普通模板的占位 View 误判为主图标。
+     */
+    private fun hookMiuiNotificationViewWrapper(wrapper: Any) {
+        val resolver = MiuiNotificationViewWrapperClass?.resolve()?.optional(silent = true) ?: return
+        val nf = wrapper.getRowPair().second.getSbn() ?: return
+        resolver.firstFieldOrNull { name = "mAppImIcon" }?.of(wrapper)?.get<ImageView>()?.isVisible = false
+        val iconView = resolver.firstFieldOrNull { name = "mAppIcon" }?.of(wrapper)?.get<ImageView>() ?: return
+        if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
+            compatNotifyIcon(iconView.context, nf, iconView, isUseMaterial3Style = true, isMiuiPanel = true)
+        else iconView.setImageDrawable(nf.miuiAppIcon?.loadDrawable(iconView.context) ?: iconView.context.appIconOf(nf.nfPkgName))
+    }
+
+    /**
      * 从 [NotificationViewWrapperClass] 中获取 [ExpandableNotificationRowClass]
      * @return [Pair] - ([Boolean] 通知是否展开,[Any] 通知 Row 实例)
      */
@@ -1121,12 +1134,13 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 缓存图标数据 */
         cachingIconDatas()
         /**
-         * Android 17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标，
-         * 强制返回 false 以让折叠和展开模板都继续使用通知 smallIcon
+         * Android 16、17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标；
+         * OS3、OS4 的参数类型及顺序不同，统一按方法语义拦截，让折叠和展开模板继续使用通知 smallIcon。
          */
         NotificationIconStyleProviderImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "shouldShowAppIcon"
-            parameters(Context::class, StatusBarNotification::class)
+            parameterCount = 2
+            returnType = Boolean::class
         }?.hook()?.replaceToFalse()
         /**
          * OS3、OS4 的更多通知入口只接收 Drawable 并在控制器内立即合成 Bitmap，没有可单独处理的
@@ -1459,14 +1473,11 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         /** 修改 MIUI 风格通知栏的通知图标 */
         MiuiNotificationViewWrapperClass?.resolve()?.optional()?.apply {
-            constructor {}.hookAll().after {
-                val nf = instance.getRowPair().second.getSbn() ?: return@after
-                firstFieldOrNull { name = "mAppIcon" }?.of(instance)?.get<ImageView>()?.clone {
-                    if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
-                        compatNotifyIcon(context, nf, iconView = this, isUseMaterial3Style = true, isMiuiPanel = true)
-                    else setImageDrawable(nf.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(nf.packageName))
-                }
-            }
+            constructor {}.hookAll().after { hookMiuiNotificationViewWrapper(instance) }
+            firstMethodOrNull {
+                name = "onContentUpdated"
+                parameterCount = 1
+            }?.hook()?.after { hookMiuiNotificationViewWrapper(instance) }
         }
         /** 修改 MIUI 风格通知栏的通知图标 - 折叠通知 */
         MiuiNotificationChildrenContainerClass?.resolve()?.optional()?.apply {
