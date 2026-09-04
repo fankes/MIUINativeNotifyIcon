@@ -32,7 +32,6 @@ import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.data.factory.bind
 import com.fankes.miui.notify.databinding.ActivityMainBinding
 import com.fankes.miui.notify.databinding.DiaStatusIconCountBinding
-import com.fankes.miui.notify.params.IconPackParams
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.androidVersionCodeName
 import com.fankes.miui.notify.utils.factory.hideOrShowLauncherIcon
@@ -54,6 +53,7 @@ import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.I18nWarnTool
+import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.projectpromote.ProjectPromote
 import com.highcapable.betterandroid.ui.extension.view.isUnderline
@@ -91,7 +91,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     title = "不是 MIUI 或 HyperOS 系统"
                     msg = "此模块专为 MIUI、HyperOS 系统打造，当前无法识别你的系统为其中任意之一，所以模块无法工作。"
                     confirmButton(text = "查看支持的模块") {
-                        openBrowser(url = "https://github.com/fankes/AndroidNotifyIconAdapt")
+                        openBrowser(url = IconRuleManagerTool.ANIP_REPOSITORY_URL)
                         finish()
                     }
                     cancelButton(text = "退出") { finish() }
@@ -127,11 +127,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
             /** 判断是否 Hook */
             YukiHookAPI.Status.isXposedModuleActive -> {
-                if (IconPackParams(context = this).iconDatas.isEmpty() && ConfigData.isEnableNotifyIconFix)
+                if (IconRuleManagerTool.hasCachedResources(this).not() && ConfigData.isEnableNotifyIconFix)
                     showDialog {
                         title = "配置通知图标优化名单"
-                        msg = "模块需要获取在线规则以更新“通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
-                            "你可以随时在本页面下方找到“配置通知图标优化名单”手动前往。"
+                        msg = "模块需要更新 “通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
+                            "你可以随时在本页面下方找到 “配置通知图标优化名单” 手动前往。"
                         confirmButton(text = "前往") { navigate<ConfigureActivity>() }
                         cancelButton()
                         noCancelable()
@@ -139,7 +139,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix)
                     showDialog {
                         title = "模块的通知权限已关闭"
-                        msg = "请开启通知权限，以确保你能收到通知图标优化在线规则的更新。"
+                        msg = "请开启通知权限，以确保你能收到通知图标优化名单的更新。"
                         confirmButton { openNotifySetting() }
                         cancelButton()
                         noCancelable()
@@ -376,12 +376,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             showTimePicker(ConfigData.notifyIconFixAutoTime) {
                 showDialog {
                     title = "每天 $it 自动更新"
-                    msg = "设置保存后将在每天 $it 自动同步名单到最新云端数据，若数据已是最新则不会显示任何提示，否则会发送一条通知。\n\n" +
-                        "请确保：\n\n" +
-                        "1.模块没有被禁止前台以及后台联网权限\n" +
-                        "2.模块没有被禁止被其它 APP 关联唤醒\n" +
-                        "3.模块的系统通知权限已开启\n\n" +
-                        "模块无需保持在后台运行，到达同步时间后会自动启动，如果到达时间后模块正在运行则会自动取消本次计划任务。"
+                    msg = "设置保存后将在每天 $it 自动同步名单到最新云端数据，若数据已是最新则不会显示任何提示，否则会发送一条通知，模块无需保持在后台运行。"
                     confirmButton(text = "保存设置") {
                         ConfigData.notifyIconFixAutoTime = it
                         this@MainActivity.binding.notifyIconAutoSyncText.text = it

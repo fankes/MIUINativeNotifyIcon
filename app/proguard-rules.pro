@@ -44,3 +44,12 @@
     <init>();
     *** inflate(android.view.LayoutInflater);
 }
+
+# LSPosed 以注入类加载器载入模块，无法依赖 META-INF/services 发现 Main dispatcher
+# kotlinx-coroutines-android 的 R8 规则会假定 ServiceLoader 已被优化，因此保留其 Android 快速加载路径
+-assumevalues class kotlinx.coroutines.internal.MainDispatcherLoader {
+    boolean FAST_SERVICE_LOADER_ENABLED return true;
+}
+-keep class kotlinx.coroutines.internal.MainDispatcherLoader {*;}
+-keep class kotlinx.coroutines.internal.FastServiceLoader {*;}
+-keep class kotlinx.coroutines.android.AndroidDispatcherFactory {*;}

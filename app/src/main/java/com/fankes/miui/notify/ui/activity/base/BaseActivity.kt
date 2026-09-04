@@ -37,18 +37,11 @@ import com.highcapable.kavaref.extension.toClassOrNull
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
-    companion object {
-
-        /** 应用是否正在运行 */
-        var isMainThreadRunning = false
-    }
-
     /** 获取绑定布局对象 */
     lateinit var binding: VB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isMainThreadRunning = true
         val bindingClass = javaClass.genericSuperclassTypeArguments().firstOrNull()?.toClassOrNull()
         binding = bindingClass?.resolve()?.optional()?.firstMethodOrNull {
             name = "inflate"

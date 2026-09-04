@@ -54,6 +54,8 @@ object SystemUITool {
 
     private val CALL_HOST_REFRESH_CACHING = ChannelData("call_host_refresh_caching", false)
     private val CALL_MODULE_REFRESH_RESULT = ChannelData("call_module_refresh_result", false)
+    private val CALL_HOST_REFRESH_ICON_DATA = ChannelData("call_host_refresh_icon_data", false)
+    private val CALL_MODULE_REFRESH_ICON_DATA_RESULT = ChannelData("call_module_refresh_icon_data_result", false)
 
     /** 当前全部调试日志 */
     private var debugLogs = listOf<YLogData>()
@@ -73,6 +75,19 @@ object SystemUITool {
          */
         fun onRefreshSystemUI(param: PackageParam, result: (Boolean) -> Boolean) {
             param.dataChannel.with { wait(CALL_HOST_REFRESH_CACHING) { put(CALL_MODULE_REFRESH_RESULT, result(it)) } }
+        }
+
+        /**
+         * 监听通知图标数据刷新请求
+         * @param param 当前宿主参数
+         * @param refresh 异步刷新回调
+         */
+        fun onRefreshIconData(param: PackageParam, refresh: ((Boolean) -> Unit) -> Unit) {
+            param.dataChannel.with {
+                wait(CALL_HOST_REFRESH_ICON_DATA) {
+                    refresh { put(CALL_MODULE_REFRESH_ICON_DATA_RESULT, it) }
+                }
+            }
         }
     }
 
@@ -205,17 +220,28 @@ object SystemUITool {
      * 刷新系统界面状态栏与通知图标
      * @param context 实例
      * @param isRefreshCacheOnly 仅刷新缓存不刷新图标和通知改变 - 默认：否
+     * @param isRefreshIconData 是否刷新通知图标数据 - 默认：否
      * @param callback 成功后回调
      */
-    fun refreshSystemUI(context: Context? = null, isRefreshCacheOnly: Boolean = false, callback: () -> Unit = {}) {
+    fun refreshSystemUI(
+        context: Context? = null,
+        isRefreshCacheOnly: Boolean = false,
+        isRefreshIconData: Boolean = false,
+        callback: () -> Unit = {}
+    ) {
         /**
          * 刷新系统界面
          * @param result 回调结果
          */
         fun doRefresh(result: (Boolean) -> Unit) {
             context?.dataChannel(PackageName.SYSTEMUI)?.with {
-                wait(CALL_MODULE_REFRESH_RESULT) { result(it) }
-                put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
+                if (isRefreshIconData) {
+                    wait(CALL_MODULE_REFRESH_ICON_DATA_RESULT) { result(it) }
+                    put(CALL_HOST_REFRESH_ICON_DATA, true)
+                } else {
+                    wait(CALL_MODULE_REFRESH_RESULT) { result(it) }
+                    put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)
+                }
             }
         }
         when {
@@ -241,7 +267,7 @@ object SystemUITool {
                             else -> doRefresh {
                                 cancel()
                                 isWaited = true
-                                callback()
+                                if (it) callback()
                                 if (it.not()) context.snake(msg = "刷新失败，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
                             }
                         }
@@ -249,7 +275,7 @@ object SystemUITool {
                     noCancelable()
                 }
             YukiHookAPI.Status.isXposedModuleActive.not() && context is AppCompatActivity -> context.snake(msg = "模块没有激活，更改不会生效")
-            else -> doRefresh { callback() }
+            else -> doRefresh { if (it) callback() }
         }
     }
 

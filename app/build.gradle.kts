@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.kavaref.android)
     implementation(libs.kavaref.extension)
     implementation(libs.betterandroid.ui.extension)
+    implementation(libs.anip.sdk)
     implementation(libs.project.promote)
     implementation(libs.libsu)
     implementation(libs.drawabletoolbox)

@@ -6,7 +6,8 @@ project-promote = "1.0.1"
 rovo89-xposed-api = "82"
 yukihookapi = "1.3.2"
 kavaref-bom = "1.1.0"
-betterandroid = "1.1.5"
+betterandroid = "1.1.6"
+anip-sdk = "1.0.0"
 libsu = "5.2.2"
 drawabletoolbox = "1.0.7"
 okhttp = "5.5.0"
@@ -34,6 +35,7 @@ kavaref-core = { group = "com.highcapable.kavaref", name = "kavaref-core" }
 kavaref-android = { group = "com.highcapable.kavaref", name = "kavaref-android" }
 kavaref-extension = { group = "com.highcapable.kavaref", name = "kavaref-extension" }
 betterandroid-ui-extension = { group = "com.highcapable.betterandroid", name = "ui-extension", version.ref = "betterandroid" }
+anip-sdk = { group = "com.highcapable.anip", name = "anip-sdk", version.ref = "anip-sdk" }
 libsu = { group = "com.github.topjohnwu.libsu", name = "core", version.ref = "libsu" }
 drawabletoolbox = { group = "com.github.duanhong169", name = "drawabletoolbox", version.ref = "drawabletoolbox" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }

@@ -40,7 +40,6 @@ import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.utils.factory.isDebugApp
 import com.fankes.miui.notify.utils.factory.isSystemApp
 import com.fankes.miui.notify.utils.factory.runInSafe
-import com.fankes.miui.notify.utils.factory.stampToDate
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 
 /**
@@ -55,9 +54,6 @@ object IconAdaptationTool {
 
     /** 推送通知的渠道名称 */
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
-
-    /** 已过期的时间 */
-    private val outTimeLimits = HashSet<String>()
 
     /**
      * 推送新 APP 安装适配通知
@@ -77,7 +73,7 @@ object IconAdaptationTool {
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
                 setContentTitle("您已安装 ${context.appNameOf(packageName)}")
-                setContentText("尚未适配此应用，点按打开在线规则。")
+                setContentText("尚未适配此应用，点按打开通知图标优化名单。")
                 setColor(0xFF2993F0.toInt())
                 setAutoCancel(true)
                 setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_unsupported))
@@ -111,24 +107,5 @@ object IconAdaptationTool {
      */
     fun removeNewAppSupportNotify(context: Context, packageName: String) = runInSafe {
         context.getSystemService(NotificationManager::class.java)?.cancel(packageName.hashCode())
-    }
-
-    /**
-     * 自动更新通知图标优化在线规则
-     * @param context 实例
-     * @param timeSet 设定的时间
-     */
-    fun prepareAutoUpdateIconRule(context: Context, timeSet: String) = runInSafe {
-        System.currentTimeMillis().also {
-            val nowTime = it.stampToDate(format = "HH:mm")
-            if (timeSet != nowTime || outTimeLimits.any { e -> e == nowTime }) return
-            outTimeLimits.add(nowTime)
-            context.startActivity(
-                Intent().apply {
-                    component = ComponentName(MODULE_PACKAGE_NAME, "$MODULE_PACKAGE_NAME.ui.activity.auto.NotifyIconRuleUpdateActivity")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-            )
-        }
     }
 }

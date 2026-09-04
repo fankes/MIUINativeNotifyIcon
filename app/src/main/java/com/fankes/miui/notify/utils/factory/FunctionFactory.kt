@@ -37,11 +37,9 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PackageInfoFlags
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -74,7 +72,6 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.type.java.StringClass
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
 import com.topjohnwu.superuser.Shell
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -337,13 +334,13 @@ fun Resources.colorOf(@ColorRes resId: Int) = ResourcesCompat.getColor(this, res
 /**
  * 得到 APP 安装包信息 (兼容)
  * @param packageName APP 包名
- * @param flag [PackageInfoFlags]
+ * @param flag [PackageManager.PackageInfoFlags]
  * @return [PackageInfo] or null
  */
 private fun Context.getPackageInfoCompat(packageName: String, flag: Number = 0) = runCatching {
     @Suppress("DEPRECATION", "KotlinRedundantDiagnosticSuppress")
     if (Build.VERSION.SDK_INT >= 33)
-        packageManager?.getPackageInfo(packageName, PackageInfoFlags.of(flag.toLong()))
+        packageManager?.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flag.toLong()))
     else packageManager?.getPackageInfo(packageName, flag.toInt())
 }.getOrNull()
 
@@ -509,36 +506,7 @@ val Int.isWhiteColor
  * Base64 加密
  * @return [String]
  */
-val Bitmap.base64
-    get() = safeOfNothing {
-        val baos = ByteArrayOutputStream()
-        compress(Bitmap.CompressFormat.PNG, 100, baos)
-        Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
-    }
-
-/**
- * Base64 加密
- * @return [String]
- */
 val String.base64: String get() = Base64.encodeToString(toByteArray(), Base64.DEFAULT)
-
-/**
- * Base64 解密为字节流
- * @return [ByteArray]
- */
-val String.unbase64 get() = Base64.decode(this, Base64.DEFAULT) ?: ByteArray(0)
-
-/**
- * 字节流解析为位图
- * @return [Bitmap]
- */
-val ByteArray.bitmap: Bitmap get() = BitmapFactory.decodeByteArray(this, 0, size)
-
-/**
- * 字符串解析为位图
- * @return [Bitmap]
- */
-val String.bitmap: Bitmap get() = unbase64.bitmap
 
 /**
  * 圆角图片

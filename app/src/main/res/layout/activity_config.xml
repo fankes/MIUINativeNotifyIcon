@@ -118,7 +118,7 @@
             android:layout_height="wrap_content"
             android:alpha="0.6"
             android:lineSpacingExtra="5dp"
-            android:text="启用替换后 APP 的彩色通知图标将被替换为预设的小图标。\n启用全部替换将忽略 APP 单色图标，强制将全部通知图标替换为列表中预设的小图标。"
+            android:text="启用后 APP 的彩色通知图标将替换为名单内提供的单色图标。\n覆盖选项将忽略 APP 原有的单色图标，始终使用名单内提供的单色图标。"
             android:textColor="@color/colorTextGray"
             android:textSize="11sp"
             tools:ignore="SmallSp" />
@@ -165,7 +165,7 @@
         android:gravity="center"
         android:padding="10dp"
         android:singleLine="true"
-        android:text="贡献通知图标优化名单"
+        android:text="为 ANIP 做出贡献"
         android:textColor="@color/colorTextGray"
         android:textSize="15sp" />
 </LinearLayout>

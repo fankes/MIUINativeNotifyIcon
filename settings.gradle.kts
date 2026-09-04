@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
         maven("https://api.xposed.info/")
         maven("https://raw.githubusercontent.com/fankes/maven-repository/main/repository/releases")
+        maven("https://raw.githubusercontent.com/HighCapable/maven-repository/main/repository/releases")
     }
 }
 plugins {

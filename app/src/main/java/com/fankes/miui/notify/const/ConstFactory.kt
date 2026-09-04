@@ -41,17 +41,14 @@ object PackageName {
  */
 object IconRuleSourceSyncType {
 
-    /** GitHub Raw (代理 - GitHub Proxy) */
-    const val GITHUB_RAW_PROXY_1 = 500
+    /** GitHub URL 代理 - 线路一 */
+    const val GITHUB_PROXY_1 = 500
 
-    /** GitHub Raw (代理 - 7ED Services) */
-    const val GITHUB_RAW_PROXY_2 = 1000
+    /** GitHub URL 代理 - 线路二 */
+    const val GITHUB_PROXY_2 = 1000
 
-    /** GitHub Raw (直连) */
-    const val GITHUB_RAW_DIRECT = 2000
-
-    /** 自定义地址 */
-    const val CUSTOM_URL = 3000
+    /** GitHub 直连 */
+    const val GITHUB_DIRECT = 2000
 }
 
 /**

@@ -69,12 +69,6 @@
             android:exported="true"
             android:screenOrientation="behind" />
 
-        <activity
-            android:name=".ui.activity.auto.NotifyIconRuleUpdateActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <service
             android:name=".service.QuickStartTileService"
             android:exported="true"

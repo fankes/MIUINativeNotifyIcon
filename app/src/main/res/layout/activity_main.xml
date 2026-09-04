@@ -1061,7 +1061,7 @@
                     android:layout_marginBottom="10dp"
                     android:alpha="0.6"
                     android:lineSpacingExtra="6dp"
-                    android:text="首次安装请打开名单列表从云端更新数据，后期适配的内容也请手动打开名单列表重新拉取数据以检查更新，数据更新后无需重启系统界面，实时生效。"
+                    android:text="首次安装请打开列表同步通知图标资源，之后可以重新同步以获取新增适配，数据更新后无需重启系统界面，实时生效。"
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
@@ -1185,7 +1185,7 @@
                         android:layout_marginBottom="10dp"
                         android:alpha="0.6"
                         android:lineSpacingExtra="6dp"
-                        android:text="此选项默认开启，为确保名单内的数据为云端最新版本，你可以设置每天自动更新在线规则的时间，自动更新的地址为你最后一次成功设置的在线规则同步地址。\n请确保模块能够后台联网并不被阻止其它 APP 唤醒，否则自动同步可能会失败。\n模块无需保持在后台运行，到达同步时间后会自动启动，如果到达时间后模块正在运行则会自动取消本次计划任务。"
+                        android:text="此选项默认开启，你可以设置每天自动更新通知图标资源的时间，模块无需保持在后台运行。"
                         android:textColor="@color/colorTextDark"
                         android:textSize="12sp" />
 
@@ -1477,6 +1477,55 @@
                     android:text="开发者 酷安 @星夜不荟\n未经允许不得转载、修改复制我的劳动成果"
                     android:textColor="@color/colorTextGray"
                     android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_permotion_round"
+                android:gravity="center|start"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/ic_anip" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:text="此项目使用了 ANIP。"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autoLink="web"
+                            android:ellipsize="end"
+                            android:singleLine="true"
+                            android:text="了解更多 https://github.com/BetterAndroid/android-notification-icon-project"
+                            android:textColor="@color/colorTextGray"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

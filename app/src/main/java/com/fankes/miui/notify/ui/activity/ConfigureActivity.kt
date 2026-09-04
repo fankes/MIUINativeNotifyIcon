@@ -26,16 +26,14 @@ package com.fankes.miui.notify.ui.activity
 
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
-import com.fankes.miui.notify.bean.IconDataBean
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.databinding.ActivityConfigBinding
 import com.fankes.miui.notify.databinding.AdapterConfigBinding
 import com.fankes.miui.notify.databinding.DiaIconFilterBinding
-import com.fankes.miui.notify.params.IconPackParams
-import com.fankes.miui.notify.params.factory.isAppNotifyHookAllOf
-import com.fankes.miui.notify.params.factory.isAppNotifyHookOf
-import com.fankes.miui.notify.params.factory.putAppNotifyHookAllOf
-import com.fankes.miui.notify.params.factory.putAppNotifyHookOf
+import com.fankes.miui.notify.params.factory.isAppNotifyEnabledOf
+import com.fankes.miui.notify.params.factory.isAppNotifyOverlayOf
+import com.fankes.miui.notify.params.factory.putAppNotifyEnabledOf
+import com.fankes.miui.notify.params.factory.putAppNotifyOverlayOf
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.addOnBackPressedEvent
 import com.fankes.miui.notify.utils.factory.bindAdapter
@@ -49,6 +47,8 @@ import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.toast
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.highcapable.anip.sdk.entity.NotificationIcon
+import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.yukihookapi.YukiHookAPI
 
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
@@ -63,7 +63,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private var onScrollEvent: ((Boolean) -> Unit)? = null
 
     /** 全部的通知图标优化数据 */
-    private var iconAllDatas = ArrayList<IconDataBean>()
+    private var iconAllDatas = emptyList<NotificationIcon>()
 
     override fun onCreate() {
         /** 检查激活和启用状态 */
@@ -125,36 +125,36 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             bindAdapter {
                 onBindDatas { iconDatas }
                 onBindViews<AdapterConfigBinding> { binding, position ->
-                    iconDatas[position].also { bean ->
-                        binding.adpAppIcon.setImageBitmap(bean.iconBitmap)
-                        (if (bean.iconColor != 0) bean.iconColor else resources.colorOf(R.color.colorTextGray)).also { color ->
+                    iconDatas[position].also { icon ->
+                        binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.snapshot?.getBitmap(icon))
+                        (icon.color ?: resources.colorOf(R.color.colorTextGray)).also { color ->
                             binding.adpAppIcon.setColorFilter(color)
                             binding.adpAppName.setTextColor(color)
                         }
-                        binding.adpAppName.text = bean.appName
-                        binding.adpAppPkgName.text = bean.packageName
-                        binding.adpCbrName.text = "贡献者：" + bean.contributorName
-                        isAppNotifyHookOf(bean).also { e ->
+                        binding.adpAppName.text = icon.label
+                        binding.adpAppPkgName.text = icon.packageName
+                        binding.adpCbrName.text = "贡献者：" + icon.contributors.joinToString()
+                        isAppNotifyEnabledOf(icon).also { e ->
                             binding.adpAppOpenSwitch.isChecked = e
                             binding.adpAppAllSwitch.isEnabled = e
                         }
                         binding.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
                             if (btn.isPressed.not()) return@setOnCheckedChangeListener
-                            putAppNotifyHookOf(bean, b)
+                            putAppNotifyEnabledOf(icon, b)
                             binding.adpAppAllSwitch.isEnabled = b
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
-                        binding.adpAppAllSwitch.isChecked = isAppNotifyHookAllOf(bean)
+                        binding.adpAppAllSwitch.isChecked = isAppNotifyOverlayOf(icon)
                         binding.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
                             if (btn.isPressed.not()) return@setOnCheckedChangeListener
                             fun saveState() {
-                                putAppNotifyHookAllOf(bean, b)
+                                putAppNotifyOverlayOf(icon, b)
                                 SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                             }
                             if (b) showDialog {
-                                title = "全部替换"
+                                title = "覆盖"
                                 msg = "此功能仅针对严重不遵守规范的 APP 通知图标才需要开启，例如：APP 推送通知后无法识别出现的黑白块图标。\n\n" +
-                                    "此功能在一般情况下请保持关闭并跟随在线规则的配置，并不要随意改变此配置，" +
+                                    "此功能在一般情况下请保持关闭并跟随名单提供的配置，并不要随意改变此配置，" +
                                     "开启后 APP 的通知图标可能会被规则破坏，你确定还要开启吗？"
                                 confirmButton { saveState() }
                                 cancelButton { btn.isChecked = btn.isChecked.not() }
@@ -163,26 +163,16 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         }
                     }
                 }
-            }.apply {
-                setOnItemLongClickListener { _, _, p, _ ->
-                    showDialog {
-                        title = "复制“${iconDatas[p].appName}”的规则"
-                        msg = "是否复制单条规则到剪贴板？"
-                        confirmButton { copyToClipboard(iconDatas[p].toString()) }
-                        cancelButton()
-                    }
-                    true
-                }
-                onChanged = { notifyDataSetChanged() }
-            }
+            }.apply { onChanged = { notifyDataSetChanged() } }
             onScrollEvent = { post { setSelection(if (it) iconDatas.lastIndex else 0) } }
         }
         /** 设置点击事件 */
         binding.configCbrButton.setOnClickListener {
             showDialog {
-                title = "感谢你的贡献"
-                msg = "通知图标优化名单需要大家的共同维护才能得以完善，请选择你的贡献方式。"
-                confirmButton(text = "贡献规则") { openBrowser(IconRuleManagerTool.RULES_CONTRIBUTING_URL) }
+                title = "为 ANIP 做出贡献"
+                msg = "ANIP 全名为 Android 通知图标适配计划，由社区共同维护。\n" +
+                    "你可以参与贡献新图标，也可以为未收录的应用请求适配。"
+                confirmButton(text = "参与贡献") { openBrowser(IconRuleManagerTool.RULES_CONTRIBUTING_URL) }
                 cancelButton(text = "请求适配") { openBrowser(IconRuleManagerTool.RULES_FEEDBACK_URL) }
                 neutralButton(text = "暂时不用")
             }
@@ -198,7 +188,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     title = "新安装应用通知图标适配"
                     msg = "你已安装 $appName($pkgName)\n\n" +
                         "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
-                        "可随时点击本页面下方的“贡献通知图标优化名单”按钮提交贡献或请求适配。\n\n" +
+                        "可随时点击本页面下方的 “为 ANIP 做出贡献” 按钮提交贡献或请求适配。\n\n" +
                         "若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n" +
                         "你可以现在立即同步适配列表，以获取最新的适配数据。"
                     confirmButton(text = "同步列表") { onStartRefresh() }
@@ -250,15 +240,21 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
     /** 装载或刷新本地数据 */
     private fun mockLocalData() {
-        iconAllDatas = IconPackParams(context = this).iconDatas
+        iconAllDatas = IconRuleManagerTool.snapshot?.icons.orEmpty()
         refreshAdapterResult()
+        if (iconAllDatas.isEmpty()) launch {
+            if (IconRuleManagerTool.reload(this@ConfigureActivity)) {
+                iconAllDatas = IconRuleManagerTool.snapshot?.icons.orEmpty()
+                refreshAdapterResult()
+            }
+        }
     }
 
     /** 刷新适配器结果相关 */
     private fun refreshAdapterResult() {
         onChanged?.invoke()
         binding.configTitleCountText.text =
-            if (filterText.isBlank()) "已适配 ${iconDatas.size} 个 APP 的通知图标"
+            if (filterText.isBlank()) "已收录 ${iconDatas.size} 个 APP 的通知图标"
             else "“$filterText” 匹配到 ${iconDatas.size} 个结果"
         binding.configListNoDataView.apply {
             text = if (iconAllDatas.isEmpty()) "噫，竟然什么都没有~\n请点击右上角同步按钮获取云端数据" else "噫，竟然什么都没找到~"
@@ -273,6 +269,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private val iconDatas
         get() = if (filterText.isBlank()) iconAllDatas
         else iconAllDatas.filter {
-            it.appName.lowercase().contains(filterText.lowercase()) || it.packageName.lowercase().contains(filterText.lowercase())
+            it.label.lowercase().contains(filterText.lowercase()) ||
+                it.packageName.lowercase().contains(filterText.lowercase()) ||
+                it.contributors.any { contributor -> contributor.lowercase().contains(filterText.lowercase()) }
         }
 }

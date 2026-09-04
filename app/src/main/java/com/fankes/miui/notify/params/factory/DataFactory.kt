@@ -24,44 +24,52 @@
 package com.fankes.miui.notify.params.factory
 
 import android.content.Context
-import com.fankes.miui.notify.bean.IconDataBean
+import com.fankes.miui.notify.utils.factory.base64
+import com.highcapable.anip.sdk.entity.NotificationIcon
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 
-/**
- * 获取此 APP 的通知图标是否被 Hook
- * @param bean 图标 bean
- */
-fun PackageParam.isAppNotifyHookOf(bean: IconDataBean) = prefs.getBoolean(bean.toEnabledName(), bean.isEnabled)
+private const val ENABLE_SUFFIX = "_enable"
+private const val OVERLAY_SUFFIX = "_enable_all"
+
+private fun NotificationIcon.preferenceName(suffix: String) = (label + packageName).base64 + suffix
 
 /**
- * 获取此 APP 的通知图标是否被 Hook
- * @param bean 图标 bean
+ * 获取此 APP 的 ANIP 通知图标是否启用
+ * @param icon ANIP 图标实体
  */
-fun Context.isAppNotifyHookOf(bean: IconDataBean) = prefs().getBoolean(bean.toEnabledName(), bean.isEnabled)
+fun PackageParam.isAppNotifyEnabledOf(icon: NotificationIcon) = prefs.getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
 
 /**
- * 设置 Hook 此 APP 的通知图标
- * @param bean 图标 bean
- * @param isHook 是否 Hook
+ * 获取此 APP 的 ANIP 通知图标是否启用
+ * @param icon ANIP 图标实体
  */
-fun Context.putAppNotifyHookOf(bean: IconDataBean, isHook: Boolean) = prefs().edit { putBoolean(bean.toEnabledName(), isHook) }
+fun Context.isAppNotifyEnabledOf(icon: NotificationIcon) = prefs().getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
 
 /**
- * 获取此 APP 的通知图标是否被全部 Hook
- * @param bean 图标 bean
+ * 设置此 APP 的 ANIP 通知图标是否启用
+ * @param icon ANIP 图标实体
+ * @param isEnabled 是否启用
  */
-fun PackageParam.isAppNotifyHookAllOf(bean: IconDataBean) = prefs.getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
+fun Context.putAppNotifyEnabledOf(icon: NotificationIcon, isEnabled: Boolean) =
+    prefs().edit { putBoolean(icon.preferenceName(ENABLE_SUFFIX), isEnabled) }
 
 /**
- * 获取此 APP 的通知图标是否被全部 Hook
- * @param bean 图标 bean
+ * 获取此 APP 的 ANIP 通知图标是否覆盖原有单色图标
+ * @param icon ANIP 图标实体
  */
-fun Context.isAppNotifyHookAllOf(bean: IconDataBean) = prefs().getBoolean(bean.toEnabledAllName(), bean.isEnabledAll)
+fun PackageParam.isAppNotifyOverlayOf(icon: NotificationIcon) = prefs.getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
 
 /**
- * 设置全部 Hook 此 APP 的通知图标
- * @param bean 图标 bean
- * @param isHook 是否 Hook
+ * 获取此 APP 的 ANIP 通知图标是否覆盖原有单色图标
+ * @param icon ANIP 图标实体
  */
-fun Context.putAppNotifyHookAllOf(bean: IconDataBean, isHook: Boolean) = prefs().edit { putBoolean(bean.toEnabledAllName(), isHook) }
+fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = prefs().getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
+
+/**
+ * 设置此 APP 的 ANIP 通知图标是否覆盖原有单色图标
+ * @param icon ANIP 图标实体
+ * @param isOverlay 是否覆盖
+ */
+fun Context.putAppNotifyOverlayOf(icon: NotificationIcon, isOverlay: Boolean) =
+    prefs().edit { putBoolean(icon.preferenceName(OVERLAY_SUFFIX), isOverlay) }
