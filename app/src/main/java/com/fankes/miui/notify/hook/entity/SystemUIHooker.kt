@@ -871,8 +871,8 @@ object SystemUIHooker : YukiBaseHooker() {
                 name { it == "alpha" || it == "mAlpha" }
                 superclass()
             }?.set(iconAlpha)
-            /** HyperOS 4 使用独立的 Folme 状态应用透明度，需要与原生 ViewState 同步 */
-            iconStateResolver?.firstFieldOrNull { name = "mIconState" }?.get<Any>()
+            /** OS3、OS4 还需要同步 Folme 状态；OS2 只有 ViewState，不存在 mIconState。 */
+            if (isMIOS && miosVersionCode >= 3) iconStateResolver?.firstFieldOrNull { name = "mIconState" }?.get<Any>()
                 ?.asResolver()?.optional()?.firstFieldOrNull {
                     name = "alpha"
                     superclass()
@@ -1404,10 +1404,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
         } else MiuiClockClass?.resolve()?.optional()?.apply {
-            firstMethodOrNull {
+            /** OS2 同时声明 3、6 参数重载但实际分发 6 参数；不能只取第一个，否则深色状态不会更新。 */
+            method {
                 name = "onDarkChanged"
                 parameterCount { it >= 3 }
-            }?.hook()?.after {
+            }.hookAll().after {
                 notificationIconContainer?.let {
                     when (args(index = 1).float()) {
                         1.0f -> {
@@ -1435,11 +1436,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 /** 注册壁纸颜色监听 */
                 if (args().first().any() != null) instance<ImageView>().also { registerWallpaperColorChanged(it) }
             }
-            /** Hook 深色图标模式改变 */
-            if (isPlaceholder) firstMethodOrNull {
+            /** OS2 使用 6 参数回调，OS3、OS4 使用 3 参数回调，覆盖所有重载以跟随实际分发。 */
+            if (isPlaceholder) method {
                 name = "onDarkChanged"
                 parameterCount { it >= 3 }
-            }?.hook()?.after {
+            }.hookAll().after {
                 val self = instance<ImageView>()
                 when (args(index = 1).float()) {
                     1.0f -> {
