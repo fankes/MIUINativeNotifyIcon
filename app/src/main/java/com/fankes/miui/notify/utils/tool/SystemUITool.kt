@@ -54,7 +54,7 @@ object SystemUITool {
 
     private val CALL_HOST_REFRESH_CACHING = ChannelData("call_host_refresh_caching", false)
     private val CALL_MODULE_REFRESH_RESULT = ChannelData("call_module_refresh_result", false)
-    private val CALL_HOST_REFRESH_ICON_DATA = ChannelData("call_host_refresh_icon_data", false)
+    private val CALL_HOST_REFRESH_ICON_DATA = ChannelData("call_host_refresh_icon_data", "" to 0L)
     private val CALL_MODULE_REFRESH_ICON_DATA_RESULT = ChannelData("call_module_refresh_icon_data_result", false)
 
     /** 当前全部调试日志 */
@@ -80,12 +80,12 @@ object SystemUITool {
         /**
          * 监听通知图标数据刷新请求
          * @param param 当前宿主参数
-         * @param refresh 异步刷新回调
+         * @param refresh 接收模块的仓库版本与异步刷新回调
          */
-        fun onRefreshIconData(param: PackageParam, refresh: ((Boolean) -> Unit) -> Unit) {
+        fun onRefreshIconData(param: PackageParam, refresh: (Pair<String, Long>, (Boolean) -> Unit) -> Unit) {
             param.dataChannel.with {
-                wait(CALL_HOST_REFRESH_ICON_DATA) {
-                    refresh { put(CALL_MODULE_REFRESH_ICON_DATA_RESULT, it) }
+                wait(CALL_HOST_REFRESH_ICON_DATA) { version ->
+                    refresh(version) { put(CALL_MODULE_REFRESH_ICON_DATA_RESULT, it) }
                 }
             }
         }
@@ -237,7 +237,7 @@ object SystemUITool {
             context?.dataChannel(PackageName.SYSTEMUI)?.with {
                 if (isRefreshIconData) {
                     wait(CALL_MODULE_REFRESH_ICON_DATA_RESULT) { result(it) }
-                    put(CALL_HOST_REFRESH_ICON_DATA, true)
+                    put(CALL_HOST_REFRESH_ICON_DATA, IconRuleManagerTool.snapshotVersion ?: ("" to 0L))
                 } else {
                     wait(CALL_MODULE_REFRESH_RESULT) { result(it) }
                     put(CALL_HOST_REFRESH_CACHING, isRefreshCacheOnly)

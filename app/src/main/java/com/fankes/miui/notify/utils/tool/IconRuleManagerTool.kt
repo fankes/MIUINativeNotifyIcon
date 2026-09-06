@@ -22,16 +22,18 @@
  */
 package com.fankes.miui.notify.utils.tool
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import androidx.core.widget.doAfterTextChanged
 import com.fankes.miui.notify.R
@@ -39,6 +41,7 @@ import com.fankes.miui.notify.const.IconRuleSourceSyncType
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
+import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
@@ -55,6 +58,7 @@ import com.highcapable.kavaref.extension.classOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * ANIP 通知图标资源管理类
@@ -72,9 +76,20 @@ object IconRuleManagerTool {
     /** 参与贡献 ANIP 图标的文档地址 */
     const val RULES_CONTRIBUTING_URL = "https://betterandroid.github.io/android-notification-icon-project/zh-cn/contribute/submit"
 
+    /** 更新通知携带的仓库清单地址键 */
+    const val EXTRA_ICON_RULE_SOURCE = "iconRuleSource"
+
+    /** 更新通知携带的资源版本键 */
+    const val EXTRA_ICON_RULE_VERSION = "iconRuleVersion"
+
     /** 当前进程已发布的 ANIP 内存快照 */
     @Volatile
     var snapshot: NotificationIconSnapshot? = null
+        private set
+
+    /** 已发布快照的仓库清单地址与资源版本；尚无可用快照时为空 */
+    @Volatile
+    var snapshotVersion: Pair<String, Long>? = null
         private set
 
     private const val NOTIFY_CHANNEL = "notifyRuleUpdateId"
@@ -116,10 +131,42 @@ object IconRuleManagerTool {
     }
 
     /**
+     * 判断当前快照是否已包含指定仓库的资源版本
+     * @param version 仓库清单地址与资源版本
+     */
+    fun hasSnapshotVersion(version: Pair<String, Long>) = snapshotVersion?.let {
+        version.first == it.first && version.second > 0L && it.second >= version.second
+    } == true
+
+    /**
      * 当前进程是否存在已成功获取的 ANIP 缓存
      * @param context 当前进程上下文
      */
     fun hasCachedResources(context: Context) = obtainAnip(context).timestamp > 0L
+
+    /**
+     * 判断当前仓库的本地缓存是否落后于更新通知携带的版本
+     * @param context 当前模块上下文
+     * @param version 通知携带的仓库清单地址与资源版本
+     */
+    suspend fun isCachedVersionBehind(context: Context, version: Pair<String, Long>) = withContext(Dispatchers.IO) {
+        val currentAnip = obtainAnip(context)
+        version.first == currentAnip.config.source.manifestUrl && version.second > currentAnip.timestamp
+    }
+
+    /**
+     * 发送后台同步结果提醒；资源已是最新时不发送通知
+     * @param context 当前进程上下文
+     * @param result 获取结果
+     */
+    fun notifyFetchResult(context: Context, result: Anip.FetchResult) {
+        when (result.status) {
+            Anip.FetchResult.Status.SUCCESS ->
+                pushNotify(context, title = "同步完成", msg = "通知图标优化适配名单已更新，点击查看。")
+            Anip.FetchResult.Status.FAILED -> pushNotify(context, title = "同步失败", msg = result.message, isRetry = true)
+            Anip.FetchResult.Status.UP_TO_DATE -> Unit
+        }
+    }
 
     /**
      * 显示同步来源并手动获取 ANIP 资源
@@ -254,11 +301,14 @@ object IconRuleManagerTool {
     private suspend fun publishSnapshot(anip: Anip): Boolean {
         val nextSnapshot = anip.createSnapshot()
         if (nextSnapshot.icons.isEmpty()) return false
+        val nextVersion = withContext(Dispatchers.IO) { anip.config.source.manifestUrl to anip.timestamp }
         snapshot = nextSnapshot
+        snapshotVersion = nextVersion
         return true
     }
 
     private fun handleFetchResult(context: Context, result: Anip.FetchResult, callback: () -> Unit) {
+        if (context !is AppCompatActivity) notifyFetchResult(context, result)
         if (result.isOk && snapshot?.icons.isNullOrEmpty().not()) {
             callback()
             if (result.status == Anip.FetchResult.Status.SUCCESS) notifyRefresh(context)
@@ -273,12 +323,9 @@ object IconRuleManagerTool {
                 confirmButton(text = "再试一次") { syncByHand(context, callback) }
                 cancelButton()
             }
-        else pushNotify(context, title = "同步失败", msg = result.message, isRetry = true)
     }
 
     private fun notifyRefresh(context: Context) {
-        if (context !is AppCompatActivity)
-            pushNotify(context, title = "同步完成", msg = "通知图标优化适配名单已更新，点击查看")
         SystemUITool.refreshSystemUI(context, isRefreshIconData = true) {
             if (context is AppCompatActivity) context.snake(msg = "通知图标优化适配名单已更新")
         }
@@ -294,24 +341,32 @@ object IconRuleManagerTool {
                     NotificationManager.IMPORTANCE_DEFAULT
                 )
             )
-            notify(0, NotificationCompat.Builder(context, NOTIFY_CHANNEL).apply {
+            notify(NOTIFY_CHANNEL, 0, Notification.Builder(context, NOTIFY_CHANNEL).apply {
+                setSubText(context.appNameOf(BuildConfigWrapper.APPLICATION_ID))
                 setContentTitle(title)
                 setContentText(msg)
-                color = NOTIFY_COLOR
+                setColor(NOTIFY_COLOR)
                 setAutoCancel(true)
-                setSmallIcon(R.drawable.ic_nf_icon_update)
-                setSound(null)
-                setDefaults(NotificationCompat.DEFAULT_ALL)
+                // SystemUI 使用宿主上下文发送通知，资源和目标页面必须显式指向模块包
+                setSmallIcon(Icon.createWithResource(BuildConfigWrapper.APPLICATION_ID, R.drawable.ic_nf_icon_update))
                 setContentIntent(
                     PendingIntent.getActivity(
                         context,
                         msg.hashCode(),
-                        Intent(context, classOf<ConfigureActivity>()).apply {
+                        Intent().apply {
+                            component = ComponentName(BuildConfigWrapper.APPLICATION_ID, classOf<ConfigureActivity>().name)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             if (isRetry) putExtra("isDirectUpdate", true)
-                            else putExtra("isShowUpdDialog", false)
+                            else {
+                                putExtra("isShowUpdDialog", false)
+                                snapshotVersion?.let { version ->
+                                    putExtra(EXTRA_ICON_RULE_SOURCE, version.first)
+                                    putExtra(EXTRA_ICON_RULE_VERSION, version.second)
+                                }
+                            }
                         },
-                        if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT
-                        else PendingIntent.FLAG_IMMUTABLE
+                        PendingIntent.FLAG_UPDATE_CURRENT or
+                            if (Build.VERSION.SDK_INT < 31) 0 else PendingIntent.FLAG_IMMUTABLE
                     )
                 )
             }.build())

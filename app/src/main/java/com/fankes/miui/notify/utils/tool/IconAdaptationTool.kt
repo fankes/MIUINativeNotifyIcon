@@ -72,6 +72,7 @@ object IconAdaptationTool {
             )
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
+                setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
                 setContentTitle("您已安装 ${context.appNameOf(packageName)}")
                 setContentText("尚未适配此应用，点按打开通知图标优化名单。")
                 setColor(0xFF2993F0.toInt())

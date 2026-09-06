@@ -83,6 +83,7 @@ import com.fankes.miui.notify.utils.tool.BitmapCompatTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.highcapable.anip.sdk.Anip
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.MethodCondition
@@ -1085,7 +1086,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     val updateMarker = timestamp.stampToDate(format = "yyyy-MM-dd HH:mm")
                     if (nowTime == ConfigData.notifyIconFixAutoTime && updateMarker != lastAutoUpdateIconRuleTime) {
                         lastAutoUpdateIconRuleTime = updateMarker
-                        refreshIconData(context)
+                        refreshIconData(context, isNotifyResult = true)
                     }
                 }
             }
@@ -1122,32 +1123,49 @@ object SystemUIHooker : YukiBaseHooker() {
         /** 刷新图标缓存 */
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
         /** 模块进程只传递刷新命令，SystemUI 使用自身缓存获取 ANIP 资源 */
-        SystemUITool.Host.onRefreshIconData(param = this) { result ->
+        SystemUITool.Host.onRefreshIconData(param = this) { version, result ->
             recachingPrefs(isRefreshCacheOnly = true)
-            globalContext?.let { refreshIconData(it, result) } ?: result(false)
+            globalContext?.let { refreshIconData(it, requestedVersion = version, result = result) } ?: result(false)
         }
     }
 
     /**
      * 恢复并更新 SystemUI 进程的 ANIP 快照
      * @param context SystemUI 上下文
+     * @param requestedVersion 模块已获取的仓库版本，已生效时直接确认
+     * @param isNotifyResult 是否发送定时同步结果通知
      * @param result 更新完成回调
      */
-    private fun refreshIconData(context: Context, result: (Boolean) -> Unit = {}) {
+    private fun refreshIconData(
+        context: Context,
+        requestedVersion: Pair<String, Long>? = null,
+        isNotifyResult: Boolean = false,
+        result: (Boolean) -> Unit = {}
+    ) {
         iconRuleScope.launch {
-            runCatching {
+            if (requestedVersion != null && IconRuleManagerTool.hasSnapshotVersion(requestedVersion)) {
+                result(true)
+                return@launch
+            }
+            val previousVersion = IconRuleManagerTool.snapshotVersion
+            val fetchResult = runCatching {
                 IconRuleManagerTool.reload(context)
-                val fetchResult = IconRuleManagerTool.fetch(context)
-                val isAvailable = IconRuleManagerTool.snapshot?.icons.isNullOrEmpty().not()
-                if (isAvailable) {
-                    refreshStatusBarIcons()
-                    refreshNotificationIcons()
+                IconRuleManagerTool.fetch(context).also {
+                    val isAvailable = IconRuleManagerTool.snapshot?.icons.isNullOrEmpty().not()
+                    if (isAvailable && previousVersion != IconRuleManagerTool.snapshotVersion) {
+                        refreshStatusBarIcons()
+                        refreshNotificationIcons()
+                    }
+                    result(it.isOk && isAvailable &&
+                        (requestedVersion == null || IconRuleManagerTool.hasSnapshotVersion(requestedVersion)))
                 }
-                result(fetchResult.isOk && isAvailable)
-            }.onFailure {
+            }.getOrElse {
                 YLog.error("Failed to refresh ANIP icon resources", it)
                 result(false)
+                Anip.FetchResult(it.message ?: "Failed to get ANIP icon resources", Anip.FetchResult.Status.FAILED)
             }
+            if (isNotifyResult) runCatching { IconRuleManagerTool.notifyFetchResult(context, fetchResult) }
+                .onFailure { YLog.error("Failed to notify icon resource update", it) }
         }
     }
 

@@ -35,6 +35,7 @@ import android.os.Bundle
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.appIconOf
+import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 
 /**
@@ -64,6 +65,7 @@ object ActivationPromptTool {
             )
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
+                setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
                 setContentTitle("模块已更新")
                 setContentText("点按通知打开模块以完成新版本激活。")
                 setColor(0xFFE06818.toInt())

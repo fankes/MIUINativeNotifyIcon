@@ -179,6 +179,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
         /** 装载数据 */
         mockLocalData()
+        /** 更新通知对应的仓库和版本，仅在此次通知点击中使用 */
+        val requestedSource = intent?.getStringExtra(IconRuleManagerTool.EXTRA_ICON_RULE_SOURCE).orEmpty()
+        val requestedVersion = intent?.getLongExtra(IconRuleManagerTool.EXTRA_ICON_RULE_VERSION, 0L) ?: 0L
         /** 更新数据 */
         when {
             intent?.getBooleanExtra("isNewAppSupport", false) == true ->
@@ -197,6 +200,10 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     noCancelable()
                 }
             intent?.getBooleanExtra("isDirectUpdate", false) == true -> onStartRefresh(isByHand = false)
+            requestedSource.isNotBlank() && requestedVersion > 0L -> launch {
+                if (IconRuleManagerTool.isCachedVersionBehind(this@ConfigureActivity, requestedSource to requestedVersion))
+                    onStartRefresh(isByHand = false)
+            }
             intent?.getBooleanExtra("isShowUpdDialog", true) == true -> onStartRefresh()
         }
         /** 清除数据 */
@@ -204,6 +211,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             removeExtra("isNewAppSupport")
             removeExtra("isDirectUpdate")
             removeExtra("isShowUpdDialog")
+            removeExtra(IconRuleManagerTool.EXTRA_ICON_RULE_SOURCE)
+            removeExtra(IconRuleManagerTool.EXTRA_ICON_RULE_VERSION)
         }
         /** 设置返回监听事件 */
         addOnBackPressedEvent {
