@@ -43,6 +43,7 @@
 -keep class * implements androidx.viewbinding.ViewBinding {
     <init>();
     *** inflate(android.view.LayoutInflater);
+    *** inflate(android.view.LayoutInflater, android.view.ViewGroup, boolean);
 }
 
 # LSPosed 以注入类加载器载入模块，无法依赖 META-INF/services 发现 Main dispatcher

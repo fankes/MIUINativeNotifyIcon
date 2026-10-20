@@ -29,22 +29,20 @@ import com.fankes.miui.notify.utils.factory.isLowerAndroidP
 import com.fankes.miui.notify.utils.factory.isNotMiSystem
 import com.fankes.miui.notify.utils.factory.isNotSupportMiSystemVersion
 import com.fankes.miui.notify.utils.factory.miSystemVersion
-import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
-import com.highcapable.yukihookapi.hook.factory.configs
+import com.highcapable.yukihookapi.hook.factory.configure
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.YLog
-import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import com.highcapable.yukihookapi.hook.xposed.YukiHookXposedModule
 
-@InjectYukiHookWithXposed
-object HookEntry : IYukiHookXposedInit {
+object HookEntry : YukiHookXposedModule {
 
-    override fun onInit() = configs {
-        debugLog {
+    override fun onInit() = configure {
+        logging {
             tag = "MIUINativeNotifyIcon"
-            isRecord = true
+            recording = true
             elements(PRIORITY)
         }
-        isDebug = false
+        debug = false
     }
 
     override fun onHook() = encase {

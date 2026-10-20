@@ -27,7 +27,7 @@ package com.fankes.miui.notify.data.factory
 import android.widget.SeekBar
 import android.widget.TextView
 import com.fankes.miui.notify.data.ConfigData
-import com.highcapable.yukihookapi.hook.xposed.prefs.data.PrefsData
+import com.highcapable.yukihookapi.hook.xposed.preference.data.PreferenceData
 
 /**
  * 绑定到 [SeekBar] 自动设置进度与 [TextView]
@@ -36,7 +36,7 @@ import com.highcapable.yukihookapi.hook.xposed.prefs.data.PrefsData
  * @param suffix 文本显示的后缀 - 默认空
  * @param onChange 当改变停止时回调
  */
-fun SeekBar.bind(data: PrefsData<Int>, textView: TextView, suffix: String = "", onChange: (Int) -> Unit = {}) {
+fun SeekBar.bind(data: PreferenceData<Int>, textView: TextView, suffix: String = "", onChange: (Int) -> Unit = {}) {
     ConfigData.getInt(data).also { value ->
         textView.text = "$value$suffix"
         progress = value

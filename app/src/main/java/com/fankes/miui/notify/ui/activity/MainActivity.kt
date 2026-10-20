@@ -56,8 +56,12 @@ import com.fankes.miui.notify.utils.tool.I18nWarnTool
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.projectpromote.ProjectPromote
+import com.highcapable.betterandroid.ui.extension.component.runDelayed
 import com.highcapable.betterandroid.ui.extension.view.isUnderline
-import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.betterandroid.ui.extension.view.textToString
+import com.highcapable.yukihookapi.YukiHook
+import com.highcapable.yukihookapi.runtime.YukiHookRuntime
+import kotlinx.coroutines.Job
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
@@ -74,9 +78,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun onCreate() {
-        /** 设置可用性 */
+        // 注册导出调试日志启动器，必须在 STARTED 之前，不能放进框架服务回调里
+        SystemUITool.registerExportDebugLogsLauncher(activity = this)
+        if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED) {
+            var unavailableJob: Job? = null
+            YukiHook.Status.observeFrameworkService(lifecycle) { available ->
+                // 第一次回调可能是 false，稍后连上会再回调 true，所以 false 先等一会
+                unavailableJob?.cancel()
+                if (available) onCreate(available = true)
+                else unavailableJob = runDelayed(500) { onCreate(available = false) }
+            }
+        } else onCreate(available = true)
+    }
+
+    private fun onCreate(available: Boolean) {
+        // 设置可用性
         isActivityLive = true
-        /** 检查更新 */
+        // 检查更新
         GithubReleaseTool.checkingForUpdate(context = this, ModuleVersion.NAME) { version, function ->
             binding.mainTextReleaseVersion.apply {
                 text = "点击更新 $version"
@@ -85,7 +103,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         }
         when {
-            /** 判断是否为小米系统 */
+            // 判断是否为小米系统
             isNotMiSystem ->
                 showDialog {
                     title = "不是 MIUI 或 HyperOS 系统"
@@ -97,7 +115,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断最低 Android 系统版本 */
+            // 判断最低 Android 系统版本
             isLowerAndroidP ->
                 showDialog {
                     title = "Android 系统版本过低"
@@ -110,7 +128,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断支持的系统版本 */
+            // 判断支持的系统版本
             isNotSupportMiSystemVersion ->
                 showDialog {
                     title = "不支持的系统版本"
@@ -125,51 +143,51 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = "退出") { finish() }
                     noCancelable()
                 }
-            /** 判断是否 Hook */
-            YukiHookAPI.Status.isXposedModuleActive -> {
-                if (IconRuleManagerTool.hasCachedResources(this).not() && ConfigData.isEnableNotifyIconFix)
+            else -> {
+                // 判断是否激活
+                if (available && YukiHook.Status.isModuleActive) {
+                    if (IconRuleManagerTool.hasCachedResources(this).not() && ConfigData.isEnableNotifyIconFix)
+                        showDialog {
+                            title = "配置通知图标优化名单"
+                            msg = "模块需要更新 “通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
+                                "你可以随时在本页面下方找到 “配置通知图标优化名单” 手动前往。"
+                            confirmButton(text = "前往") { navigate<ConfigureActivity>() }
+                            cancelButton()
+                            noCancelable()
+                        }
+                    if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix)
+                        showDialog {
+                            title = "模块的通知权限已关闭"
+                            msg = "请开启通知权限，以确保你能收到通知图标优化名单的更新。"
+                            confirmButton { openNotifySetting() }
+                            cancelButton()
+                            noCancelable()
+                        }
+                    if (isLowerAndroidR && ConfigData.isIgnoredAndroidVersionToLow.not())
+                        showDialog {
+                            title = "Android 版本过低"
+                            msg = "你当前使用的 Android 版本过低，模块的部分功能可能会发生问题，" +
+                                "由于设备有限，无法逐一调试，若有好的建议可向我们贡献代码提交适配请求，建议在 Android 11 及以上版本中使用效果最佳。"
+                            confirmButton(text = "我知道了") { ConfigData.isIgnoredAndroidVersionToLow = true }
+                            noCancelable()
+                        }
+                    // 推广、恰饭
+                    ProjectPromote.show(activity = this, ModuleVersion.toString())
+                } else
                     showDialog {
-                        title = "配置通知图标优化名单"
-                        msg = "模块需要更新 “通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n" +
-                            "你可以随时在本页面下方找到 “配置通知图标优化名单” 手动前往。"
-                        confirmButton(text = "前往") { navigate<ConfigureActivity>() }
-                        cancelButton()
+                        title = "模块没有激活"
+                        msg = "检测到模块没有激活，模块需要 Xposed 环境依赖，" +
+                            "同时需要系统拥有 Root 权限，" +
+                            "请自行查看本页面使用帮助与说明第二条。"
+                        confirmButton(text = "我知道了")
                         noCancelable()
                     }
-                if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix)
-                    showDialog {
-                        title = "模块的通知权限已关闭"
-                        msg = "请开启通知权限，以确保你能收到通知图标优化名单的更新。"
-                        confirmButton { openNotifySetting() }
-                        cancelButton()
-                        noCancelable()
-                    }
-                if (isLowerAndroidR && ConfigData.isIgnoredAndroidVersionToLow.not())
-                    showDialog {
-                        title = "Android 版本过低"
-                        msg = "你当前使用的 Android 版本过低，模块的部分功能可能会发生问题，" +
-                            "由于设备有限，无法逐一调试，若有好的建议可向我们贡献代码提交适配请求，建议在 Android 11 及以上版本中使用效果最佳。"
-                        confirmButton(text = "我知道了") { ConfigData.isIgnoredAndroidVersionToLow = true }
-                        noCancelable()
-                    }
-                /** 推广、恰饭 */
-                ProjectPromote.show(activity = this, ModuleVersion.toString())
             }
-            else ->
-                showDialog {
-                    title = "模块没有激活"
-                    msg = "检测到模块没有激活，模块需要 Xposed 环境依赖，" +
-                        "同时需要系统拥有 Root 权限，" +
-                        "请自行查看本页面使用帮助与说明第二条。\n" +
-                        "由于需要修改系统应用达到效果，模块不支持太极阴、应用转生。"
-                    confirmButton(text = "我知道了")
-                    noCancelable()
-                }
         }
         I18nWarnTool.checkingOrShowing(context = this)
-        if (isMIOS) binding.mainTitle.text = binding.mainTitle.text.toString().replace("MIUI", "HyperOS")
+        if (isMIOS) binding.mainTitle.text = binding.mainTitle.textToString().replace("MIUI", "HyperOS")
         binding.mainTextVersion.text = "模块版本：${ModuleVersion.NAME}"
-        /** 设置 CI 自动构建标识 */
+        // 设置 CI 自动构建标识
         if (ModuleVersion.isCiMode)
             binding.mainTextReleaseVersion.apply {
                 text = "CI ${ModuleVersion.GITHUB_COMMIT_ID}"
@@ -340,13 +358,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.notifyIconCustomCornerSeekbar.bind(ConfigData.NOTIFY_ICON_CORNER_SIZE, binding.notifyIconCustomCornerText, suffix = " dp") {
             SystemUITool.refreshSystemUI(context = this)
         }
-        /** 导出全部日志按钮点击事件 */
+        // 导出全部日志按钮点击事件
         binding.expAllDebugLogButton.setOnClickListener { SystemUITool.obtainAndExportDebugLogs(context = this) }
-        /** MIUI 通知显示设置按钮点击事件 */
+        // MIUI 通知显示设置按钮点击事件
         binding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
-        /** 通知图标优化名单按钮点击事件 */
+        // 通知图标优化名单按钮点击事件
         binding.notifyIconFixButton.setOnClickListener { navigate<ConfigureActivity>() }
-        /** 修改状态栏通知图标个数按钮点击事件 */
+        // 修改状态栏通知图标个数按钮点击事件
         binding.statusIconCountButton.setOnClickListener {
             showDialog<DiaStatusIconCountBinding> {
                 title = "设置最多显示的图标个数"
@@ -371,7 +389,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 cancelButton()
             }
         }
-        /** 自动更新在线规则修改时间按钮点击事件 */
+        // 自动更新在线规则修改时间按钮点击事件
         binding.notifyIconAutoSyncButton.setOnClickListener {
             showTimePicker(ConfigData.notifyIconFixAutoTime) {
                 showDialog {
@@ -387,11 +405,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
             }
         }
-        /** 重启按钮点击事件 */
+        // 重启按钮点击事件
         binding.titleRestartIcon.setOnClickListener { SystemUITool.restartSystemUI(context = this) }
-        /** 项目地址按钮点击事件 */
+        // 项目地址按钮点击事件
         binding.titleGithubIcon.setOnClickListener { openProjectUrl() }
-        /** 恰饭！ */
+        // 恰饭！
         binding.layoutSupportMe.setOnClickListener {
             openBrowser(url = "https://afdian.com/a/fankes")
         }
@@ -400,14 +418,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.linkWithFollowMe.setOnClickListener {
             openBrowser(url = "https://www.coolapk.com/u/876977", packageName = "com.coolapk.market")
         }
-        /** 设置桌面图标显示隐藏 */
+        // 设置桌面图标显示隐藏
         binding.hideIconInLauncherSwitch.isChecked = isLauncherIconShowing.not()
         binding.hideIconInLauncherSwitch.setOnCheckedChangeListener { btn, b ->
             if (btn.isPressed.not()) return@setOnCheckedChangeListener
             hideOrShowLauncherIcon(b)
         }
-        /** 注册导出调试日志启动器 */
-        SystemUITool.registerExportDebugLogsLauncher(activity = this)
+        // 框架服务状态确定后同步刷新模块状态，否则需要切换后台触发 onResume 才会更新
+        checkModuleStatus()
     }
 
     /** 前往项目地址 */
@@ -419,38 +437,43 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun refreshModuleStatus() {
         binding.mainLinStatus.setBackgroundResource(
             when {
-                YukiHookAPI.Status.isXposedModuleActive &&
+                YukiHook.Status.isModuleActive &&
                     (isModuleRegular.not() || isModuleValied.not() || ConfigData.isEnableModule.not()) -> R.drawable.bg_yellow_round
-                YukiHookAPI.Status.isXposedModuleActive -> R.drawable.bg_green_round
+                YukiHook.Status.isModuleActive -> R.drawable.bg_green_round
                 else -> R.drawable.bg_dark_round
             }
         )
         binding.mainImgStatus.setImageResource(
             when {
-                YukiHookAPI.Status.isXposedModuleActive && ConfigData.isEnableModule -> R.drawable.ic_success
+                YukiHook.Status.isModuleActive && ConfigData.isEnableModule -> R.drawable.ic_success
                 else -> R.drawable.ic_warn
             }
         )
         binding.mainTextStatus.text = when {
-            YukiHookAPI.Status.isXposedModuleActive && ConfigData.isEnableModule.not() -> "模块已停用"
-            YukiHookAPI.Status.isXposedModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
-            YukiHookAPI.Status.isXposedModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
-            YukiHookAPI.Status.isXposedModuleActive -> "模块已激活"
+            YukiHook.Status.isModuleActive && ConfigData.isEnableModule.not() -> "模块已停用"
+            YukiHook.Status.isModuleActive && isModuleRegular.not() -> "模块已激活，请重启系统界面"
+            YukiHook.Status.isModuleActive && isModuleValied.not() -> "模块已更新，请重启系统界面"
+            YukiHook.Status.isModuleActive -> "模块已激活"
             else -> "模块未激活"
         }
-        binding.mainTextApiWay.isVisible = YukiHookAPI.Status.isXposedModuleActive
-        binding.mainTextApiWay.text = "Activated by ${YukiHookAPI.Status.Executor.name} API ${YukiHookAPI.Status.Executor.apiLevel}"
+        binding.mainTextApiWay.isVisible = YukiHook.Status.isModuleActive
+        binding.mainTextApiWay.text = "Activated by ${YukiHook.Status.Executor.name} API ${YukiHook.Status.Executor.apiVersion}"
     }
 
-    override fun onResume() {
-        super.onResume()
-        /** 刷新模块状态 */
+    /** 刷新并检查模块状态 */
+    private fun checkModuleStatus() {
+        // 刷新模块状态
         refreshModuleStatus()
-        /** 检查模块激活状态 */
+        // 检查模块激活状态
         SystemUITool.checkingActivated(context = this) { isValied ->
             isModuleRegular = true
             isModuleValied = isValied
             refreshModuleStatus()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkModuleStatus()
     }
 }

@@ -39,7 +39,7 @@ import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.factory.dataChannel
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.log.data.YLogData
@@ -97,7 +97,7 @@ object SystemUITool {
      * @param result 成功后回调
      */
     fun checkingActivated(context: Context, result: (Boolean) -> Unit) =
-        context.dataChannel(PackageName.SYSTEMUI).checkingVersionEquals(result = result)
+        context.dataChannel(PackageName.SYSTEMUI).checkVersionMatch(result = result)
 
     /**
      * 注册导出调试日志启动器到 [AppCompatActivity]
@@ -141,7 +141,7 @@ object SystemUITool {
                 } else context.snake(msg = "暂无调试日志")
             }
         }
-        if (YukiHookAPI.Status.isXposedModuleActive)
+        if (YukiHook.Status.isModuleActive)
             context.showDialog {
                 title = "导出全部调试日志"
                 msg = "调试日志中会包含当前系统推送的全部通知内容，其中可能包含你的个人隐私，" +
@@ -245,13 +245,13 @@ object SystemUITool {
             }
         }
         when {
-            YukiHookAPI.Status.isXposedModuleActive && context is AppCompatActivity ->
+            YukiHook.Status.isModuleActive && context is AppCompatActivity ->
                 context.showDialog {
                     title = "请稍后"
                     progressContent = "正在等待系统界面刷新"
                     /** 是否等待成功 */
                     var isWaited = false
-                    /** 设置等待延迟 */
+                    // 设置等待延迟
                     delayedRun(ms = 5000) {
                         if (isWaited) return@delayedRun
                         cancel()
@@ -274,7 +274,7 @@ object SystemUITool {
                     }
                     noCancelable()
                 }
-            YukiHookAPI.Status.isXposedModuleActive.not() && context is AppCompatActivity -> context.snake(msg = "模块没有激活，更改不会生效")
+            YukiHook.Status.isModuleActive.not() && context is AppCompatActivity -> context.snake(msg = "模块没有激活，更改不会生效")
             else -> doRefresh { if (it) callback() }
         }
     }
@@ -284,7 +284,7 @@ object SystemUITool {
      * @param context 实例
      */
     fun showNeedRestartSnake(context: Context) =
-        if (YukiHookAPI.Status.isXposedModuleActive)
+        if (YukiHook.Status.isModuleActive)
             context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
         else context.snake(msg = "模块没有激活，更改不会生效")
 }

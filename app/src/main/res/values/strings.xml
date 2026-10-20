@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">MIUI 原生通知图标</string>
     <string name="tile_name">通知图标</string>
+    <string name="module_description">为金凡教我做事的 MIUI 修复自 12.5 开始后期被破坏的单色图标。\n开发者：酷安 @星夜不荟</string>
 </resources>

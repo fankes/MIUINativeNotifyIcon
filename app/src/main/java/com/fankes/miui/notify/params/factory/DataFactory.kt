@@ -26,7 +26,7 @@ package com.fankes.miui.notify.params.factory
 import android.content.Context
 import com.fankes.miui.notify.utils.factory.base64
 import com.highcapable.anip.sdk.entity.NotificationIcon
-import com.highcapable.yukihookapi.hook.factory.prefs
+import com.highcapable.yukihookapi.hook.factory.preferences
 import com.highcapable.yukihookapi.hook.param.PackageParam
 
 private const val ENABLE_SUFFIX = "_enable"
@@ -38,13 +38,13 @@ private fun NotificationIcon.preferenceName(suffix: String) = (label + packageNa
  * 获取此 APP 的 ANIP 通知图标是否启用
  * @param icon ANIP 图标实体
  */
-fun PackageParam.isAppNotifyEnabledOf(icon: NotificationIcon) = prefs.getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
+fun PackageParam.isAppNotifyEnabledOf(icon: NotificationIcon) = preferences.getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
 
 /**
  * 获取此 APP 的 ANIP 通知图标是否启用
  * @param icon ANIP 图标实体
  */
-fun Context.isAppNotifyEnabledOf(icon: NotificationIcon) = prefs().getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
+fun Context.isAppNotifyEnabledOf(icon: NotificationIcon) = preferences().getBoolean(icon.preferenceName(ENABLE_SUFFIX), true)
 
 /**
  * 设置此 APP 的 ANIP 通知图标是否启用
@@ -52,19 +52,19 @@ fun Context.isAppNotifyEnabledOf(icon: NotificationIcon) = prefs().getBoolean(ic
  * @param isEnabled 是否启用
  */
 fun Context.putAppNotifyEnabledOf(icon: NotificationIcon, isEnabled: Boolean) =
-    prefs().edit { putBoolean(icon.preferenceName(ENABLE_SUFFIX), isEnabled) }
+    preferences().edit { putBoolean(icon.preferenceName(ENABLE_SUFFIX), isEnabled) }
 
 /**
  * 获取此 APP 的 ANIP 通知图标是否覆盖原有单色图标
  * @param icon ANIP 图标实体
  */
-fun PackageParam.isAppNotifyOverlayOf(icon: NotificationIcon) = prefs.getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
+fun PackageParam.isAppNotifyOverlayOf(icon: NotificationIcon) = preferences.getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
 
 /**
  * 获取此 APP 的 ANIP 通知图标是否覆盖原有单色图标
  * @param icon ANIP 图标实体
  */
-fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = prefs().getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
+fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = preferences().getBoolean(icon.preferenceName(OVERLAY_SUFFIX), icon.overlay)
 
 /**
  * 设置此 APP 的 ANIP 通知图标是否覆盖原有单色图标
@@ -72,4 +72,4 @@ fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = prefs().getBoolean(ic
  * @param isOverlay 是否覆盖
  */
 fun Context.putAppNotifyOverlayOf(icon: NotificationIcon, isOverlay: Boolean) =
-    prefs().edit { putBoolean(icon.preferenceName(OVERLAY_SUFFIX), isOverlay) }
+    preferences().edit { putBoolean(icon.preferenceName(OVERLAY_SUFFIX), isOverlay) }

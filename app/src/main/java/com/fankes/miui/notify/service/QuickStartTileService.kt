@@ -30,7 +30,7 @@ class QuickStartTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        /** 启动通知图标优化列表窗口 */
+        // 启动通知图标优化列表窗口
         navigate<ConfigureActivity>()
     }
 }

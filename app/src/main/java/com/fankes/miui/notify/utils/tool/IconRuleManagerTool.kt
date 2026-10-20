@@ -32,7 +32,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
-import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.widget.doAfterTextChanged
@@ -53,6 +52,7 @@ import com.highcapable.anip.sdk.config.RemoteSource
 import com.highcapable.anip.sdk.entity.NotificationIconSnapshot
 import com.highcapable.anip.sdk.type.SystemVariant
 import com.highcapable.betterandroid.ui.extension.component.launch
+import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.betterandroid.ui.extension.view.textToString
 import com.highcapable.kavaref.extension.classOf
 import kotlinx.coroutines.CoroutineScope
@@ -174,7 +174,7 @@ object IconRuleManagerTool {
      * @param callback 成功后回调
      */
     fun syncByHand(context: Context, callback: () -> Unit) {
-        val binding = DiaSourceFromBinding.inflate(LayoutInflater.from(context))
+        val binding = DiaSourceFromBinding.inflate(context.layoutInflater)
         var sourceType = ConfigData.iconRuleSourceSyncType.normalizedSourceType
         var isSyncRequested = false
         binding.sourceRadio0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_1

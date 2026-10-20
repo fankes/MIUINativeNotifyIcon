@@ -65,12 +65,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.google.android.material.snackbar.Snackbar
-import com.highcapable.yukihookapi.hook.factory.hasClass
-import com.highcapable.yukihookapi.hook.factory.method
-import com.highcapable.yukihookapi.hook.factory.toClassOrNull
+import com.highcapable.kavaref.KavaRef.Companion.resolve
+import com.highcapable.kavaref.extension.hasClass
+import com.highcapable.kavaref.extension.toClassOrNull
 import com.highcapable.yukihookapi.hook.log.YLog
-import com.highcapable.yukihookapi.hook.type.java.StringClass
-import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication.Companion.appContext
+import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 import com.topjohnwu.superuser.Shell
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -81,7 +80,7 @@ import java.util.Locale
  * 系统深色模式是否开启
  * @return [Boolean] 是否开启
  */
-val isSystemInDarkMode get() = appContext.isSystemInDarkMode
+val isSystemInDarkMode get() = ModuleApplication.requireContext().isSystemInDarkMode
 
 /**
  * 系统深色模式是否没开启
@@ -147,8 +146,7 @@ val isNotMiSystem get() = !isMiSystem
  * 当前设备是否是 MIUI 定制 Android 系统
  * @return [Boolean] 是否符合条件
  */
-@Suppress("DEPRECATION")
-val isMIUI by lazy { "android.miui.R".hasClass() }
+val isMIUI by lazy { object {}.javaClass.classLoader?.hasClass("android.miui.R") == true }
 
 /**
  * 当前设备是否是 HyperOS 定制 Android 系统
@@ -370,6 +368,13 @@ val Context.appVersionName get() = getPackageInfoCompat(packageName)?.versionNam
 val Context.appVersionCode get() = getPackageInfoCompat(packageName)?.versionCodeCompat
 
 /**
+ * 得到 APP 最后更新时间
+ * @param packageName APP 包名
+ * @return [Long] or null
+ */
+fun Context.appLastUpdateTimeOf(packageName: String) = getPackageInfoCompat(packageName)?.lastUpdateTime
+
+/**
  * 得到 APP 名称
  * @param packageName APP 包名 - 默认为当前 APP
  * @return [String]
@@ -432,7 +437,7 @@ val String.minute
  * 是否关闭了通知权限
  * @return [Boolean]
  */
-val isNotNoificationEnabled get() = !NotificationManagerCompat.from(appContext).areNotificationsEnabled()
+val isNotNoificationEnabled get() = !NotificationManagerCompat.from(ModuleApplication.requireContext()).areNotificationsEnabled()
 
 /**
  * 网络连接是否正常
@@ -534,12 +539,14 @@ fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
  * @param default 默认值
  * @return [String]
  */
-@Suppress("DEPRECATION")
 fun findPropString(key: String, default: String = "") = safeOf(default) {
-    "android.os.SystemProperties".toClassOrNull()?.method {
-        name = "get"
-        param(StringClass, StringClass)
-    }?.get()?.invoke(key, default) ?: default
+    "android.os.SystemProperties".toClassOrNull()
+        ?.resolve()
+        ?.optional(silent = true)
+        ?.firstMethodOrNull {
+            name = "get"
+            parameters(String::class, String::class)
+        }?.invokeQuietly<String>(key, default) ?: default
 }
 
 /**
@@ -570,7 +577,7 @@ fun execShell(cmd: String, isSu: Boolean = true) = safeOfNothing {
  */
 fun toast(msg: String) {
     runCatching {
-        Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
+        Toast.makeText(ModuleApplication.requireContext(), msg, Toast.LENGTH_SHORT).show()
     }.onFailure { YLog.warn(msg) }
 }
 
@@ -609,7 +616,7 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
         if (packageName.isNotBlank()) setPackage(packageName)
         action = Intent.ACTION_VIEW
         data = url.toUri()
-        /** 防止顶栈一样重叠在自己的 APP 中 */
+        // 防止顶栈一样重叠在自己的 APP 中
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     })
 }.onFailure {
@@ -622,7 +629,7 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
  * 跳转 APP 自身设置界面
  * @param packageName 包名
  */
-fun Context.openSelfSetting(packageName: String = appContext.packageName) = runCatching {
+fun Context.openSelfSetting(packageName: String = ModuleApplication.requireContext().packageName) = runCatching {
     if (isInstall(packageName))
         startActivity(Intent().apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK

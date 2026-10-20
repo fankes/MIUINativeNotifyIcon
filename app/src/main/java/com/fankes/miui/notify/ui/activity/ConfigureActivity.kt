@@ -49,7 +49,10 @@ import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.anip.sdk.entity.NotificationIcon
 import com.highcapable.betterandroid.ui.extension.component.launch
-import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.betterandroid.ui.extension.component.runDelayed
+import com.highcapable.yukihookapi.YukiHook
+import com.highcapable.yukihookapi.runtime.YukiHookRuntime
+import kotlinx.coroutines.Job
 
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
@@ -66,21 +69,34 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private var iconAllDatas = emptyList<NotificationIcon>()
 
     override fun onCreate() {
-        /** 检查激活和启用状态 */
-        if (YukiHookAPI.Status.isXposedModuleActive.not() || ConfigData.isEnableModule.not()) {
+        if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED) {
+            var unavailableJob: Job? = null
+            YukiHook.Status.observeFrameworkService(lifecycle) { available ->
+                // 第一次回调可能是 false，稍后连上会再回调 true，所以 false 先等一会
+                unavailableJob?.cancel()
+                if (available) onCreate(available = true)
+                else unavailableJob = runDelayed(500) { onCreate(available = false) }
+            }
+        } else onCreate(available = true)
+    }
+
+    private fun onCreate(available: Boolean) {
+        if (!available || !YukiHook.Status.isModuleActive || !ConfigData.isEnableModule)
             showDialog {
                 title = "模块不可用"
                 msg = "模块没有激活或已被停用，你无法使用这里的功能，请先激活或启用模块。"
                 confirmButton(text = "我知道了") { finish() }
                 noCancelable()
             }
-            return
-        }
-        /** 返回按钮点击事件 */
+        else continueOnCreate()
+    }
+
+    private fun continueOnCreate() {
+        // 返回按钮点击事件
         binding.titleBackIcon.setOnClickListener { callOnBackPressed() }
-        /** 刷新适配器结果相关 */
+        // 刷新适配器结果相关
         refreshAdapterResult()
-        /** 设置上下按钮点击事件 */
+        // 设置上下按钮点击事件
         binding.configTitleUp.setOnClickListener {
             snake(msg = "滚动到顶部")
             onScrollEvent?.invoke(false)
@@ -89,7 +105,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             snake(msg = "滚动到底部")
             onScrollEvent?.invoke(true)
         }
-        /** 设置过滤按钮点击事件 */
+        // 设置过滤按钮点击事件
         binding.configTitleFilter.setOnClickListener {
             showDialog<DiaIconFilterBinding> {
                 title = "按条件过滤"
@@ -118,9 +134,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     }
             }
         }
-        /** 设置同步列表按钮点击事件 */
+        // 设置同步列表按钮点击事件
         binding.configTitleSync.setOnClickListener { onStartRefresh() }
-        /** 设置列表元素和 Adapter */
+        // 设置列表元素和 Adapter
         binding.configListView.apply {
             bindAdapter {
                 onBindDatas { iconDatas }
@@ -166,7 +182,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             }.apply { onChanged = { notifyDataSetChanged() } }
             onScrollEvent = { post { setSelection(if (it) iconDatas.lastIndex else 0) } }
         }
-        /** 设置点击事件 */
+        // 设置点击事件
         binding.configCbrButton.setOnClickListener {
             showDialog {
                 title = "为 ANIP 做出贡献"
@@ -177,12 +193,12 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 neutralButton(text = "暂时不用")
             }
         }
-        /** 装载数据 */
+        // 装载数据
         mockLocalData()
         /** 更新通知对应的仓库和版本，仅在此次通知点击中使用 */
         val requestedSource = intent?.getStringExtra(IconRuleManagerTool.EXTRA_ICON_RULE_SOURCE).orEmpty()
         val requestedVersion = intent?.getLongExtra(IconRuleManagerTool.EXTRA_ICON_RULE_VERSION, 0L) ?: 0L
-        /** 更新数据 */
+        // 更新数据
         when {
             intent?.getBooleanExtra("isNewAppSupport", false) == true ->
                 showDialog {
@@ -206,7 +222,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             }
             intent?.getBooleanExtra("isShowUpdDialog", true) == true -> onStartRefresh()
         }
-        /** 清除数据 */
+        // 清除数据
         intent?.apply {
             removeExtra("isNewAppSupport")
             removeExtra("isDirectUpdate")
@@ -214,7 +230,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             removeExtra(IconRuleManagerTool.EXTRA_ICON_RULE_SOURCE)
             removeExtra(IconRuleManagerTool.EXTRA_ICON_RULE_VERSION)
         }
-        /** 设置返回监听事件 */
+        // 设置返回监听事件
         addOnBackPressedEvent {
             if (MainActivity.isActivityLive.not())
                 showDialog {

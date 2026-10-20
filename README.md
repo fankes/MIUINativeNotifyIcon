@@ -29,7 +29,7 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 ## 适配说明
 
-- 此模块仅支持 **LSPosed** (作用域“系统界面”)、**~~EdXposed(随时停止支持)~~**、不支持**太极、无极**
+- 此模块仅支持 **LSPosed** (作用域“系统界面”)、**~~EdXposed(随时停止支持)~~**
 
 - 请确保你使用的是 MIUI 官方版本，任何第三方官改包发生的问题，开发者没有义务去解决和修复，请自求多福
 
@@ -47,9 +47,9 @@ This project will not be adapted i18n, please stay tuned for my new projects in 
 
 ## 贡献通知图标优化名单
 
-此项目是 `AndroidNotifyIconAdapt` 项目的一部分，详情请参考下方。
+此项目是 `ANIP` 项目的一部分，详情请参考下方。
 
-- [Android 通知图标规范适配计划](https://github.com/fankes/AndroidNotifyIconAdapt)
+- [ANIP](https://github.com/BetterAndroid/android-notification-icon-project)
 
 ## 发行渠道
 
@@ -119,6 +119,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-Powered by [YukiHookAPI](https://github.com/HighCapable/YukiHookAPI)
+Powered by [YukiHook](https://github.com/HighCapable/YukiHook)
 
 版权所有 © 2017 Fankes Studio(qzmmcn@163.com)
