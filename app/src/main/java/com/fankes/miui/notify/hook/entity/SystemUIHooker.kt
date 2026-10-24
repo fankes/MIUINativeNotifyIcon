@@ -26,6 +26,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.WallpaperManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -55,6 +56,7 @@ import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.params.factory.isAppNotifyEnabledOf
 import com.fankes.miui.notify.params.factory.isAppNotifyOverlayOf
+import com.fankes.miui.notify.service.IconRuleUpdateService
 import com.fankes.miui.notify.utils.factory.appIconOf
 import com.fankes.miui.notify.utils.factory.appLastUpdateTimeOf
 import com.fankes.miui.notify.utils.factory.appNameOf
@@ -89,6 +91,7 @@ import com.highcapable.kavaref.condition.MethodCondition
 import com.highcapable.kavaref.extension.VariousClass
 import com.highcapable.kavaref.extension.classOf
 import com.highcapable.kavaref.extension.isSubclassOf
+import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.extension.kavaref.hook
 import com.highcapable.yukihookapi.extension.kavaref.hookAll
 import com.highcapable.yukihookapi.extension.kavaref.lazyClass
@@ -98,12 +101,16 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.injectModuleResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.HookParam
+import com.highcapable.yukihookapi.runtime.YukiHookRuntime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.defaults.drawabletoolbox.DrawableBuilder
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * 系统界面核心 Hook 类
@@ -220,10 +227,16 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
 
+    /** 等待模块定时更新服务响应的最长时间 */
+    private const val ICON_RULE_UPDATE_TIMEOUT = 60_000L
+
     private val foldEntranceIconContext = ThreadLocal<Pair<List<StatusBarNotification>, Int>>()
 
     /** SystemUI 进程内用于恢复和更新 ANIP 快照的协程作用域。 */
     private val iconRuleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** 当前运行时是否提供模块共享文件，不提供时回退为 SystemUI 自行获取资源 */
+    private val isSharedCacheAvailable get() = YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED
 
     /** 当前是否处于深色图标模式 - 跟随 Hook 保存 */
     private var isDarkIconMode = false
@@ -242,6 +255,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 上次自动更新 ANIP 资源的日期与分钟标记 */
     private var lastAutoUpdateIconRuleTime = ""
+
+    /** 模块定时更新服务未响应时的兜底提醒 */
+    private var iconRuleUpdateFallbackJob: Job? = null
 
     /** 状态栏通知图标容器 */
     @Suppress("StaticFieldLeak")
@@ -1068,7 +1084,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     val updateMarker = timestamp.stampToDate(format = "yyyy-MM-dd HH:mm")
                     if (nowTime == ConfigData.notifyIconFixAutoTime && updateMarker != lastAutoUpdateIconRuleTime) {
                         lastAutoUpdateIconRuleTime = updateMarker
-                        refreshIconData(context, isNotifyResult = true)
+                        requestIconRuleUpdate(context)
                     }
                 }
             }
@@ -1102,10 +1118,15 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         // 刷新图标缓存
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
-        // 模块进程只传递刷新命令，SystemUI 使用自身缓存获取 ANIP 资源
+        // 模块获取资源并写入共享文件后发送刷新命令，SystemUI 从共享文件重新装载
         SystemUITool.Host.onRefreshIconData(param = this) { version, result ->
             recachingPrefs(isRefreshCacheOnly = true)
             globalContext?.let { refreshIconData(it, requestedVersion = version, result = result) } ?: result(false)
+        }
+        // 模块的定时更新服务已启动，后续结果由模块自行通知
+        SystemUITool.Host.onIconRuleUpdateStarted(param = this) {
+            iconRuleUpdateFallbackJob?.cancel()
+            iconRuleUpdateFallbackJob = null
         }
     }
 
@@ -1114,7 +1135,7 @@ object SystemUIHooker : YukiBaseHooker() {
         moduleLastUpdateTime = appLastUpdateTimeOf(BuildConfigWrapper.APPLICATION_ID)
         // 注入模块资源
         injectModuleResources()
-        // 先恢复 SystemUI 私有缓存，再由 SystemUI 自身检查更新
+        // 从模块共享文件恢复 ANIP 快照
         globalContext?.let { refreshIconData(it) }
     }
 
@@ -1138,13 +1159,77 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
-     * 恢复并更新 SystemUI 进程的 ANIP 快照
+     * 启动模块的定时更新服务，SystemUI 只能读取共享文件，获取资源需要交给模块进程
+     *
+     * 无法启动或超时未响应时提醒用户手动同步，legacy 运行时回退到 [legacyRefreshIconData]
+     * @param context SystemUI 上下文
+     */
+    private fun requestIconRuleUpdate(context: Context) {
+        if (isSharedCacheAvailable.not()) return legacyRefreshIconData(context, isNotifyResult = true)
+        /** 提醒用户手动同步 */
+        fun notifyManualUpdate() = runCatching {
+            IconRuleManagerTool.notifyFetchResult(
+                context, Anip.FetchResult("无法自动启动模块进行同步，点击手动同步", Anip.FetchResult.Status.FAILED)
+            )
+        }.onFailure { YLog.error("Failed to notify icon resource update", it) }
+        iconRuleUpdateFallbackJob?.cancel()
+        runCatching {
+            context.startForegroundService(Intent().apply {
+                component = ComponentName(BuildConfigWrapper.APPLICATION_ID, classOf<IconRuleUpdateService>().name)
+            })
+        }.onFailure {
+            YLog.error("Failed to start icon rule update service", it)
+            notifyManualUpdate()
+            return
+        }
+        iconRuleUpdateFallbackJob = iconRuleScope.launch {
+            delay(ICON_RULE_UPDATE_TIMEOUT.milliseconds)
+            YLog.warn("Icon rule update service did not respond")
+            notifyManualUpdate()
+        }
+    }
+
+    /**
+     * 从模块共享文件重新装载 SystemUI 进程的 ANIP 快照，legacy 运行时回退到 [legacyRefreshIconData]
+     * @param context SystemUI 上下文
+     * @param requestedVersion 模块已获取的仓库版本，已生效时直接确认
+     * @param result 装载完成回调
+     */
+    private fun refreshIconData(
+        context: Context,
+        requestedVersion: Pair<String, Long>? = null,
+        result: (Boolean) -> Unit = {}
+    ) {
+        if (isSharedCacheAvailable.not()) return legacyRefreshIconData(context, requestedVersion, result = result)
+        iconRuleScope.launch {
+            if (requestedVersion != null && IconRuleManagerTool.hasSnapshotVersion(requestedVersion)) {
+                result(true)
+                return@launch
+            }
+            val previousVersion = IconRuleManagerTool.snapshotVersion
+            runCatching {
+                IconRuleManagerTool.reload(context)
+                val isAvailable = IconRuleManagerTool.snapshot?.icons.isNullOrEmpty().not()
+                if (isAvailable && previousVersion != IconRuleManagerTool.snapshotVersion) {
+                    refreshStatusBarIcons()
+                    refreshNotificationIcons()
+                }
+                result(isAvailable && (requestedVersion == null || IconRuleManagerTool.hasSnapshotVersion(requestedVersion)))
+            }.onFailure {
+                YLog.error("Failed to reload ANIP icon resources", it)
+                result(false)
+            }
+        }
+    }
+
+    /**
+     * 回退：legacy 运行时没有模块共享文件，SystemUI 恢复自己的私有缓存并自行获取资源
      * @param context SystemUI 上下文
      * @param requestedVersion 模块已获取的仓库版本，已生效时直接确认
      * @param isNotifyResult 是否发送定时同步结果通知
      * @param result 更新完成回调
      */
-    private fun refreshIconData(
+    private fun legacyRefreshIconData(
         context: Context,
         requestedVersion: Pair<String, Long>? = null,
         isNotifyResult: Boolean = false,
@@ -1197,6 +1282,8 @@ object SystemUIHooker : YukiBaseHooker() {
 
     override fun onHook() {
         isHooked = true
+        // SystemUI 只读取模块写入的 ANIP 共享文件
+        if (isSharedCacheAvailable) IconRuleManagerTool.attachHost(sharedFiles)
         // 注册生命周期
         registerLifecycle()
         // Android 16、17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标；

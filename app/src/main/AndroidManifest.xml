@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <uses-permission
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
@@ -57,6 +61,11 @@
             android:exported="true"
             android:screenOrientation="behind" />
 
+        <service
+            android:name=".service.IconRuleUpdateService"
+            android:exported="true"
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.STATUS_BAR_SERVICE" />
         <service
             android:name=".service.QuickStartTileService"
             android:exported="true"

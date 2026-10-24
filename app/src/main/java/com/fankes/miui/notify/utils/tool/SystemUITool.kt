@@ -56,6 +56,7 @@ object SystemUITool {
     private val CALL_MODULE_REFRESH_RESULT = ChannelData("call_module_refresh_result", false)
     private val CALL_HOST_REFRESH_ICON_DATA = ChannelData("call_host_refresh_icon_data", "" to 0L)
     private val CALL_MODULE_REFRESH_ICON_DATA_RESULT = ChannelData("call_module_refresh_icon_data_result", false)
+    private const val CALL_HOST_ICON_RULE_UPDATE_STARTED = "call_host_icon_rule_update_started"
 
     /** 当前全部调试日志 */
     private var debugLogs = listOf<YLogData>()
@@ -89,6 +90,23 @@ object SystemUITool {
                 }
             }
         }
+
+        /**
+         * 监听模块的定时更新服务已启动
+         * @param param 当前宿主参数
+         * @param callback 回调
+         */
+        fun onIconRuleUpdateStarted(param: PackageParam, callback: () -> Unit) {
+            param.dataChannel.wait(CALL_HOST_ICON_RULE_UPDATE_STARTED, callback = callback)
+        }
+    }
+
+    /**
+     * 告知系统界面模块的定时更新服务已启动
+     * @param context 模块上下文
+     */
+    fun notifyIconRuleUpdateStarted(context: Context) {
+        context.dataChannel(PackageName.SYSTEMUI).put(CALL_HOST_ICON_RULE_UPDATE_STARTED)
     }
 
     /**

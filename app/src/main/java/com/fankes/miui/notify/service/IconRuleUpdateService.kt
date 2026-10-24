@@ -1,0 +1,129 @@
+/*
+ * MIUINativeNotifyIcon - Fix the native notification bar icon function abandoned by the MIUI development team.
+ * Copyright (C) 2017 Fankes Studio(qzmmcn@163.com)
+ * https://github.com/fankes/MIUINativeNotifyIcon
+ *
+ * This software is non-free but opensource software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation; either
+ * version 3 of the License, or any later version.
+ * <p>
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * and eula along with this software.  If not, see
+ * <https://www.gnu.org/licenses/>
+ *
+ * This file is created by fankes on 2026/10/24.
+ */
+package com.fankes.miui.notify.service
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
+import android.content.Intent
+import android.content.pm.ServiceInfo
+import androidx.core.app.ServiceCompat
+import androidx.core.content.getSystemService
+import com.fankes.miui.notify.R
+import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
+import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.highcapable.anip.sdk.Anip
+import com.highcapable.yukihookapi.YukiHook
+import com.highcapable.yukihookapi.runtime.YukiHookRuntime
+import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * 由 SystemUI 定时启动的通知图标优化名单更新服务
+ *
+ * SystemUI 只能读取共享文件，获取资源并写入的工作需要在模块进程中完成
+ */
+class IconRuleUpdateService : Service() {
+
+    private companion object {
+
+        /** 等待 Hook 框架服务连接的最长时间 */
+        const val FRAMEWORK_SERVICE_TIMEOUT = 15_000L
+
+        const val NOTIFY_CHANNEL = "iconRuleUpdatingId"
+        const val NOTIFY_ID = 1
+    }
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** 是否正在更新 */
+    private var isUpdating = false
+
+    override fun onBind(intent: Intent?) = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground()
+        // 告知 SystemUI 已收到更新请求，取消它的兜底提醒
+        SystemUITool.notifyIconRuleUpdateStarted(context = this)
+        if (isUpdating) return START_NOT_STICKY
+        isUpdating = true
+        scope.launch {
+            val result = if (awaitFrameworkService())
+                runCatching { IconRuleManagerTool.fetch(context = this@IconRuleUpdateService) }.getOrElse {
+                    Anip.FetchResult(it.message ?: "获取 ANIP 资源失败", Anip.FetchResult.Status.FAILED)
+                }
+            else Anip.FetchResult("Hook 框架服务未连接，请确认模块已激活", Anip.FetchResult.Status.FAILED)
+            IconRuleManagerTool.notifyFetchResult(context = this@IconRuleUpdateService, result)
+            if (result.status == Anip.FetchResult.Status.SUCCESS)
+                SystemUITool.refreshSystemUI(context = this@IconRuleUpdateService, isRefreshIconData = true)
+            stopSelf()
+        }
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
+    }
+
+    /** 启动前台服务并显示同步中的通知 */
+    private fun startForeground() {
+        getSystemService<NotificationManager>()?.createNotificationChannel(
+            NotificationChannel(NOTIFY_CHANNEL, "通知图标优化适配名单同步", NotificationManager.IMPORTANCE_LOW)
+        )
+        val notification = Notification.Builder(this, NOTIFY_CHANNEL)
+            .setSmallIcon(R.drawable.ic_nf_icon_update)
+            .setContentTitle("正在同步")
+            .setContentText("正在获取 ANIP 图标资源")
+            .build()
+        @Suppress("InlinedApi")
+        ServiceCompat.startForeground(this, NOTIFY_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+    }
+
+    /** 冷启动的模块进程需要等待 Hook 框架服务异步连接后才能写入共享文件 */
+    private suspend fun awaitFrameworkService(): Boolean {
+        // legacy 运行时没有框架服务，监听会直接抛出异常
+        if (YukiHook.Status.runtime != YukiHookRuntime.LIBXPOSED) return true
+        var subscription: FrameworkServiceBridge? = null
+        return try {
+            withTimeoutOrNull(FRAMEWORK_SERVICE_TIMEOUT.milliseconds) {
+                suspendCancellableCoroutine { continuation ->
+                    subscription = YukiHook.Status.observeFrameworkService { available ->
+                        if (available && continuation.isActive) continuation.resume(true)
+                    }
+                }
+            } == true
+        } finally {
+            subscription?.unregister()
+        }
+    }
+}

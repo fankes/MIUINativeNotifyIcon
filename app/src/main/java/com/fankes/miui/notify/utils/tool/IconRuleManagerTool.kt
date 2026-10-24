@@ -55,6 +55,9 @@ import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.betterandroid.ui.extension.view.textToString
 import com.highcapable.kavaref.extension.classOf
+import com.highcapable.yukihookapi.YukiHook
+import com.highcapable.yukihookapi.hook.xposed.file.YukiHookSharedFiles
+import com.highcapable.yukihookapi.runtime.YukiHookRuntime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,7 +66,11 @@ import kotlinx.coroutines.withContext
 /**
  * ANIP 通知图标资源管理类
  *
- * 模块与 SystemUI 进程会各自创建实例和私有缓存，快照仅在当前进程内复用
+ * 模块与 SystemUI 进程会各自创建实例，缓存保存在模块共享文件中，由模块负责获取与写入，SystemUI 只读
+ *
+ * legacy 运行时没有模块共享文件，回退为各进程使用私有缓存
+ *
+ * 快照仅在当前进程内复用
  */
 object IconRuleManagerTool {
 
@@ -92,6 +99,9 @@ object IconRuleManagerTool {
     var snapshotVersion: Pair<String, Long>? = null
         private set
 
+    /** ANIP 缓存在模块共享文件中的文件名 */
+    private const val ANIP_SHARED_FILE_NAME = "anip-bundle"
+
     private const val NOTIFY_CHANNEL = "notifyRuleUpdateId"
     private const val NOTIFY_COLOR = 0xFFE06818.toInt()
 
@@ -103,6 +113,18 @@ object IconRuleManagerTool {
 
     @Volatile
     private var anip: Anip? = null
+
+    /** SystemUI 绑定的共享文件，模块进程中为空 */
+    @Volatile
+    private var hostSharedFiles: YukiHookSharedFiles? = null
+
+    /**
+     * 在 SystemUI 中绑定只读的模块共享文件，需要在首次装载资源之前调用
+     * @param sharedFiles 宿主中的共享文件实例
+     */
+    fun attachHost(sharedFiles: YukiHookSharedFiles) {
+        hostSharedFiles = sharedFiles
+    }
 
     /**
      * 从当前进程的私有缓存恢复 ANIP 快照
@@ -283,15 +305,27 @@ object IconRuleManagerTool {
             return it
         }
         return synchronized(this) {
-            anip?.apply { config.source = source } ?: Anip(
-                context.applicationContext,
-                AnipConfig(
-                    systemVariant = SystemVariant.MIOS,
-                    source = source
-                )
-            ).also { anip = it }
+            anip?.apply { config.source = source } ?: Anip(context.applicationContext, createAnipConfig(source)).also { anip = it }
         }
     }
+
+    private fun createAnipConfig(source: RemoteSource) =
+        if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED)
+            AnipConfig(
+                systemVariant = SystemVariant.MIOS,
+                cacheDescriptor = createSharedCacheDescriptor(),
+                source = source
+            )
+        else createLegacyAnipConfig(source)
+
+    private fun createSharedCacheDescriptor() = hostSharedFiles?.let { sharedFiles ->
+        AnipConfig.CacheDescriptor(isReadOnly = true) { sharedFiles.open(ANIP_SHARED_FILE_NAME) }
+    } ?: AnipConfig.CacheDescriptor { YukiHook.Module.sharedFiles.open(ANIP_SHARED_FILE_NAME) }
+
+    /**
+     * 回退：legacy 运行时没有模块共享文件，模块与 SystemUI 各自使用 SDK 默认的私有缓存，SystemUI 需要自行获取资源
+     */
+    private fun createLegacyAnipConfig(source: RemoteSource) = AnipConfig(systemVariant = SystemVariant.MIOS, source = source)
 
     private fun createSource(repository: String, sourceType: Int) = RemoteSource.GitHub(
         repository = repository,
