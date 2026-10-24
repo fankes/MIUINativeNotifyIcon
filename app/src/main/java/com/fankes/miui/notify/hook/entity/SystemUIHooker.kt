@@ -253,8 +253,8 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 是否已经使用过缓存刷新功能 */
     private var isUsingCachingMethod = false
 
-    /** 上次自动更新 ANIP 资源的日期与分钟标记 */
-    private var lastAutoUpdateIconRuleTime = ""
+    /** 上次自动更新 ANIP 资源的日期 */
+    private var lastAutoUpdateIconRuleDate = ""
 
     /** 模块定时更新服务未响应时的兜底提醒 */
     private var iconRuleUpdateFallbackJob: Job? = null
@@ -1081,9 +1081,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 if (ConfigData.isEnableNotifyIconFix && ConfigData.isEnableNotifyIconFixAuto) {
                     val timestamp = System.currentTimeMillis()
                     val nowTime = timestamp.stampToDate(format = "HH:mm")
-                    val updateMarker = timestamp.stampToDate(format = "yyyy-MM-dd HH:mm")
-                    if (nowTime == ConfigData.notifyIconFixAutoTime && updateMarker != lastAutoUpdateIconRuleTime) {
-                        lastAutoUpdateIconRuleTime = updateMarker
+                    val today = timestamp.stampToDate(format = "yyyy-MM-dd")
+                    // 息屏 Doze 时 TIME_TICK 会被合并为几分钟一次，可能错过设定的那一分钟，
+                    // 所以过了设定时间后当天的任意一次 TIME_TICK 都可以补触发，两者均为补零的 "HH:mm" 可直接比较
+                    if (nowTime >= ConfigData.notifyIconFixAutoTime && today != lastAutoUpdateIconRuleDate) {
+                        lastAutoUpdateIconRuleDate = today
                         requestIconRuleUpdate(context)
                     }
                 }
