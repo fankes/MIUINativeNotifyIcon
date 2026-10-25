@@ -1,10 +1,12 @@
 # 历史背景
 
+> 更新于：2023-10-31
+
 这个模块诞生来源于 MIUI 的乱改和不规范，本来 MIUI 9 之后，官方给出了原生通知图标样式，后面由于用户反应通知栏经常出现黑白块。
 
-这当然不是系统的错，而是国内 APP 和 `MIPUSH` 的通知极其不规范的通知图标设计。
+这当然不是系统的错，而是国内应用和 `MIPUSH` 的通知极其不规范的通知图标设计。
 
-但是呢，接到反馈后 MIUI 开发组选择直接忽略这个问题，在 `2021-5-18` 的开发版开始，把全部通知图标都改成了 APP 的彩色图标，使得之前拥有自有样式的原生图标也被破坏。
+但是呢，接到反馈后 MIUI 开发组选择直接忽略这个问题，在 `2021-5-18` 的开发版开始，把全部通知图标都改成了应用的彩色图标，使得之前拥有自有样式的原生图标也被破坏。
 
 对于 Android 开发者来说，官方文档中的 `setSmallIcon` 不再适用于魔改后的 MIUI，这将会严重破坏非常多的状态图标。
 
@@ -24,7 +26,7 @@
 
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/img-src/native.jpg?raw=true" height = "35" alt="Screenshot"/>
 
-而 MIUI 最近的版本直接破坏了这一状态性，全部设置为 APP 的图标，不仅难看而且你无法下拉通知栏区别这些图标代表什么。
+而 MIUI 最近的版本直接破坏了这一状态性，全部设置为应用的图标，不仅难看而且你无法下拉通知栏区别这些图标代表什么。
 
 <img src="https://github.com/fankes/MIUINativeNotifyIcon/blob/master/img-src/miui.jpg?raw=true" height = "40" alt="Screenshot"/>
 

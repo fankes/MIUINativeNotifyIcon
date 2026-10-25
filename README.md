@@ -1,4 +1,4 @@
-# MIUI 原生通知图标
+# HyperOS/MIUI Stock Notification Icon
 
 [![GitHub license](https://img.shields.io/github/license/fankes/MIUINativeNotifyIcon?color=blue&style=flat-square)](https://github.com/fankes/MIUINativeNotifyIcon/blob/master/LICENSE)
 [![GitHub CI](https://img.shields.io/github/actions/workflow/status/fankes/MIUINativeNotifyIcon/commit_ci.yml?label=CI%20builds&style=flat-square)](https://github.com/fankes/MIUINativeNotifyIcon/actions/workflows/commit_ci.yml)
@@ -7,98 +7,99 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/Xposed-Modules-Repo/com.fankes.miui.notify/total?label=LSPosed%20downloads&labelColor=F48FB1&style=flat-square)
 
 [![Telegram CI](https://img.shields.io/badge/CI%20builds-Telegram-blue.svg?logo=telegram&style=flat-square)](https://t.me/MIUINativeNotifyIcon_CI)
+[![Telegram Channel](https://img.shields.io/badge/channel-Telegram-blue.svg?logo=telegram&style=flat-square)](https://t.me/XiaofangDaily)
 [![Telegram](https://img.shields.io/badge/discussion-Telegram-blue.svg?logo=telegram&style=flat-square)](https://t.me/XiaofangInternet)
 [![QQ](https://img.shields.io/badge/discussion-QQ-blue.svg?logo=tencent-qq&logoColor=red&style=flat-square)](https://qm.qq.com/cgi-bin/qm/qr?k=dp2h5YhWiga9WWb_Oh7kSHmx01X8I8ii&jump_from=webapi&authKey=Za5CaFP0lk7+Zgsk2KpoBD7sSaYbeXbsDgFjiWelOeH4VSionpxFJ7V0qQBSqvFM)
-[![QQ 频道](https://img.shields.io/badge/discussion-QQ%20频道-blue.svg?logo=tencent-qq&logoColor=red&style=flat-square)](https://pd.qq.com/s/44gcy28h)
+[![QQ Channel](https://img.shields.io/badge/discussion-QQ%20频道-blue.svg?logo=tencent-qq&logoColor=red&style=flat-square)](https://pd.qq.com/s/44gcy28h)
 
 <img src="img-src/icon.png" width = "100" height = "100" alt="LOGO"/>
 
-Fix the native notification bar icon function abandoned by the MIUI development team.
+English | [简体中文](README-zh-CN.md)
 
-修复被 MIUI 开发组丢弃的原生通知图标，支持 MIUI 11-14 以及 HyperOS 1.0-4.0。
+Fix the stock notification bar icon function abandoned by the HyperOS/MIUI development team.
 
-## For Non-Chinese Users
+## Project Migration Notice
 
-This project will not be adapted i18n, please stay tuned for my new projects in the future.
+Maintaining two modules for both **HyperOS/MIUI** and **ColorOS** at the same time is very inconvenient, so I plan to gradually merge and decouple the
+two
+projects into a new one, with plans to support more systems and devices, such as AOSP and AOSP-like systems.
 
-## 项目迁移公告
+Once the new project is settled, its link will be added here. At that time I will stop maintaining this project and recommend that everyone move to
+the new project.
 
-由于本人同时维护 **MIUI** 与 **ColorOS** 两个系统需要同时维护两个模块，十分不方便，所以我决定在后期逐渐合并两个项目并解耦合为一个新项目并计划适配更多系统与设备，例如原生与类原生系统。
+## Compatibility Notes
 
-在新的项目确定后，会在这里添加新项目的链接，届时我会终止维护这个项目并建议大家转移到新项目。
+- **LSPosed** (scope: "System UI") is recommended
+- Please make sure you are using an official HyperOS/MIUI build. The developer has no obligation to solve or fix problems that occur on any
+  third-party
+  modified ROM
+- The minimum supported version is MIUI 11 based on Android 9, or MIUI 12 / 12.5
+- It is recommended to use the module from the MIUI 12.5 `2021-5-18` development build onwards. Earlier versions may have MIUI's own bugs that make it
+  ineffective or show black and white block icons
 
-## 适配说明
+## Background
 
-- 此模块仅支持 **LSPosed** (作用域“系统界面”)、**~~EdXposed(随时停止支持)~~**
+Click [here](EXPLORE_HISTORY.md) to read the background and exploration history of this module (Chinese only).
 
-- 请确保你使用的是 MIUI 官方版本，任何第三方官改包发生的问题，开发者没有义务去解决和修复，请自求多福
+## Contribute to the ANIP
 
-- 目前最低支持基于 Android 9 版本的 MIUI 11 或 MIUI 12、12.5 (最低建议)
+The notification icons of this project come from the ANIP project. [Click here](https://github.com/BetterAndroid/android-notification-icon-project)
+for details.
 
-- 建议最低从 MIUI 12.5 `2021-5-18` 开发版以后开始使用模块，之前的版本可能或多或少存在 MIUI 自身 BUG 不生效、图标黑白块的问题
+## Release Channels
 
-- 请始终保持最新版本的 **LSPosed**，旧版本可能会出现 Hook 不生效的问题，若最新版本依然不生效请在作用域中长按“系统界面” (“系统 UI”) 选择重新优化
+| <img src="https://avatars.githubusercontent.com/in/15368?s=64&v=4" width = "30" height = "30" alt="LOGO"/> | [GitHub CI](https://github.com/fankes/MIUINativeNotifyIcon/actions/workflows/commit_ci.yml) | CI automatic builds (beta) |
+|------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|----------------------------|
 
-## 历史背景
+| <img src="https://github.com/peter-iakovlev/Telegram/blob/public/Icon.png?raw=true" width = "30" height = "30" alt="LOGO"/> | [Telegram CI Channel](https://t.me/MIUINativeNotifyIcon_CI) | CI automatic builds (beta) |
+|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|----------------------------|
 
-点击下方的链接查看此模块的历史背景与探索历程。
+| <img src="https://avatars.githubusercontent.com/in/15368?s=64&v=4" width = "30" height = "30" alt="LOGO"/> | [GitHub Releases](https://github.com/fankes/MIUINativeNotifyIcon/releases) | Official releases (stable) |
+|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|----------------------------|
 
-- [EXPLORE_HISTORY](EXPLORE_HISTORY.md)
+| <img src="https://avatars.githubusercontent.com/u/78217009?s=200&v=4?raw=true" width = "30" height = "30" alt="LOGO"/> | [Xposed-Modules-Repo](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases) | Official releases (stable) |
+|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|----------------------------|
 
-## 贡献通知图标优化名单
+The release addresses of this module are limited to those listed above. We are not responsible for any impact caused by versions downloaded from other
+unofficial channels.
 
-此项目是 `ANIP` 项目的一部分，详情请参考下方。
+### Choose a Module Version by Scenario
 
-- [ANIP](https://github.com/BetterAndroid/android-notification-icon-project)
+The installation packages of this project come in two tracks: **modern** and **legacy**.
 
-## 发行渠道
+- Versions marked **modern** are for Xposed frameworks that support the libxposed API, such as LSPosed
+- Versions marked **legacy** are for Xposed frameworks that support the Xposed Framework API, such as old LSPosed (≤ 1.9.0), EdXposed, etc.
 
-| <img src="https://avatars.githubusercontent.com/in/15368?s=64&v=4" width = "30" height = "30" alt="LOGO"/> | [GitHub CI](https://github.com/fankes/MIUINativeNotifyIcon/actions/workflows/commit_ci.yml) | CI 自动构建 (测试版) |
-|------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|
+The **modern** version supports automatic hot reload on LSPosed 2.1.0+. After the first installation, later module updates take effect without
+restarting System UI.
 
-| <img src="https://github.com/peter-iakovlev/Telegram/blob/public/Icon.png?raw=true" width = "30" height = "30" alt="LOGO"/> | [Telegram CI 频道](https://t.me/MIUINativeNotifyIcon_CI) | CI 自动构建 (测试版) |
-|-----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|---------------|
+## Notes
 
-| <img src="https://avatars.githubusercontent.com/in/15368?s=64&v=4" width = "30" height = "30" alt="LOGO"/> | [GitHub Releases](https://github.com/fankes/MIUINativeNotifyIcon/releases) | 正式版 (稳定版) |
-|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|-----------|
+1. This software is free and developed out of interest, for learning and communication only. If you obtained it from an unofficial channel by paying
+   for it, you may have been defrauded, and you are welcome to report suspicious behavior to us.
+2. This software is licensed under the **GNU Affero General Public License (AGPL 3.0)**. According to the license:
+    1. Any derivative work must use the same AGPLv3 license
+    2. The complete source code must be provided when distributing this software or its modified versions
+    3. The original copyright notice and license information must be retained
+    4. No additional restrictions may be imposed to limit others' free use of this software
+3. We encourage free distribution and improvement under the terms of AGPLv3, but please respect the author's attribution and do not impersonate the
+   original author
 
-| <img src="https://avatars.githubusercontent.com/u/78217009?s=200&v=4?raw=true" width = "30" height = "30" alt="LOGO"/> | [Xposed-Modules-Repo](https://github.com/Xposed-Modules-Repo/com.fankes.miui.notify/releases) | 正式版 (稳定版) |
-|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|-----------|
-
-本模块发布地址仅限于上述所列出的地址，从其他非正规渠道下载到的版本或对您造成任何影响均与我们无关。
-
-## 注意事项
-
-<h3>1.&nbsp;本软件免费、由兴趣驱动开发，仅供学习交流使用。如果你是从其他非官方渠道付费获得本软件，可能已遭遇欺诈，欢迎向我们举报可疑行为。</h3>
-
-<h3>2.&nbsp;本软件采用 <strong>GNU Affero General Public License (AGPL 3.0)</strong> 许可证。根据该许可证的要求：</h3>
-
-- 任何衍生作品必须采用相同的 AGPL 许可证
-- 分发本软件或其修改版本时，必须提供完整的源代码
-- 必须保留原始的版权声明及许可证信息
-- 不得额外施加限制来限制他人对本软件的自由使用
-
-<h3>3.&nbsp;我们鼓励在遵守 AGPL 3.0 条款的前提下进行自由传播和改进，但请尊重作者署名权，勿冒用原作者名义。</h3>
-
-## 更多项目
+## More Projects
 
 <!--suppress HtmlDeprecatedAttribute -->
 <div align="center">
-    <h2>嘿，还请君留步！👋</h2>
-    <h3>如果你觉得这个项目能给你提供帮助，不妨继续往下看看我的更多项目吧！</h3>
-    <h3>如果这些项目能为你提供帮助，不妨为我点个关注或者 star ⭐️ 吧！</h3>
-    <h1><a href="https://github.com/fankes/fankes/blob/main/project-promote/README-zh-CN.md">→ 查看更多关于我的项目，请点击这里 ←</a></h1>
+    <h2>Hey, please stay a moment! 👋</h2>
+    <h3>If you find this project helpful, take a look at my other projects below!</h3>
+    <h3>If these projects help you, consider giving me a follow or a star ⭐️!</h3>
+    <h1><a href="https://github.com/fankes/fankes/blob/main/project-promote/README.md">→ Click here to see more of my projects ←</a></h1>
 </div>
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/chart?repos=fankes/MIUINativeNotifyIcon&type=date&legend=top-left&sealed_token=e08B7CwtCWLIhfayg8iVh4-3aBIVSVi2eNIWy2MbhxI2KND4ObyRmak37WHM3IGMOmmlFV8qaYfrTpqFA6IPjYuhCPNOlSCUeQ2Jj3Kt1bU--xm6e3Q6uQ)](https://www.star-history.com/?repos=fankes%2FMIUINativeNotifyIcon&type=date&legend=top-left)
 
-## 隐私政策
-
-- [PRIVACY](PRIVACY.md)
-
-## 许可证
+## License
 
 - [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)
 
@@ -121,4 +122,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Powered by [YukiHook](https://github.com/HighCapable/YukiHook)
 
-版权所有 © 2017 Fankes Studio(qzmmcn@163.com)
+Copyright © 2017 Fankes Studio(qzmmcn@163.com)
