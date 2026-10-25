@@ -138,6 +138,12 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 未确定版本存在的类 */
     private val SettingsManagerClass by lazyClassOrNull("com.miui.systemui.SettingsManager")
 
+    /** HyperOS 2 的设置管理器获取入口 */
+    private val MiuiDependencyClass by lazyClassOrNull("com.miui.systemui.MiuiDependency")
+
+    /** HyperOS 3、4 的设置管理器获取入口 */
+    private val InterfacesImplManagerClass by lazyClassOrNull("com.miui.systemui.interfacesmanager.InterfacesImplManager")
+
     /** MIUI 未确定版本存在的类 */
     private val MiuiClockClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.views.MiuiClock")
 
@@ -1146,12 +1152,30 @@ object SystemUIHooker : YukiBaseHooker() {
     fun onReloaded() {
         if (isHooked.not()) return
         iconRuleScope.launch {
+            restoreSettingsManager()
             hostApplication?.apply {
                 onHostCreated()
                 if (ActivationPromptTool.isPrompting(this))
                     ActivationPromptTool.prompt(this, BuildConfigWrapper.APPLICATION_ID, isReloaded = true, resources = module.resources)
             }
         }
+    }
+
+    /**
+     * 热重载后设置管理器的构造方法不会再次执行，[settingsManager] 会一直为空，通知图标无法刷新
+     *
+     * 设置管理器是单例，这里从系统的依赖获取入口中找回已存在的实例
+     */
+    private fun restoreSettingsManager() = runInSafe {
+        if (settingsManager != null || SettingsManagerClass == null) return@runInSafe
+        settingsManager = InterfacesImplManagerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "getImpl"
+            parameters(Class::class)
+        }?.invokeQuietly<Any>(SettingsManagerClass) ?: MiuiDependencyClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "get"
+            parameters(Class::class)
+        }?.invokeQuietly<Any>(SettingsManagerClass)
+        if (settingsManager == null) YLog.warn("Failed to restore settings manager after reloaded")
     }
 
     /** 释放当前模块实例在宿主中启动的协程和监听 */
