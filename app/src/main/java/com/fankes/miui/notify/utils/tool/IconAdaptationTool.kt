@@ -29,6 +29,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -59,22 +60,23 @@ object IconAdaptationTool {
      * 推送新 APP 安装适配通知
      * @param context 实例
      * @param packageName 安装的 APP 包名
+     * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前实例资源
      */
-    fun pushNewAppSupportNotify(context: Context, packageName: String) {
+    fun pushNewAppSupportNotify(context: Context, packageName: String, resources: Resources = context.resources) {
         if (packageName.startsWith("com.google.android.trichromelibrary")) return
         if (context.isSystemApp(packageName) || context.isDebugApp(packageName)) return
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
-                    NOTIFY_CHANNEL, "通知图标优化适配",
+                    NOTIFY_CHANNEL, resources.getString(R.string.notify_channel_adaptation),
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply { enableLights(false) }
             )
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
                 setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
-                setContentTitle("您已安装 ${context.appNameOf(packageName)}")
-                setContentText("尚未适配此应用，点按打开通知图标优化名单。")
+                setContentTitle(resources.getString(R.string.notify_app_installed, context.appNameOf(packageName)))
+                setContentText(resources.getString(R.string.notify_app_not_adapted))
                 setColor(0xFF2993F0.toInt())
                 setAutoCancel(true)
                 setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_unsupported))

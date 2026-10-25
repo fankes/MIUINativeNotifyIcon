@@ -25,7 +25,6 @@
 package com.fankes.miui.notify.utils.factory
 
 import android.app.Dialog
-import android.app.TimePickerDialog
 import android.content.Context
 import android.view.Gravity
 import android.view.View
@@ -33,21 +32,34 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import com.fankes.miui.notify.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.highcapable.betterandroid.ui.extension.binding.ViewBinding
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.kavaref.extension.classOf
-import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.YukiHook
 
 /**
  * 显示时间选择对话框
  * @param timeSet 当前时间 - 不写将使用当前时间格式：HH:mm
  * @param result 回调 - 小时与分钟 HH:mm
  */
-fun Context.showTimePicker(timeSet: String = "", result: (String) -> Unit) =
-    TimePickerDialog(this, { _, h, m -> result("${h.autoZero}:${m.autoZero}") }, timeSet.hour, timeSet.minute, true).show()
+fun Context.showTimePicker(timeSet: String = "", result: (String) -> Unit) {
+    val picker = MaterialTimePicker.Builder()
+        .setTimeFormat(TimeFormat.CLOCK_24H)
+        .setHour(timeSet.hour)
+        .setMinute(timeSet.minute)
+        .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+        .setTheme(R.style.ThemeOverlay_MIUINativeNotifyIcon_TimePicker)
+        .build()
+    picker.addOnPositiveButtonClickListener { result("${picker.hour.autoZero}:${picker.minute.autoZero}") }
+    picker.show((this as AppCompatActivity).supportFragmentManager, "time_picker")
+}
 
 /**
  * 构造 [VB] 自定义 View 对话框
@@ -96,7 +108,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
     }
 
     init {
-        if (YukiHookAPI.Status.isXposedEnvironment) error("This dialog is not allowed to created in Xposed environment")
+        if (YukiHook.Status.isXposedEnvironment) error("This dialog is not allowed to created in Xposed environment")
         instance = MaterialAlertDialogBuilder(context)
     }
 
@@ -146,7 +158,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param text 按钮文本内容
      * @param callback 点击事件
      */
-    fun confirmButton(text: String = "确定", callback: () -> Unit = {}) {
+    fun confirmButton(text: String = context.getString(R.string.common_ok), callback: () -> Unit = {}) {
         instance?.setPositiveButton(text) { _, _ -> callback() }
     }
 
@@ -155,7 +167,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param text 按钮文本内容
      * @param callback 点击事件
      */
-    fun cancelButton(text: String = "取消", callback: () -> Unit = {}) {
+    fun cancelButton(text: String = context.getString(R.string.common_cancel), callback: () -> Unit = {}) {
         instance?.setNegativeButton(text) { _, _ -> callback() }
     }
 
@@ -164,7 +176,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
      * @param text 按钮文本内容
      * @param callback 点击事件
      */
-    fun neutralButton(text: String = "更多", callback: () -> Unit = {}) {
+    fun neutralButton(text: String = context.getString(R.string.common_more), callback: () -> Unit = {}) {
         instance?.setNeutralButton(text) { _, _ -> callback() }
     }
 

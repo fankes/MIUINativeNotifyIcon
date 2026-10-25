@@ -10,8 +10,30 @@
         <item name="colorSecondaryVariant">@color/colorPrimaryAccent</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:statusBarColor">@color/colorThemeBackground</item>
         <item name="android:windowLightStatusBar">true</item>
+        <!-- Dialog background color. -->
+        <item name="colorSurfaceContainerHigh">@color/colorCard</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Widget.MIUINativeNotifyIcon.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/colorNavIndicator</item>
+    </style>
+
+    <!-- Time picker dialog, replace the default Material 3 tonal colors that tint it pink. -->
+    <style name="ThemeOverlay.MIUINativeNotifyIcon.TimePicker" parent="ThemeOverlay.Material3.MaterialTimePicker">
+        <item name="colorPrimary">@color/colorPrimaryAccent</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurfaceContainerHigh">@color/colorCard</item>
+        <item name="colorSurfaceContainerHighest">@color/colorCardButton</item>
+        <item name="colorPrimaryContainer">@color/colorNavIndicator</item>
+        <item name="colorOnPrimaryContainer">@color/colorTextGray</item>
+        <item name="colorSecondaryContainer">@color/colorNavIndicator</item>
+        <item name="colorOnSecondaryContainer">@color/colorTextGray</item>
+        <item name="colorTertiaryContainer">@color/colorNavIndicator</item>
+        <item name="colorOnTertiaryContainer">@color/colorTextGray</item>
+        <item name="colorOnSurface">@color/colorTextGray</item>
+        <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
     </style>
 </resources>

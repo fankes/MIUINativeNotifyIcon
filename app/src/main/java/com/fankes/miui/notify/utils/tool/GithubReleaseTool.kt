@@ -27,6 +27,7 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.icu.util.TimeZone
+import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.isNetWorkSuccess
 import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.openSelfSetting
@@ -77,10 +78,9 @@ object GithubReleaseTool {
                         date = getString("published_at").localTime()
                     ).apply {
                         fun showUpdate() = context.showDialog {
-                            title = "最新版本 $name"
-                            msg = "发布于 $date\n\n" +
-                                "更新日志\n\n" + content
-                            confirmButton(text = "更新") { context.openBrowser(htmlUrl) }
+                            title = context.getString(R.string.release_latest_version, name)
+                            msg = context.getString(R.string.release_message, date) + content
+                            confirmButton(text = context.getString(R.string.release_update)) { context.openBrowser(htmlUrl) }
                             cancelButton()
                         }
                         if (name != version) (context as? Activity?)?.runOnUiThread {
@@ -109,9 +109,9 @@ object GithubReleaseTool {
                 override fun onFailure(call: Call, e: IOException) {
                     (context as? Activity?)?.runOnUiThread {
                         context.showDialog {
-                            title = "网络不可用"
-                            msg = "应用的联网权限可能已被禁用，请开启联网权限以定期检查更新。"
-                            confirmButton(text = "去开启") { context.openSelfSetting() }
+                            title = context.getString(R.string.release_network_unavailable)
+                            msg = context.getString(R.string.release_network_unavailable_msg)
+                            confirmButton(text = context.getString(R.string.release_enable)) { context.openSelfSetting() }
                             cancelButton()
                             noCancelable()
                         }

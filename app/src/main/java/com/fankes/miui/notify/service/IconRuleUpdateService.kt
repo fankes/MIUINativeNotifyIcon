@@ -79,9 +79,9 @@ class IconRuleUpdateService : Service() {
         scope.launch {
             val result = if (awaitFrameworkService())
                 runCatching { IconRuleManagerTool.fetch(context = this@IconRuleUpdateService) }.getOrElse {
-                    Anip.FetchResult(it.message ?: "获取 ANIP 资源失败", Anip.FetchResult.Status.FAILED)
+                    Anip.FetchResult(it.message ?: getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
                 }
-            else Anip.FetchResult("Hook 框架服务未连接，请确认模块已激活", Anip.FetchResult.Status.FAILED)
+            else Anip.FetchResult(getString(R.string.service_hook_not_connected), Anip.FetchResult.Status.FAILED)
             IconRuleManagerTool.notifyFetchResult(context = this@IconRuleUpdateService, result)
             if (result.status == Anip.FetchResult.Status.SUCCESS)
                 SystemUITool.refreshSystemUI(context = this@IconRuleUpdateService, isRefreshIconData = true)
@@ -98,12 +98,12 @@ class IconRuleUpdateService : Service() {
     /** 启动前台服务并显示同步中的通知 */
     private fun startForeground() {
         getSystemService<NotificationManager>()?.createNotificationChannel(
-            NotificationChannel(NOTIFY_CHANNEL, "通知图标优化适配名单同步", NotificationManager.IMPORTANCE_LOW)
+            NotificationChannel(NOTIFY_CHANNEL, getString(R.string.sync_service_channel), NotificationManager.IMPORTANCE_LOW)
         )
         val notification = Notification.Builder(this, NOTIFY_CHANNEL)
             .setSmallIcon(R.drawable.ic_nf_icon_update)
-            .setContentTitle("正在同步")
-            .setContentText("正在获取 ANIP 图标资源")
+            .setContentTitle(getString(R.string.sync_syncing))
+            .setContentText(getString(R.string.sync_fetching_anip))
             .build()
         @Suppress("InlinedApi")
         ServiceCompat.startForeground(this, NOTIFY_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)

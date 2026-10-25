@@ -29,6 +29,7 @@ import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.fankes.miui.notify.R
 import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.ui.activity.MainActivity
@@ -135,12 +136,12 @@ object SystemUITool {
                         "[Display]: ${Build.DISPLAY}\n" +
                         "[Android Version]: ${Build.VERSION.RELEASE}\n" +
                         "[Android API Level]: ${Build.VERSION.SDK_INT}\n" +
-                        "[${if (isMIOS) "HyperOS" else "MIUI"} Version]: $systemFullVersion\n" +
+                        "[${if (isMIOS) "HyperOS" else "MIUI"} Version]: ${activity.systemFullVersion}\n" +
                         "[System Locale]: ${Locale.getDefault()}\n\n" + YLog.contents(debugLogs).trim()
                     activity.contentResolver?.openOutputStream(e)?.apply { write(content.toByteArray()) }?.close()
-                    activity.snake(msg = "导出完成")
-                } ?: activity.snake(msg = "已取消操作")
-            }.onFailure { activity.snake(msg = "导出过程发生错误") }
+                    activity.snake(msg = activity.getString(R.string.tool_export_done))
+                } ?: activity.snake(msg = activity.getString(R.string.tool_operation_cancelled))
+            }.onFailure { activity.snake(msg = activity.getString(R.string.tool_export_error)) }
         }
     }
 
@@ -155,31 +156,26 @@ object SystemUITool {
                 if (it.isNotEmpty()) {
                     debugLogs = it
                     runCatching { launcher?.launch("miui_notification_icons_processing_logs.log") }
-                        .onFailure { context.snake(msg = "启动系统文件选择器失败") }
-                } else context.snake(msg = "暂无调试日志")
+                        .onFailure { context.snake(msg = context.getString(R.string.tool_open_file_picker_failed)) }
+                } else context.snake(msg = context.getString(R.string.tool_no_debug_log))
             }
         }
         if (YukiHook.Status.isModuleActive)
             context.showDialog {
-                title = "导出全部调试日志"
-                msg = "调试日志中会包含当前系统推送的全部通知内容，其中可能包含你的个人隐私，" +
-                    "你可以在导出后的日志文件中选择将这些敏感信息模糊化处理再进行共享，" +
-                    "开发者使用并查看你导出的调试日志仅为排查与修复问题，并且在之后会及时销毁这些日志。\n\n" +
-                    "继续导出即代表你已阅读并知悉上述内容。"
-                confirmButton(text = "继续") { doExport() }
+                title = context.getString(R.string.main_export_debug_log)
+                msg = context.getString(R.string.tool_export_debug_log_msg)
+                confirmButton(text = context.getString(R.string.common_continue)) { doExport() }
                 cancelButton()
             }
-        else context.snake(msg = "模块没有激活，请先激活模块")
+        else context.snake(msg = context.getString(R.string.tool_module_not_active_activate))
     }
 
     /** 当 Root 权限获取失败时显示对话框 */
     private fun Context.showWhenAccessRootFail() =
         showDialog {
-            title = "获取 Root 权限失败"
-            msg = "当前无法获取 Root 权限，请确认你的设备已经被 Root 且同意授予 Root 权限。\n" +
-                "如果你正在使用 Magisk 并安装了 Shamiko 模块，" +
-                "请确认当前是否正处于白名单模式。 (白名单模式将导致无法申请 Root 权限)"
-            confirmButton(text = "我知道了")
+            title = getString(R.string.tool_root_failed)
+            msg = getString(R.string.tool_root_failed_msg)
+            confirmButton(text = getString(R.string.common_got_it))
         }
 
     /**
@@ -203,7 +199,7 @@ object SystemUITool {
             ).also {
                 when {
                     it.isBlank() -> context.showWhenAccessRootFail()
-                    else -> context.snake(msg = "已发送请求，如果未打开则是当前系统不支持此功能")
+                    else -> context.snake(msg = context.getString(R.string.tool_request_sent))
                 }
             }
         }
@@ -217,11 +213,9 @@ object SystemUITool {
         /** 动态刷新功能是否可用 */
         val isDynamicAvailable = ConfigData.isEnableModule && MainActivity.isModuleRegular && MainActivity.isModuleValied
         context.showDialog {
-            title = "重启系统界面"
-            msg = "你确定要立即重启系统界面吗？\n\n" +
-                "部分 MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n" +
-                "重启过程会黑屏并等待进入锁屏重新解锁。" + (if (isDynamicAvailable)
-                    "\n\n你也可以选择“立即生效”来动态刷新系统界面并生效当前模块设置。" else "")
+            title = context.getString(R.string.main_restart_system_ui)
+            msg = context.getString(R.string.tool_restart_system_ui_msg_miui) + (if (isDynamicAvailable)
+                context.getString(R.string.tool_restart_system_ui_dynamic) else "")
             confirmButton {
                 execShell(cmd = "pgrep systemui").also { pid ->
                     if (pid.isNotBlank())
@@ -230,7 +224,7 @@ object SystemUITool {
                 }
             }
             cancelButton()
-            if (isDynamicAvailable) neutralButton(text = "立即生效") { refreshSystemUI(context) }
+            if (isDynamicAvailable) neutralButton(text = context.getString(R.string.tool_apply_now)) { refreshSystemUI(context) }
         }
     }
 
@@ -265,34 +259,34 @@ object SystemUITool {
         when {
             YukiHook.Status.isModuleActive && context is AppCompatActivity ->
                 context.showDialog {
-                    title = "请稍后"
-                    progressContent = "正在等待系统界面刷新"
+                    title = context.getString(R.string.tool_please_wait)
+                    progressContent = context.getString(R.string.tool_waiting_system_ui_refresh)
                     /** 是否等待成功 */
                     var isWaited = false
                     // 设置等待延迟
                     delayedRun(ms = 5000) {
                         if (isWaited) return@delayedRun
                         cancel()
-                        context.snake(msg = "预计响应超时，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
+                        context.snake(msg = context.getString(R.string.tool_refresh_timeout), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
                     }
                     checkingActivated(context) { isValied ->
                         when {
                             isValied.not() -> {
                                 cancel()
                                 isWaited = true
-                                context.snake(msg = "请重启系统界面以生效模块更新", actionText = "立即重启") { restartSystemUI(context) }
+                                context.snake(msg = context.getString(R.string.tool_restart_to_apply_update), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
                             }
                             else -> doRefresh {
                                 cancel()
                                 isWaited = true
                                 if (it) callback()
-                                if (it.not()) context.snake(msg = "刷新失败，建议重启系统界面", actionText = "立即重启") { restartSystemUI(context) }
+                                if (it.not()) context.snake(msg = context.getString(R.string.tool_refresh_failed), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
                             }
                         }
                     }
                     noCancelable()
                 }
-            YukiHook.Status.isModuleActive.not() && context is AppCompatActivity -> context.snake(msg = "模块没有激活，更改不会生效")
+            YukiHook.Status.isModuleActive.not() && context is AppCompatActivity -> context.snake(msg = context.getString(R.string.tool_module_not_active_no_effect))
             else -> doRefresh { if (it) callback() }
         }
     }
@@ -303,6 +297,6 @@ object SystemUITool {
      */
     fun showNeedRestartSnake(context: Context) =
         if (YukiHook.Status.isModuleActive)
-            context.snake(msg = "设置需要重启系统界面才能生效", actionText = "立即重启") { restartSystemUI(context) }
-        else context.snake(msg = "模块没有激活，更改不会生效")
+            context.snake(msg = context.getString(R.string.tool_restart_to_apply), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
+        else context.snake(msg = context.getString(R.string.tool_module_not_active_no_effect))
 }

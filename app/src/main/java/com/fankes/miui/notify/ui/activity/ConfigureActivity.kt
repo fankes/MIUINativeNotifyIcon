@@ -20,7 +20,7 @@
  *
  * This file is created by fankes on 2022/1/30.
  */
-@file:Suppress("SetTextI18n", "InflateParams")
+@file:Suppress("InflateParams")
 
 package com.fankes.miui.notify.ui.activity
 
@@ -83,9 +83,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private fun onCreate(available: Boolean) {
         if (!available || !YukiHook.Status.isModuleActive || !ConfigData.isEnableModule)
             showDialog {
-                title = "模块不可用"
-                msg = "模块没有激活或已被停用，你无法使用这里的功能，请先激活或启用模块。"
-                confirmButton(text = "我知道了") { finish() }
+                title = getString(R.string.config_module_unavailable)
+                msg = getString(R.string.config_module_unavailable_msg)
+                confirmButton(text = getString(R.string.common_got_it)) { finish() }
                 noCancelable()
             }
         else continueOnCreate()
@@ -98,17 +98,17 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         refreshAdapterResult()
         // 设置上下按钮点击事件
         binding.configTitleUp.setOnClickListener {
-            snake(msg = "滚动到顶部")
+            snake(msg = getString(R.string.config_scroll_top))
             onScrollEvent?.invoke(false)
         }
         binding.configTitleDown.setOnClickListener {
-            snake(msg = "滚动到底部")
+            snake(msg = getString(R.string.config_scroll_bottom))
             onScrollEvent?.invoke(true)
         }
         // 设置过滤按钮点击事件
         binding.configTitleFilter.setOnClickListener {
             showDialog<DiaIconFilterBinding> {
-                title = "按条件过滤"
+                title = getString(R.string.config_filter)
                 binding.iconFiltersEdit.apply {
                     requestFocus()
                     invalidate()
@@ -122,13 +122,13 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         filterText = binding.iconFiltersEdit.text.toString().trim()
                         refreshAdapterResult()
                     } else {
-                        toast(msg = "条件不能为空")
+                        toast(msg = getString(R.string.config_filter_empty))
                         it.performClick()
                     }
                 }
                 cancelButton()
                 if (filterText.isNotBlank())
-                    neutralButton(text = "清除条件") {
+                    neutralButton(text = getString(R.string.config_filter_clear)) {
                         filterText = ""
                         refreshAdapterResult()
                     }
@@ -149,7 +149,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         }
                         binding.adpAppName.text = icon.label
                         binding.adpAppPkgName.text = icon.packageName
-                        binding.adpCbrName.text = "贡献者：" + icon.contributors.joinToString()
+                        binding.adpCbrName.text = getString(R.string.config_contributors, icon.contributors.joinToString())
                         isAppNotifyEnabledOf(icon).also { e ->
                             binding.adpAppOpenSwitch.isChecked = e
                             binding.adpAppAllSwitch.isEnabled = e
@@ -168,10 +168,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                                 SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                             }
                             if (b) showDialog {
-                                title = "覆盖"
-                                msg = "此功能仅针对严重不遵守规范的 APP 通知图标才需要开启，例如：APP 推送通知后无法识别出现的黑白块图标。\n\n" +
-                                    "此功能在一般情况下请保持关闭并跟随名单提供的配置，并不要随意改变此配置，" +
-                                    "开启后 APP 的通知图标可能会被规则破坏，你确定还要开启吗？"
+                                title = getString(R.string.config_override)
+                                msg = getString(R.string.config_override_msg)
                                 confirmButton { saveState() }
                                 cancelButton { btn.isChecked = btn.isChecked.not() }
                                 noCancelable()
@@ -185,12 +183,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         // 设置点击事件
         binding.configCbrButton.setOnClickListener {
             showDialog {
-                title = "为 ANIP 做出贡献"
-                msg = "ANIP 全名为 Android 通知图标适配计划，由社区共同维护。\n" +
-                    "你可以参与贡献新图标，也可以为未收录的应用请求适配。"
-                confirmButton(text = "参与贡献") { openBrowser(IconRuleManagerTool.RULES_CONTRIBUTING_URL) }
-                cancelButton(text = "请求适配") { openBrowser(IconRuleManagerTool.RULES_FEEDBACK_URL) }
-                neutralButton(text = "暂时不用")
+                title = getString(R.string.config_contribute_anip)
+                msg = getString(R.string.config_contribute_anip_msg)
+                confirmButton(text = getString(R.string.config_contribute)) { openBrowser(getString(R.string.anip_contribute_url)) }
+                cancelButton(text = getString(R.string.config_request_adaptation)) { openBrowser(getString(R.string.anip_request_adaptation_url)) }
+                neutralButton(text = getString(R.string.config_not_now))
             }
         }
         // 装载数据
@@ -204,15 +201,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 showDialog {
                     val appName = intent?.getStringExtra("appName") ?: ""
                     val pkgName = intent?.getStringExtra("pkgName") ?: ""
-                    title = "新安装应用通知图标适配"
-                    msg = "你已安装 $appName($pkgName)\n\n" +
-                        "此应用未在通知优化名单中发现适配数据，若此应用发送的通知为彩色图标，" +
-                        "可随时点击本页面下方的 “为 ANIP 做出贡献” 按钮提交贡献或请求适配。\n\n" +
-                        "若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n" +
-                        "你可以现在立即同步适配列表，以获取最新的适配数据。"
-                    confirmButton(text = "同步列表") { onStartRefresh() }
-                    cancelButton(text = "复制名称+包名") { copyToClipboard(content = "$appName($pkgName)") }
-                    neutralButton(text = "取消")
+                    title = getString(R.string.config_new_app_title)
+                    msg = getString(R.string.config_new_app_msg, appName, pkgName)
+                    confirmButton(text = getString(R.string.config_sync_list)) { onStartRefresh() }
+                    cancelButton(text = getString(R.string.config_copy_name_package)) { copyToClipboard(content = "$appName($pkgName)") }
+                    neutralButton(text = getString(R.string.common_cancel))
                     noCancelable()
                 }
             intent?.getBooleanExtra("isDirectUpdate", false) == true -> onStartRefresh(isByHand = false)
@@ -234,8 +227,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         addOnBackPressedEvent {
             if (MainActivity.isActivityLive.not())
                 showDialog {
-                    title = "提示"
-                    msg = "要返回模块主页吗？"
+                    title = getString(R.string.common_prompt)
+                    msg = getString(R.string.config_back_to_main)
                     confirmButton {
                         releaseEventAndBack()
                         navigate<MainActivity>()
@@ -279,10 +272,10 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private fun refreshAdapterResult() {
         onChanged?.invoke()
         binding.configTitleCountText.text =
-            if (filterText.isBlank()) "已收录 ${iconDatas.size} 个 APP 的通知图标"
-            else "“$filterText” 匹配到 ${iconDatas.size} 个结果"
+            if (filterText.isBlank()) getString(R.string.config_included_count, iconDatas.size)
+            else getString(R.string.config_filter_result, filterText, iconDatas.size)
         binding.configListNoDataView.apply {
-            text = if (iconAllDatas.isEmpty()) "噫，竟然什么都没有~\n请点击右上角同步按钮获取云端数据" else "噫，竟然什么都没找到~"
+            text = if (iconAllDatas.isEmpty()) getString(R.string.config_empty_no_data) else getString(R.string.config_empty_no_match)
             isVisible = iconDatas.isEmpty()
         }
     }

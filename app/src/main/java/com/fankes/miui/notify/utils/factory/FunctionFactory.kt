@@ -54,6 +54,7 @@ import android.os.Build
 import android.os.Handler
 import android.provider.Settings
 import android.util.Base64
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -63,6 +64,7 @@ import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
+import com.fankes.miui.notify.R
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.google.android.material.snackbar.Snackbar
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -294,25 +296,25 @@ val miosIncrementalVersion get() = findPropString("ro.mi.os.version.incremental"
  * 获取 MIUI、HyperOS 完全版本
  * @return [String]
  */
-val systemFullVersion
+val Context.systemFullVersion
     get() = when {
         isMIOS -> "HyperOS " + miosIncrementalVersion.let {
             if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
-                "${it.replaceFirst("OS", "")} 稳定版"
+                getString(R.string.main_version_stable, it.replaceFirst("OS", ""))
             else when {
-                it.lowercase().endsWith(".dev") -> "${it.replaceFirst("OS", "")} 开发版"
-                else -> "$miosVersion $it 开发版"
+                it.lowercase().endsWith(".dev") -> getString(R.string.main_version_dev, it.replaceFirst("OS", ""))
+                else -> getString(R.string.main_version_dev_with_os, miosVersion, it)
             }
         }
         isMIUI -> miuiIncrementalVersion.let {
             if (it.lowercase().endsWith(".dev").not() && it.lowercase().any { e -> e.code in 97..122 })
-                "$it 稳定版"
+                getString(R.string.main_version_stable, it)
             else when {
-                it.lowercase().endsWith(".dev") -> "$it 开发版"
-                else -> "V$miuiVersion $it 开发版"
+                it.lowercase().endsWith(".dev") -> getString(R.string.main_version_dev, it)
+                else -> getString(R.string.main_version_dev_miui, miuiVersion, it)
             }
         }
-        else -> "不是 MIUI 或 HyperOS 系统"
+        else -> getString(R.string.common_not_miui)
     }
 
 /**
@@ -601,6 +603,8 @@ inline fun <reified T : Activity> Context.navigate() = runInSafe {
 fun Context.snake(msg: String, actionText: String = "", callback: () -> Unit = {}) =
     Snackbar.make((this as Activity).findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG)
         .apply {
+            // 有底栏时显示在底栏上方，避免挡住底栏
+            (findViewById<View>(R.id.main_bottom_nav) ?: findViewById<View>(R.id.config_bottom_bar))?.let { anchorView = it }
             if (actionText.isBlank()) return@apply
             setActionTextColor(if (isSystemInDarkMode) Color.BLACK else Color.WHITE)
             setAction(actionText) { callback() }
@@ -621,8 +625,8 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
     })
 }.onFailure {
     if (packageName.isNotBlank())
-        snake(msg = "启动 $packageName 失败")
-    else snake(msg = "启动系统浏览器失败")
+        snake(msg = getString(R.string.common_launch_failed, packageName))
+    else snake(msg = getString(R.string.common_launch_browser_failed))
 }
 
 /**
@@ -636,8 +640,8 @@ fun Context.openSelfSetting(packageName: String = ModuleApplication.requireConte
             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
             data = Uri.fromParts("package", packageName, null)
         })
-    else toast(msg = "你没有安装此应用")
-}.onFailure { toast(msg = "启动 $packageName 应用信息失败") }
+    else toast(msg = getString(R.string.common_app_not_installed))
+}.onFailure { toast(msg = getString(R.string.common_launch_app_info_failed, packageName)) }
 
 /** 跳转通知设置界面 */
 fun Context.openNotifySetting() = runCatching {
@@ -647,7 +651,7 @@ fun Context.openNotifySetting() = runCatching {
         intent.putExtra(Notification.EXTRA_CHANNEL_ID, applicationInfo.uid)
         startActivity(intent)
     }
-}.onFailure { snake(msg = "跳转通知设置失败") }
+}.onFailure { snake(msg = getString(R.string.common_open_notify_settings_failed)) }
 
 /**
  * 复制到剪贴板
@@ -657,7 +661,7 @@ fun Context.copyToClipboard(content: String) = runInSafe {
     (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
         setPrimaryClip(ClipData.newPlainText(null, content))
         (primaryClip?.getItemAt(0)?.text ?: "").also {
-            if (it != content) snake(msg = "复制失败") else snake(msg = "已复制")
+            if (it != content) snake(msg = getString(R.string.common_copy_failed)) else snake(msg = getString(R.string.common_copied))
         }
     }
 }

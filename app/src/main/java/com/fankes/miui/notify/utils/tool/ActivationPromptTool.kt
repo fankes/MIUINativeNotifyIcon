@@ -29,6 +29,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
@@ -67,21 +68,22 @@ object ActivationPromptTool {
      * @param context 当前实例
      * @param packageName 当前 APP 包名
      * @param isReloaded 新版本是否已通过热重载生效 - 默认：否
+     * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前实例资源
      */
-    fun prompt(context: Context, packageName: String, isReloaded: Boolean = false) {
+    fun prompt(context: Context, packageName: String, isReloaded: Boolean = false, resources: Resources = context.resources) {
         if (packageName != BuildConfigWrapper.APPLICATION_ID) return
         context.getSystemService(NotificationManager::class.java)?.apply {
             createNotificationChannel(
                 NotificationChannel(
-                    NOTIFY_CHANNEL, "MIUI 原生通知图标 - 版本更新",
+                    NOTIFY_CHANNEL, resources.getString(R.string.notify_channel_update),
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply { enableLights(false) }
             )
             notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
                 setShowWhen(true)
                 setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
-                setContentTitle("模块已更新")
-                setContentText(if (isReloaded) "模块已完成更新，点按通知打开模块。" else "点按通知打开模块以完成新版本激活。")
+                setContentTitle(resources.getString(R.string.notify_module_updated))
+                setContentText(if (isReloaded) resources.getString(R.string.notify_module_updated_reloaded) else resources.getString(R.string.notify_module_updated_activate))
                 setOnlyAlertOnce(true)
                 setColor(0xFFE06818.toInt())
                 setAutoCancel(true)

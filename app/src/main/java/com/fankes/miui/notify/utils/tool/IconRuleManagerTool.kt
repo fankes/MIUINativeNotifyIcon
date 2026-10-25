@@ -30,6 +30,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -76,12 +77,6 @@ object IconRuleManagerTool {
 
     /** ANIP 仓库地址 */
     const val ANIP_REPOSITORY_URL = "https://github.com/BetterAndroid/android-notification-icon-project"
-
-    /** 请求适配 ANIP 图标的文档地址 */
-    const val RULES_FEEDBACK_URL = "https://betterandroid.github.io/android-notification-icon-project/zh-cn/contribute/request"
-
-    /** 参与贡献 ANIP 图标的文档地址 */
-    const val RULES_CONTRIBUTING_URL = "https://betterandroid.github.io/android-notification-icon-project/zh-cn/contribute/submit"
 
     /** 更新通知携带的仓库清单地址键 */
     const val EXTRA_ICON_RULE_SOURCE = "iconRuleSource"
@@ -142,13 +137,14 @@ object IconRuleManagerTool {
      *
      * 获取失败或新快照为空时保留上一份可用快照
      * @param context 当前进程上下文
+     * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前上下文资源
      * @return SDK 获取结果
      */
-    suspend fun fetch(context: Context): Anip.FetchResult {
+    suspend fun fetch(context: Context, resources: Resources = context.resources): Anip.FetchResult {
         val currentAnip = obtainAnip(context)
         val result = currentAnip.fetch()
         if (result.isOk && publishSnapshot(currentAnip).not())
-            return Anip.FetchResult("ANIP 资源中没有可用的通知图标", Anip.FetchResult.Status.FAILED)
+            return Anip.FetchResult(resources.getString(R.string.anip_no_icons), Anip.FetchResult.Status.FAILED)
         return result
     }
 
@@ -180,12 +176,13 @@ object IconRuleManagerTool {
      * 发送后台同步结果提醒；资源已是最新时不发送通知
      * @param context 当前进程上下文
      * @param result 获取结果
+     * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前上下文资源
      */
-    fun notifyFetchResult(context: Context, result: Anip.FetchResult) {
+    fun notifyFetchResult(context: Context, result: Anip.FetchResult, resources: Resources = context.resources) {
         when (result.status) {
             Anip.FetchResult.Status.SUCCESS ->
-                pushNotify(context, title = "同步完成", msg = "通知图标优化适配名单已更新，点击查看。")
-            Anip.FetchResult.Status.FAILED -> pushNotify(context, title = "同步失败", msg = result.message, isRetry = true)
+                pushNotify(context, resources, title = resources.getString(R.string.sync_done), msg = resources.getString(R.string.sync_done_msg))
+            Anip.FetchResult.Status.FAILED -> pushNotify(context, resources, title = resources.getString(R.string.sync_failed), msg = result.message, isRetry = true)
             Anip.FetchResult.Status.UP_TO_DATE -> Unit
         }
     }
@@ -213,11 +210,11 @@ object IconRuleManagerTool {
             binding.sourceRepositoryEdit.setText(RemoteSource.GITHUB_OFFICIAL_REPO_SLUG)
         }
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle("同步列表")
+            .setTitle(context.getString(R.string.config_sync_list))
             .setView(binding.root)
-            .setPositiveButton("确定", null)
-            .setNegativeButton("取消", null)
-            .setNeutralButton("云端规则") { _, _ -> context.openBrowser(ANIP_REPOSITORY_URL) }
+            .setPositiveButton(context.getString(R.string.common_ok), null)
+            .setNegativeButton(context.getString(R.string.common_cancel), null)
+            .setNeutralButton(context.getString(R.string.sync_cloud_rules)) { _, _ -> context.openBrowser(ANIP_REPOSITORY_URL) }
             .create()
         dialog.setOnDismissListener {
             if (isSyncRequested) sync(context, sourceType, callback)
@@ -226,11 +223,11 @@ object IconRuleManagerTool {
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                 val repository = binding.sourceRepositoryEdit.textToString().trim()
                 if (repository.isEmpty()) {
-                    binding.sourceRepositoryTextLin.error = "请填写目标存储库"
+                    binding.sourceRepositoryTextLin.error = context.getString(R.string.sync_repository_required)
                     return@setOnClickListener
                 }
                 if (runCatching { createSource(repository, sourceType) }.isFailure) {
-                    binding.sourceRepositoryTextLin.error = "存储库格式应为 owner/repository"
+                    binding.sourceRepositoryTextLin.error = context.getString(R.string.sync_repository_invalid)
                     return@setOnClickListener
                 }
                 ConfigData.iconRuleSourceSyncType = sourceType
@@ -260,12 +257,12 @@ object IconRuleManagerTool {
         ConfigData.iconRuleSourceSyncType = sourceType.normalizedSourceType
         if (context is AppCompatActivity)
             context.showDialog refreshingDialog@{
-                title = "同步中"
-                progressContent = "正在获取 ANIP 图标资源"
+                title = context.getString(R.string.sync_in_progress)
+                progressContent = context.getString(R.string.sync_fetching_anip)
                 noCancelable()
                 context.launch {
                     val result = runCatching { fetch(context) }.getOrElse {
-                        Anip.FetchResult(it.message ?: "获取 ANIP 资源失败", Anip.FetchResult.Status.FAILED)
+                        Anip.FetchResult(it.message ?: context.getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
                     }
                     this@refreshingDialog.cancel()
                     handleFetchResult(context, result, callback)
@@ -273,7 +270,7 @@ object IconRuleManagerTool {
             }
         else CoroutineScope(Dispatchers.Main.immediate).launch {
             val result = runCatching { fetch(context) }.getOrElse {
-                Anip.FetchResult(it.message ?: "获取 ANIP 资源失败", Anip.FetchResult.Status.FAILED)
+                Anip.FetchResult(it.message ?: context.getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
             }
             handleFetchResult(context, result, callback)
         }
@@ -347,31 +344,31 @@ object IconRuleManagerTool {
             callback()
             if (result.status == Anip.FetchResult.Status.SUCCESS) notifyRefresh(context)
             if (result.status == Anip.FetchResult.Status.UP_TO_DATE && context is AppCompatActivity)
-                context.snake(msg = "通知图标优化适配名单已是最新")
+                context.snake(msg = context.getString(R.string.sync_up_to_date))
             return
         }
         if (context is AppCompatActivity)
             context.showDialog {
-                title = "同步失败"
+                title = context.getString(R.string.sync_failed)
                 msg = result.message
-                confirmButton(text = "再试一次") { syncByHand(context, callback) }
+                confirmButton(text = context.getString(R.string.sync_retry)) { syncByHand(context, callback) }
                 cancelButton()
             }
     }
 
     private fun notifyRefresh(context: Context) {
         SystemUITool.refreshSystemUI(context, isRefreshIconData = true) {
-            if (context is AppCompatActivity) context.snake(msg = "通知图标优化适配名单已更新")
+            if (context is AppCompatActivity) context.snake(msg = context.getString(R.string.sync_updated))
         }
     }
 
-    private fun pushNotify(context: Context, title: String, msg: String, isRetry: Boolean = false) {
+    private fun pushNotify(context: Context, resources: Resources, title: String, msg: String, isRetry: Boolean = false) {
         if (context is AppCompatActivity) return
         context.getSystemService<NotificationManager>()?.apply {
             createNotificationChannel(
                 NotificationChannel(
                     NOTIFY_CHANNEL,
-                    "通知图标优化适配名单",
+                    resources.getString(R.string.sync_notify_channel),
                     NotificationManager.IMPORTANCE_DEFAULT
                 )
             )

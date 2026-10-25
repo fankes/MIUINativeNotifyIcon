@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingLeft="15dp"
     android:paddingTop="15dp"
-    android:paddingRight="15dp"
-    tools:ignore="HardcodedText">
+    android:paddingRight="15dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -17,7 +15,7 @@
         android:layout_marginRight="8.5dp"
         android:layout_marginBottom="10dp"
         android:lineSpacingExtra="6dp"
-        android:text="ANIP 图标资源托管在 GitHub 上，建议定期同步列表以获取对最新 APP 的适配。"
+        android:text="@string/sync_source_desc"
         android:textSize="14sp" />
 
     <RadioGroup
@@ -28,21 +26,21 @@
             android:id="@+id/source_radio_0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="中国大陆 CDN 代理 (线路一)"
+            android:text="@string/sync_source_cdn_1"
             app:buttonTint="@color/colorPrimaryAccent" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/source_radio_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="中国大陆 CDN 代理 (线路二)"
+            android:text="@string/sync_source_cdn_2"
             app:buttonTint="@color/colorPrimaryAccent" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/source_radio_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GitHub (海外直连)"
+            android:text="@string/sync_source_github"
             app:buttonTint="@color/colorPrimaryAccent" />
     </RadioGroup>
 
@@ -51,11 +49,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:hint="使用的 GitHub 存储库"
-        app:endIconContentDescription="恢复默认"
+        android:hint="@string/sync_repository_hint"
+        app:endIconContentDescription="@string/sync_restore_default"
         app:endIconDrawable="@drawable/ic_restore"
         app:endIconMode="custom"
-        app:helperText="如有自定义需求可以更改为你的存储库。">
+        app:helperText="@string/sync_repository_helper">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/source_repository_edit"
