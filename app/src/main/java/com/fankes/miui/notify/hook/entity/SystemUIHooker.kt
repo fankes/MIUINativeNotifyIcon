@@ -596,6 +596,9 @@ object SystemUIHooker : YukiBaseHooker() {
                     iconView.colorFilter = null
                 }
             }
+            // HyperOS 1/2 的 getSmallIcon 已被 Hook 换成 APP 图标或规则图标，
+            // 灰度小图标没有被替换时需要写回原始 smallIcon，否则会一直停留在彩色图标上被染成白块
+            else if (miosVersionCode < 3) pair.first?.also { iconView.setImageDrawable(it) }
         }
         updateStatusBarIconColor(iconView)
     }
