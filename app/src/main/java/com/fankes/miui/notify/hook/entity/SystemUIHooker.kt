@@ -98,7 +98,6 @@ import com.highcapable.yukihookapi.extension.kavaref.lazyClass
 import com.highcapable.yukihookapi.extension.kavaref.lazyClassOrNull
 import com.highcapable.yukihookapi.extension.kavaref.toClassOrNull
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
-import com.highcapable.yukihookapi.hook.factory.injectModuleResources
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
@@ -521,8 +520,6 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [Triple] - ([Drawable] 小图标,[Int] 颜色,[Boolean] 是否为占位符图标)
      */
     private fun compatCustomIcon(context: Context, isGrayscaleIcon: Boolean, packageName: String): Triple<Drawable?, Int, Boolean> {
-        // 防止模块资源注入失败重新注入
-        context.injectModuleResources()
         var customPair: Triple<Drawable?, Int, Boolean>? = null
         if (ConfigData.isEnableNotifyIconFix) run {
             val snapshot = IconRuleManagerTool.snapshot
@@ -537,7 +534,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 return@run
             }
             if (isGrayscaleIcon.not() && ConfigData.isEnableNotifyIconFixPlaceholder)
-                customPair = Triple(context.resources.drawableOf(R.drawable.ic_message), 0, true)
+                customPair = Triple(module.resources.drawableOf(R.drawable.ic_message), 0, true)
         }
         return customPair ?: Triple(null, 0, false)
     }
@@ -1145,8 +1142,6 @@ object SystemUIHooker : YukiBaseHooker() {
     /** 宿主 [Application] 创建后的初始化，模块热重载后同样需要执行 */
     private fun Application.onHostCreated() {
         moduleLastUpdateTime = appLastUpdateTimeOf(BuildConfigWrapper.APPLICATION_ID)
-        // 注入模块资源
-        injectModuleResources()
         // 从模块共享文件恢复 ANIP 快照
         globalContext?.let { refreshIconData(it) }
     }
