@@ -111,9 +111,9 @@
     <string name="main_set_max_icon_count">设置最多显示的图标个数</string>
     <string name="main_placeholder_icon_msg">开启这个功能后，当发现未适配的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。\n\n此功能的作用仅为临时修复破坏规范的通知图标，仍然继续开启吗？</string>
     <string name="common_notice">注意</string>
-    <string name="main_force_app_icon_msg">开启这个功能后，任何通知栏中的通知图标都会被强制替换为当前推送通知的应用的图标，某些系统级别的应用通知图标可能会显示异常或发生图标丢失。\n\n此功能仅面向一些追求图标美观度的用户，我们不推荐开启这个功能，且发生任何 BUG 都不会去修复，仍然继续开启吗？</string>
+    <string name="main_force_app_icon_msg">开启这个功能后，任何通知栏中的通知图标都会被强制替换为当前推送通知的应用的图标，某些系统级别的应用通知图标可能会显示异常或发生图标丢失，仍然继续开启吗？</string>
     <string name="main_destructive_warn">破坏性功能警告</string>
-    <string name="main_system_default_tint_msg">开启这个功能后，任何通知栏中的通知图标都会忽略图标自身的着色属性，全部使用系统默认颜色 (系统提供的统一色调) 着色。\n\n此功能仅面向一些追求图标美观度的用户，我们不推荐开启这个功能，且发生任何 BUG 都不会去修复，仍然继续开启吗？</string>
+    <string name="main_system_default_tint_msg">开启这个功能后，任何通知栏中的通知图标都会忽略图标自身的着色属性，全部使用系统默认颜色 (系统提供的统一色调) 着色，仍然继续开启吗？</string>
     <string name="main_compat_mode_msg">启用兼容模式可修复部分系统版本可能出现无法判定通知图标反色的问题，但是这也可能会导致新的问题，一般情况下不建议开启，确定要继续吗？\n\n如果系统界面刷新后通知图标颜色发生错误，请尝试重启一次系统界面。</string>
     <string name="main_compat_mode_title">启用兼容模式</string>
     <string name="main_system_version_detail">[%1$s] %2$s</string>
@@ -197,7 +197,7 @@
     <string name="tool_please_wait">请稍后</string>
     <string name="tool_apply_now">立即生效</string>
     <string name="tool_restart_system_ui_dynamic">\n\n你也可以选择 “立即生效” 来动态刷新系统界面并生效当前模块设置。</string>
-    <string name="tool_restart_system_ui_msg_miui">你确定要立即重启系统界面吗？\n\n部分 HyperOS/MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n重启过程会黑屏并等待进入锁屏重新解锁。</string>
+    <string name="tool_restart_system_ui_msg_miui">你确定要立即重启系统界面吗？\n\n部分 HyperOS/MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n重启过程会黑屏并等待进入锁屏重新解锁。\n\nLSPosed</string>
     <string name="tool_request_sent">已发送请求，如果未打开则是当前系统不支持此功能</string>
     <string name="tool_root_failed_msg">当前无法获取 Root 权限，请确认你的设备已经被 Root 且同意授予 Root 权限。\n如果你正在使用 Magisk 并安装了 Shamiko 模块，请确认当前是否正处于白名单模式。 (白名单模式将导致无法申请 Root 权限)</string>
     <string name="tool_root_failed">获取 Root 权限失败</string>
