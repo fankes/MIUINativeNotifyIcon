@@ -489,7 +489,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             isModuleRegular = true
             isModuleValied = isValied
             refreshModuleStatus()
-            refreshOptimizeListSummary()
+            if (YukiHook.Status.isModuleActive) refreshOptimizeListSummary()
         }
     }
 
