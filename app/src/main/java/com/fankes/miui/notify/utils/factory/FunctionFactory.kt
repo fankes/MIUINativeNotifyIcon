@@ -34,14 +34,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
@@ -50,7 +43,6 @@ import android.provider.Settings
 import android.util.Base64
 import android.view.View
 import androidx.core.content.getSystemService
-import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
@@ -386,20 +378,6 @@ val Context.isNetWorkSuccess
     }
 
 /**
- * dp 转换为 pxInt
- * @param context 使用的实例
- * @return [Int]
- */
-fun Number.dp(context: Context) = dpFloat(context).toInt()
-
-/**
- * dp 转换为 pxFloat
- * @param context 使用的实例
- * @return [Float]
- */
-fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetrics.density
-
-/**
  * 获取系统主题色
  * @return [Int] Android < 12 返回 [wallpaperColor]
  */
@@ -448,26 +426,6 @@ val Int.isWhiteColor
  * @return [String]
  */
 val String.base64: String get() = Base64.encodeToString(toByteArray(), Base64.DEFAULT)
-
-/**
- * 圆角图片
- * @param radius 圆角度
- * @return [Bitmap] 圆角后的位图 - 失败会返回处理之前的位图
- */
-fun Bitmap.round(radius: Float): Bitmap = safeOf(default = this) {
-    createBitmap(width, height).also { out ->
-        Canvas(out).also { canvas ->
-            Paint().also { paint ->
-                paint.isAntiAlias = true
-                canvas.drawARGB(0, 0, 0, 0)
-                paint.color = Color.WHITE
-                canvas.drawRoundRect(RectF(Rect(0, 0, width, height)), radius, radius, paint)
-                paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-                canvas.drawBitmap(this, Rect(0, 0, width, height), Rect(0, 0, width, height), paint)
-            }
-        }
-    }
-}
 
 /**
  * 获取系统 Prop 值

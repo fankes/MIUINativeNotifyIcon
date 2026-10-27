@@ -25,8 +25,9 @@ package com.fankes.miui.notify.ui.activity.base
 import android.os.Bundle
 import androidx.viewbinding.ViewBinding
 import com.highcapable.betterandroid.ui.component.activity.AppBindingActivity
+import com.highcapable.betterandroid.ui.extension.component.base.DisplayDensity
 
-abstract class BaseActivity<VB : ViewBinding> : AppBindingActivity<VB>() {
+abstract class BaseActivity<VB : ViewBinding> : AppBindingActivity<VB>(), DisplayDensity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

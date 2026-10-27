@@ -32,11 +32,11 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.TextViewCompat
-import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
+import com.highcapable.betterandroid.ui.extension.component.base.DisplayDensity
 import top.defaults.drawabletoolbox.DrawableBuilder
 
-class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs) {
+class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs), DisplayDensity {
 
     private fun toColors(selected: Int, pressed: Int, normal: Int): ColorStateList {
         val colors = intArrayOf(selected, pressed, normal)
@@ -54,16 +54,16 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             .rectangle()
             .rounded()
             .solidColor(0xFF656565.toInt())
-            .height(20.dp(context))
-            .cornerRadius(15.dp(context))
+            .height(20.dp)
+            .cornerRadius(15.dp)
             .build()
         thumbDrawable = DrawableBuilder()
             .rectangle()
             .rounded()
             .solidColor(Color.WHITE)
-            .size(20.dp(context), 20.dp(context))
-            .cornerRadius(20.dp(context))
-            .strokeWidth(8.dp(context))
+            .size(20.dp, 20.dp)
+            .cornerRadius(20.dp)
+            .strokeWidth(8.dp)
             .strokeColor(Color.TRANSPARENT)
             .build()
         trackTintList = toColors(
@@ -72,7 +72,7 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             thumbColor.toInt()
         )
         maxLines = 1
-        switchPadding = 10.dp(context)
+        switchPadding = 10.dp
         ellipsize = TextUtils.TruncateAt.END
         // 文字显示不下时从布局里设置的字号向下缩小，最小 10sp，缩到最小仍显示不下才省略
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(

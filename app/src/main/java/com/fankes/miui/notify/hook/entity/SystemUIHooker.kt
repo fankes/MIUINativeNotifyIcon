@@ -61,13 +61,10 @@ import com.fankes.miui.notify.utils.factory.appLastUpdateTimeOf
 import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.utils.factory.brighterColor
 import com.fankes.miui.notify.utils.factory.delayedRun
-import com.fankes.miui.notify.utils.factory.dp
-import com.fankes.miui.notify.utils.factory.dpFloat
 import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.miosVersionCode
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
-import com.fankes.miui.notify.utils.factory.round
 import com.fankes.miui.notify.utils.factory.runInSafe
 import com.fankes.miui.notify.utils.factory.safeOf
 import com.fankes.miui.notify.utils.factory.safeOfFalse
@@ -84,6 +81,8 @@ import com.highcapable.anip.sdk.Anip
 import com.highcapable.betterandroid.system.extension.component.getParcelableCompat
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.betterandroid.ui.extension.component.base.getDrawableCompat
+import com.highcapable.betterandroid.ui.extension.component.base.toPx
+import com.highcapable.betterandroid.ui.extension.graphics.round
 import com.highcapable.betterandroid.ui.extension.view.outlineProvider
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -465,7 +464,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [Drawable]
      */
     private fun Drawable.rounded(context: Context) =
-        safeOf(default = this) { toBitmap().round(10.dpFloat(context)).toDrawable(context.resources) }
+        safeOf(default = this) { toBitmap().round(10.toPx(context).toFloat()).toDrawable(context.resources) }
 
     /**
      * 注册主题壁纸改变颜色监听
@@ -631,7 +630,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 outlineProvider { view, out ->
                     out.setRoundRect(
                         0, 0,
-                        view.width, view.height, 5.dpFloat(context)
+                        view.width, view.height, 5.toPx(context).toFloat()
                     )
                 }
                 if (isUseMaterial3Style) {
@@ -695,10 +694,10 @@ object SystemUIHooker : YukiBaseHooker() {
              * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
              */
             fun setPromotedOngoingComposedIcon(drawable: Drawable, foregroundColor: Int, backgroundColor: Int) {
-                val inset = 7.dp(context)
+                val inset = 7.toPx(context)
                 val backgroundDrawable = DrawableBuilder()
                     .rectangle()
-                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                    .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                     .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
                     .build()
                 val foregroundDrawable = (drawable.constantState?.newDrawable(context.resources) ?: drawable).mutate().apply {
@@ -760,14 +759,14 @@ object SystemUIHooker : YukiBaseHooker() {
                         if (isUseMaterial3Style && customIconColor != 0)
                             background = DrawableBuilder()
                                 .rectangle()
-                                .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                                .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                                 .solidColor(if (isDarkMode) customIconColor.brighterColor else customIconColor)
                                 .build()
                         when {
                             // 缩小 HyperOS 的通知图标
-                            isMIOS && isMiuiPanel -> setPadding(7.dp(context))
+                            isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
                             // 设置原生的背景边距
-                            isUseMaterial3Style -> setPadding(4.dp(context))
+                            isUseMaterial3Style -> setPadding(4.toPx(context))
                         }
                     }
                 }
@@ -788,14 +787,14 @@ object SystemUIHooker : YukiBaseHooker() {
                             if (isUseMaterial3Style)
                                 background = DrawableBuilder()
                                     .rectangle()
-                                    .cornerRadius(ConfigData.notifyIconCornerSize.dp(context))
+                                    .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                                     .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
                                     .build()
                             when {
                                 // 缩小 HyperOS 的通知图标
-                                isMIOS && isMiuiPanel -> setPadding(7.dp(context))
+                                isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
                                 // 设置原生的背景边距
-                                isUseMaterial3Style -> setPadding(4.dp(context))
+                                isUseMaterial3Style -> setPadding(4.toPx(context))
                             }
                         }
                     } else setDefaultNotifyIcon(iconDrawable)
@@ -824,7 +823,7 @@ object SystemUIHooker : YukiBaseHooker() {
         iconView.measure(sizeSpec, sizeSpec)
         iconView.layout(0, 0, size, size)
         createBitmap(size, size).also { iconView.draw(Canvas(it)) }
-            .round(ConfigData.notifyIconCornerSize.dpFloat(context))
+            .round(ConfigData.notifyIconCornerSize.toPx(context).toFloat())
             .toDrawable(context.resources)
     }
 

@@ -38,7 +38,6 @@ import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.addOnBackPressedEvent
 import com.fankes.miui.notify.utils.factory.callOnBackPressed
 import com.fankes.miui.notify.utils.factory.copyToClipboard
-import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
@@ -142,7 +141,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         binding.configTitleSync.setOnClickListener { onStartRefresh() }
         // 设置列表元素和 Adapter
         binding.configListView.apply {
-            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 15.dp(context))) {
+            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 15.dp)) {
                 onBindDiffer(
                     areItemsTheSame = { oldItem, newItem -> oldItem.packageName == newItem.packageName },
                     // 同一快照的图标不可变，重新装载后的新实例也需要刷新位图。
