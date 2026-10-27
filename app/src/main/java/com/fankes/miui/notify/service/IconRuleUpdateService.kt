@@ -22,18 +22,17 @@
  */
 package com.fankes.miui.notify.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import androidx.core.app.ServiceCompat
-import androidx.core.content.getSystemService
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.anip.sdk.Anip
+import com.highcapable.betterandroid.ui.component.notification.factory.Notification
+import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
+import com.highcapable.betterandroid.ui.component.notification.factory.startForeground
+import com.highcapable.betterandroid.ui.component.notification.type.NotificationImportance
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
 import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
@@ -97,16 +96,18 @@ class IconRuleUpdateService : Service() {
 
     /** 启动前台服务并显示同步中的通知 */
     private fun startForeground() {
-        getSystemService<NotificationManager>()?.createNotificationChannel(
-            NotificationChannel(NOTIFY_CHANNEL, getString(R.string.sync_service_channel), NotificationManager.IMPORTANCE_LOW)
-        )
-        val notification = Notification.Builder(this, NOTIFY_CHANNEL)
-            .setSmallIcon(R.drawable.ic_nf_icon_update)
-            .setContentTitle(getString(R.string.sync_syncing))
-            .setContentText(getString(R.string.sync_fetching_anip))
-            .build()
+        val notification = Notification(
+            context = this,
+            channel = NotificationChannel(NOTIFY_CHANNEL, importance = NotificationImportance.LOW) {
+                name = getString(R.string.sync_service_channel)
+            }
+        ) {
+            smallIcon(R.drawable.ic_nf_icon_update)
+            contentTitle = getString(R.string.sync_syncing)
+            contentText = getString(R.string.sync_fetching_anip)
+        }
         @Suppress("InlinedApi")
-        ServiceCompat.startForeground(this, NOTIFY_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        startForeground(NOTIFY_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
     }
 
     /** 冷启动的模块进程需要等待 Hook 框架服务异步连接后才能写入共享文件 */

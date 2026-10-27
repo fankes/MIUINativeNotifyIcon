@@ -22,7 +22,6 @@
  */
 package com.fankes.miui.notify.utils.tool
 
-import android.app.Activity
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
@@ -33,6 +32,7 @@ import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.openSelfSetting
 import com.fankes.miui.notify.utils.factory.runInSafe
 import com.fankes.miui.notify.utils.factory.showDialog
+import com.highcapable.betterandroid.ui.extension.component.hostActivity
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -83,7 +83,7 @@ object GithubReleaseTool {
                             confirmButton(text = context.getString(R.string.release_update)) { context.openBrowser(htmlUrl) }
                             cancelButton()
                         }
-                        if (name != version) (context as? Activity?)?.runOnUiThread {
+                        if (name != version) context.hostActivity?.runOnUiThread {
                             showUpdate()
                             result(name) { showUpdate() }
                         }
@@ -107,7 +107,7 @@ object GithubReleaseTool {
                     .build()
             ).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    (context as? Activity?)?.runOnUiThread {
+                    context.hostActivity?.runOnUiThread {
                         context.showDialog {
                             title = context.getString(R.string.release_network_unavailable)
                             msg = context.getString(R.string.release_network_unavailable_msg)
@@ -119,7 +119,7 @@ object GithubReleaseTool {
                 }
 
                 override fun onResponse(call: Call, response: Response) = runInSafe {
-                    (context as? Activity?)?.runOnUiThread { runInSafe { callback() } }
+                    context.hostActivity?.runOnUiThread { runInSafe { callback() } }
                 }
             })
     }

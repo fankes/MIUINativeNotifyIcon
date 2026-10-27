@@ -22,19 +22,14 @@
  */
 package com.fankes.miui.notify.utils.tool
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Resources
-import android.graphics.drawable.Icon
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.getSystemService
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.widget.doAfterTextChanged
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.const.IconRuleSourceSyncType
@@ -52,6 +47,9 @@ import com.highcapable.anip.sdk.config.AnipConfig
 import com.highcapable.anip.sdk.config.RemoteSource
 import com.highcapable.anip.sdk.entity.NotificationIconSnapshot
 import com.highcapable.anip.sdk.type.SystemVariant
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
+import com.highcapable.betterandroid.ui.component.notification.factory.createNotification
 import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.betterandroid.ui.extension.view.textToString
@@ -364,43 +362,37 @@ object IconRuleManagerTool {
 
     private fun pushNotify(context: Context, resources: Resources, title: String, msg: String, isRetry: Boolean = false) {
         if (context is AppCompatActivity) return
-        context.getSystemService<NotificationManager>()?.apply {
-            createNotificationChannel(
-                NotificationChannel(
-                    NOTIFY_CHANNEL,
-                    resources.getString(R.string.sync_notify_channel),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
+        @Suppress("MissingPermission")
+        context.createNotification(
+            channel = NotificationChannel(NOTIFY_CHANNEL) {
+                name = resources.getString(R.string.sync_notify_channel)
+            }
+        ) {
+            subText = context.appNameOf(BuildConfigWrapper.APPLICATION_ID)
+            contentTitle = title
+            contentText = msg
+            color = NOTIFY_COLOR
+            isAutoCancel = true
+            @Suppress("RestrictedApi")
+            smallIcon = IconCompat.createWithResource(resources, BuildConfigWrapper.APPLICATION_ID, R.drawable.ic_nf_icon_update)
+            contentIntent = PendingIntent.getActivity(
+                context,
+                msg.hashCode(),
+                Intent().apply {
+                    component = ComponentName(BuildConfigWrapper.APPLICATION_ID, classOf<ConfigureActivity>().name)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    if (isRetry) putExtra("isDirectUpdate", true)
+                    else {
+                        putExtra("isShowUpdDialog", false)
+                        snapshotVersion?.let { version ->
+                            putExtra(EXTRA_ICON_RULE_SOURCE, version.first)
+                            putExtra(EXTRA_ICON_RULE_VERSION, version.second)
+                        }
+                    }
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or
+                    if (AndroidVersion.isLessThan(AndroidVersion.S)) 0 else PendingIntent.FLAG_IMMUTABLE
             )
-            notify(NOTIFY_CHANNEL, 0, Notification.Builder(context, NOTIFY_CHANNEL).apply {
-                setSubText(context.appNameOf(BuildConfigWrapper.APPLICATION_ID))
-                setContentTitle(title)
-                setContentText(msg)
-                setColor(NOTIFY_COLOR)
-                setAutoCancel(true)
-                // SystemUI 使用宿主上下文发送通知，资源和目标页面必须显式指向模块包
-                setSmallIcon(Icon.createWithResource(BuildConfigWrapper.APPLICATION_ID, R.drawable.ic_nf_icon_update))
-                setContentIntent(
-                    PendingIntent.getActivity(
-                        context,
-                        msg.hashCode(),
-                        Intent().apply {
-                            component = ComponentName(BuildConfigWrapper.APPLICATION_ID, classOf<ConfigureActivity>().name)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            if (isRetry) putExtra("isDirectUpdate", true)
-                            else {
-                                putExtra("isShowUpdDialog", false)
-                                snapshotVersion?.let { version ->
-                                    putExtra(EXTRA_ICON_RULE_SOURCE, version.first)
-                                    putExtra(EXTRA_ICON_RULE_VERSION, version.second)
-                                }
-                            }
-                        },
-                        PendingIntent.FLAG_UPDATE_CURRENT or
-                            if (Build.VERSION.SDK_INT < 31) 0 else PendingIntent.FLAG_IMMUTABLE
-                    )
-                )
-            }.build())
-        }
+        }.post(id = 0, tag = NOTIFY_CHANNEL)
     }
 }

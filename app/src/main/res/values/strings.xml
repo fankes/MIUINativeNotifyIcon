@@ -252,6 +252,7 @@
     <string name="about_group_built_with">Built with</string>
     <string name="about_anip">Android Notification Icon Project</string>
     <string name="about_anip_desc">Provides standardized monochrome icon resources for apps and vendor systems that do not follow the Android notification design standard</string>
+    <string name="about_betterandroid_desc">Create more useful tool extensions for Android</string>
     <string name="about_yukihook_desc">A modern hook API and Xposed module solution</string>
     <string name="about_kavaref_desc">Modern Java reflection implemented in Kotlin</string>
     <string name="about_copyright">Reproducing, modifying or copying my work without permission is prohibited</string>

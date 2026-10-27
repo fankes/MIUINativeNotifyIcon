@@ -137,14 +137,11 @@
             android:textSize="17sp"
             android:visibility="gone" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/config_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@color/trans"
-            android:dividerHeight="15dp"
             android:fadingEdgeLength="10dp"
-            android:listSelector="@color/trans"
             android:padding="15dp"
             android:requiresFadingEdge="vertical"
             android:scrollbars="none" />

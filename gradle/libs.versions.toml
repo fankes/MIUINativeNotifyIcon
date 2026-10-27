@@ -14,6 +14,8 @@ drawabletoolbox = "1.0.7"
 okhttp = "5.5.1"
 androidx-core-ktx = "1.19.0"
 androidx-appcompat = "1.8.0"
+androidx-recyclerview = "1.4.0"
+androidx-viewpager2 = "1.1.0"
 # noinspection GradleDependency
 material = "1.11.0"
 androidx-constraintlayout = "2.2.2"
@@ -41,12 +43,17 @@ kavaref-core = { group = "com.highcapable.kavaref", name = "kavaref-core" }
 kavaref-android = { group = "com.highcapable.kavaref", name = "kavaref-android" }
 kavaref-extension = { group = "com.highcapable.kavaref", name = "kavaref-extension" }
 betterandroid-ui-extension = { group = "com.highcapable.betterandroid", name = "ui-extension", version.ref = "betterandroid" }
+betterandroid-system-extension = { group = "com.highcapable.betterandroid", name = "system-extension", version.ref = "betterandroid" }
+betterandroid-ui-component = { group = "com.highcapable.betterandroid", name = "ui-component", version.ref = "betterandroid" }
+betterandroid-ui-component-adapter = { group = "com.highcapable.betterandroid", name = "ui-component-adapter", version.ref = "betterandroid" }
 anip-sdk = { group = "com.highcapable.anip", name = "anip-sdk", version.ref = "anip-sdk" }
 libsu = { group = "com.github.topjohnwu.libsu", name = "core", version.ref = "libsu" }
 drawabletoolbox = { group = "com.github.duanhong169", name = "drawabletoolbox", version.ref = "drawabletoolbox" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
+androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "androidx-viewpager2" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -40,6 +40,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.highcapable.betterandroid.ui.extension.binding.ViewBinding
+import com.highcapable.betterandroid.ui.extension.component.fragmentManager
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.kavaref.extension.classOf
 import com.highcapable.yukihookapi.YukiHook
@@ -58,7 +59,7 @@ fun Context.showTimePicker(timeSet: String = "", result: (String) -> Unit) {
         .setTheme(R.style.ThemeOverlay_MIUINativeNotifyIcon_TimePicker)
         .build()
     picker.addOnPositiveButtonClickListener { result("${picker.hour.autoZero}:${picker.minute.autoZero}") }
-    picker.show((this as AppCompatActivity).supportFragmentManager, "time_picker")
+    picker.show((this as AppCompatActivity).fragmentManager(), "time_picker")
 }
 
 /**

@@ -40,6 +40,7 @@ import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.google.android.material.snackbar.Snackbar
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.factory.dataChannel
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -134,8 +135,8 @@ object SystemUITool {
                         "[Device Brand]: ${Build.BRAND}\n" +
                         "[Device Model]: ${Build.MODEL}\n" +
                         "[Display]: ${Build.DISPLAY}\n" +
-                        "[Android Version]: ${Build.VERSION.RELEASE}\n" +
-                        "[Android API Level]: ${Build.VERSION.SDK_INT}\n" +
+                        "[Android Version]: ${AndroidVersion.name}\n" +
+                        "[Android API Level]: ${AndroidVersion.code}\n" +
                         "[${if (isMIOS) "HyperOS" else "MIUI"} Version]: ${activity.systemFullVersion}\n" +
                         "[System Locale]: ${Locale.getDefault()}\n\n" + YLog.contents(debugLogs).trim()
                     activity.contentResolver?.openOutputStream(e)?.apply { write(content.toByteArray()) }?.close()

@@ -35,7 +35,6 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
-import android.os.Build
 import android.os.SystemClock
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -64,10 +63,8 @@ import com.fankes.miui.notify.utils.factory.brighterColor
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.dpFloat
-import com.fankes.miui.notify.utils.factory.drawableOf
 import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
-import com.fankes.miui.notify.utils.factory.isUpperOfAndroidS
 import com.fankes.miui.notify.utils.factory.miosVersionCode
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
 import com.fankes.miui.notify.utils.factory.round
@@ -84,6 +81,9 @@ import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.highcapable.anip.sdk.Anip
+import com.highcapable.betterandroid.system.extension.component.getParcelableCompat
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.extension.component.base.getDrawableCompat
 import com.highcapable.betterandroid.ui.extension.view.outlineProvider
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -329,8 +329,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 resolver.firstFieldOrNull { name = "mIsFocusNotification" }?.get<Boolean>() == true ||
                     resolver.firstFieldOrNull { name = "mIsPromotedOngoing" }?.get<Boolean>() == true
             } || notification.extras.let {
-                @Suppress("DEPRECATION")
-                it.getBoolean("miui.focus.isFocus") || it.getParcelable<RemoteViews>("miui.focus.rv") != null
+                it.getBoolean("miui.focus.isFocus") || it.getParcelableCompat<RemoteViews>("miui.focus.rv") != null
             }
 
     /**
@@ -353,7 +352,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [String]
      */
     private val StatusBarNotification.compatOpPkgName
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) opPkg else packageName ?: ""
+        get() = if (AndroidVersion.isAtLeast(AndroidVersion.Q)) opPkg else packageName ?: ""
 
     /**
      * 判断通知是否来自 MIPUSH
@@ -384,8 +383,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * 获取 MIUI 自己设置的通知图标
      * @return [Icon] or null
      */
-    @Suppress("DEPRECATION")
-    private val StatusBarNotification.miuiAppIcon get() = notification?.extras?.getParcelable<Icon?>("miui.appIcon")
+    private val StatusBarNotification.miuiAppIcon get() = notification?.extras?.getParcelableCompat<Icon>("miui.appIcon")
 
     /**
      * 打印日志
@@ -400,7 +398,7 @@ object SystemUIHooker : YukiBaseHooker() {
         if (ConfigData.isEnableModuleLog) {
             val focusTicker = nf?.notification?.extras?.getString("miui.focus.ticker")
             val focusIconId = nf?.notification?.extras?.getInt("miui.focus.iconId", -1)
-            val focusRv = nf?.notification?.extras?.getParcelable<RemoteViews?>("miui.focus.rv")
+            val focusRv = nf?.notification?.extras?.getParcelableCompat<RemoteViews>("miui.focus.rv")
             val focusParam = nf?.notification?.extras?.getString("miui.focus.param")
             if (focusRv != null)
                 YLog.debug(
@@ -476,7 +474,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param view 实例
      */
     private fun registerWallpaperColorChanged(view: View) = runInSafe {
-        if (isWallpaperColorListenerSetUp.not() && isUpperOfAndroidS.not()) view.apply {
+        if (isWallpaperColorListenerSetUp.not() && AndroidVersion.isLessThan(AndroidVersion.S)) view.apply {
             val manager = WallpaperManager.getInstance(context)
             val listener = WallpaperManager.OnColorsChangedListener { _, _ -> refreshNotificationIcons() }
             manager.addOnColorsChangedListener(listener, handler)
@@ -534,7 +532,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 return@run
             }
             if (isGrayscaleIcon.not() && ConfigData.isEnableNotifyIconFixPlaceholder)
-                customPair = Triple(module.resources.drawableOf(R.drawable.ic_message), 0, true)
+                customPair = Triple(module.resources.getDrawableCompat(R.drawable.ic_message), 0, true)
         }
         return customPair ?: Triple(null, 0, false)
     }
@@ -616,7 +614,7 @@ object SystemUIHooker : YukiBaseHooker() {
         nf: StatusBarNotification?,
         iconView: ImageView,
         isExpanded: Boolean = true,
-        isUseMaterial3Style: Boolean = isUpperOfAndroidS,
+        isUseMaterial3Style: Boolean = AndroidVersion.isAtLeast(AndroidVersion.S),
         isMiuiPanel: Boolean = false
     ) = runInSafe(msg = "compatNotifyIcon") {
         /**
@@ -1049,7 +1047,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 ?: resolver.firstFieldOrNull { name = "mRanking" }?.get<NotificationListenerService.Ranking>()
         }
         safeOfNull { ranking?.channel?.importance }?.let { return it }
-        if (Build.VERSION.SDK_INT >= 37) return null
+        if (AndroidVersion.isAtLeast(AndroidVersion.CINNAMON_BUN)) return null
         return safeOfNull {
             (context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
                 ?.getNotificationChannel(sbn?.notification?.channelId)?.importance

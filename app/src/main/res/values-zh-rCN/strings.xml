@@ -252,6 +252,7 @@
     <string name="about_group_built_with">基于以下项目构建</string>
     <string name="about_anip">Android 通知图标适配计划</string>
     <string name="about_anip_desc">为不符合 Android 原生通知设计的应用与厂商系统提供规范的单色图标资源</string>
+    <string name="about_betterandroid_desc">为 Android 创造更多有用的工具扩展</string>
     <string name="about_yukihook_desc">一个现代化的 Hook API 与 Xposed 模块解决方案</string>
     <string name="about_kavaref_desc">一个使用 Kotlin 实现的现代化 Java 反射</string>
     <string name="about_copyright">未经允许不得转载、修改复制我的劳动成果</string>

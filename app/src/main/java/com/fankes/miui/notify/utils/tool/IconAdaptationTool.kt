@@ -22,17 +22,14 @@
  */
 package com.fankes.miui.notify.utils.tool
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.os.Bundle
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.hook.HookEntry
@@ -42,6 +39,10 @@ import com.fankes.miui.notify.utils.factory.isDebugApp
 import com.fankes.miui.notify.utils.factory.isSystemApp
 import com.fankes.miui.notify.utils.factory.runInSafe
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
+import com.highcapable.betterandroid.ui.component.notification.factory.createNotification
+import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
 
 /**
  * 通知图标适配推送通知类
@@ -65,42 +66,39 @@ object IconAdaptationTool {
     fun pushNewAppSupportNotify(context: Context, packageName: String, resources: Resources = context.resources) {
         if (packageName.startsWith("com.google.android.trichromelibrary")) return
         if (context.isSystemApp(packageName) || context.isDebugApp(packageName)) return
-        context.getSystemService(NotificationManager::class.java)?.apply {
-            createNotificationChannel(
-                NotificationChannel(
-                    NOTIFY_CHANNEL, resources.getString(R.string.notify_channel_adaptation),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply { enableLights(false) }
-            )
-            notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
-                setShowWhen(true)
-                setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
-                setContentTitle(resources.getString(R.string.notify_app_installed, context.appNameOf(packageName)))
-                setContentText(resources.getString(R.string.notify_app_not_adapted))
-                setColor(0xFF2993F0.toInt())
-                setAutoCancel(true)
-                setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_unsupported))
-                setExtras(Bundle().apply {
-                    putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
-                })
-                setContentIntent(
-                    PendingIntent.getActivity(
-                        context, packageName.hashCode(),
-                        Intent().apply {
-                            component = ComponentName(
-                                MODULE_PACKAGE_NAME,
-                                "$MODULE_PACKAGE_NAME.ui.activity.ConfigureActivity"
-                            )
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }.apply {
-                            putExtra("isNewAppSupport", true)
-                            putExtra("appName", context.appNameOf(packageName))
-                            putExtra("pkgName", packageName)
-                        }, if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+        @Suppress("MissingPermission")
+        context.createNotification(
+            channel = NotificationChannel(NOTIFY_CHANNEL) {
+                name = resources.getString(R.string.notify_channel_adaptation)
+                isLightsEnabled = false
+            }
+        ) {
+            isShowWhen = true
+            subText = context.appNameOf(MODULE_PACKAGE_NAME)
+            contentTitle = resources.getString(R.string.notify_app_installed, context.appNameOf(packageName))
+            contentText = resources.getString(R.string.notify_app_not_adapted)
+            color = 0xFF2993F0.toInt()
+            isAutoCancel = true
+            @Suppress("RestrictedApi")
+            smallIcon = IconCompat.createWithResource(resources, MODULE_PACKAGE_NAME, R.drawable.ic_unsupported)
+            extras = Bundle().apply {
+                putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
+            }
+            contentIntent = PendingIntent.getActivity(
+                context, packageName.hashCode(),
+                Intent().apply {
+                    component = ComponentName(
+                        MODULE_PACKAGE_NAME,
+                        "$MODULE_PACKAGE_NAME.ui.activity.ConfigureActivity"
                     )
-                )
-            }.build())
-        }
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }.apply {
+                    putExtra("isNewAppSupport", true)
+                    putExtra("appName", context.appNameOf(packageName))
+                    putExtra("pkgName", packageName)
+                }, if (AndroidVersion.isLessThan(AndroidVersion.S)) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
+            )
+        }.post(packageName.hashCode())
     }
 
     /**
@@ -109,6 +107,6 @@ object IconAdaptationTool {
      * @param packageName 卸载的 APP 包名
      */
     fun removeNewAppSupportNotify(context: Context, packageName: String) = runInSafe {
-        context.getSystemService(NotificationManager::class.java)?.cancel(packageName.hashCode())
+        context.notificationManager.cancel(packageName.hashCode())
     }
 }

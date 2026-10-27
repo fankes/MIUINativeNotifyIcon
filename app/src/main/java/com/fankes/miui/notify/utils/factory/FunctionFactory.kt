@@ -27,18 +27,13 @@ package com.fankes.miui.notify.utils.factory
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Notification
-import android.app.Service
 import android.app.WallpaperManager
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -50,27 +45,29 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.provider.Settings
 import android.util.Base64
 import android.view.View
-import android.widget.Toast
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
-import androidx.core.content.pm.PackageInfoCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.google.android.material.snackbar.Snackbar
+import com.highcapable.betterandroid.system.extension.component.clipboardManager
+import com.highcapable.betterandroid.system.extension.component.copy
+import com.highcapable.betterandroid.system.extension.component.getPackageInfoOrNull
+import com.highcapable.betterandroid.system.extension.component.hasPackage
+import com.highcapable.betterandroid.system.extension.component.isComponentEnabled
+import com.highcapable.betterandroid.system.extension.component.versionCodeCompat
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
+import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
+import com.highcapable.betterandroid.ui.extension.view.toast
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.extension.hasClass
 import com.highcapable.kavaref.extension.toClassOrNull
-import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 import com.topjohnwu.superuser.Shell
 import java.text.SimpleDateFormat
@@ -101,36 +98,6 @@ val Context.isSystemInDarkMode get() = (resources.configuration.uiMode and Confi
  * @return [Boolean] 是否开启
  */
 inline val Context.isNotSystemInDarkMode get() = !isSystemInDarkMode
-
-/**
- * 系统版本是否高于或等于 Android 14
- * @return [Boolean] 是否符合条件
- */
-inline val isUpperOfAndroidU get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-
-/**
- * 系统版本是否高于或等于 Android 13
- * @return [Boolean] 是否符合条件
- */
-inline val isUpperOfAndroidT get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
-/**
- * 系统版本是否高于或等于 Android 12
- * @return [Boolean] 是否符合条件
- */
-inline val isUpperOfAndroidS get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-
-/**
- * 系统版本是否低于 Android 9
- * @return [Boolean] 是否符合条件
- */
-inline val isLowerAndroidP get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
-
-/**
- * 系统版本是否低于 Android 11
- * @return [Boolean] 是否符合条件
- */
-inline val isLowerAndroidR get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
 
 /**
  * 当前设备是否是 MIUI、HyperOS 定制 Android 系统
@@ -196,7 +163,7 @@ inline val isNotSupportMiSystemVersion get() = !isSupportMiSystemVersion
  * @return [String]
  */
 val androidVersionCodeName
-    get() = when (Build.VERSION.SDK_INT) {
+    get() = when (AndroidVersion.code) {
         37 -> "C"
         36 -> "W"
         35 -> "V"
@@ -318,63 +285,30 @@ val Context.systemFullVersion
     }
 
 /**
- * 获取 [Drawable]
- * @param resId 属性资源 ID
- * @return [Drawable]
- */
-fun Resources.drawableOf(@DrawableRes resId: Int) = ResourcesCompat.getDrawable(this, resId, null) ?: error("Invalid resources")
-
-/**
- * 获取颜色
- * @param resId 属性资源 ID
- * @return [Int]
- */
-fun Resources.colorOf(@ColorRes resId: Int) = ResourcesCompat.getColor(this, resId, null)
-
-/**
- * 得到 APP 安装包信息 (兼容)
- * @param packageName APP 包名
- * @param flag [PackageManager.PackageInfoFlags]
- * @return [PackageInfo] or null
- */
-private fun Context.getPackageInfoCompat(packageName: String, flag: Number = 0) = runCatching {
-    @Suppress("DEPRECATION", "KotlinRedundantDiagnosticSuppress")
-    if (Build.VERSION.SDK_INT >= 33)
-        packageManager?.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flag.toLong()))
-    else packageManager?.getPackageInfo(packageName, flag.toInt())
-}.getOrNull()
-
-/**
- * 得到 APP 版本号 (兼容 [PackageInfo.getLongVersionCode])
- * @return [Int]
- */
-private val PackageInfo.versionCodeCompat get() = PackageInfoCompat.getLongVersionCode(this)
-
-/**
  * 判断 APP 是否安装
  * @param packageName APP 包名
  * @return [Boolean]
  */
-fun Context.isInstall(packageName: String) = getPackageInfoCompat(packageName)?.let { true } ?: false
+fun Context.isInstall(packageName: String) = packageManager.hasPackage(packageName)
 
 /**
  * 得到 APP 版本信息
  * @return [String]
  */
-val Context.appVersionName get() = getPackageInfoCompat(packageName)?.versionName ?: ""
+val Context.appVersionName get() = packageManager.getPackageInfoOrNull(packageName)?.versionName ?: ""
 
 /**
  * 得到 APP 版本号
  * @return [Int]
  */
-val Context.appVersionCode get() = getPackageInfoCompat(packageName)?.versionCodeCompat
+val Context.appVersionCode get() = packageManager.getPackageInfoOrNull(packageName)?.versionCodeCompat
 
 /**
  * 得到 APP 最后更新时间
  * @param packageName APP 包名
  * @return [Long] or null
  */
-fun Context.appLastUpdateTimeOf(packageName: String) = getPackageInfoCompat(packageName)?.lastUpdateTime
+fun Context.appLastUpdateTimeOf(packageName: String) = packageManager.getPackageInfoOrNull(packageName)?.lastUpdateTime
 
 /**
  * 得到 APP 名称
@@ -382,14 +316,14 @@ fun Context.appLastUpdateTimeOf(packageName: String) = getPackageInfoCompat(pack
  * @return [String]
  */
 fun Context.appNameOf(packageName: String = getPackageName()) =
-    getPackageInfoCompat(packageName)?.applicationInfo?.loadLabel(packageManager)?.toString() ?: ""
+    packageManager.getPackageInfoOrNull(packageName)?.applicationInfo?.loadLabel(packageManager)?.toString() ?: ""
 
 /**
  * 得到 APP 图标
  * @param packageName APP 包名 - 默认为当前 APP
  * @return [Drawable] or null
  */
-fun Context.appIconOf(packageName: String = getPackageName()) = getPackageInfoCompat(packageName)?.applicationInfo?.loadIcon(packageManager)
+fun Context.appIconOf(packageName: String = getPackageName()) = packageManager.getPackageInfoOrNull(packageName)?.applicationInfo?.loadIcon(packageManager)
 
 /**
  * 获取 APP 是否为 DEBUG 版本
@@ -397,7 +331,7 @@ fun Context.appIconOf(packageName: String = getPackageName()) = getPackageInfoCo
  * @return [Boolean]
  */
 fun Context.isDebugApp(packageName: String) =
-    safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
+    safeOfFalse { (packageManager.getPackageInfoOrNull(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_DEBUGGABLE) ?: 0) != 0 }
 
 /**
  * 获取 APP 是否为系统 APP
@@ -405,7 +339,7 @@ fun Context.isDebugApp(packageName: String) =
  * @return [Boolean]
  */
 fun Context.isSystemApp(packageName: String) =
-    safeOfFalse { (getPackageInfoCompat(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM) ?: 0) != 0 }
+    safeOfFalse { (packageManager.getPackageInfoOrNull(packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM) ?: 0) != 0 }
 
 /**
  * 对数值自动补零
@@ -439,7 +373,7 @@ val String.minute
  * 是否关闭了通知权限
  * @return [Boolean]
  */
-val isNotNoificationEnabled get() = !NotificationManagerCompat.from(ModuleApplication.requireContext()).areNotificationsEnabled()
+val isNotNoificationEnabled get() = !ModuleApplication.requireContext().notificationManager.areNotificationsEnabled()
 
 /**
  * 网络连接是否正常
@@ -472,7 +406,7 @@ fun Number.dpFloat(context: Context) = toFloat() * context.resources.displayMetr
 val Context.systemAccentColor
     @SuppressLint("InlinedApi")
     get() = safeOf(wallpaperColor) {
-        if (isUpperOfAndroidS) resources.colorOf(android.R.color.system_accent1_600) else wallpaperColor
+        if (AndroidVersion.isAtLeast(AndroidVersion.S)) resources.getColorCompat(android.R.color.system_accent1_600) else wallpaperColor
     }
 
 /**
@@ -574,27 +508,6 @@ fun execShell(cmd: String, isSu: Boolean = true) = safeOfNothing {
 }
 
 /**
- * 弹出 [Toast]
- * @param msg 提示内容
- */
-fun toast(msg: String) {
-    runCatching {
-        Toast.makeText(ModuleApplication.requireContext(), msg, Toast.LENGTH_SHORT).show()
-    }.onFailure { YLog.warn(msg) }
-}
-
-/**
- * 跳转到指定页面
- *
- * [T] 为指定的 [Activity]
- */
-inline fun <reified T : Activity> Context.navigate() = runInSafe {
-    startActivity(Intent(if (this is Service) applicationContext else this, T::class.java).apply {
-        if (this@navigate !is Activity) flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    })
-}
-
-/**
  * 弹出 [Snackbar]
  * @param msg 提示内容
  * @param actionText 按钮文本 - 不写默认取消按钮
@@ -604,7 +517,7 @@ fun Context.snake(msg: String, actionText: String = "", callback: () -> Unit = {
     Snackbar.make((this as Activity).findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG)
         .apply {
             // 有底栏时显示在底栏上方，避免挡住底栏
-            (findViewById<View>(R.id.main_bottom_nav) ?: findViewById<View>(R.id.config_bottom_bar))?.let { anchorView = it }
+            (findViewById(R.id.main_bottom_nav) ?: findViewById<View>(R.id.config_bottom_bar))?.let { anchorView = it }
             if (actionText.isBlank()) return@apply
             setActionTextColor(if (isSystemInDarkMode) Color.BLACK else Color.WHITE)
             setAction(actionText) { callback() }
@@ -640,8 +553,8 @@ fun Context.openSelfSetting(packageName: String = ModuleApplication.requireConte
             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
             data = Uri.fromParts("package", packageName, null)
         })
-    else toast(msg = getString(R.string.common_app_not_installed))
-}.onFailure { toast(msg = getString(R.string.common_launch_app_info_failed, packageName)) }
+    else toast(getString(R.string.common_app_not_installed))
+}.onFailure { toast(getString(R.string.common_launch_app_info_failed, packageName)) }
 
 /** 跳转通知设置界面 */
 fun Context.openNotifySetting() = runCatching {
@@ -658,8 +571,8 @@ fun Context.openNotifySetting() = runCatching {
  * @param content 要复制的文本
  */
 fun Context.copyToClipboard(content: String) = runInSafe {
-    (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).apply {
-        setPrimaryClip(ClipData.newPlainText(null, content))
+    clipboardManager.apply {
+        copy(content)
         (primaryClip?.getItemAt(0)?.text ?: "").also {
             if (it != content) snake(msg = getString(R.string.common_copy_failed)) else snake(msg = getString(R.string.common_copied))
         }
@@ -680,7 +593,7 @@ fun Long.stampToDate(format: String = "yyyy-MM-dd HH:mm:ss") =
  * @param it 方法体
  */
 fun Any?.delayedRun(ms: Long = 150, it: () -> Unit) = runInSafe {
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "ReplaceWithCoroutinesExtension")
     Handler().postDelayed({ it() }, ms)
 }
 
@@ -703,6 +616,4 @@ fun Context.hideOrShowLauncherIcon(isShow: Boolean) {
  * @return [Boolean] 是否显示
  */
 val Context.isLauncherIconShowing
-    get() = packageManager?.getComponentEnabledSetting(
-        ComponentName(packageName, "${BuildConfigWrapper.APPLICATION_ID}.Home")
-    ) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    get() = packageManager.isComponentEnabled(ComponentName(packageName, "${BuildConfigWrapper.APPLICATION_ID}.Home"))

@@ -22,22 +22,23 @@
  */
 package com.fankes.miui.notify.utils.tool
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.os.Bundle
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.factory.appIconOf
 import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
+import com.highcapable.betterandroid.ui.component.notification.factory.createNotification
+import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
 
 /**
  * 模块更新激活提醒通知工具类
@@ -59,9 +60,9 @@ object ActivationPromptTool {
      * @return [Boolean]
      */
     fun isPrompting(context: Context) =
-        context.getSystemService(NotificationManager::class.java)?.activeNotifications?.any {
+        context.notificationManager.activeNotifications.any {
             it.id == MODULE_PACKAGE_NAME.hashCode() && it.notification.extras.getBoolean(EXTRA_IS_RELOADED).not()
-        } == true
+        }
 
     /**
      * 推送提醒通知
@@ -72,36 +73,33 @@ object ActivationPromptTool {
      */
     fun prompt(context: Context, packageName: String, isReloaded: Boolean = false, resources: Resources = context.resources) {
         if (packageName != BuildConfigWrapper.APPLICATION_ID) return
-        context.getSystemService(NotificationManager::class.java)?.apply {
-            createNotificationChannel(
-                NotificationChannel(
-                    NOTIFY_CHANNEL, resources.getString(R.string.notify_channel_update),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply { enableLights(false) }
+        @Suppress("MissingPermission")
+        context.createNotification(
+            channel = NotificationChannel(NOTIFY_CHANNEL) {
+                name = resources.getString(R.string.notify_channel_update)
+                isLightsEnabled = false
+            }
+        ) {
+            isShowWhen = true
+            subText = context.appNameOf(MODULE_PACKAGE_NAME)
+            contentTitle = resources.getString(R.string.notify_module_updated)
+            contentText = if (isReloaded) resources.getString(R.string.notify_module_updated_reloaded) else resources.getString(R.string.notify_module_updated_activate)
+            isOnlyAlertOnce = true
+            color = 0xFFE06818.toInt()
+            isAutoCancel = true
+            @Suppress("RestrictedApi")
+            smallIcon = IconCompat.createWithResource(resources, MODULE_PACKAGE_NAME, R.drawable.ic_notify_update)
+            extras = Bundle().apply {
+                putBoolean(EXTRA_IS_RELOADED, isReloaded)
+                putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
+            }
+            contentIntent = PendingIntent.getActivity(
+                context, packageName.hashCode(),
+                Intent().apply {
+                    component = ComponentName(MODULE_PACKAGE_NAME, "$MODULE_PACKAGE_NAME.ui.activity.MainActivity")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }, if (AndroidVersion.isLessThan(AndroidVersion.S)) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
             )
-            notify(packageName.hashCode(), Notification.Builder(context, NOTIFY_CHANNEL).apply {
-                setShowWhen(true)
-                setSubText(context.appNameOf(MODULE_PACKAGE_NAME))
-                setContentTitle(resources.getString(R.string.notify_module_updated))
-                setContentText(if (isReloaded) resources.getString(R.string.notify_module_updated_reloaded) else resources.getString(R.string.notify_module_updated_activate))
-                setOnlyAlertOnce(true)
-                setColor(0xFFE06818.toInt())
-                setAutoCancel(true)
-                setSmallIcon(Icon.createWithResource(MODULE_PACKAGE_NAME, R.drawable.ic_notify_update))
-                setExtras(Bundle().apply {
-                    putBoolean(EXTRA_IS_RELOADED, isReloaded)
-                    putParcelable("miui.appIcon", Icon.createWithBitmap(context.appIconOf(MODULE_PACKAGE_NAME)?.toBitmap()))
-                })
-                setContentIntent(
-                    PendingIntent.getActivity(
-                        context, packageName.hashCode(),
-                        Intent().apply {
-                            component = ComponentName(MODULE_PACKAGE_NAME, "$MODULE_PACKAGE_NAME.ui.activity.MainActivity")
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }, if (Build.VERSION.SDK_INT < 31) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_IMMUTABLE
-                    )
-                )
-            }.build())
-        }
+        }.post(packageName.hashCode())
     }
 }

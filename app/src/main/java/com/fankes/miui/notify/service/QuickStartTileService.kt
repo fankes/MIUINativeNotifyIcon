@@ -24,13 +24,13 @@ package com.fankes.miui.notify.service
 
 import android.service.quicksettings.TileService
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
-import com.fankes.miui.notify.utils.factory.navigate
+import com.highcapable.betterandroid.ui.extension.component.startActivity
 
 class QuickStartTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
         // 启动通知图标优化列表窗口
-        navigate<ConfigureActivity>()
+        startActivity<ConfigureActivity>(newTask = true)
     }
 }

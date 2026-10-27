@@ -24,6 +24,7 @@ package com.fankes.miui.notify.utils.factory
 
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.highcapable.betterandroid.ui.extension.component.OnBackPressedCallback
 
 /** 已添加的返回监听事件 */
 private val onBackPressedCallbacks = HashMap<AppCompatActivity, OnBackPressedCallback>()
@@ -43,11 +44,7 @@ fun AppCompatActivity.callOnBackPressed(ignored: Boolean = false) {
  * @param callback 回调事件
  */
 fun AppCompatActivity.addOnBackPressedEvent(callback: OnBackPressedEvent.() -> Unit) {
-    object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            OnBackPressedEvent(this@addOnBackPressedEvent).apply(callback)
-        }
-    }.also { result ->
+    OnBackPressedCallback { OnBackPressedEvent(this@addOnBackPressedEvent).apply(callback) }.also { result ->
         onBackPressedCallbacks.computeIfAbsent(this) {
             onBackPressedDispatcher.addCallback(result)
             result

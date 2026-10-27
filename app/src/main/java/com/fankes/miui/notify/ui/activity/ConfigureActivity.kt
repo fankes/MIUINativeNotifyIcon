@@ -36,20 +36,24 @@ import com.fankes.miui.notify.params.factory.putAppNotifyEnabledOf
 import com.fankes.miui.notify.params.factory.putAppNotifyOverlayOf
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.addOnBackPressedEvent
-import com.fankes.miui.notify.utils.factory.bindAdapter
 import com.fankes.miui.notify.utils.factory.callOnBackPressed
-import com.fankes.miui.notify.utils.factory.colorOf
 import com.fankes.miui.notify.utils.factory.copyToClipboard
-import com.fankes.miui.notify.utils.factory.navigate
+import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
-import com.fankes.miui.notify.utils.factory.toast
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.anip.sdk.entity.NotificationIcon
+import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
+import com.highcapable.betterandroid.ui.component.adapter.recycler.cosmetic.RecyclerCosmetic
+import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.component.runDelayed
+import com.highcapable.betterandroid.ui.extension.component.startActivity
+import com.highcapable.betterandroid.ui.extension.view.textColor
+import com.highcapable.betterandroid.ui.extension.view.textToString
+import com.highcapable.betterandroid.ui.extension.view.toast
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
 import kotlinx.coroutines.Job
@@ -60,7 +64,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private var filterText = ""
 
     /** 回调适配器改变 */
-    private var onChanged: (() -> Unit)? = null
+    private var onChanged: ((List<NotificationIcon>) -> Unit)? = null
 
     /** 回调滚动事件改变 */
     private var onScrollEvent: ((Boolean) -> Unit)? = null
@@ -118,11 +122,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     }
                 }
                 confirmButton {
-                    if (binding.iconFiltersEdit.text.toString().isNotBlank()) {
-                        filterText = binding.iconFiltersEdit.text.toString().trim()
+                    if (binding.iconFiltersEdit.textToString().isNotBlank()) {
+                        filterText = binding.iconFiltersEdit.textToString().trim()
                         refreshAdapterResult()
                     } else {
-                        toast(msg = getString(R.string.config_filter_empty))
+                        toast(getString(R.string.config_filter_empty))
                         it.performClick()
                     }
                 }
@@ -138,47 +142,54 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         binding.configTitleSync.setOnClickListener { onStartRefresh() }
         // 设置列表元素和 Adapter
         binding.configListView.apply {
-            bindAdapter {
-                onBindDatas { iconDatas }
-                onBindViews<AdapterConfigBinding> { binding, position ->
-                    iconDatas[position].also { icon ->
-                        binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.snapshot?.getBitmap(icon))
-                        (icon.color ?: resources.colorOf(R.color.colorTextGray)).also { color ->
-                            binding.adpAppIcon.setColorFilter(color)
-                            binding.adpAppName.setTextColor(color)
-                        }
-                        binding.adpAppName.text = icon.label
-                        binding.adpAppPkgName.text = icon.packageName
-                        binding.adpCbrName.text = getString(R.string.config_contributors, icon.contributors.joinToString())
-                        isAppNotifyEnabledOf(icon).also { e ->
-                            binding.adpAppOpenSwitch.isChecked = e
-                            binding.adpAppAllSwitch.isEnabled = e
-                        }
-                        binding.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
-                            if (btn.isPressed.not()) return@setOnCheckedChangeListener
-                            putAppNotifyEnabledOf(icon, b)
-                            binding.adpAppAllSwitch.isEnabled = b
+            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 15.dp(context))) {
+                onBindDiffer(
+                    areItemsTheSame = { oldItem, newItem -> oldItem.packageName == newItem.packageName },
+                    // 同一快照的图标不可变，重新装载后的新实例也需要刷新位图。
+                    areContentsTheSame = { oldItem, newItem -> oldItem === newItem }
+                )
+                onBindItemView<AdapterConfigBinding> { binding, icon, _ ->
+                    binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.snapshot?.getBitmap(icon))
+                    (icon.color ?: resources.getColorCompat(R.color.colorTextGray)).also { color ->
+                        binding.adpAppIcon.setColorFilter(color)
+                        binding.adpAppName.textColor = color
+                    }
+                    binding.adpAppName.text = icon.label
+                    binding.adpAppPkgName.text = icon.packageName
+                    binding.adpCbrName.text = getString(R.string.config_contributors, icon.contributors.joinToString())
+                    isAppNotifyEnabledOf(icon).also { e ->
+                        binding.adpAppOpenSwitch.isChecked = e
+                        binding.adpAppAllSwitch.isEnabled = e
+                    }
+                    binding.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
+                        if (btn.isPressed.not()) return@setOnCheckedChangeListener
+                        putAppNotifyEnabledOf(icon, b)
+                        binding.adpAppAllSwitch.isEnabled = b
+                        SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
+                    }
+                    binding.adpAppAllSwitch.isChecked = isAppNotifyOverlayOf(icon)
+                    binding.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
+                        if (btn.isPressed.not()) return@setOnCheckedChangeListener
+                        fun saveState() {
+                            putAppNotifyOverlayOf(icon, b)
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
-                        binding.adpAppAllSwitch.isChecked = isAppNotifyOverlayOf(icon)
-                        binding.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
-                            if (btn.isPressed.not()) return@setOnCheckedChangeListener
-                            fun saveState() {
-                                putAppNotifyOverlayOf(icon, b)
-                                SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
-                            }
-                            if (b) showDialog {
-                                title = getString(R.string.config_override)
-                                msg = getString(R.string.config_override_msg)
-                                confirmButton { saveState() }
-                                cancelButton { btn.isChecked = btn.isChecked.not() }
-                                noCancelable()
-                            } else saveState()
-                        }
+                        if (b) showDialog {
+                            title = getString(R.string.config_override)
+                            msg = getString(R.string.config_override_msg)
+                            confirmButton { saveState() }
+                            cancelButton { btn.isChecked = btn.isChecked.not() }
+                            noCancelable()
+                        } else saveState()
                     }
                 }
-            }.apply { onChanged = { notifyDataSetChanged() } }
-            onScrollEvent = { post { setSelection(if (it) iconDatas.lastIndex else 0) } }
+            }.apply { onChanged = { submitList(it) } }
+            onScrollEvent = { toBottom ->
+                post {
+                    val count = adapter?.itemCount ?: 0
+                    if (count > 0) scrollToPosition(if (toBottom) count - 1 else 0)
+                }
+            }
         }
         // 设置点击事件
         binding.configCbrButton.setOnClickListener {
@@ -231,7 +242,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     msg = getString(R.string.config_back_to_main)
                     confirmButton {
                         releaseEventAndBack()
-                        navigate<MainActivity>()
+                        startActivity<MainActivity>()
                     }
                     cancelButton { releaseEventAndBack() }
                 }
@@ -270,19 +281,20 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
     /** 刷新适配器结果相关 */
     private fun refreshAdapterResult() {
-        onChanged?.invoke()
+        val icons = iconDatas.toList()
+        onChanged?.invoke(icons)
         binding.configTitleCountText.text =
-            if (filterText.isBlank()) getString(R.string.config_included_count, iconDatas.size)
-            else getString(R.string.config_filter_result, filterText, iconDatas.size)
+            if (filterText.isBlank()) getString(R.string.config_included_count, icons.size)
+            else getString(R.string.config_filter_result, filterText, icons.size)
         binding.configListNoDataView.apply {
             text = if (iconAllDatas.isEmpty()) getString(R.string.config_empty_no_data) else getString(R.string.config_empty_no_match)
-            isVisible = iconDatas.isEmpty()
+            isVisible = icons.isEmpty()
         }
     }
 
     /**
      * 当前结果下的图标数组
-     * @return [Array]
+     * @return [List]
      */
     private val iconDatas
         get() = if (filterText.isBlank()) iconAllDatas
