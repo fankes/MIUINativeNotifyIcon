@@ -110,14 +110,15 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     }
 
     private fun onCreate(available: Boolean) {
-        if (!available || !YukiHook.Status.isModuleActive)
+        if (!available || !YukiHook.Status.isModuleActive) {
+            binding.configTitleCountText.text = getString(R.string.config_module_unavailable)
             showDialog {
                 title = getString(R.string.config_module_unavailable)
                 msg = getString(R.string.config_module_unavailable_msg)
                 confirmButton(text = getString(R.string.common_got_it)) { finish() }
                 noCancelable()
             }
-        else continueOnCreate()
+        } else continueOnCreate()
     }
 
     private fun continueOnCreate() {

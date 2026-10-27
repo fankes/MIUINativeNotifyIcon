@@ -192,13 +192,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         }
                     // 推广、恰饭
                     ProjectPromote.show(activity = this, ModuleVersion.toString())
-                } else
+                } else {
+                    homeBinding.mainOptimizeListSummaryText.text = getString(R.string.config_module_unavailable)
                     showDialog {
                         title = getString(R.string.main_module_not_active)
                         msg = getString(R.string.main_module_not_active_msg)
                         confirmButton(text = getString(R.string.common_got_it))
                         noCancelable()
                     }
+                }
             }
         }
         // 框架服务状态确定后同步刷新模块状态，否则需要切换后台触发 onResume 才会更新
