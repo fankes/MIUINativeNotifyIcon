@@ -29,7 +29,9 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.TypedValue
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.widget.TextViewCompat
 import com.fankes.miui.notify.utils.factory.dp
 import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import top.defaults.drawabletoolbox.DrawableBuilder
@@ -69,8 +71,17 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             thumbColor.toInt(),
             thumbColor.toInt()
         )
-        isSingleLine = true
+        maxLines = 1
+        switchPadding = 10.dp(context)
         ellipsize = TextUtils.TruncateAt.END
+        // 文字显示不下时从布局里设置的字号向下缩小，最小 10sp，缩到最小仍显示不下才省略
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            this,
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10f, resources.displayMetrics).toInt(),
+            textSize.toInt(),
+            1,
+            TypedValue.COMPLEX_UNIT_PX
+        )
         // Material3 主题的开关样式自带 48dp 最小高度，会把一行撑高，这里去掉让高度跟随内容
         minHeight = 0
         minimumHeight = 0
