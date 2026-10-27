@@ -197,7 +197,7 @@
     <string name="tool_please_wait">请稍后</string>
     <string name="tool_apply_now">立即生效</string>
     <string name="tool_restart_system_ui_dynamic">\n\n你也可以选择 “立即生效” 来动态刷新系统界面并生效当前模块设置。</string>
-    <string name="tool_restart_system_ui_msg_miui">你确定要立即重启系统界面吗？\n\n部分 HyperOS/MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n重启过程会黑屏并等待进入锁屏重新解锁。\n\nLSPosed</string>
+    <string name="tool_restart_system_ui_msg_miui">你确定要立即重启系统界面吗？\n\n部分 HyperOS/MIUI 内测和开发版中使用了状态栏主题可能会发生主题失效的情况，这种情况请再重启一次即可。\n\n重启过程会黑屏并等待进入锁屏重新解锁。</string>
     <string name="tool_request_sent">已发送请求，如果未打开则是当前系统不支持此功能</string>
     <string name="tool_root_failed_msg">当前无法获取 Root 权限，请确认你的设备已经被 Root 且同意授予 Root 权限。\n如果你正在使用 Magisk 并安装了 Shamiko 模块，请确认当前是否正处于白名单模式。 (白名单模式将导致无法申请 Root 权限)</string>
     <string name="tool_root_failed">获取 Root 权限失败</string>
