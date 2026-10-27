@@ -52,7 +52,6 @@ import com.fankes.miui.notify.utils.factory.miuiVersionCode
 import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.openNotifySetting
 import com.fankes.miui.notify.utils.factory.showDialog
-import com.fankes.miui.notify.utils.factory.showTimePicker
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
@@ -63,6 +62,7 @@ import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.viewholder.delegate.base.ViewHolderDelegate
 import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
+import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.component.runDelayed
 import com.highcapable.betterandroid.ui.extension.component.startActivity
 import com.highcapable.betterandroid.ui.extension.insets.factory.removeWindowInsetsListener
@@ -239,21 +239,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     /** 初始化读写偏好设置的状态文本和开关绑定 */
     private fun initConfigBindings() {
         configBinding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
-        configBinding.notifyIconAutoSyncText.text = ConfigData.notifyIconFixAutoTime
-        homeBinding.moduleEnableSwitch.bind(ConfigData.ENABLE_MODULE) {
-            onInitialize {
-                homeBinding.moduleEnableLogItem.isVisible = it
-                configBinding.colorIconHookItem.isVisible = it
-                configBinding.statusIconCountItem.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R) && it
-                configBinding.notifyStyleConfigItem.isVisible = it
-                configBinding.notifyIconConfigItem.isVisible = it
-            }
-            onChanged {
-                reinitialize()
-                refreshModuleStatus()
-                SystemUITool.showNeedRestartSnake(context = this@MainActivity)
-            }
-        }
+        configBinding.statusIconCountItem.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R)
         homeBinding.moduleEnableLogSwitch.bind(ConfigData.ENABLE_MODULE_LOG) {
             onInitialize { homeBinding.expAllDebugLogButton.isVisible = it }
             onChanged {
@@ -332,45 +318,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 } else applyChangesAndRefresh()
             }
         }
-        configBinding.notifyIconFixSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX) {
-            onInitialize {
-                configBinding.notifyIconFixButton.isVisible = it
-                configBinding.notifyIconFixPlaceholderItem.isVisible = it
-                configBinding.notifyIconFixNotifyItem.isVisible = it
-                configBinding.notifyIconAutoSyncItem.isVisible = it
-            }
-            onChanged {
-                reinitialize()
-                SystemUITool.refreshSystemUI(context = this@MainActivity)
-            }
-        }
-        configBinding.notifyIconFixPlaceholderSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_PLACEHOLDER) {
-            isAutoApplyChanges = false
-            onChanged {
-                /** 应用更改并刷新系统界面 */
-                fun applyChangesAndRefresh() {
-                    applyChanges()
-                    SystemUITool.refreshSystemUI(context = this@MainActivity)
-                }
-                if (it) showDialog {
-                    title = getString(R.string.common_notice)
-                    msg = getString(R.string.main_placeholder_icon_msg)
-                    confirmButton { applyChangesAndRefresh() }
-                    cancelButton { cancelChanges() }
-                    noCancelable()
-                } else applyChangesAndRefresh()
-            }
-        }
-        configBinding.notifyIconFixNotifySwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_NOTIFY) {
-            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true) }
-        }
-        configBinding.notifyIconAutoSyncSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_AUTO) {
-            onInitialize { configBinding.notifyIconAutoSyncChildItem.isVisible = it }
-            onChanged {
-                reinitialize()
-                SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)
-            }
-        }
         configBinding.statusDarkIconCustomAlphaSeekbar.bind(
             ConfigData.STATUS_ICON_DARK_ALPHA_LEVEL, configBinding.statusDarkIconCustomAlphaText, suffix = "%"
         ) { SystemUITool.refreshSystemUI(context = this) }
@@ -388,8 +335,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         homeBinding.expAllDebugLogButton.setOnClickListener { SystemUITool.obtainAndExportDebugLogs(context = this) }
         // MIUI 通知显示设置按钮点击事件
         configBinding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
-        // 通知图标优化名单按钮点击事件
-        configBinding.notifyIconFixButton.setOnClickListener { startActivity<ConfigureActivity>() }
+        // 通知图标优化名单卡片点击事件
+        homeBinding.mainOptimizeListItem.setOnClickListener { startActivity<ConfigureActivity>() }
         // 修改状态栏通知图标个数按钮点击事件
         configBinding.statusIconCountButton.setOnClickListener {
             showDialog<DiaStatusIconCountBinding> {
@@ -413,22 +360,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     }
                 }
                 cancelButton()
-            }
-        }
-        // 自动更新在线规则修改时间按钮点击事件
-        configBinding.notifyIconAutoSyncButton.setOnClickListener {
-            showTimePicker(ConfigData.notifyIconFixAutoTime) {
-                showDialog {
-                    title = getString(R.string.main_auto_update_title, it)
-                    msg = getString(R.string.main_auto_update_msg, it)
-                    confirmButton(text = getString(R.string.main_save_settings)) {
-                        ConfigData.notifyIconFixAutoTime = it
-                        this@MainActivity.configBinding.notifyIconAutoSyncText.text = it
-                        SystemUITool.refreshSystemUI(context, isRefreshCacheOnly = true)
-                    }
-                    cancelButton()
-                    noCancelable()
-                }
             }
         }
         // 重启按钮点击事件
@@ -506,7 +437,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     /** 刷新模块状态 */
     private fun refreshModuleStatus() {
         val isActive = YukiHook.Status.isModuleActive
-        val isWarning = isActive && (isModuleRegular.not() || isModuleValied.not() || ConfigData.isEnableModule.not())
+        val isWarning = isActive && (isModuleRegular.not() || isModuleValied.not())
         homeBinding.mainLinStatus.setCardBackgroundColor(
             resources.getColorCompat(when {
                 isWarning -> R.color.colorStatusWarningContainer
@@ -522,13 +453,31 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         )
         homeBinding.mainTextStatus.text = when {
-            YukiHook.Status.isModuleActive && ConfigData.isEnableModule.not() -> getString(R.string.main_module_disabled)
             YukiHook.Status.isModuleActive && (isModuleRegular.not() || isModuleValied.not()) -> getString(R.string.main_module_not_fully_active)
             YukiHook.Status.isModuleActive -> getString(R.string.main_module_active)
             else -> getString(R.string.main_module_inactive)
         }
         homeBinding.mainTextApiWay.isVisible = YukiHook.Status.isModuleActive
         homeBinding.mainTextApiWay.text = "Activated by ${YukiHook.Status.Executor.name} API ${YukiHook.Status.Executor.apiVersion}"
+    }
+
+    /** 刷新通知图标优化名单卡片的摘要 */
+    private fun refreshOptimizeListSummary() = launch {
+        if (IconRuleManagerTool.snapshot == null) IconRuleManagerTool.reload(this@MainActivity)
+        val icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+        homeBinding.mainOptimizeListSummaryText.text = when {
+            ConfigData.isEnableNotifyIconFix.not() -> getString(R.string.notify_icon_optimization_disabled)
+            IconRuleManagerTool.hasCachedResources(context = this@MainActivity).not() -> getString(R.string.main_optimize_list_not_synced)
+            else -> getString(R.string.main_optimize_list_total, icons.size)
+        }
+        if (ConfigData.isEnableNotifyIconFix && icons.isNotEmpty())
+            SystemUITool.obtainInstalledApps(context = this@MainActivity) { apps ->
+                if (apps.isEmpty()) return@obtainInstalledApps
+                val includedPackages = icons.map { it.packageName }.toSet()
+                val installedIncluded = apps.count { it.packageName in includedPackages }
+                val notIncluded = apps.count { it.isCandidate && it.packageName !in includedPackages }
+                homeBinding.mainOptimizeListSummaryText.text = getString(R.string.main_optimize_list_summary, installedIncluded, notIncluded)
+            }
     }
 
     /** 刷新并检查模块状态 */
@@ -540,6 +489,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             isModuleRegular = true
             isModuleValied = isValied
             refreshModuleStatus()
+            refreshOptimizeListSummary()
         }
     }
 

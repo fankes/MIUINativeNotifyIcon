@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fadingEdgeLength="10dp"
+    android:requiresFadingEdge="vertical"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="25dp"
+        android:paddingTop="15dp"
+        android:paddingRight="25dp">
+
+        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+            android:id="@+id/notify_icon_fix_placeholder_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="8dp"
+            android:text="@string/main_placeholder_icon"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.6"
+            android:lineSpacingExtra="6dp"
+            android:text="@string/main_placeholder_icon_desc"
+            android:textColor="@color/colorTextDark"
+            android:textSize="12sp" />
+
+        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+            android:id="@+id/notify_icon_fix_notify_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="8dp"
+            android:text="@string/main_remind_new_app"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.6"
+            android:lineSpacingExtra="6dp"
+            android:text="@string/main_remind_new_app_desc"
+            android:textColor="@color/colorTextDark"
+            android:textSize="12sp" />
+
+        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+            android:id="@+id/notify_icon_auto_sync_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="8dp"
+            android:text="@string/main_auto_update"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.6"
+            android:lineSpacingExtra="6dp"
+            android:text="@string/main_auto_update_desc"
+            android:textColor="@color/colorTextDark"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:id="@+id/notify_icon_auto_sync_child_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:src="@drawable/ic_system_clock"
+                app:tint="@color/colorTextGray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="@string/main_everyday"
+                android:textColor="@color/colorTextGray"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/notify_icon_auto_sync_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxWidth="100dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:singleLine="true"
+                android:text="07:00"
+                android:textColor="@color/colorTextGray"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/notify_icon_auto_sync_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_button_round"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp"
+                android:singleLine="true"
+                android:text="@string/main_change_time"
+                android:textColor="@color/colorTextGray"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

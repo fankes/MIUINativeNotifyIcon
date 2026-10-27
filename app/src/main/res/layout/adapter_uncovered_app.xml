@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    tools:ignore="HardcodedText,ContentDescription">
+
+    <ImageView
+        android:id="@+id/adp_uncovered_icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_unsupported" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/adp_uncovered_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/config_item_app_name"
+            android:textColor="@color/colorTextGray"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/adp_uncovered_pkg_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:alpha="0.75"
+            android:singleLine="true"
+            android:text="com.xxx.xxx"
+            android:textColor="@color/colorTextDark"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

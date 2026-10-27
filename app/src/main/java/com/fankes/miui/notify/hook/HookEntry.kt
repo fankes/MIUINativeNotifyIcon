@@ -52,7 +52,6 @@ object HookEntry : YukiHookXposedModule {
                 isNotMiSystem -> YLog.warn("Aborted Hook -> This System is not MIUI or HyperOS")
                 AndroidVersion.isLessThan(AndroidVersion.P) -> YLog.warn("Aborted Hook -> This System is lower than Android P")
                 isNotSupportMiSystemVersion -> YLog.warn("Aborted Hook -> This System Version ${miSystemVersion.ifBlank { "unknown" }} not supported")
-                ConfigData.isEnableModule.not() -> YLog.warn("Aborted Hook -> Hook Closed")
                 else -> loadHooker(SystemUIHooker)
             }
         }

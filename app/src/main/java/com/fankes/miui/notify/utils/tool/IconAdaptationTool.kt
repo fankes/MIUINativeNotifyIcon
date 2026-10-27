@@ -22,27 +22,32 @@
  */
 package com.fankes.miui.notify.utils.tool
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.bean.InstalledAppBean
 import com.fankes.miui.notify.hook.HookEntry
 import com.fankes.miui.notify.utils.factory.appIconOf
 import com.fankes.miui.notify.utils.factory.appNameOf
 import com.fankes.miui.notify.utils.factory.isDebugApp
 import com.fankes.miui.notify.utils.factory.isSystemApp
 import com.fankes.miui.notify.utils.factory.runInSafe
+import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
 import com.highcapable.betterandroid.ui.component.notification.factory.createNotification
 import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
+import java.io.ByteArrayOutputStream
 
 /**
  * 通知图标适配推送通知类
@@ -58,14 +63,50 @@ object IconAdaptationTool {
     private const val NOTIFY_CHANNEL = "notifyRuleSupportId"
 
     /**
+     * 判断 APP 是否需要适配通知图标
+     *
+     * 系统应用、调试应用和 Trichrome 库不会被计入
+     * @param context 实例
+     * @param packageName APP 包名
+     * @return [Boolean]
+     */
+    private fun isAdaptationCandidate(context: Context, packageName: String) =
+        packageName.startsWith("com.google.android.trichromelibrary").not() &&
+            context.isSystemApp(packageName).not() && context.isDebugApp(packageName).not()
+
+    /**
+     * 获取已安装的应用
+     * @param context 实例
+     * @return [ArrayList]<[InstalledAppBean]>
+     */
+    @SuppressLint("QueryPermissionsNeeded") // 仅在系统界面中调用，系统界面可以查看全部应用
+    fun obtainInstalledApps(context: Context) = ArrayList(
+        context.packageManager.getInstalledApplications(0).map {
+            val isCandidate = isAdaptationCandidate(context, it.packageName)
+            InstalledAppBean(it.packageName, name = if (isCandidate) it.loadLabel(context.packageManager).toString() else "", isCandidate)
+        }
+    )
+
+    /**
+     * 获取 APP 图标数据
+     * @param context 实例
+     * @param packageName APP 包名
+     * @return PNG 格式的图标数据 or null
+     */
+    fun obtainAppIconData(context: Context, packageName: String) = safeOfNull {
+        ByteArrayOutputStream().also {
+            context.packageManager.getApplicationIcon(packageName).toBitmap(96, 96).compress(Bitmap.CompressFormat.PNG, 100, it)
+        }.toByteArray()
+    }
+
+    /**
      * 推送新 APP 安装适配通知
      * @param context 实例
      * @param packageName 安装的 APP 包名
      * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前实例资源
      */
     fun pushNewAppSupportNotify(context: Context, packageName: String, resources: Resources = context.resources) {
-        if (packageName.startsWith("com.google.android.trichromelibrary")) return
-        if (context.isSystemApp(packageName) || context.isDebugApp(packageName)) return
+        if (isAdaptationCandidate(context, packageName).not()) return
         @Suppress("MissingPermission")
         context.createNotification(
             channel = NotificationChannel(NOTIFY_CHANNEL) {

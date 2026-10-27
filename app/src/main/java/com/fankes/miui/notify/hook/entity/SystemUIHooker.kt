@@ -1129,6 +1129,14 @@ object SystemUIHooker : YukiBaseHooker() {
             recachingPrefs(isRefreshCacheOnly = true)
             globalContext?.let { refreshIconData(it, requestedVersion = version, result = result) } ?: result(false)
         }
+        // 模块获取已安装的应用，用于展示通知图标优化名单的适配情况
+        SystemUITool.Host.onPushInstalledApps(param = this) {
+            globalContext?.let { IconAdaptationTool.obtainInstalledApps(it) } ?: arrayListOf()
+        }
+        // 模块获取未收录应用的图标
+        SystemUITool.Host.onPushAppIcons(param = this) { packageName ->
+            globalContext?.let { IconAdaptationTool.obtainAppIconData(it, packageName) }
+        }
         // 模块的定时更新服务已启动，后续结果由模块自行通知
         SystemUITool.Host.onIconRuleUpdateStarted(param = this) {
             iconRuleUpdateFallbackJob?.cancel()

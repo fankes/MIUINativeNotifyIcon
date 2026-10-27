@@ -37,9 +37,6 @@ import com.highcapable.yukihookapi.hook.xposed.preference.data.PreferenceData
  */
 object ConfigData {
 
-    /** 启用模块 */
-    val ENABLE_MODULE = PreferenceData("_enable_module", true)
-
     /** 启用模块日志 */
     val ENABLE_MODULE_LOG = PreferenceData("_enable_module_log", false)
 
@@ -183,16 +180,6 @@ object ConfigData {
             else -> error("Unknown type for put preferences data")
         }
     }
-
-    /**
-     * 是否启用模块
-     * @return [Boolean]
-     */
-    var isEnableModule
-        get() = getBoolean(ENABLE_MODULE)
-        set(value) {
-            putBoolean(ENABLE_MODULE, value)
-        }
 
     /**
      * 是否启用模块日志
