@@ -1,27 +1,32 @@
-name: Issues and Bugs Report / 问题与 BUG 反馈
-description: 问题反馈必须使用此模板进行提交 / Issues and bugs report must be submitted using this template
+name: Bug Report / 问题反馈
+description: 反馈模块问题必须使用此模板进行提交 / Bug reports must be submitted using this template
 labels: [ bug ]
-title: "[Issues and Bugs Report] (Briefly describe the cause of the problem)"
+title: "[Bug Report / 问题反馈] "
 body:
   - type: markdown
     attributes:
       value: |
         ### Please fill in the specific reason and steps to reproduce the problem below.
 
-        We only accept official releases of MIUI or HyperOS. If you are using a modified third-party ROM, please do not submit any bugs or issues. We are under no obligation to fix them.
+        We only accept official releases of MIUI or HyperOS. If you are using a modified third-party ROM, please do not submit any feedback. We are under no obligation to fix them.
 
-        In the event of an exception, crash, force close or functional problem, you must submit a problem log. Issues without a log will be closed directly.
+        In the event of a crash, force close or functional problem, you must submit a problem log. Issues without a log will be closed directly.
+
+        Please reproduce the problem with the latest CI automatic build first, and continue to report it only if the problem still exists, to avoid wasting each other's unnecessary time.
 
         ### 请在下方填写问题发生的具体原因和复现步骤。
 
-        我们只接受 MIUI 或 HyperOS 正规官方版本系统，如果你正在使用官改 (第三方修改版) 请不要提交任何 BUG 与问题，我们无义务去解决。
+        我们只接受 MIUI 或 HyperOS 正规官方版本系统，如果你正在使用官改 (第三方修改版) 请不要进行反馈，我们无义务去解决。
 
-        发生异常、崩溃、闪退或功能性问题，必须提交问题 Log (日志)，没有 Log 的 issues 将直接被关闭。
+        发生崩溃、闪退或功能性问题，必须提交问题 Log (日志)，没有 Log 的 issue 将直接被关闭。
+
+        请优先使用最新的 CI 自动构建版本复现问题，确认问题仍然存在后再继续反馈，避免浪费彼此不必要的时间。
   - type: input
     attributes:
       label: Module App version / 模块版本
       description: |
         Please fill in the complete version of the Module App currently in use, for example: **1.0**
+
         请填写当前使用的模块完整版本号，例如：**1.0**
     validations:
       required: true
@@ -30,9 +35,10 @@ body:
       label: Module type / 模块类型
       description: |
         Please select the currently installed module type, which can be found in the file name of the installation package, for example: **MIUINativeNotifyIcon-vXxx(Xxx)-modern-release.apk**
-        **modern** is for Xposed Frameworks that support the libxposed API, **legacy** is for traditional Xposed Frameworks that only support the Xposed API 82
+        **modern** is for Xposed Frameworks that support the libxposed API (e.g. LSPosed 2.0.0+), **legacy** is for traditional Xposed Frameworks that only support the Xposed API 82.
+
         请选择当前安装的模块类型，可以从安装包的文件名中查看，例如：**MIUINativeNotifyIcon-vXxx(Xxx)-modern-release.apk**
-        **modern** 适用于支持 libxposed API 的 Xposed 框架，**legacy** 适用于仅支持 Xposed API 82 的传统 Xposed 框架
+        **modern** 适用于支持 libxposed API 的 Xposed 框架 (例如 LSPosed 2.0.0+)，**legacy** 适用于仅支持 Xposed API 82 的传统 Xposed 框架。
       options:
         - modern
         - legacy
@@ -44,6 +50,7 @@ body:
       description: |
         Fill in your current system here, for example: **MIUI 13.0.1** or **HyperOS 1.0**
         For development builds, please include the specific build number, for example: **MIUI 13 22.9.27** or **HyperOS 1.0 22.9.27**
+
         这里填写当前的系统，例如：**MIUI 13.0.1** 或 **HyperOS 1.0**
         开发版需要标注具体的版本号，例如：**MIUI 13 22.9.27** 或 **HyperOS 1.0 22.9.27**
     validations:
@@ -53,6 +60,7 @@ body:
       label: System version type / 系统版本类型
       description: |
         Please select the type of system version you are using.
+
         请选择你使用的系统版本类型。
       options:
         - Stable / 稳定版
@@ -84,8 +92,9 @@ body:
     attributes:
       label: Xposed Framework name and version / Xposed 框架名称与版本号
       description: |
-        Please fill in the currently used Xposed Framework, for example: **LSPosed 1.8.4 (version code)**
-        请填写当前使用的 Xposed 框架，例如：**LSPosed 1.8.4 (次版本号)**
+        Please fill in the currently used Xposed Framework, for example: **LSPosed 2.0.0 (version code)**
+
+        请填写当前使用的 Xposed 框架，例如：**LSPosed 2.0.0 (版本号)**
     validations:
       required: true
   - type: input
@@ -95,28 +104,31 @@ body:
         The scope of this module is System UI.
         To ensure that the problem is not caused by conflicts with other modules, please be sure to fill in the relevant modules that you are currently activating at the same time.
         If there are none, please fill in "none" directly below.
-        此模块的作用域为系统界面 (系统 UI)，为确保非其它模块冲突造成的问题，请一定要填写当前你同时激活的相关模块。
-        若没有，请直接在下方填写“无”。
+
+        此模块的作用域为系统界面 (系统 UI)，为确保非其他模块冲突造成的问题，请一定要填写当前你同时激活的相关模块。
+        若没有，请直接在下方填写 “无”。
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Describe in detail why the problem occurred / 详细描述问题发生的具体原因
+      label: Describe why the problem occurred / 描述问题发生的具体原因
       description: |
-        Please describe in detail the specific scenario, steps to reproduce and the process of the problem below, so that we can reproduce it by following your steps.
-        请在下方详细描述问题发生的具体场景、复现步骤和经过，以便我们能够按照你所描述的步骤复现这个问题。
+        Please describe in detail the specific scenario and steps to reproduce the problem below, so that we can reproduce it by following your steps.
+
+        请在下方详细描述问题发生的具体场景、复现步骤，以便我们能够按照你所描述的步骤复现这个问题。
     validations:
       required: true
   - type: textarea
     attributes:
       label: Provide module problem logs or necessary logs / 提供模块问题 Log 或必要 Log
       description: |
-        If you are using LSPosed, you can view and filter the logs containing `MIUINativeNotifyIcon` in the log management.
-        LSPosed 可在日志管理中查看并筛选包含 `MIUINativeNotifyIcon` 的日志。
+        You can view and filter the logs containing `MIUINativeNotifyIcon` in the module logs of your Xposed manager.
+
+        你可以在 Xposed 管理器的模块日志中查看并筛选包含 `MIUINativeNotifyIcon` 的日志。
       value: |
         <details><summary>Click to expand / 展开查看</summary><pre><code>
 
-        (Paste problem log here / 此处粘贴问题 Log)
+        (Paste problem log here, please paste text instead of screenshots / 此处粘贴问题 Log，请粘贴文本而不是截图)
 
         </code></pre></details>
         <!-- When submitting, please delete the parentheses including the parentheses, paste the logs you copied, and do not break the code format -->
@@ -127,10 +139,11 @@ body:
     attributes:
       label: Confirm the contents you submitted / 确认一下你提交的信息
       description: |
-        In order to ensure the quality of issues and avoid wasting unnecessary time, issues that do not check the options below will be closed directly.
+        In order to avoid wasting unnecessary time, issues that do not check the options below will be closed directly.
         Please make sure you have **checked the option below** before submitting.
-        为了确保 issues 的质量和避免浪费不必要的时间，未勾选下方选项的 issues 将直接被关闭。
+
+        为了避免浪费不必要的时间，未勾选下方选项的 issue 将直接被关闭。
         请一定确保你已经**勾选下方的选项**后再提交。
       options:
-        - label: I certify that the above contents is correct / 我确保上述信息准确无误
+        - label: I certify that the above information is accurate / 我确保上述信息准确无误
           required: false
