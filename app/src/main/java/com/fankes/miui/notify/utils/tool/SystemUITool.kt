@@ -32,8 +32,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.InstalledAppBean
+import com.fankes.miui.notify.const.MimeType
 import com.fankes.miui.notify.const.PackageName
-import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.ui.activity.MainActivity
 import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.execShell
@@ -183,7 +183,7 @@ object SystemUITool {
      * @param activity 实例
      */
     fun registerExportDebugLogsLauncher(activity: AppCompatActivity) {
-        launcher = activity.registerForActivityResult(ActivityResultContracts.CreateDocument("*/application")) { result ->
+        launcher = activity.registerForActivityResult(ActivityResultContracts.CreateDocument(MimeType.LOG)) { result ->
             runCatching {
                 result?.let { e ->
                     val content = "" +

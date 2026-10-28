@@ -52,6 +52,20 @@ object IconRuleSourceSyncType {
 }
 
 /**
+ * MIME 类型常量定义类
+ */
+object MimeType {
+
+    /**
+     * 日志文件
+     *
+     * 使用 text/plain 或 application/octet-stream 时，部分定制 ROM 的系统文件选择器会给文件名追加 .txt 或 .bin 扩展名，
+     * 这里使用系统无法识别的类型，让文件名保持不变
+     */
+    const val LOG = "application/x-apperrortracker-log"
+}
+
+/**
  * 模块版本常量定义类
  */
 object ModuleVersion {
