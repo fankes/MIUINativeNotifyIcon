@@ -167,10 +167,11 @@
     <string name="common_copied">Copied</string>
     <string name="common_copy_failed">Copy failed</string>
     <string name="common_open_notify_settings_failed">Failed to open notification settings</string>
+    <string name="common_launch_browser_failed">Failed to open the system browser</string>
+    <string name="common_launch_failed">Failed to open %1$s, you may not have this app installed</string>
     <string name="common_launch_app_info_failed">Failed to open App Info for %1$s</string>
     <string name="common_app_not_installed">This app is not installed</string>
-    <string name="common_launch_browser_failed">Failed to open the system browser</string>
-    <string name="common_launch_failed">Failed to open %1$s</string>
+    <string name="app_coolapk">Coolapk</string>
     <string name="main_version_dev_miui">V%1$s %2$s Dev</string>
     <string name="main_version_dev">%1$s Dev</string>
     <string name="main_version_stable">%1$s Stable</string>

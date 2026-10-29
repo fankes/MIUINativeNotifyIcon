@@ -485,8 +485,9 @@ fun Context.snake(msg: String, actionText: String = "", callback: () -> Unit = {
  * 启动系统浏览器
  * @param url 网址
  * @param packageName 指定包名 - 可不填
+ * @param name 指定应用名称 - 可不填，启动失败提示中使用，为空时使用包名
  */
-fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
+fun Context.openBrowser(url: String, packageName: String = "", name: String = "") = runCatching {
     startActivity(Intent().apply {
         if (packageName.isNotBlank()) setPackage(packageName)
         action = Intent.ACTION_VIEW
@@ -496,7 +497,7 @@ fun Context.openBrowser(url: String, packageName: String = "") = runCatching {
     })
 }.onFailure {
     if (packageName.isNotBlank())
-        snake(msg = getString(R.string.common_launch_failed, packageName))
+        snake(msg = getString(R.string.common_launch_failed, name.ifBlank { packageName }))
     else snake(msg = getString(R.string.common_launch_browser_failed))
 }
 
