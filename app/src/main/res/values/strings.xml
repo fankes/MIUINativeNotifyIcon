@@ -7,7 +7,6 @@
     <string name="config_item_contributors_placeholder">Contributors: noname</string>
     <string name="config_item_enable">Enable</string>
     <string name="config_item_override">Override</string>
-    <string name="common_back">Back</string>
     <string name="config_title">Icon Optimization List</string>
     <string name="config_list_loading">Loading the list…</string>
     <string name="config_scroll_top">Scroll to Top</string>
@@ -119,8 +118,6 @@
     <string name="main_notify_permission_off_msg">Please allow notifications for the module so you can receive updates to the notification icon optimization list.</string>
     <string name="main_notify_permission_off">Module Notifications Disabled</string>
     <string name="common_go">Go</string>
-    <string name="main_config_optimize_list_first_msg">The module needs to update the \"Notification Icon Optimization List\", which is empty now. This looks like your first time using the module, so please set it up first to use the related functions.\nYou can always tap \"Notification Icon Optimization List\" on the Home page to do it manually.</string>
-    <string name="main_config_optimize_list_title">Configure the Notification Icon Optimization List</string>
     <string name="common_exit">Exit</string>
     <string name="main_go_project">Go to Project Page</string>
     <string name="main_unsupported_version_feedback">If you have any other questions, tap the button below to go to the project page and send feedback.</string>
@@ -133,7 +130,7 @@
     <string name="main_not_miui_msg">This module is built for HyperOS/MIUI. Your system could not be recognized as either, so the module cannot work.</string>
     <string name="common_not_miui">Not a MIUI or HyperOS System</string>
     <string name="config_empty_no_match">Oops, no matches found</string>
-    <string name="config_empty_no_data">Oops, nothing here yet\nTap the sync button at the top right to get cloud data</string>
+    <string name="config_empty_no_data">No data here yet\nTap the sync button at the top right to get cloud data</string>
     <string name="config_filter_result">Matches for \"%1$s\": %2$d</string>
     <string name="config_included_count">%1$d apps</string>
     <string name="config_back_to_main">Go back to the module\'s home page?</string>
@@ -159,7 +156,7 @@
     <string name="config_uncovered_title">Apps Not Included (%1$d)</string>
     <string name="main_optimize_list_summary">%1$d included · %2$d not included</string>
     <string name="main_optimize_list_total">%1$d included</string>
-    <string name="main_optimize_list_not_synced">Not synced yet. Tap to get it</string>
+    <string name="main_optimize_list_not_synced">No data yet. Tap to configure</string>
     <string name="notify_icon_optimization_disabled">Notification icon optimization is turned off</string>
     <string name="common_close">Close</string>
     <string name="config_filter_empty">The condition cannot be empty</string>

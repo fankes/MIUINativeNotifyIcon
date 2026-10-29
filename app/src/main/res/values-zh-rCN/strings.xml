@@ -7,7 +7,6 @@
     <string name="config_item_contributors_placeholder">贡献者：noname</string>
     <string name="config_item_enable">启用</string>
     <string name="config_item_override">覆盖</string>
-    <string name="common_back">返回</string>
     <string name="config_title">通知图标优化名单</string>
     <string name="config_list_loading">适配列表正在等待装载</string>
     <string name="config_scroll_top">滚动到顶部</string>
@@ -119,8 +118,6 @@
     <string name="main_notify_permission_off_msg">请开启通知权限，以确保你能收到通知图标优化名单的更新。</string>
     <string name="main_notify_permission_off">模块的通知权限已关闭</string>
     <string name="common_go">前往</string>
-    <string name="main_config_optimize_list_first_msg">模块需要更新 “通知图标优化名单”，它现在是空的，这看起来是你第一次使用模块，请首先进行配置才可以使用相关功能。\n你可以随时在主页点击 “通知图标优化名单” 手动前往。</string>
-    <string name="main_config_optimize_list_title">配置通知图标优化名单</string>
     <string name="common_exit">退出</string>
     <string name="main_go_project">前往项目地址</string>
     <string name="main_unsupported_version_feedback">若有其他疑问，你可以点击下方按钮前往项目地址进行反馈。</string>
@@ -133,7 +130,7 @@
     <string name="main_not_miui_msg">此模块专为 HyperOS/MIUI 系统打造，当前无法识别你的系统为其中任意之一，所以模块无法工作。</string>
     <string name="common_not_miui">不是 MIUI 或 HyperOS 系统</string>
     <string name="config_empty_no_match">噫，竟然什么都没找到~</string>
-    <string name="config_empty_no_data">噫，竟然什么都没有~\n请点击右上角同步按钮获取云端数据</string>
+    <string name="config_empty_no_data">这里还没有数据\n请点击右上角同步按钮获取云端数据</string>
     <string name="config_filter_result">“%1$s” 匹配到 %2$d 个结果</string>
     <string name="config_included_count">共 %1$d 个应用</string>
     <string name="config_back_to_main">要返回模块主页吗？</string>
@@ -159,7 +156,7 @@
     <string name="config_uncovered_title">未收录的应用 (%1$d)</string>
     <string name="main_optimize_list_summary">已收录 %1$d 个 · 未收录 %2$d 个</string>
     <string name="main_optimize_list_total">共收录 %1$d 个</string>
-    <string name="main_optimize_list_not_synced">名单尚未同步，点击获取</string>
+    <string name="main_optimize_list_not_synced">暂无数据，点击进行配置</string>
     <string name="notify_icon_optimization_disabled">通知图标优化功能已关闭</string>
     <string name="common_close">关闭</string>
     <string name="config_filter_empty">条件不能为空</string>

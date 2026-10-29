@@ -69,18 +69,18 @@ import kotlinx.coroutines.Job
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
     /** 名单的查看范围 */
-    private enum class ViewMode { INSTALLED, ALL, ENABLED, OVERRIDDEN }
+    private enum class ViewMode { ALL, INSTALLED, ENABLED, OVERRIDDEN }
 
-    /** 当前查看范围 - 为空表示还没有选择，已安装的应用返回后默认查看已安装 */
-    private var viewMode: ViewMode? = null
+    /** 当前查看范围 */
+    private var viewMode = ViewMode.ALL
 
     /** 已安装的应用 - 系统界面没有返回时为空 */
     private var installedApps = emptyList<InstalledAppBean>()
 
     /** 查看范围按钮 */
     private val viewPills get() = mapOf(
-        binding.configViewInstalled to ViewMode.INSTALLED,
         binding.configViewAll to ViewMode.ALL,
+        binding.configViewInstalled to ViewMode.INSTALLED,
         binding.configViewEnabled to ViewMode.ENABLED,
         binding.configViewOverridden to ViewMode.OVERRIDDEN
     )
@@ -185,14 +185,14 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         viewPills.forEach { (pill, mode) ->
             pill.setOnClickListener {
                 // 再次点击当前选项时数据不变，直接平滑滚动到顶部
-                if (mode == (viewMode ?: ViewMode.ALL)) return@setOnClickListener binding.configListView.smoothScrollToFirstPosition()
+                if (mode == viewMode) return@setOnClickListener binding.configListView.smoothScrollToFirstPosition()
                 viewMode = mode
                 refreshAdapterResult(isScrollToTop = true)
             }
         }
         // 设置列表元素和 Adapter
         binding.configListView.apply {
-            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 15.dp)) {
+            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 10.dp)) {
                 onBindDiffer(
                     areItemsTheSame = { oldItem, newItem -> oldItem.packageName == newItem.packageName },
                     // 同一快照的图标不可变，重新装载后的新实例也需要刷新位图。
@@ -325,7 +325,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private fun loadInstalledApps() = SystemUITool.obtainInstalledApps(context = this) { apps ->
         if (apps.isEmpty()) return@obtainInstalledApps
         installedApps = apps
-        if (viewMode == null) viewMode = ViewMode.INSTALLED
         refreshAdapterResult()
     }
 
@@ -443,8 +442,14 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             text = if (iconAllDatas.isEmpty()) getString(R.string.config_empty_no_data) else getString(R.string.config_empty_no_match)
             isVisible = icons.isEmpty()
         }
+        // 列表为空时没有可滚动的内容
+        binding.configTitleUp.isVisible = icons.isNotEmpty()
+        binding.configTitleDown.isVisible = icons.isNotEmpty()
+        // 没有名单数据时查看范围和数量栏没有意义
+        binding.configViewPills.isVisible = iconAllDatas.isNotEmpty()
+        binding.configCountBar.isVisible = iconAllDatas.isNotEmpty()
         binding.configViewInstalled.isVisible = installedApps.isNotEmpty()
-        viewPills.forEach { (pill, mode) -> pill.isSelected = mode == (viewMode ?: ViewMode.ALL) }
+        viewPills.forEach { (pill, mode) -> pill.isSelected = mode == viewMode }
         /** 已安装但名单中没有的应用，名单为空时无法判断 */
         val uncoveredApps = if (iconAllDatas.isEmpty()) emptyList() else {
             val includedPackages = iconAllDatas.map { it.packageName }.toSet()

@@ -172,14 +172,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             else -> {
                 // 判断是否激活
                 if (available && YukiHook.Status.isModuleActive) {
-                    if (IconRuleManagerTool.hasCachedResources(this).not() && ConfigData.isEnableNotifyIconFix)
-                        showDialog {
-                            title = getString(R.string.main_config_optimize_list_title)
-                            msg = getString(R.string.main_config_optimize_list_first_msg)
-                            confirmButton(text = getString(R.string.common_go)) { startActivity<ConfigureActivity>() }
-                            cancelButton()
-                            noCancelable()
-                        }
                     if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix)
                         showDialog {
                             title = getString(R.string.main_notify_permission_off)
