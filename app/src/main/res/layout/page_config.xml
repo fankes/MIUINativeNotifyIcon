@@ -696,6 +696,56 @@
             android:alpha="0.6"
             android:ellipsize="end"
             android:singleLine="true"
+            android:text="@string/main_group_promotion"
+            android:textColor="@color/colorTextGray"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/bg_permotion_round"
+            android:elevation="0dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="10dp">
+
+            <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                android:id="@+id/show_project_promotion_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingTop="5dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:text="@string/main_show_project_promotion"
+                android:textColor="@color/colorTextGray"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:alpha="0.6"
+                android:lineSpacingExtra="6dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/main_show_project_promotion_desc"
+                android:textColor="@color/colorTextDark"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.6"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="@string/main_group_help"
             android:textColor="@color/colorTextGray"
             android:textSize="13sp" />

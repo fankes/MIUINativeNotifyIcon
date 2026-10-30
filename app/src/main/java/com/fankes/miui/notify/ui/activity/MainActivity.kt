@@ -188,7 +188,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             noCancelable()
                         }
                     // 推广、恰饭
-                    ProjectPromote.show(activity = this, ModuleVersion.toString())
+                    if (ConfigData.isShowProjectPromotion) ProjectPromote.show(activity = this, ModuleVersion.toString())
                 } else {
                     homeBinding.mainOptimizeListSummaryText.text = getString(R.string.config_module_unavailable)
                     showDialog {
@@ -326,6 +326,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.notifyIconCustomCornerSeekbar.bind(ConfigData.NOTIFY_ICON_CORNER_SIZE, configBinding.notifyIconCustomCornerText, suffix = " dp") {
             SystemUITool.refreshSystemUI(context = this)
         }
+        configBinding.showProjectPromotionSwitch.bind(ConfigData.SHOW_PROJECT_PROMOTION)
     }
 
     /** 初始化按钮的点击事件，它们不依赖模块是否激活 */
