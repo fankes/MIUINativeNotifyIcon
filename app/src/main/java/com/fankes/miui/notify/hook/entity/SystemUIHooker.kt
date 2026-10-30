@@ -22,7 +22,6 @@
  */
 package com.fankes.miui.notify.hook.entity
 
-import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.WallpaperManager
@@ -278,9 +277,6 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 已注册的主题壁纸颜色监听，模块实例释放时注销 */
     private var wallpaperColorsListener: Pair<WallpaperManager, WallpaperManager.OnColorsChangedListener>? = null
-
-    /** 当前进程是否已加载此 Hooker */
-    private var isHooked = false
 
     /** 当前模块实例加载时模块 APK 的最后更新时间 */
     private var moduleLastUpdateTime: Long? = null
@@ -1120,7 +1116,17 @@ object SystemUIHooker : YukiBaseHooker() {
                         }
                 }
             }
-            onCreate { onHostCreated() }
+        }
+        // 宿主首次就绪和模块热重载后统一初始化
+        withApplicationReady { application ->
+            moduleLastUpdateTime = application.appLastUpdateTimeOf(BuildConfigWrapper.APPLICATION_ID)
+            iconRuleScope.launch {
+                restoreSettingsManager()
+                // 从模块共享文件恢复 ANIP 快照
+                globalContext?.let { refreshIconData(it) }
+                if (ActivationPromptTool.isPrompting(application))
+                    ActivationPromptTool.prompt(application, BuildConfigWrapper.APPLICATION_ID, isReloaded = true, resources = module.resources)
+            }
         }
         // 刷新图标缓存
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
@@ -1141,26 +1147,6 @@ object SystemUIHooker : YukiBaseHooker() {
         SystemUITool.Host.onIconRuleUpdateStarted(param = this) {
             iconRuleUpdateFallbackJob?.cancel()
             iconRuleUpdateFallbackJob = null
-        }
-    }
-
-    /** 宿主 [Application] 创建后的初始化，模块热重载后同样需要执行 */
-    private fun Application.onHostCreated() {
-        moduleLastUpdateTime = appLastUpdateTimeOf(BuildConfigWrapper.APPLICATION_ID)
-        // 从模块共享文件恢复 ANIP 快照
-        globalContext?.let { refreshIconData(it) }
-    }
-
-    /** 模块热重载完成后重新执行宿主初始化，热重载不会重放 [Application.onCreate] */
-    fun onReloaded() {
-        if (isHooked.not()) return
-        iconRuleScope.launch {
-            restoreSettingsManager()
-            hostApplication?.apply {
-                onHostCreated()
-                if (ActivationPromptTool.isPrompting(this))
-                    ActivationPromptTool.prompt(this, BuildConfigWrapper.APPLICATION_ID, isReloaded = true, resources = module.resources)
-            }
         }
     }
 
@@ -1312,7 +1298,6 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     override fun onHook() {
-        isHooked = true
         // SystemUI 只读取模块写入的 ANIP 共享文件
         if (isSharedCacheAvailable) IconRuleManagerTool.attachHost(sharedFiles)
         // 注册生命周期

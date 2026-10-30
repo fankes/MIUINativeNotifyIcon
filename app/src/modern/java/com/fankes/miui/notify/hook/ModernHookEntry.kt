@@ -40,7 +40,6 @@ object ModernHookEntry : YukiHookXposedModule by HookEntry {
         HookEntry.onInit()
         registerModuleLifecycle {
             onDispose { SystemUIHooker.release() }
-            onReloaded { SystemUIHooker.onReloaded() }
         }
     }
 }
