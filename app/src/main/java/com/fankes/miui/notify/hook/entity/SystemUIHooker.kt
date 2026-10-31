@@ -456,11 +456,33 @@ object SystemUIHooker : YukiBaseHooker() {
         } else BitmapCompatTool.isGrayscaleDrawable(drawable)
 
     /**
+     * 按系统状态栏图标尺寸生成位图，保留宽高比，不放大小图标
+     * @param context 系统界面实例
+     * @return 状态栏图标位图
+     */
+    @Suppress("DiscouragedApi")
+    private fun Drawable.toStatusIconBitmap(context: Context) = run {
+        val size = listOf("status_bar_icon_size", "status_bar_icon_size_sp").mapNotNull { name ->
+            context.resources.getIdentifier(name, "dimen", PackageName.SYSTEMUI)
+                .takeIf { it != 0 }?.let { context.resources.getDimensionPixelSize(it) }
+        }.maxOrNull()?.takeIf { it > 0 } ?: 24.toPx(context)
+        val width = intrinsicWidth
+        val height = intrinsicHeight
+        if (width <= 0 || height <= 0) return@run BitmapCompatTool.rasterizeDrawable(this, size, size)
+        val scale = minOf(1.0, size.toDouble() / maxOf(width, height))
+        BitmapCompatTool.rasterizeDrawable(this, (width * scale).toInt().coerceAtLeast(1), (height * scale).toInt().coerceAtLeast(1))
+    }
+
+    /**
      * 处理为圆角图标
      * @return [Drawable]
      */
-    private fun Drawable.rounded(context: Context) =
-        safeOf(default = this) { toBitmap().round(10.toPx(context).toFloat()).toDrawable(context.resources) }
+    private fun Drawable.rounded(context: Context) = safeOf(default = this) {
+        val bitmap = toStatusIconBitmap(context)
+        // 位图缩小时同步缩放圆角半径，保留原图的圆角比例
+        val scale = if (intrinsicWidth > 0) bitmap.width.toFloat() / intrinsicWidth else 1f
+        bitmap.round(10.toPx(context) * scale).toDrawable(context.resources)
+    }
 
     /**
      * 注册主题壁纸改变颜色监听
@@ -579,7 +601,7 @@ object SystemUIHooker : YukiBaseHooker() {
             iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
         ).also { pair ->
             if (pair.second) pair.first?.also { drawable ->
-                iconView.setImageDrawable(drawable.toBitmap().toDrawable(iconView.resources))
+                iconView.setImageDrawable(drawable.toStatusIconBitmap(iconView.context).toDrawable(iconView.resources))
                 // HyperOS 3 起会保留系统着色，彩色图标写入后需要同时清除两层 Tint
                 if (isGrayscaleIcon(iconView.context, drawable).not()) {
                     iconView.imageTintList = null
@@ -1360,7 +1382,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val appName = nf.extras?.getString("miui.opPkg")
                 if (appName != null) {
                     val appContext = context.createPackageContext(appName, Context.CONTEXT_IGNORE_SECURITY)
-                    val iconBitmap = nf.smallIcon?.loadDrawable(appContext)?.toBitmap()
+                    val iconBitmap = nf.smallIcon?.loadDrawable(appContext)?.toStatusIconBitmap(context)
                     result = if (iconBitmap != null && !iconBitmap.isRecycled)
                         iconBitmap.toDrawable(context.resources)
                     else null
@@ -1393,7 +1415,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         context = context,
                         nf = expandedNf,
                         iconDrawable = result<Icon>()?.loadDrawable(context)
-                    ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toBitmap()) }
+                    ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toStatusIconBitmap(context)) }
                 }
             }
         }

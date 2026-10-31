@@ -54,16 +54,48 @@ object BitmapCompatTool {
     private val tempMatrix = Matrix()
 
     /**
+     * 将图标绘制到指定尺寸，缩放画布以保留包装图标的固定边距比例
+     * @param drawable 原始图标
+     * @param width 输出宽度 (px)
+     * @param height 输出高度 (px)
+     * @return [Bitmap] 指定尺寸的图标位图
+     */
+    fun rasterizeDrawable(drawable: Drawable, width: Int, height: Int): Bitmap {
+        if (drawable is BitmapDrawable) return drawable.toBitmap(width, height)
+        val sourceWidth = drawable.intrinsicWidth.takeIf { it > 0 } ?: width
+        val sourceHeight = drawable.intrinsicHeight.takeIf { it > 0 } ?: height
+        val left = drawable.bounds.left
+        val top = drawable.bounds.top
+        val right = drawable.bounds.right
+        val bottom = drawable.bounds.bottom
+        val bitmap = createBitmap(width, height)
+        val canvas = Canvas(bitmap)
+        canvas.scale(width.toFloat() / sourceWidth, height.toFloat() / sourceHeight)
+        try {
+            drawable.setBounds(0, 0, sourceWidth, sourceHeight)
+            drawable.draw(canvas)
+        } finally {
+            drawable.setBounds(left, top, right, bottom)
+        }
+        return bitmap
+    }
+
+    /**
      * 判断 [Drawable] 是否为灰度位图
      * @param drawable 要判断的 [Drawable]
      * @return [Boolean] 是否灰度
      */
-    fun isGrayscaleDrawable(drawable: Drawable) = safeOfFalse {
+    fun isGrayscaleDrawable(drawable: Drawable): Boolean = safeOfFalse {
         when (drawable) {
             is BitmapDrawable -> isGrayscaleBitmap(drawable.bitmap)
-            is AnimationDrawable -> !(drawable.numberOfFrames <= 0 || !isGrayscaleBitmap(drawable.getFrame(0).toBitmap()))
+            is AnimationDrawable -> drawable.numberOfFrames > 0 && isGrayscaleDrawable(drawable.getFrame(0))
             is VectorDrawable -> true
-            else -> isGrayscaleBitmap(drawable.toBitmap())
+            // 灰度检查只需要小图，避免先按固有尺寸绘制大位图
+            else -> {
+                val width = drawable.intrinsicWidth.coerceIn(1, 64)
+                val height = drawable.intrinsicHeight.coerceIn(1, 64)
+                isGrayscaleBitmap(rasterizeDrawable(drawable, width, height))
+            }
         }
     }
 
@@ -76,6 +108,7 @@ object BitmapCompatTool {
         cachedBitmapGrayscales[bitmap.generationId] ?: let {
             var height = bitmap.height
             var width = bitmap.width
+            var sampledBitmap = bitmap
             if (height > 64 || width > 64) {
                 if (tempCompactBitmap == null) {
                     tempCompactBitmap = createBitmap(64, 64)
@@ -86,12 +119,13 @@ object BitmapCompatTool {
                 tempMatrix.setScale(64f / width, 64f / height, 0f, 0f)
                 tempCompactBitmapCanvas?.drawColor(0, PorterDuff.Mode.SRC)
                 tempCompactBitmapCanvas?.drawBitmap(bitmap, tempMatrix, tempCompactBitmapPaint)
+                sampledBitmap = tempCompactBitmap ?: return@let false
                 height = 64
                 width = 64
             }
             val size = height * width
             ensureBufferSize(size)
-            tempCompactBitmap?.getPixels(tempBuffer, 0, width, 0, 0, width, height)
+            sampledBitmap.getPixels(tempBuffer, 0, width, 0, 0, width, height)
             for (i in 0 until size) {
                 if (isGrayscaleColor(tempBuffer[i]).not()) {
                     cachedBitmapGrayscales[bitmap.generationId] = false
