@@ -32,8 +32,9 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.widget.TextViewCompat
-import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
+import com.fankes.miui.notify.R
 import com.highcapable.betterandroid.ui.extension.component.base.DisplayDensity
+import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import top.defaults.drawabletoolbox.DrawableBuilder
 
 class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs), DisplayDensity {
@@ -46,8 +47,6 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
         states[2] = intArrayOf()
         return ColorStateList(states, colors)
     }
-
-    private val thumbColor get() = if (context.isSystemInDarkMode) 0xFF7C7C7C else 0xFFCCCCCC
 
     init {
         trackDrawable = DrawableBuilder()
@@ -66,10 +65,11 @@ class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(cont
             .strokeWidth(8.dp)
             .strokeColor(Color.TRANSPARENT)
             .build()
+        thumbTintList = ColorStateList.valueOf(Color.WHITE)
         trackTintList = toColors(
-            0xFF656565.toInt(),
-            thumbColor.toInt(),
-            thumbColor.toInt()
+            context.getColorCompat(R.color.colorSwitchTrackChecked),
+            context.getColorCompat(R.color.colorSwitchTrackNormal),
+            context.getColorCompat(R.color.colorSwitchTrackNormal)
         )
         maxLines = 1
         switchPadding = 10.dp

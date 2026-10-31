@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MaterialAlertDialog.MIUINativeNotifyIcon.Body.Text" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+
+    <style name="ThemeOverlay.MIUINativeNotifyIcon.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.MIUINativeNotifyIcon.Body.Text</item>
+        <item name="colorOnSurface">@color/colorTextGray</item>
+        <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
+        <item name="android:textColorPrimary">@color/colorTextGray</item>
+        <item name="android:textColorSecondary">@color/colorTextDark</item>
+    </style>
+    <style name="Widget.MIUINativeNotifyIcon.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="android:textColor">@color/colorTextGray</item>
+    </style>
+
+    <style name="Widget.MIUINativeNotifyIcon.RadioButton" parent="Widget.Material3.CompoundButton.RadioButton">
+        <item name="android:textColor">@color/colorTextGray</item>
+    </style>
+
+    <style name="Widget.MIUINativeNotifyIcon.Chip" parent="Base.Widget.Material3.Chip">
+        <item name="android:checkable">true</item>
+        <item name="closeIconTint">@color/colorChipContent</item>
+        <item name="chipIconTint">@color/colorChipContent</item>
+        <item name="checkedIconTint">@color/colorChipContent</item>
+        <item name="chipIconSize">@dimen/app_chip_icon_size</item>
+        <item name="android:textColor">@color/colorChipContent</item>
+        <item name="chipCornerRadius">10dp</item>
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="chipSurfaceColor">@color/colorCard</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeColor">?attr/colorPrimary</item>
+        <item name="rippleColor">?attr/colorControlHighlight</item>
+    </style>
+</resources>

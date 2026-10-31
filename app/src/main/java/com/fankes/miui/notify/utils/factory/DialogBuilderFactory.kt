@@ -40,9 +40,11 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.highcapable.betterandroid.ui.extension.binding.ViewBinding
+import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import com.highcapable.betterandroid.ui.extension.component.base.toPx
 import com.highcapable.betterandroid.ui.extension.component.fragmentManager
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
+import com.highcapable.betterandroid.ui.extension.view.textColor
 import com.highcapable.kavaref.extension.classOf
 import com.highcapable.yukihookapi.YukiHook
 
@@ -149,6 +151,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
                     addView(TextView(context).apply {
                         tag = "progressContent"
                         text = value
+                        textColor = context.getColorCompat(R.color.colorTextDark)
                     })
                     setPadding(20.toPx(context), 20.toPx(context), 20.toPx(context), 20.toPx(context))
                 }

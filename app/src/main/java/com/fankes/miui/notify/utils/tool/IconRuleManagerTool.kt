@@ -194,12 +194,16 @@ object IconRuleManagerTool {
         val binding = DiaSourceFromBinding.inflate(context.layoutInflater)
         var sourceType = ConfigData.iconRuleSourceSyncType.normalizedSourceType
         var isSyncRequested = false
-        binding.sourceRadio0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_1
-        binding.sourceRadio1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_2
-        binding.sourceRadio2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_DIRECT
-        binding.sourceRadio0.setOnClickListener { sourceType = IconRuleSourceSyncType.GITHUB_PROXY_1 }
-        binding.sourceRadio1.setOnClickListener { sourceType = IconRuleSourceSyncType.GITHUB_PROXY_2 }
-        binding.sourceRadio2.setOnClickListener { sourceType = IconRuleSourceSyncType.GITHUB_DIRECT }
+        binding.sourceChip0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_1
+        binding.sourceChip1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_2
+        binding.sourceChip2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_DIRECT
+        binding.sourceChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            sourceType = when (checkedIds.first()) {
+                R.id.source_chip_0 -> IconRuleSourceSyncType.GITHUB_PROXY_1
+                R.id.source_chip_1 -> IconRuleSourceSyncType.GITHUB_PROXY_2
+                else -> IconRuleSourceSyncType.GITHUB_DIRECT
+            }
+        }
         binding.sourceRepositoryEdit.apply {
             setText(ConfigData.iconRuleRepository)
             doAfterTextChanged { binding.sourceRepositoryTextLin.error = null }

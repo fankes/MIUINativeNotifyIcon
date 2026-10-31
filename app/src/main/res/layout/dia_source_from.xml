@@ -16,33 +16,35 @@
         android:layout_marginBottom="10dp"
         android:lineSpacingExtra="6dp"
         android:text="@string/sync_source_desc"
+        android:textColor="@color/colorTextDark"
         android:textSize="14sp" />
 
-    <RadioGroup
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/source_chip_group"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:chipSpacingVertical="8dp">
 
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/source_radio_0"
-            android:layout_width="wrap_content"
+        <com.fankes.miui.notify.ui.widget.AppChip
+            android:id="@+id/source_chip_0"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sync_source_cdn_1"
-            app:buttonTint="@color/colorPrimaryAccent" />
+            android:text="@string/sync_source_cdn_1" />
 
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/source_radio_1"
-            android:layout_width="wrap_content"
+        <com.fankes.miui.notify.ui.widget.AppChip
+            android:id="@+id/source_chip_1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sync_source_cdn_2"
-            app:buttonTint="@color/colorPrimaryAccent" />
+            android:text="@string/sync_source_cdn_2" />
 
-        <com.google.android.material.radiobutton.MaterialRadioButton
-            android:id="@+id/source_radio_2"
-            android:layout_width="wrap_content"
+        <com.fankes.miui.notify.ui.widget.AppChip
+            android:id="@+id/source_chip_2"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sync_source_github"
-            app:buttonTint="@color/colorPrimaryAccent" />
-    </RadioGroup>
+            android:text="@string/sync_source_github" />
+    </com.google.android.material.chip.ChipGroup>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/source_repository_text_lin"
