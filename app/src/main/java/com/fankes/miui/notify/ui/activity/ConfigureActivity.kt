@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.ui.activity
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.Typeface
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
@@ -140,6 +141,17 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     }
 
     private fun continueOnCreate() {
+        // 联动内容区可能超出可见范围，提示按裁剪后的区域居中，而不是按测量高度居中
+        val visibleContent = Rect()
+        binding.configContent.viewTreeObserver.addOnPreDrawListener {
+            if ((binding.configListProgress.isVisible || binding.configListNoDataView.isVisible) &&
+                binding.configContent.getLocalVisibleRect(visibleContent)) {
+                val offset = visibleContent.exactCenterY() - binding.configContent.height / 2f
+                binding.configListProgress.translationY = offset
+                binding.configListNoDataView.translationY = offset
+            }
+            true
+        }
         // 开启优化时允许直接拖动 AppBar，关闭时锁定展开状态
         (binding.configAppBar.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarLayout.Behavior().apply {
             setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
