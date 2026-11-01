@@ -153,7 +153,7 @@
     <string name="config_options">选项</string>
     <string name="config_view_installed">已安装</string>
     <string name="config_view_all">全部</string>
-    <string name="config_view_enabled">已启用</string>
+    <string name="config_view_disabled">未启用</string>
     <string name="config_view_overridden">已覆盖</string>
     <string name="config_uncovered_count">%1$d 个未收录的应用</string>
     <string name="config_uncovered_title">未收录的应用 (%1$d)</string>
@@ -264,4 +264,6 @@
     <string name="about_yukihook_desc">一个现代化的 Hook API 与 Xposed 模块解决方案</string>
     <string name="about_kavaref_desc">一个使用 Kotlin 实现的现代化 Java 反射</string>
     <string name="about_copyright">未经允许不得转载、修改复制我的劳动成果</string>
+    <string name="config_restore_rules">撤销更改</string>
+    <string name="config_restore_rules_confirm">这将恢复当前所做的更改到上游云端规则，要继续吗？</string>
 </resources>

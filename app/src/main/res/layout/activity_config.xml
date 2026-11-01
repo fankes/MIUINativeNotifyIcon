@@ -12,6 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:elevation="0dp"
         android:gravity="center|start"
         android:paddingStart="15dp"
@@ -55,6 +56,17 @@
             android:src="@drawable/ic_settings"
             android:tint="@color/colorTextGray"
             android:tooltipText="@string/config_options" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/config_title_restore"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="15dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_restore_rules"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="@string/config_restore_rules"
+            android:visibility="gone" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/config_title_sync"
@@ -195,7 +207,7 @@
                                     android:textSize="13sp" />
 
                                 <TextView
-                                    android:id="@+id/config_view_enabled"
+                                    android:id="@+id/config_view_disabled"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginLeft="4dp"
@@ -206,7 +218,7 @@
                                     android:paddingRight="14dp"
                                     android:paddingBottom="7dp"
                                     android:singleLine="true"
-                                    android:text="@string/config_view_enabled"
+                                    android:text="@string/config_view_disabled"
                                     android:textColor="@color/selector_view_pill_text"
                                     android:textSize="13sp" />
 
@@ -294,6 +306,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1">
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/config_list_progress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            app:indicatorColor="@color/colorPrimaryAccent" />
 
                         <TextView
                             android:id="@+id/config_list_no_data_view"

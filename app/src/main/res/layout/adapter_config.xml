@@ -90,11 +90,13 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/adp_app_overlay_row"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:gravity="center|end">
 
             <TextView
+                android:id="@+id/adp_app_overlay_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/config_item_override"

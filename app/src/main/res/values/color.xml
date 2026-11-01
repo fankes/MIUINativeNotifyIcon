@@ -20,4 +20,5 @@
     <color name="colorStatusInactive">#FFFF453A</color>
     <color name="colorStatusInactiveContainer">#FFFFEBEA</color>
     <color name="colorNavIndicator">#FFE4E4E4</color>
+    <color name="colorRuleChanged">#FF2196F3</color>
 </resources>

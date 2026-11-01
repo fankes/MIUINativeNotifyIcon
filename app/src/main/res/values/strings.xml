@@ -153,7 +153,7 @@
     <string name="config_options">Options</string>
     <string name="config_view_installed">Installed</string>
     <string name="config_view_all">All</string>
-    <string name="config_view_enabled">Enabled</string>
+    <string name="config_view_disabled">Disabled</string>
     <string name="config_view_overridden">Overridden</string>
     <string name="config_uncovered_count">%1$d apps not included</string>
     <string name="config_uncovered_title">Apps Not Included (%1$d)</string>
@@ -264,4 +264,6 @@
     <string name="about_yukihook_desc">A modern hook API and Xposed module solution</string>
     <string name="about_kavaref_desc">Modern Java reflection implemented in Kotlin</string>
     <string name="about_copyright">Reproducing, modifying or copying my work without permission is prohibited</string>
+    <string name="config_restore_rules">Undo Changes</string>
+    <string name="config_restore_rules_confirm">This will revert your current changes to the upstream cloud rules. Continue?</string>
 </resources>

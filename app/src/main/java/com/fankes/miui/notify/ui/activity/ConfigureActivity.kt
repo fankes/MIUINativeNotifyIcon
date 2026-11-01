@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.ui.activity
 
 import android.graphics.Bitmap
+import android.graphics.Typeface
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
@@ -41,6 +42,7 @@ import com.fankes.miui.notify.params.factory.isAppNotifyEnabledOf
 import com.fankes.miui.notify.params.factory.isAppNotifyOverlayOf
 import com.fankes.miui.notify.params.factory.putAppNotifyEnabledOf
 import com.fankes.miui.notify.params.factory.putAppNotifyOverlayOf
+import com.fankes.miui.notify.params.factory.resetAppNotifyOverlayRules
 import com.fankes.miui.notify.ui.activity.base.BaseActivity
 import com.fankes.miui.notify.utils.factory.addOnBackPressedEvent
 import com.fankes.miui.notify.utils.factory.callOnBackPressed
@@ -66,12 +68,17 @@ import com.highcapable.betterandroid.ui.extension.view.textToString
 import com.highcapable.betterandroid.ui.extension.view.toast
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
 
+    /** 图标及当前本地开关状态，用于比较列表项变化 */
+    private data class IconItem(val icon: NotificationIcon, val enabled: Boolean, val overlay: Boolean)
+
     /** 名单的查看范围 */
-    private enum class ViewMode { ALL, INSTALLED, ENABLED, OVERRIDDEN }
+    private enum class ViewMode { ALL, INSTALLED, DISABLED, OVERRIDDEN }
 
     /** 当前查看范围 */
     private var viewMode = ViewMode.ALL
@@ -83,7 +90,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private val viewPills get() = mapOf(
         binding.configViewAll to ViewMode.ALL,
         binding.configViewInstalled to ViewMode.INSTALLED,
-        binding.configViewEnabled to ViewMode.ENABLED,
+        binding.configViewDisabled to ViewMode.DISABLED,
         binding.configViewOverridden to ViewMode.OVERRIDDEN
     )
 
@@ -91,13 +98,22 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private var filterText = ""
 
     /** 回调适配器改变 */
-    private var onChanged: ((List<NotificationIcon>, Runnable?) -> Unit)? = null
+    private var onChanged: ((List<IconItem>, Runnable?) -> Unit)? = null
 
     /** 回调滚动事件改变 */
     private var onScrollEvent: ((Boolean) -> Unit)? = null
 
     /** 全部的通知图标优化数据 */
     private var iconAllDatas = emptyList<NotificationIcon>()
+
+    /** 当前名单状态加载任务 */
+    private var iconLoadJob: Job? = null
+
+    /** 首次名单加载完成前不显示空内容提示 */
+    private var isLoadingIcons = true
+
+    /** 当前名单的开关状态，切换时只更新对应应用，避免全量重读偏好 */
+    private var iconItems = mutableMapOf<String, IconItem>()
 
     override fun onCreate() {
         if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED) {
@@ -148,6 +164,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 binding.configDisabledView.isVisible = it.not()
                 binding.configTitleSync.isVisible = it
                 binding.configTitleOptions.isVisible = it
+                updateRestoreButton()
             }
             onChanged {
                 reinitialize()
@@ -194,6 +211,19 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     }
             }
         }
+        binding.configTitleRestore.setOnClickListener {
+            showDialog {
+                title = getString(R.string.config_restore_rules)
+                msg = getString(R.string.config_restore_rules_confirm)
+                confirmButton {
+                    resetAppNotifyOverlayRules(iconAllDatas)
+                    iconItems.replaceAll { _, item -> item.copy(overlay = item.icon.overlay) }
+                    refreshAdapterResult()
+                    SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
+                }
+                cancelButton()
+            }
+        }
         // 设置同步列表按钮点击事件
         binding.configTitleSync.setOnClickListener { onStartRefresh() }
         // 设置选项按钮点击事件
@@ -209,13 +239,16 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
         // 设置列表元素和 Adapter
         binding.configListView.apply {
-            bindAdapter<NotificationIcon>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 10.dp)) {
+            bindAdapter<IconItem>(RecyclerCosmetic.fromLinearVertical(context, rowSpacing = 10.dp)) {
                 onBindDiffer(
-                    areItemsTheSame = { oldItem, newItem -> oldItem.packageName == newItem.packageName },
-                    // 同一快照的图标不可变，重新装载后的新实例也需要刷新位图。
-                    areContentsTheSame = { oldItem, newItem -> oldItem === newItem }
+                    areItemsTheSame = { oldItem, newItem -> oldItem.icon.packageName == newItem.icon.packageName },
+                    // 同一快照的图标不可变，重新装载后的新实例也需要刷新位图
+                    areContentsTheSame = { oldItem, newItem ->
+                        oldItem.icon === newItem.icon && oldItem.enabled == newItem.enabled && oldItem.overlay == newItem.overlay
+                    }
                 )
-                onBindItemView<AdapterConfigBinding> { binding, icon, _ ->
+                onBindItemView<AdapterConfigBinding> { binding, item, _ ->
+                    val icon = item.icon
                     binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.snapshot?.getBitmap(icon))
                     (icon.color ?: resources.getColorCompat(R.color.colorTextGray)).also { color ->
                         binding.adpAppIcon.setColorFilter(color)
@@ -224,22 +257,31 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     binding.adpAppName.text = icon.label
                     binding.adpAppPkgName.text = icon.packageName
                     binding.adpCbrName.text = getString(R.string.config_contributors, icon.contributors.joinToString())
-                    isAppNotifyEnabledOf(icon).also { e ->
+                    item.enabled.also { e ->
                         binding.adpAppOpenSwitch.isChecked = e
                         binding.adpAppAllSwitch.isEnabled = e
+                        binding.adpAppOverlayRow.alpha = if (e) 1f else 0.5f
                     }
                     binding.adpAppOpenSwitch.setOnCheckedChangeListener { btn, b ->
                         if (btn.isPressed.not()) return@setOnCheckedChangeListener
                         putAppNotifyEnabledOf(icon, b)
+                        iconItems[icon.packageName] = iconItems.getValue(icon.packageName).copy(enabled = b)
                         binding.adpAppAllSwitch.isEnabled = b
+                        binding.adpAppOverlayRow.alpha = if (b) 1f else 0.5f
                         refreshAdapterResult()
                         SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                     }
-                    binding.adpAppAllSwitch.isChecked = isAppNotifyOverlayOf(icon)
+                    val isOverlayChanged = item.overlay != icon.overlay
+                    binding.adpAppOverlayText.textColor = resources.getColorCompat(
+                        if (isOverlayChanged) R.color.colorRuleChanged else R.color.colorTextGray
+                    )
+                    binding.adpAppOverlayText.setTypeface(null, if (isOverlayChanged) Typeface.BOLD else Typeface.NORMAL)
+                    binding.adpAppAllSwitch.isChecked = item.overlay
                     binding.adpAppAllSwitch.setOnCheckedChangeListener { btn, b ->
                         if (btn.isPressed.not()) return@setOnCheckedChangeListener
                         fun saveState() {
                             putAppNotifyOverlayOf(icon, b)
+                            iconItems[icon.packageName] = iconItems.getValue(icon.packageName).copy(overlay = b)
                             refreshAdapterResult()
                             SystemUITool.refreshSystemUI(context = this@ConfigureActivity)
                         }
@@ -435,15 +477,32 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             cancelButton(text = getString(R.string.common_close))
         }
 
+    /** 根据当前名单与云端规则的差异更新恢复按钮 */
+    private fun updateRestoreButton() {
+        binding.configTitleRestore.isVisible = binding.notifyIconFixSwitch.isChecked && iconItems.values.any {
+            it.overlay != it.icon.overlay
+        }
+    }
+
     /** 装载或刷新本地数据 */
     private fun mockLocalData() {
-        iconAllDatas = IconRuleManagerTool.snapshot?.icons.orEmpty()
+        iconLoadJob?.cancel()
+        isLoadingIcons = true
         refreshAdapterResult()
-        if (iconAllDatas.isEmpty()) launch {
-            if (IconRuleManagerTool.reload(this@ConfigureActivity)) {
-                iconAllDatas = IconRuleManagerTool.snapshot?.icons.orEmpty()
-                refreshAdapterResult()
+        iconLoadJob = launch {
+            val (icons, items) = withContext(Dispatchers.IO) {
+                var icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+                if (icons.isEmpty() && IconRuleManagerTool.reload(this@ConfigureActivity))
+                    icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+                val items = icons.associate { icon ->
+                    icon.packageName to IconItem(icon, isAppNotifyEnabledOf(icon), isAppNotifyOverlayOf(icon))
+                }.toMutableMap()
+                icons to items
             }
+            iconAllDatas = icons
+            iconItems = items
+            isLoadingIcons = false
+            refreshAdapterResult()
         }
     }
 
@@ -453,14 +512,16 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
      */
     private fun refreshAdapterResult(isScrollToTop: Boolean = false) {
         val icons = iconDatas.toList()
+        binding.configListProgress.isVisible = isLoadingIcons && iconAllDatas.isEmpty()
+        updateRestoreButton()
         // 列表数据提交完成后再滚动，否则列表变化会打断滚动
-        onChanged?.invoke(icons, if (isScrollToTop) Runnable { binding.configListView.scrollToFirstPosition() } else null)
+        onChanged?.invoke(icons.map { iconItems.getValue(it.packageName) }, if (isScrollToTop) Runnable { binding.configListView.scrollToFirstPosition() } else null)
         binding.configTitleCountText.text =
             if (filterText.isBlank()) getString(R.string.config_included_count, icons.size)
             else getString(R.string.config_filter_result, filterText, icons.size)
         binding.configListNoDataView.apply {
             text = if (iconAllDatas.isEmpty()) getString(R.string.config_empty_no_data) else getString(R.string.config_empty_no_match)
-            isVisible = icons.isEmpty()
+            isVisible = !isLoadingIcons && icons.isEmpty()
         }
         // 列表为空时没有可滚动的内容
         binding.configTitleUp.isVisible = icons.isNotEmpty()
@@ -493,8 +554,8 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         get() = iconAllDatas.filter { icon ->
             when (viewMode) {
                 ViewMode.INSTALLED -> installedApps.any { it.packageName == icon.packageName }
-                ViewMode.ENABLED -> isAppNotifyEnabledOf(icon)
-                ViewMode.OVERRIDDEN -> isAppNotifyOverlayOf(icon)
+                ViewMode.DISABLED -> !iconItems.getValue(icon.packageName).enabled
+                ViewMode.OVERRIDDEN -> iconItems.getValue(icon.packageName).overlay
                 else -> true
             } && (filterText.isBlank() ||
                 icon.label.lowercase().contains(filterText.lowercase()) ||

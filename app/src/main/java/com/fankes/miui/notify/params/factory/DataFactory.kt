@@ -73,3 +73,12 @@ fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = preferences().getBool
  */
 fun Context.putAppNotifyOverlayOf(icon: NotificationIcon, isOverlay: Boolean) =
     preferences().edit { putBoolean(icon.preferenceName(OVERLAY_SUFFIX), isOverlay) }
+
+/**
+ * 清除名单中的本地覆盖设置，恢复跟随云端规则，保留启用状态
+ * @param icons 要恢复的图标名单
+ */
+fun Context.resetAppNotifyOverlayRules(icons: List<NotificationIcon>) =
+    preferences().edit {
+        icons.forEach { remove(it.preferenceName(OVERLAY_SUFFIX)) }
+    }
