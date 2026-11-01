@@ -155,7 +155,7 @@
     <string name="config_view_all">全部</string>
     <string name="config_view_enabled">已启用</string>
     <string name="config_view_overridden">已覆盖</string>
-    <string name="config_uncovered_count">未收录 %1$d 个</string>
+    <string name="config_uncovered_count">%1$d 个未收录的应用</string>
     <string name="config_uncovered_title">未收录的应用 (%1$d)</string>
     <string name="main_optimize_list_summary">已收录 %1$d 个 · 未收录 %2$d 个</string>
     <string name="main_optimize_list_total">共收录 %1$d 个</string>

@@ -14,6 +14,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
         android:layout_weight="1"
         android:gravity="center|start"
         android:orientation="vertical">
@@ -56,6 +57,7 @@
             android:id="@+id/adp_cbr_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:singleLine="true"
             android:text="@string/config_item_contributors_placeholder"
             android:textColor="@color/colorTextDark"

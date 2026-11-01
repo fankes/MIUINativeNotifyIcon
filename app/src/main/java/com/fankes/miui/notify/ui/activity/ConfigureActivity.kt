@@ -243,16 +243,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 }
             }
         }
-        // 设置点击事件
-        binding.configCbrButton.setOnClickListener {
-            showDialog {
-                title = getString(R.string.config_contribute_anip)
-                msg = getString(R.string.config_contribute_anip_msg)
-                confirmButton(text = getString(R.string.config_contribute)) { openBrowser(getString(R.string.anip_contribute_url)) }
-                cancelButton(text = getString(R.string.config_request_adaptation)) { openBrowser(getString(R.string.anip_request_adaptation_url)) }
-                neutralButton(text = getString(R.string.config_not_now))
-            }
-        }
         // 装载数据
         mockLocalData()
         loadInstalledApps()
@@ -380,6 +370,16 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             confirmButton(text = getString(R.string.common_close))
         }
 
+    /** 显示为 ANIP 做出贡献的对话框 */
+    private fun showContributeDialog() =
+        showDialog {
+            title = getString(R.string.config_contribute_anip)
+            msg = getString(R.string.config_contribute_anip_msg)
+            confirmButton(text = getString(R.string.config_contribute)) { openBrowser(getString(R.string.anip_contribute_url)) }
+            cancelButton(text = getString(R.string.config_request_adaptation)) { openBrowser(getString(R.string.anip_request_adaptation_url)) }
+            neutralButton(text = getString(R.string.config_not_now))
+        }
+
     /**
      * 显示未收录的应用对话框
      * @param apps 未收录的应用
@@ -411,7 +411,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 appIcons[packageName] = icon
                 dialogBinding.uncoveredListView.adapter?.notifyItemChanged(apps.indexOfFirst { it.packageName == packageName })
             }
-            confirmButton(text = getString(R.string.config_request_adaptation)) { openBrowser(getString(R.string.anip_request_adaptation_url)) }
+            confirmButton(text = getString(R.string.config_request_adaptation)) { showContributeDialog() }
             cancelButton(text = getString(R.string.common_close))
         }
 
@@ -455,10 +455,13 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             val includedPackages = iconAllDatas.map { it.packageName }.toSet()
             installedApps.filter { it.isCandidate && it.packageName !in includedPackages }.sortedBy { it.name.lowercase() }
         }
-        binding.configUncoveredButton.apply {
-            text = getString(R.string.config_uncovered_count, uncoveredApps.size)
-            isVisible = uncoveredApps.isNotEmpty()
-            setOnClickListener { showUncoveredApps(uncoveredApps) }
+        binding.configCbrButton.apply {
+            text = if (uncoveredApps.isNotEmpty()) getString(R.string.config_uncovered_count, uncoveredApps.size)
+            else getString(R.string.config_contribute_anip)
+            setOnClickListener {
+                if (uncoveredApps.isNotEmpty()) showUncoveredApps(uncoveredApps)
+                else showContributeDialog()
+            }
         }
     }
 

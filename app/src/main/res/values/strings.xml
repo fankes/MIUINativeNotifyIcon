@@ -155,7 +155,7 @@
     <string name="config_view_all">All</string>
     <string name="config_view_enabled">Enabled</string>
     <string name="config_view_overridden">Overridden</string>
-    <string name="config_uncovered_count">Not included: %1$d</string>
+    <string name="config_uncovered_count">%1$d apps not included</string>
     <string name="config_uncovered_title">Apps Not Included (%1$d)</string>
     <string name="main_optimize_list_summary">%1$d included · %2$d not included</string>
     <string name="main_optimize_list_total">%1$d included</string>
