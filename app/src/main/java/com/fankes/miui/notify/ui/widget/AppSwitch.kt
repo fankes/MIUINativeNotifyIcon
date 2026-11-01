@@ -37,7 +37,7 @@ import com.highcapable.betterandroid.ui.extension.component.base.DisplayDensity
 import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import top.defaults.drawabletoolbox.DrawableBuilder
 
-class MaterialSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs), DisplayDensity {
+class AppSwitch(context: Context, attrs: AttributeSet?) : SwitchCompat(context, attrs), DisplayDensity {
 
     private fun toColors(selected: Int, pressed: Int, normal: Int): ColorStateList {
         val colors = intArrayOf(selected, pressed, normal)

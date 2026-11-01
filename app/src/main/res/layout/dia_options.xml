@@ -15,7 +15,7 @@
         android:paddingTop="15dp"
         android:paddingRight="25dp">
 
-        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+        <com.fankes.miui.notify.ui.widget.AppSwitch
             android:id="@+id/notify_icon_fix_placeholder_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:textColor="@color/colorTextDark"
             android:textSize="12sp" />
 
-        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+        <com.fankes.miui.notify.ui.widget.AppSwitch
             android:id="@+id/notify_icon_fix_notify_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:textColor="@color/colorTextDark"
             android:textSize="12sp" />
 
-        <com.fankes.miui.notify.ui.widget.MaterialSwitch
+        <com.fankes.miui.notify.ui.widget.AppSwitch
             android:id="@+id/notify_icon_auto_sync_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

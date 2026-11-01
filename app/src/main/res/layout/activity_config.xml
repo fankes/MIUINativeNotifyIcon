@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.fankes.miui.notify.ui.widget.MaterialSwitch
+                    <com.fankes.miui.notify.ui.widget.AppSwitch
                         android:id="@+id/notify_icon_fix_switch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

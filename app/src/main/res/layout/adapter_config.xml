@@ -82,7 +82,7 @@
                 android:textColor="@color/colorTextGray"
                 android:textSize="13sp" />
 
-            <com.fankes.miui.notify.ui.widget.MaterialSwitch
+            <com.fankes.miui.notify.ui.widget.AppSwitch
                 android:id="@+id/adp_app_open_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -103,7 +103,7 @@
                 android:textColor="@color/colorTextGray"
                 android:textSize="13sp" />
 
-            <com.fankes.miui.notify.ui.widget.MaterialSwitch
+            <com.fankes.miui.notify.ui.widget.AppSwitch
                 android:id="@+id/adp_app_all_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
