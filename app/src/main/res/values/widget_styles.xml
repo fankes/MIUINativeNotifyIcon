@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="MaterialAlertDialog.MIUINativeNotifyIcon.Body.Text" parent="MaterialAlertDialog.Material3.Body.Text">
-        <item name="android:textColor">@color/colorTextDark</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
     <style name="ThemeOverlay.MIUINativeNotifyIcon.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.MIUINativeNotifyIcon.Body.Text</item>
         <item name="colorOnSurface">@color/colorTextGray</item>
-        <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
+        <item name="colorOnSurfaceVariant">@color/colorDialogBody</item>
         <item name="android:textColorPrimary">@color/colorTextGray</item>
-        <item name="android:textColorSecondary">@color/colorTextDark</item>
+        <item name="android:textColorSecondary">@color/colorDialogBody</item>
     </style>
     <style name="Widget.MIUINativeNotifyIcon.CheckBox" parent="Widget.Material3.CompoundButton.CheckBox">
         <item name="android:textColor">@color/colorTextGray</item>
