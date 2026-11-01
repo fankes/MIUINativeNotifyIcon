@@ -25,6 +25,7 @@
 package com.fankes.miui.notify.ui.activity
 
 import android.graphics.Bitmap
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
 import com.fankes.miui.notify.bean.InstalledAppBean
@@ -50,6 +51,7 @@ import com.fankes.miui.notify.utils.factory.showTimePicker
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
+import com.google.android.material.appbar.AppBarLayout
 import com.highcapable.anip.sdk.entity.NotificationIcon
 import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.cosmetic.RecyclerCosmetic
@@ -122,12 +124,27 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     }
 
     private fun continueOnCreate() {
+        // 开启优化时允许直接拖动 AppBar，关闭时锁定展开状态
+        (binding.configAppBar.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarLayout.Behavior().apply {
+            setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
+                override fun canDrag(appBarLayout: AppBarLayout) = binding.notifyIconFixSwitch.isChecked
+            })
+        }
         // 返回按钮点击事件
         binding.titleBackIcon.setOnClickListener { callOnBackPressed() }
         // 通知图标优化开关，关闭后隐藏名单相关内容
         binding.notifyIconFixSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX) {
             onInitialize {
+                binding.configTip.layoutParams = (binding.configTip.layoutParams as AppBarLayout.LayoutParams).apply {
+                    scrollFlags = if (it) AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL else 0
+                }
+                if (!it) {
+                    binding.configAppBar.setExpanded(true, false)
+                    binding.configListView.scrollToFirstPosition()
+                }
                 binding.configContent.isVisible = it
+                binding.configBottomBar.isVisible = it
+                binding.configListControls.isVisible = it
                 binding.configDisabledView.isVisible = it.not()
                 binding.configTitleSync.isVisible = it
                 binding.configTitleOptions.isVisible = it
@@ -239,7 +256,10 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             onScrollEvent = { toBottom ->
                 post {
                     val count = adapter?.itemCount ?: 0
-                    if (count > 0) scrollToPosition(if (toBottom) count - 1 else 0)
+                    if (count > 0) {
+                        binding.configAppBar.setExpanded(!toBottom, true)
+                        scrollToPosition(if (toBottom) count - 1 else 0)
+                    }
                 }
             }
         }
