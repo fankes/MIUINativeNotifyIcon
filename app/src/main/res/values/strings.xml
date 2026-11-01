@@ -132,7 +132,7 @@
     <string name="main_view_supported_modules">View Supported Modules</string>
     <string name="main_not_miui_msg">This module is built for HyperOS/MIUI. Your system could not be recognized as either, so the module cannot work.</string>
     <string name="common_not_miui">Not a MIUI or HyperOS System</string>
-    <string name="config_empty_no_match">Oops, no matches found</string>
+    <string name="config_empty_no_match">No matching results found</string>
     <string name="config_empty_no_data">No data here yet\nTap the sync button at the top right to get cloud data</string>
     <string name="config_filter_result">Matches for \"%1$s\": %2$d</string>
     <string name="config_included_count">%1$d apps</string>

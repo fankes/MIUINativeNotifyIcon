@@ -132,7 +132,7 @@
     <string name="main_view_supported_modules">查看支持的模块</string>
     <string name="main_not_miui_msg">此模块专为 HyperOS/MIUI 系统打造，当前无法识别你的系统为其中任意之一，所以模块无法工作。</string>
     <string name="common_not_miui">不是 MIUI 或 HyperOS 系统</string>
-    <string name="config_empty_no_match">噫，竟然什么都没找到~</string>
+    <string name="config_empty_no_match">没有匹配到任何结果</string>
     <string name="config_empty_no_data">这里还没有数据\n请点击右上角同步按钮获取云端数据</string>
     <string name="config_filter_result">“%1$s” 匹配到 %2$d 个结果</string>
     <string name="config_included_count">共 %1$d 个应用</string>
