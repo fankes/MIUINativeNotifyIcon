@@ -15,9 +15,11 @@
         <item name="colorOnSurface">@color/colorTextGray</item>
         <item name="colorSurfaceVariant">@color/colorPrimaryTint</item>
         <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
+        <item name="colorOutline">@color/colorPrimaryTint</item>
         <item name="colorSecondaryContainer">@color/colorPrimaryTintTertiary</item>
         <item name="colorOnSecondaryContainer">@color/colorTextGray</item>
         <item name="chipStyle">@style/Widget.MIUINativeNotifyIcon.Chip</item>
+        <item name="popupMenuStyle">@style/Widget.MIUINativeNotifyIcon.PopupMenu</item>
         <item name="checkboxStyle">@style/Widget.MIUINativeNotifyIcon.CheckBox</item>
         <item name="radioButtonStyle">@style/Widget.MIUINativeNotifyIcon.RadioButton</item>
         <item name="android:textColorPrimary">@color/colorTextGray</item>
@@ -54,5 +56,11 @@
         <item name="colorOnTertiaryContainer">@color/colorTextGray</item>
         <item name="colorOnSurface">@color/colorTextGray</item>
         <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
+    </style>
+    <!-- Popup menu. -->
+    <style name="Widget.MIUINativeNotifyIcon.PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:dropDownSelector">@android:color/transparent</item>
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
+        <item name="android:popupElevation">8dp</item>
     </style>
 </resources>

@@ -25,8 +25,8 @@
 package com.fankes.miui.notify.data
 
 import android.content.Context
+import com.fankes.miui.notify.const.AdditionalSourceTemplate
 import com.fankes.miui.notify.const.IconRuleSourceSyncType
-import com.highcapable.anip.sdk.config.RemoteSource
 import com.highcapable.yukihookapi.hook.factory.preferences
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.PackageParam
@@ -91,8 +91,16 @@ object ConfigData {
     /** 通知图标优化名单同步方式 */
     val ICON_RULE_SOURCE_SYNC_TYPE = PreferenceData("_rule_source_sync_way", IconRuleSourceSyncType.GITHUB_PROXY_1)
 
-    /** ANIP GitHub 存储库 */
-    val ICON_RULE_REPOSITORY = PreferenceData("_rule_repository", RemoteSource.GITHUB_OFFICIAL_REPO_SLUG)
+    /** 启用附加来源 */
+    val ENABLE_ADDITIONAL_SOURCE = PreferenceData("_enable_additional_source", false)
+
+    /** 附加来源模板 */
+    val ADDITIONAL_SOURCE_TEMPLATE = PreferenceData("_additional_source_template", AdditionalSourceTemplate.GITHUB.name)
+
+    /** 各附加来源独立保存的参数 */
+    private val additionalSourceValues = AdditionalSourceTemplate.entries.associateWith {
+        PreferenceData("_additional_source_value_${it.name.lowercase()}", "")
+    }
 
     /** 忽略 Android 版本过低提示 */
     val IGNORED_ANDROID_VERSION_TO_LOW = PreferenceData("_ignored_android_version_to_low", false)
@@ -364,14 +372,37 @@ object ConfigData {
         }
 
     /**
-     * ANIP GitHub 存储库
+     * 是否启用附加来源
+     * @return [Boolean]
+     */
+    var isEnableAdditionalSource
+        get() = getBoolean(ENABLE_ADDITIONAL_SOURCE)
+        set(value) {
+            putBoolean(ENABLE_ADDITIONAL_SOURCE, value)
+        }
+
+    /**
+     * 附加来源模板
+     * @return [AdditionalSourceTemplate]
+     */
+    var additionalSourceTemplate
+        get() = AdditionalSourceTemplate.of(getString(ADDITIONAL_SOURCE_TEMPLATE))
+        set(value) {
+            putString(ADDITIONAL_SOURCE_TEMPLATE, value.name)
+        }
+
+    /**
+     * 附加来源参数
      * @return [String]
      */
-    var iconRuleRepository
-        get() = getString(ICON_RULE_REPOSITORY).ifBlank { RemoteSource.GITHUB_OFFICIAL_REPO_SLUG }
-        set(value) {
-            putString(ICON_RULE_REPOSITORY, value)
-        }
+    val additionalSourceValue get() = getAdditionalSourceValue(additionalSourceTemplate)
+
+    /** 获取指定附加来源保存的参数 */
+    fun getAdditionalSourceValue(template: AdditionalSourceTemplate) = getString(additionalSourceValues.getValue(template))
+
+    /** 保存指定附加来源的参数 */
+    fun putAdditionalSourceValue(template: AdditionalSourceTemplate, value: String) =
+        putString(additionalSourceValues.getValue(template), value)
 
     /**
      * 是否忽略 Android 版本过低提示

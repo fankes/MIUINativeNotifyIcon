@@ -14,9 +14,11 @@
         <item name="colorOnSurface">@color/colorTextGray</item>
         <item name="colorSurfaceVariant">@color/colorPrimaryTint</item>
         <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
+        <item name="colorOutline">@color/colorPrimaryTint</item>
         <item name="colorSecondaryContainer">@color/colorPrimaryTintTertiary</item>
         <item name="colorOnSecondaryContainer">@color/colorTextGray</item>
         <item name="chipStyle">@style/Widget.MIUINativeNotifyIcon.Chip</item>
+        <item name="popupMenuStyle">@style/Widget.MIUINativeNotifyIcon.PopupMenu</item>
         <item name="checkboxStyle">@style/Widget.MIUINativeNotifyIcon.CheckBox</item>
         <item name="radioButtonStyle">@style/Widget.MIUINativeNotifyIcon.RadioButton</item>
         <item name="android:textColorPrimary">@color/colorTextGray</item>

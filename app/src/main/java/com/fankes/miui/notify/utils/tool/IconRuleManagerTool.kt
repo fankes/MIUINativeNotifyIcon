@@ -28,23 +28,30 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Resources
+import android.text.InputType
+import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.fankes.miui.notify.R
+import com.fankes.miui.notify.const.AdditionalSourceTemplate
 import com.fankes.miui.notify.const.IconRuleSourceSyncType
 import com.fankes.miui.notify.data.ConfigData
 import com.fankes.miui.notify.databinding.DiaSourceFromBinding
 import com.fankes.miui.notify.ui.activity.ConfigureActivity
+import com.fankes.miui.notify.ui.window.DropdownMenu
 import com.fankes.miui.notify.utils.factory.appNameOf
-import com.fankes.miui.notify.utils.factory.openBrowser
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.wrapper.BuildConfigWrapper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.highcapable.anip.sdk.Anip
 import com.highcapable.anip.sdk.config.AnipConfig
 import com.highcapable.anip.sdk.config.RemoteSource
+import com.highcapable.anip.sdk.entity.NotificationIcon
 import com.highcapable.anip.sdk.entity.NotificationIconSnapshot
 import com.highcapable.anip.sdk.type.SystemVariant
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
@@ -57,10 +64,12 @@ import com.highcapable.kavaref.extension.classOf
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.xposed.file.YukiHookSharedFiles
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * ANIP 通知图标资源管理类
@@ -82,18 +91,25 @@ object IconRuleManagerTool {
     /** 更新通知携带的资源版本键 */
     const val EXTRA_ICON_RULE_VERSION = "iconRuleVersion"
 
-    /** 当前进程已发布的 ANIP 内存快照 */
-    @Volatile
-    var snapshot: NotificationIconSnapshot? = null
-        private set
+    /** 两个来源成功加载后的快照，统一发布供页面和宿主读取 */
+    private data class RuleState(
+        val main: NotificationIconSnapshot,
+        val extra: NotificationIconSnapshot?,
+        val version: Pair<String, Long>
+    )
 
-    /** 已发布快照的仓库清单地址与资源版本；尚无可用快照时为空 */
     @Volatile
-    var snapshotVersion: Pair<String, Long>? = null
-        private set
+    private var state: RuleState? = null
 
-    /** ANIP 缓存在模块共享文件中的文件名 */
-    private const val ANIP_SHARED_FILE_NAME = "anip-bundle"
+    /** 当前两源的来源地址与 SDK 资源版本 */
+    val snapshotVersion get() = state?.version
+
+    private val operationMutex = Mutex()
+    private const val BUNDLE_FILE_NAME = "anip-bundle"
+    private const val EXTRA_BUNDLE_FILE_NAME = "anip-bundle-extra"
+
+    private var mainAnip: Anip? = null
+    private var extraAnip: Anip? = null
 
     private const val NOTIFY_CHANNEL = "notifyRuleUpdateId"
     private const val NOTIFY_COLOR = 0xFFE06818.toInt()
@@ -103,9 +119,6 @@ object IconRuleManagerTool {
 
     private val githubProxy1UrlResolver = RemoteSource.UrlResolver { sourceUrl, _, _ -> "$GITHUB_PROXY_1_URL/$sourceUrl" }
     private val githubProxy2UrlResolver = RemoteSource.UrlResolver { sourceUrl, _, _ -> "$GITHUB_PROXY_2_URL/$sourceUrl" }
-
-    @Volatile
-    private var anip: Anip? = null
 
     /** SystemUI 绑定的共享文件，模块进程中为空 */
     @Volatile
@@ -124,26 +137,50 @@ object IconRuleManagerTool {
      * @param context 当前进程上下文
      * @return 是否恢复了非空快照
      */
-    suspend fun reload(context: Context): Boolean {
-        val currentAnip = obtainAnip(context)
-        if (currentAnip.reload().not()) return false
-        return publishSnapshot(currentAnip)
+    suspend fun reload(context: Context): Boolean = operationMutex.withLock {
+        val main = obtainMainAnip(context)
+        val extra = if (ConfigData.isEnableAdditionalSource) obtainExtraAnip(context) else null
+        if (extra != null && !extra.reload()) return@withLock false
+        if (!main.reload()) return@withLock false
+        val next = createRuleState(main, extra) ?: return@withLock false
+        state = next
+        true
     }
 
     /**
-     * 获取最新 ANIP 资源并原子替换当前进程快照
-     *
-     * 获取失败或新快照为空时保留上一份可用快照
-     * @param context 当前进程上下文
-     * @param resources 用于读取文案的模块资源，SystemUI 中需要传入模块资源 - 默认：当前上下文资源
-     * @return SDK 获取结果
+     * 先同步附加来源，成功后同步主来源；两者成功后统一发布快照
+     * 缓存的读取、校验和写入均交给各自的 SDK 实例
+     * @param context 当前上下文
+     * @param resources 用于读取同步提示的资源
      */
-    suspend fun fetch(context: Context, resources: Resources = context.resources): Anip.FetchResult {
-        val currentAnip = obtainAnip(context)
-        val result = currentAnip.fetch()
-        if (result.isOk && publishSnapshot(currentAnip).not())
-            return Anip.FetchResult(resources.getString(R.string.anip_no_icons), Anip.FetchResult.Status.FAILED)
-        return result
+    suspend fun fetch(context: Context, resources: Resources = context.resources): Anip.FetchResult = operationMutex.withLock {
+        val extra = if (ConfigData.isEnableAdditionalSource) obtainExtraAnip(context) else null
+        val extraResult = extra?.fetch()
+        if (extraResult != null && !extraResult.isOk) return@withLock extraResult
+        val main = obtainMainAnip(context)
+        val mainResult = main.fetch()
+        if (!mainResult.isOk) return@withLock mainResult
+        val next = createRuleState(main, extra)
+            ?: return@withLock Anip.FetchResult(resources.getString(R.string.anip_no_icons), Anip.FetchResult.Status.FAILED)
+        val changed = mainResult.status == Anip.FetchResult.Status.SUCCESS ||
+            extraResult?.status == Anip.FetchResult.Status.SUCCESS || state?.version != next.version
+        if (changed) state = next
+        Anip.FetchResult(mainResult.message, if (changed) Anip.FetchResult.Status.SUCCESS else Anip.FetchResult.Status.UP_TO_DATE)
+    }
+
+    private suspend fun createRuleState(main: Anip, extra: Anip?): RuleState? {
+        val mainSnapshot = main.createSnapshot()
+        if (mainSnapshot.icons.isEmpty()) return null
+        val extraSnapshot = extra?.createSnapshot()
+        if (extraSnapshot != null && extraSnapshot.icons.isEmpty()) return null
+        return RuleState(mainSnapshot, extraSnapshot, resourceVersion(main, extra))
+    }
+
+    private suspend fun resourceVersion(main: Anip, extra: Anip?) = withContext(Dispatchers.IO) {
+        val mainVersion = main.timestamp
+        val extraVersion = extra?.timestamp ?: 0L
+        val identity = "${main.config.source.manifestUrl}@$mainVersion|${extra?.config?.source?.manifestUrl.orEmpty()}@$extraVersion"
+        identity to maxOf(mainVersion, extraVersion)
     }
 
     /**
@@ -158,17 +195,34 @@ object IconRuleManagerTool {
      * 当前进程是否存在已成功获取的 ANIP 缓存
      * @param context 当前进程上下文
      */
-    fun hasCachedResources(context: Context) = obtainAnip(context).timestamp > 0L
+    fun hasCachedResources(context: Context) = obtainMainAnip(context).timestamp > 0L
 
-    /**
-     * 判断当前仓库的本地缓存是否落后于更新通知携带的版本
-     * @param context 当前模块上下文
-     * @param version 通知携带的仓库清单地址与资源版本
-     */
-    suspend fun isCachedVersionBehind(context: Context, version: Pair<String, Long>) = withContext(Dispatchers.IO) {
-        val currentAnip = obtainAnip(context)
-        version.first == currentAnip.config.source.manifestUrl && version.second > currentAnip.timestamp
+    /** 判断缓存中的两源版本是否与通知一致 */
+    suspend fun isCachedVersionBehind(context: Context, version: Pair<String, Long>): Boolean {
+        val main = obtainMainAnip(context)
+        val extra = if (ConfigData.isEnableAdditionalSource) obtainExtraAnip(context) else null
+        return resourceVersion(main, extra) != version
     }
+
+    /** 按包名查找，附加来源优先 */
+    fun getIcon(packageName: String) = state?.let { it.extra?.getIcon(packageName) ?: it.main.getIcon(packageName) }
+
+    /** 判断图标是否来自当前已生效的附加来源 */
+    fun isAdditionalIcon(packageName: String) = state?.extra?.getIcon(packageName) != null
+
+    /** 按包名读取对应来源的位图 */
+    fun getBitmap(packageName: String) = state?.let { it.extra?.getBitmap(packageName) ?: it.main.getBitmap(packageName) }
+
+    /** 读取图标位图 */
+    fun getBitmap(icon: NotificationIcon) = getBitmap(icon.packageName)
+
+    /** 按包名合并，附加来源覆盖主来源 */
+    val icons: List<NotificationIcon>
+        get() = state?.let { current ->
+            val merged = current.main.icons.associateByTo(linkedMapOf()) { it.packageName }
+            current.extra?.icons?.forEach { merged[it.packageName] = it }
+            merged.values.toList()
+        }.orEmpty()
 
     /**
      * 发送后台同步结果提醒；资源已是最新时不发送通知
@@ -186,60 +240,116 @@ object IconRuleManagerTool {
     }
 
     /**
-     * 显示同步来源并手动获取 ANIP 资源
+     * 显示同步设置对话框，仅保存设置，不主动触发同步
      * @param context 当前页面上下文
-     * @param callback 成功后回调
+     * @param syncOnConfirm 是否在确定保存设置后触发一次同步 - 仅首次配置时使用
+     * @param onSync 触发同步的回调
      */
-    fun syncByHand(context: Context, callback: () -> Unit) {
+    fun showSyncSettings(context: Context, syncOnConfirm: Boolean = false, onSync: () -> Unit = {}) {
         val binding = DiaSourceFromBinding.inflate(context.layoutInflater)
         var sourceType = ConfigData.iconRuleSourceSyncType.normalizedSourceType
+        var isAdditionalEnabled = ConfigData.isEnableAdditionalSource
+        var template = ConfigData.additionalSourceTemplate
+        val sourceValues = AdditionalSourceTemplate.entries.associateWith { ConfigData.getAdditionalSourceValue(it) }.toMutableMap()
         var isSyncRequested = false
-        binding.sourceChip0.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_1
-        binding.sourceChip1.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_PROXY_2
-        binding.sourceChip2.isChecked = sourceType == IconRuleSourceSyncType.GITHUB_DIRECT
-        binding.sourceChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            sourceType = when (checkedIds.first()) {
-                R.id.source_chip_0 -> IconRuleSourceSyncType.GITHUB_PROXY_1
-                R.id.source_chip_1 -> IconRuleSourceSyncType.GITHUB_PROXY_2
-                else -> IconRuleSourceSyncType.GITHUB_DIRECT
+
+        val sourceTypeLabels = mapOf(
+            IconRuleSourceSyncType.GITHUB_PROXY_1 to R.string.sync_source_cdn_1,
+            IconRuleSourceSyncType.GITHUB_PROXY_2 to R.string.sync_source_cdn_2,
+            IconRuleSourceSyncType.GITHUB_DIRECT to R.string.sync_source_github
+        )
+        val templateLabels = mapOf(
+            AdditionalSourceTemplate.GITHUB to R.string.sync_additional_github,
+            AdditionalSourceTemplate.GITLAB to R.string.sync_additional_gitlab,
+            AdditionalSourceTemplate.STATIC to R.string.sync_additional_static,
+            AdditionalSourceTemplate.CUSTOM to R.string.sync_additional_custom
+        )
+
+        fun updateAdditionalValueHint() {
+            binding.additionalSourceValueLin.hint = context.getString(template.hintResource())
+        }
+        fun showSourceTypeMenu() = DropdownMenu(
+            context = context,
+            items = sourceTypeLabels.map { it.value to it.key },
+            selectedItem = sourceType,
+            widthMatchedToAnchor = true
+        ) {
+            sourceType = it
+            binding.sourceTypeEdit.setText(context.getString(sourceTypeLabels.getValue(it)))
+        }.show(binding.sourceTypeEdit)
+
+        fun showTemplateMenu() = DropdownMenu(
+            context = context,
+            items = templateLabels.map { it.value to it.key },
+            selectedItem = template,
+            widthMatchedToAnchor = true
+        ) {
+            sourceValues[template] = binding.additionalSourceValueEdit.textToString()
+            template = it
+            binding.additionalSourceValueEdit.setText(sourceValues.getValue(template))
+            binding.additionalTemplateEdit.setText(context.getString(templateLabels.getValue(it)))
+            binding.additionalSourceValueLin.error = null
+            updateAdditionalValueHint()
+        }.show(binding.additionalTemplateEdit)
+
+        fun setupDropdown(edit: TextInputEditText, layout: TextInputLayout, label: String, onClick: () -> Unit) {
+            fun showMenu() {
+                edit.requestFocus()
+                edit.post { onClick() }
             }
+            edit.apply {
+                inputType = InputType.TYPE_NULL
+                isSingleLine = true
+                setText(label)
+                setOnClickListener { showMenu() }
+                setOnTouchListener { view, event ->
+                    if (event.actionMasked != MotionEvent.ACTION_UP) return@setOnTouchListener false
+                    view.performClick()
+                    true
+                }
+            }
+            layout.setEndIconOnClickListener { showMenu() }
         }
-        binding.sourceRepositoryEdit.apply {
-            setText(ConfigData.iconRuleRepository)
-            doAfterTextChanged { binding.sourceRepositoryTextLin.error = null }
+        setupDropdown(binding.sourceTypeEdit, binding.sourceTypeLin, context.getString(sourceTypeLabels.getValue(sourceType))) { showSourceTypeMenu() }
+
+        binding.additionalSourcePanel.isVisible = isAdditionalEnabled
+        setupDropdown(binding.additionalTemplateEdit, binding.additionalTemplateLin, context.getString(templateLabels.getValue(template))) { showTemplateMenu() }
+
+        binding.additionalSourceValueEdit.apply {
+            setText(sourceValues.getValue(template))
+            doAfterTextChanged { binding.additionalSourceValueLin.error = null }
         }
-        binding.sourceRepositoryTextLin.setEndIconOnClickListener {
-            binding.sourceRepositoryEdit.setText(RemoteSource.GITHUB_OFFICIAL_REPO_SLUG)
-        }
+        updateAdditionalValueHint()
         val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(context.getString(R.string.config_sync_list))
+            .setTitle(context.getString(R.string.sync_settings))
             .setView(binding.root)
-            .setPositiveButton(context.getString(R.string.common_ok), null)
+            .setPositiveButton(context.getString(if (syncOnConfirm) R.string.common_ok else R.string.common_save), null)
             .setNegativeButton(context.getString(R.string.common_cancel), null)
-            .setNeutralButton(context.getString(R.string.sync_cloud_rules)) { _, _ -> context.openBrowser(ANIP_REPOSITORY_URL) }
+            .setNeutralButton(context.getString(R.string.sync_additional), null)
             .create()
         dialog.setOnDismissListener {
-            if (isSyncRequested) sync(context, sourceType, callback)
+            if (isSyncRequested) onSync()
         }
         dialog.setOnShowListener {
+            dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener {
+                isAdditionalEnabled = isAdditionalEnabled.not()
+                binding.additionalSourcePanel.isVisible = isAdditionalEnabled
+            }
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                val repository = binding.sourceRepositoryEdit.textToString().trim()
-                if (repository.isEmpty()) {
-                    binding.sourceRepositoryTextLin.error = context.getString(R.string.sync_repository_required)
-                    return@setOnClickListener
-                }
-                if (runCatching { createSource(repository, sourceType) }.isFailure) {
-                    binding.sourceRepositoryTextLin.error = context.getString(R.string.sync_repository_invalid)
-                    return@setOnClickListener
+                sourceValues[template] = binding.additionalSourceValueEdit.textToString().trim()
+                if (isAdditionalEnabled) {
+                    val value = binding.additionalSourceValueEdit.textToString().trim()
+                    if (runCatching { createAdditionalSource(template, value) }.isFailure) {
+                        binding.additionalSourceValueLin.error = context.getString(R.string.sync_additional_invalid)
+                        return@setOnClickListener
+                    }
                 }
                 ConfigData.iconRuleSourceSyncType = sourceType
-                ConfigData.iconRuleRepository = repository
-                isSyncRequested = true
+                ConfigData.additionalSourceTemplate = template
+                sourceValues.forEach { (sourceTemplate, value) -> ConfigData.putAdditionalSourceValue(sourceTemplate, value.trim()) }
+                ConfigData.isEnableAdditionalSource = isAdditionalEnabled
+                isSyncRequested = syncOnConfirm
                 dialog.dismiss()
-            }
-            binding.sourceRepositoryEdit.post {
-                binding.sourceRepositoryEdit.selectAll()
-                binding.sourceRepositoryEdit.requestFocus()
             }
         }
         dialog.show()
@@ -249,32 +359,26 @@ object IconRuleManagerTool {
      * 根据已选来源获取 ANIP 资源
      * @param context 当前上下文
      * @param sourceType 同步来源
+     * @param isAuto 是否自动触发 - 自动触发时仅在存在更新时提示
+     * @param onSyncStateChange 同步状态变化回调 - 用于转圈提示
      * @param callback 成功后回调
      */
     fun sync(
-        context: Context,
+        context: AppCompatActivity,
         sourceType: Int = ConfigData.iconRuleSourceSyncType,
+        isAuto: Boolean = false,
+        onSyncStateChange: ((Boolean) -> Unit)? = null,
         callback: () -> Unit
     ) {
         ConfigData.iconRuleSourceSyncType = sourceType.normalizedSourceType
-        if (context is AppCompatActivity)
-            context.showDialog refreshingDialog@{
-                title = context.getString(R.string.sync_in_progress)
-                progressContent = context.getString(R.string.sync_fetching_anip)
-                noCancelable()
-                context.launch {
-                    val result = runCatching { fetch(context) }.getOrElse {
-                        Anip.FetchResult(it.message ?: context.getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
-                    }
-                    this@refreshingDialog.cancel()
-                    handleFetchResult(context, result, callback)
-                }
-            }
-        else CoroutineScope(Dispatchers.Main.immediate).launch {
+        onSyncStateChange?.invoke(true)
+        context.launch {
             val result = runCatching { fetch(context) }.getOrElse {
+                if (it is CancellationException) throw it
                 Anip.FetchResult(it.message ?: context.getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
             }
-            handleFetchResult(context, result, callback)
+            onSyncStateChange?.invoke(false)
+            handleFetchResult(context, result, isAuto, onSyncStateChange, callback)
         }
     }
 
@@ -292,68 +396,82 @@ object IconRuleManagerTool {
             else -> null
         }
 
-    private fun obtainAnip(context: Context): Anip {
-        val sourceType = ConfigData.iconRuleSourceSyncType.normalizedSourceType
-        val source = runCatching { createSource(ConfigData.iconRuleRepository, sourceType) }.getOrElse {
-            if (context.packageName == BuildConfigWrapper.APPLICATION_ID)
-                ConfigData.iconRuleRepository = RemoteSource.GITHUB_OFFICIAL_REPO_SLUG
-            createSource(RemoteSource.GITHUB_OFFICIAL_REPO_SLUG, sourceType)
-        }
-        anip?.let {
-            it.config.source = source
-            return it
-        }
-        return synchronized(this) {
-            anip?.apply { config.source = source } ?: Anip(context.applicationContext, createAnipConfig(source)).also { anip = it }
-        }
+    private fun obtainMainAnip(context: Context): Anip {
+        val source = createMainSource(ConfigData.iconRuleSourceSyncType.normalizedSourceType)
+        return mainAnip?.apply { config.source = source }
+            ?: createAnip(context, source, BUNDLE_FILE_NAME).also { mainAnip = it }
     }
 
-    private fun createAnipConfig(source: RemoteSource) =
-        if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED)
+    private fun obtainExtraAnip(context: Context): Anip {
+        val source = createAdditionalSource()
+        return extraAnip?.apply { config.source = source }
+            ?: createAnip(context, source, EXTRA_BUNDLE_FILE_NAME).also { extraAnip = it }
+    }
+
+    private fun createAnip(context: Context, source: RemoteSource, fileName: String): Anip {
+        val config = if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED)
             AnipConfig(
                 systemVariant = SystemVariant.MIOS,
-                cacheDescriptor = createSharedCacheDescriptor(),
-                source = source
+                source = source,
+                cacheDescriptor = hostSharedFiles?.let { files ->
+                    AnipConfig.CacheDescriptor(isReadOnly = true) { files.open(fileName) }
+                } ?: AnipConfig.CacheDescriptor { YukiHook.Module.sharedFiles.open(fileName) }
             )
-        else createLegacyAnipConfig(source)
+        else AnipConfig(
+            systemVariant = SystemVariant.MIOS,
+            source = source,
+            // SDK 默认缓存文件同名，附加实例使用独立目录避免覆盖主源缓存
+            cacheDirectory = if (fileName == EXTRA_BUNDLE_FILE_NAME) File(context.cacheDir, EXTRA_BUNDLE_FILE_NAME) else null
+        )
+        return Anip(context.applicationContext, config)
+    }
 
-    private fun createSharedCacheDescriptor() = hostSharedFiles?.let { sharedFiles ->
-        AnipConfig.CacheDescriptor(isReadOnly = true) { sharedFiles.open(ANIP_SHARED_FILE_NAME) }
-    } ?: AnipConfig.CacheDescriptor { YukiHook.Module.sharedFiles.open(ANIP_SHARED_FILE_NAME) }
-
-    /**
-     * 回退：legacy 运行时没有模块共享文件，模块与 SystemUI 各自使用 SDK 默认的私有缓存，SystemUI 需要自行获取资源
-     */
-    private fun createLegacyAnipConfig(source: RemoteSource) = AnipConfig(systemVariant = SystemVariant.MIOS, source = source)
-
-    private fun createSource(repository: String, sourceType: Int) = RemoteSource.GitHub(
-        repository = repository,
+    private fun createMainSource(sourceType: Int) = RemoteSource.GitHub(
+        repository = RemoteSource.GITHUB_OFFICIAL_REPO_SLUG,
         urlResolver = sourceType.urlResolver
     )
 
-    private suspend fun publishSnapshot(anip: Anip): Boolean {
-        val nextSnapshot = anip.createSnapshot()
-        if (nextSnapshot.icons.isEmpty()) return false
-        val nextVersion = withContext(Dispatchers.IO) { anip.config.source.manifestUrl to anip.timestamp }
-        snapshot = nextSnapshot
-        snapshotVersion = nextVersion
-        return true
+    private fun createAdditionalSource(
+        template: AdditionalSourceTemplate = ConfigData.additionalSourceTemplate,
+        value: String = ConfigData.additionalSourceValue
+    ) = when (template) {
+        AdditionalSourceTemplate.GITHUB -> RemoteSource.GitHub(value)
+        AdditionalSourceTemplate.GITLAB -> RemoteSource.GitLab(value)
+        AdditionalSourceTemplate.STATIC -> RemoteSource.Static(value)
+        AdditionalSourceTemplate.CUSTOM -> RemoteSource.Custom(value)
     }
 
-    private fun handleFetchResult(context: Context, result: Anip.FetchResult, callback: () -> Unit) {
+    private fun AdditionalSourceTemplate.hintResource() = when (this) {
+        AdditionalSourceTemplate.GITHUB -> R.string.sync_additional_github_hint
+        AdditionalSourceTemplate.GITLAB -> R.string.sync_additional_gitlab_hint
+        AdditionalSourceTemplate.STATIC -> R.string.sync_additional_static_hint
+        AdditionalSourceTemplate.CUSTOM -> R.string.sync_additional_custom_hint
+    }
+
+    private fun handleFetchResult(
+        context: Context,
+        result: Anip.FetchResult,
+        isAuto: Boolean,
+        onSyncStateChange: ((Boolean) -> Unit)?,
+        callback: () -> Unit
+    ) {
         if (context !is AppCompatActivity) notifyFetchResult(context, result)
-        if (result.isOk && snapshot?.icons.isNullOrEmpty().not()) {
-            callback()
-            if (result.status == Anip.FetchResult.Status.SUCCESS) notifyRefresh(context)
-            if (result.status == Anip.FetchResult.Status.UP_TO_DATE && context is AppCompatActivity)
+        if (result.isOk && icons.isNotEmpty()) {
+            if (result.status == Anip.FetchResult.Status.SUCCESS) {
+                callback()
+                notifyRefresh(context)
+            } else if (result.status == Anip.FetchResult.Status.UP_TO_DATE && context is AppCompatActivity && !isAuto) {
                 context.snake(msg = context.getString(R.string.sync_up_to_date))
+            }
             return
         }
-        if (context is AppCompatActivity)
+        if (context is AppCompatActivity && !isAuto)
             context.showDialog {
                 title = context.getString(R.string.sync_failed)
                 msg = result.message
-                confirmButton(text = context.getString(R.string.sync_retry)) { syncByHand(context, callback) }
+                confirmButton(text = context.getString(R.string.sync_retry)) {
+                    sync(context, isAuto = isAuto, onSyncStateChange = onSyncStateChange, callback = callback)
+                }
                 cancelButton()
             }
     }

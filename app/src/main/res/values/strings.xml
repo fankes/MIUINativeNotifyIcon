@@ -12,7 +12,7 @@
     <string name="config_scroll_top">Scroll to Top</string>
     <string name="config_scroll_bottom">Scroll to Bottom</string>
     <string name="config_filter">Filter by Condition</string>
-    <string name="config_sync_list">Sync List</string>
+    <string name="config_sync_list">Sync</string>
     <string name="config_description">When an app is enabled, its colored notification icons are replaced with the monochrome icons provided in the list.\nThe Override option ignores the app\'s own monochrome icon and always uses the one provided in the list.</string>
     <string name="config_no_data">No data</string>
     <string name="config_contribute_anip">Contribute to ANIP</string>
@@ -86,10 +86,10 @@
     <string name="main_group_donate">Donate</string>
     <string name="main_donate_afdian">Support me on Afdian</string>
     <string name="config_filter_hint">Enter an app name or package name</string>
-    <string name="sync_source_desc">ANIP icon resources are hosted on GitHub. Sync the list regularly to get adaptations for the latest apps.</string>
-    <string name="sync_source_cdn_1">Mirror for mainland China #1</string>
-    <string name="sync_source_cdn_2">Mirror for mainland China #2</string>
-    <string name="sync_source_github">GitHub (Direct connection)</string>
+    <string name="sync_source_desc">The notification icon optimization list resources are hosted on the official ANIP repository on GitHub. It is recommended to sync regularly to get adaptations for the latest apps.</string>
+    <string name="sync_source_cdn_1">Mirror for CN #1</string>
+    <string name="sync_source_cdn_2">Mirror for CN #2</string>
+    <string name="sync_source_github">GitHub</string>
     <string name="sync_repository_hint">GitHub repository to use</string>
     <string name="sync_restore_default">Restore Default</string>
     <string name="sync_repository_helper">You can change this to your own repository if needed.</string>
@@ -133,7 +133,7 @@
     <string name="main_not_miui_msg">This module is built for HyperOS/MIUI. Your system could not be recognized as either, so the module cannot work.</string>
     <string name="common_not_miui">Not a MIUI or HyperOS System</string>
     <string name="config_empty_no_match">No matching results found</string>
-    <string name="config_empty_no_data">No data here yet\nTap the sync button at the top right to get cloud data</string>
+    <string name="config_empty_no_data">No data available, tap the top right to sync</string>
     <string name="config_filter_result">Matches for \"%1$s\": %2$d</string>
     <string name="config_included_count">%1$d apps</string>
     <string name="config_back_to_main">Go back to the module\'s home page?</string>
@@ -266,4 +266,19 @@
     <string name="about_copyright">Reproducing, modifying or copying my work without permission is prohibited</string>
     <string name="config_restore_rules">Undo Changes</string>
     <string name="config_restore_rules_confirm">This will revert your current changes to the upstream cloud rules. Continue?</string>
+    <string name="sync_settings">Sync Settings</string>
+    <string name="sync_source_hint">Sync Source</string>
+    <string name="sync_additional">Additional Source</string>
+    <string name="sync_additional_template">Additional Source</string>
+    <string name="sync_additional_github">GitHub Releases</string>
+    <string name="sync_additional_gitlab">GitLab Releases</string>
+    <string name="sync_additional_static">Static Hosting</string>
+    <string name="sync_additional_custom">Custom URL</string>
+    <string name="sync_additional_github_hint">Enter GitHub repository</string>
+    <string name="sync_additional_gitlab_hint">Enter GitLab project</string>
+    <string name="sync_additional_static_hint">Enter static hosting base URL</string>
+    <string name="sync_additional_custom_hint">Enter resource manifest URL</string>
+    <string name="sync_additional_invalid">Enter a valid additional source parameter</string>
+    <string name="config_additional_badge">Extra</string>
+    <string name="common_save">Save</string>
 </resources>

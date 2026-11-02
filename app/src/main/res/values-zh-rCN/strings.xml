@@ -12,7 +12,7 @@
     <string name="config_scroll_top">滚动到顶部</string>
     <string name="config_scroll_bottom">滚动到底部</string>
     <string name="config_filter">按条件过滤</string>
-    <string name="config_sync_list">同步列表</string>
+    <string name="config_sync_list">同步</string>
     <string name="config_description">启用后应用的彩色通知图标将替换为名单内提供的单色图标。\n覆盖选项将忽略应用原有的单色图标，始终使用名单内提供的单色图标。</string>
     <string name="config_no_data">没有数据</string>
     <string name="config_contribute_anip">为 ANIP 做出贡献</string>
@@ -86,9 +86,9 @@
     <string name="main_group_donate">捐赠支持</string>
     <string name="main_donate_afdian">点击这里前往我的爱发电主页支持我</string>
     <string name="config_filter_hint">可输入应用名称、包名</string>
-    <string name="sync_source_desc">ANIP 图标资源托管在 GitHub 上，建议定期同步列表以获取对最新应用的适配。</string>
-    <string name="sync_source_cdn_1">中国大陆 CDN 代理 (线路一)</string>
-    <string name="sync_source_cdn_2">中国大陆 CDN 代理 (线路二)</string>
+    <string name="sync_source_desc">通知图标优化名单的资源资源托管在 GitHub 的官方 ANIP 存储库上，建议定期同步以获取对最新应用的适配。</string>
+    <string name="sync_source_cdn_1">中国大陆 CDN 代理 #1</string>
+    <string name="sync_source_cdn_2">中国大陆 CDN 代理 #2</string>
     <string name="sync_source_github">GitHub (海外直连)</string>
     <string name="sync_repository_hint">使用的 GitHub 存储库</string>
     <string name="sync_restore_default">恢复默认</string>
@@ -133,7 +133,7 @@
     <string name="main_not_miui_msg">此模块专为 HyperOS/MIUI 系统打造，当前无法识别你的系统为其中任意之一，所以模块无法工作。</string>
     <string name="common_not_miui">不是 MIUI 或 HyperOS 系统</string>
     <string name="config_empty_no_match">没有匹配到任何结果</string>
-    <string name="config_empty_no_data">这里还没有数据\n请点击右上角同步按钮获取云端数据</string>
+    <string name="config_empty_no_data">暂无数据，点击右上角进行同步</string>
     <string name="config_filter_result">“%1$s” 匹配到 %2$d 个结果</string>
     <string name="config_included_count">共 %1$d 个应用</string>
     <string name="config_back_to_main">要返回模块主页吗？</string>
@@ -266,4 +266,19 @@
     <string name="about_copyright">未经允许不得转载、修改复制我的劳动成果</string>
     <string name="config_restore_rules">撤销更改</string>
     <string name="config_restore_rules_confirm">这将恢复当前所做的更改到上游云端规则，要继续吗？</string>
+    <string name="sync_settings">同步设置</string>
+    <string name="sync_source_hint">同步来源</string>
+    <string name="sync_additional">附加来源</string>
+    <string name="sync_additional_template">附加来源</string>
+    <string name="sync_additional_github">GitHub Releases</string>
+    <string name="sync_additional_gitlab">GitLab Releases</string>
+    <string name="sync_additional_static">静态托管</string>
+    <string name="sync_additional_custom">自定义 URL</string>
+    <string name="sync_additional_github_hint">填写 GitHub 存储库</string>
+    <string name="sync_additional_gitlab_hint">填写 GitLab 项目</string>
+    <string name="sync_additional_static_hint">填写静态托管基础 URL</string>
+    <string name="sync_additional_custom_hint">填写资源清单 URL</string>
+    <string name="sync_additional_invalid">请填写有效的附加来源参数</string>
+    <string name="config_additional_badge">附加</string>
+    <string name="common_save">保存</string>
 </resources>

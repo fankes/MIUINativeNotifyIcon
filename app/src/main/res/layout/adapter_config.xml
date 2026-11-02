@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -9,7 +10,7 @@
     android:gravity="center|start"
     android:orientation="horizontal"
     android:padding="15dp"
-    tools:ignore="HardcodedText">
+    tools:ignore="HardcodedText,SmallSp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -19,28 +20,63 @@
         android:gravity="center|start"
         android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:gravity="center|start">
+            android:layout_marginBottom="5dp">
 
             <androidx.constraintlayout.utils.widget.ImageFilterView
                 android:id="@+id/adp_app_icon"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="8dp"
-                android:tint="@color/colorTextGray" />
+                android:tint="@color/colorTextGray"
+                app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
+                app:layout_constraintEnd_toStartOf="@id/adp_app_name"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/adp_app_name" />
 
             <TextView
                 android:id="@+id/adp_app_name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:includeFontPadding="false"
                 android:singleLine="true"
                 android:text="@string/config_item_app_name"
                 android:textColor="@color/colorTextGray"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:textSize="14sp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/adp_additional_badge"
+                app:layout_constraintStart_toEndOf="@id/adp_app_icon"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/adp_additional_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_additional_badge"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingStart="4dp"
+                android:paddingTop="1dp"
+                android:paddingEnd="4dp"
+                android:paddingBottom="1dp"
+                android:singleLine="true"
+                android:text="@string/config_additional_badge"
+                android:textColor="@color/white"
+                android:textSize="9sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/adp_app_name"
+                app:layout_constraintTop_toTopOf="@id/adp_app_name" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/adp_app_pkg_name"

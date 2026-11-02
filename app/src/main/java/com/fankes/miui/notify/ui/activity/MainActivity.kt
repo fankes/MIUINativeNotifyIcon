@@ -482,8 +482,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     /** 刷新通知图标优化名单卡片的摘要 */
     private fun refreshOptimizeListSummary() = launch {
-        if (IconRuleManagerTool.snapshot == null) IconRuleManagerTool.reload(this@MainActivity)
-        val icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+        if (IconRuleManagerTool.icons.isEmpty()) IconRuleManagerTool.reload(this@MainActivity)
+        val icons = IconRuleManagerTool.icons
         homeBinding.mainOptimizeListSummaryText.text = when {
             ConfigData.isEnableNotifyIconFix.not() -> getString(R.string.notify_icon_optimization_disabled)
             IconRuleManagerTool.hasCachedResources(context = this@MainActivity).not() -> getString(R.string.main_optimize_list_not_synced)

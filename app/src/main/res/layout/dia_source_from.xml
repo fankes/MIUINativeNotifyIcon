@@ -19,49 +19,59 @@
         android:textColor="@color/colorDialogBody"
         android:textSize="14sp" />
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/source_chip_group"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:singleSelection="true"
-        app:selectionRequired="true"
-        app:chipSpacingVertical="8dp">
-
-        <com.fankes.miui.notify.ui.widget.AppChip
-            android:id="@+id/source_chip_0"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sync_source_cdn_1" />
-
-        <com.fankes.miui.notify.ui.widget.AppChip
-            android:id="@+id/source_chip_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sync_source_cdn_2" />
-
-        <com.fankes.miui.notify.ui.widget.AppChip
-            android:id="@+id/source_chip_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sync_source_github" />
-    </com.google.android.material.chip.ChipGroup>
-
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/source_repository_text_lin"
+        android:id="@+id/source_type_lin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:hint="@string/sync_repository_hint"
-        app:endIconContentDescription="@string/sync_restore_default"
-        app:endIconDrawable="@drawable/ic_restore"
+        android:hint="@string/sync_source_hint"
+        app:endIconContentDescription="@string/sync_source_hint"
+        app:endIconDrawable="@drawable/ic_dropdown_arrow"
         app:endIconMode="custom"
-        app:helperText="@string/sync_repository_helper">
+        app:endIconTint="@color/colorTextDark">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/source_repository_edit"
+            android:id="@+id/source_type_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/additional_source_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/additional_template_lin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textUri"
-            android:singleLine="true" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:hint="@string/sync_additional_template"
+            app:endIconContentDescription="@string/sync_additional_template"
+            app:endIconDrawable="@drawable/ic_dropdown_arrow"
+            app:endIconMode="custom"
+            app:endIconTint="@color/colorTextDark">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/additional_template_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/additional_source_value_lin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="@string/sync_additional_github_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/additional_source_value_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
 </LinearLayout>

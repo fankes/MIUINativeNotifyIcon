@@ -24,9 +24,12 @@
 
 package com.fankes.miui.notify.ui.activity
 
+import android.animation.ObjectAnimator
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
@@ -113,8 +116,14 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     /** 首次名单加载完成前不显示空内容提示 */
     private var isLoadingIcons = true
 
+    /** 名单加载稳定后再触发一次自动同步 */
+    private var pendingAutoSync = false
+
     /** 当前名单的开关状态，切换时只更新对应应用，避免全量重读偏好 */
     private var iconItems = mutableMapOf<String, IconItem>()
+
+    /** 同步图标的转圈动画 */
+    private var syncAnimator: ObjectAnimator? = null
 
     override fun onCreate() {
         if (YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED) {
@@ -236,8 +245,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 cancelButton()
             }
         }
-        // 设置同步列表按钮点击事件
-        binding.configTitleSync.setOnClickListener { onStartRefresh() }
+        // 设置同步按钮点击事件
+        binding.configTitleSync.setOnClickListener {
+            if (iconAllDatas.isEmpty()) showSyncSettingsThenSync()
+            else startSync()
+        }
         // 设置选项按钮点击事件
         binding.configTitleOptions.setOnClickListener { showOptions() }
         // 设置查看范围按钮点击事件
@@ -261,12 +273,13 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                 )
                 onBindItemView<AdapterConfigBinding> { binding, item, _ ->
                     val icon = item.icon
-                    binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.snapshot?.getBitmap(icon))
+                    binding.adpAppIcon.setImageBitmap(IconRuleManagerTool.getBitmap(icon))
                     (icon.color ?: resources.getColorCompat(R.color.colorTextGray)).also { color ->
                         binding.adpAppIcon.setColorFilter(color)
                         binding.adpAppName.textColor = color
                     }
                     binding.adpAppName.text = icon.label
+                    binding.adpAdditionalBadge.isVisible = IconRuleManagerTool.isAdditionalIcon(icon.packageName)
                     binding.adpAppPkgName.text = icon.packageName
                     binding.adpCbrName.text = getString(R.string.config_contributors, icon.contributors.joinToString())
                     item.enabled.also { e ->
@@ -331,18 +344,17 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     val pkgName = intent?.getStringExtra("pkgName") ?: ""
                     title = getString(R.string.config_new_app_title)
                     msg = getString(R.string.config_new_app_msg, appName, pkgName)
-                    confirmButton(text = getString(R.string.config_sync_list)) { onStartRefresh() }
+                    confirmButton(text = getString(R.string.config_sync_list)) { startSync() }
                     cancelButton(text = getString(R.string.config_copy_name_package)) { copyToClipboard(content = "$appName($pkgName)") }
                     neutralButton(text = getString(R.string.common_cancel))
                     noCancelable()
                 }
-            intent?.getBooleanExtra("isDirectUpdate", false) == true -> onStartRefresh(isByHand = false)
+            intent?.getBooleanExtra("isDirectUpdate", false) == true -> startSync()
             requestedSource.isNotBlank() && requestedVersion > 0L -> launch {
                 if (IconRuleManagerTool.isCachedVersionBehind(this@ConfigureActivity, requestedSource to requestedVersion))
-                    onStartRefresh(isByHand = false)
+                    startSync()
             }
-            intent?.getBooleanExtra("isShowUpdDialog", true) == true && ConfigData.isEnableNotifyIconFix &&
-                IconRuleManagerTool.hasCachedResources(this).not() -> onStartRefresh()
+            ConfigData.isEnableNotifyIconFix && IconRuleManagerTool.hasCachedResources(this) -> pendingAutoSync = true
         }
         // 清除数据
         intent?.apply {
@@ -368,21 +380,40 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         }
     }
 
-    /**
-     * 开始同步
-     * @param isByHand 是否手动同步 - 默认是
-     */
-    private fun onStartRefresh(isByHand: Boolean = true) {
-        if (isByHand)
-            IconRuleManagerTool.syncByHand(context = this) {
-                filterText = ""
-                mockLocalData()
-            }
-        else
-            IconRuleManagerTool.sync(context = this) {
-                filterText = ""
-                mockLocalData()
-            }
+    /** 显示同步设置对话框，确定后触发一次同步 */
+    private fun showSyncSettingsThenSync() =
+        IconRuleManagerTool.showSyncSettings(context = this, syncOnConfirm = true) { startSync() }
+
+    /** 开始同步并让顶栏同步图标转圈 */
+    private fun startSync(isAuto: Boolean = false) =
+        IconRuleManagerTool.sync(context = this, isAuto = isAuto, onSyncStateChange = ::setSyncing) {
+            filterText = ""
+            mockLocalData()
+        }
+
+    /** 设置同步图标的转圈状态 */
+    private fun setSyncing(isSyncing: Boolean) {
+        binding.configTitleSync.isEnabled = !isSyncing
+        binding.configTitleOptions.isEnabled = !isSyncing
+        if (!isSyncing) {
+            syncAnimator?.cancel()
+            syncAnimator = null
+            binding.configTitleSync.rotation = 0f
+            return
+        }
+        if (syncAnimator?.isRunning == true) return
+        syncAnimator = ObjectAnimator.ofFloat(binding.configTitleSync, View.ROTATION, 0f, 360f).apply {
+            duration = 800L
+            interpolator = LinearInterpolator()
+            repeatCount = ObjectAnimator.INFINITE
+            start()
+        }
+    }
+
+    override fun onDestroy() {
+        syncAnimator?.cancel()
+        syncAnimator = null
+        super.onDestroy()
     }
 
     /** 获取系统界面中已安装的应用 */
@@ -440,6 +471,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         noCancelable()
                     }
                 }
+            }
+            neutralButtonKeepOpen(getString(R.string.sync_settings)) {
+                IconRuleManagerTool.showSyncSettings(context = this@ConfigureActivity)
             }
             confirmButton(text = getString(R.string.common_close))
         }
@@ -503,9 +537,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         refreshAdapterResult()
         iconLoadJob = launch {
             val (icons, items) = withContext(Dispatchers.IO) {
-                var icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+                var icons = IconRuleManagerTool.icons
                 if (icons.isEmpty() && IconRuleManagerTool.reload(this@ConfigureActivity))
-                    icons = IconRuleManagerTool.snapshot?.icons.orEmpty()
+                    icons = IconRuleManagerTool.icons
                 val items = icons.associate { icon ->
                     icon.packageName to IconItem(icon, isAppNotifyEnabledOf(icon), isAppNotifyOverlayOf(icon))
                 }.toMutableMap()
@@ -515,6 +549,10 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             iconItems = items
             isLoadingIcons = false
             refreshAdapterResult()
+            if (pendingAutoSync) {
+                pendingAutoSync = false
+                startSync(isAuto = true)
+            }
         }
     }
 

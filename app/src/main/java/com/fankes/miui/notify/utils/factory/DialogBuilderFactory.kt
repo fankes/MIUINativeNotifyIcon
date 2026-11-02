@@ -26,6 +26,7 @@ package com.fankes.miui.notify.utils.factory
 
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -92,6 +93,9 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
 
     /** 对话框取消监听 */
     private var onCancel: (() -> Unit)? = null
+
+    /** 点击后保持对话框打开的中性按钮回调 */
+    private var neutralButtonKeepOpenCallback: (() -> Unit)? = null
 
     /** 对话框实例 */
     private var dialogInstance: Dialog? = null
@@ -186,6 +190,16 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
     }
 
     /**
+     * 设置对话框第三个按钮，点击后保持对话框打开
+     * @param text 按钮文本内容
+     * @param callback 点击事件
+     */
+    fun neutralButtonKeepOpen(text: String, callback: () -> Unit) {
+        instance?.setNeutralButton(text, null)
+        neutralButtonKeepOpenCallback = callback
+    }
+
+    /**
      * 当对话框关闭时
      * @param callback 回调
      */
@@ -204,6 +218,11 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
             customLayoutView?.let { setView(it) }
             dialogInstance = this
             setOnCancelListener { onCancel?.invoke() }
+            neutralButtonKeepOpenCallback?.let { callback ->
+                setOnShowListener { dialog ->
+                    (dialog as? AlertDialog)?.getButton(DialogInterface.BUTTON_NEUTRAL)?.setOnClickListener { callback() }
+                }
+            }
         }?.show()
     }
 }

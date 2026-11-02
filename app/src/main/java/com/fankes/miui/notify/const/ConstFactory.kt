@@ -52,6 +52,30 @@ object IconRuleSourceSyncType {
 }
 
 /**
+ * 附加来源模板
+ */
+enum class AdditionalSourceTemplate {
+
+    /** GitHub Releases */
+    GITHUB,
+
+    /** GitLab Releases */
+    GITLAB,
+
+    /** 静态托管 */
+    STATIC,
+
+    /** 自定义 URL */
+    CUSTOM;
+
+    companion object {
+
+        /** 根据名称解析模板，无法解析时回退到 [GITHUB] */
+        fun of(name: String) = entries.firstOrNull { it.name == name } ?: GITHUB
+    }
+}
+
+/**
  * MIME 类型常量定义类
  */
 object MimeType {
