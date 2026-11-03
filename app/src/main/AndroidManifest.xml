@@ -32,7 +32,8 @@
         <activity
             android:name=".ui.activity.MainActivity"
             android:exported="true"
-            android:screenOrientation="behind">
+            android:screenOrientation="behind"
+            android:theme="@style/Theme.MIUINativeNotifyIcon.Starting">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

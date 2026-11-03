@@ -109,6 +109,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val configBinding by lazy { PageConfigBinding.inflate(layoutInflater, binding.mainViewPager, false) }
     private val aboutBinding by lazy { PageAboutBinding.inflate(layoutInflater, binding.mainViewPager, false) }
 
+    override val showSplashScreen = true
+
     override fun onCreate() {
         // 注册导出调试日志启动器，必须在 STARTED 之前，不能放进框架服务回调里
         SystemUITool.registerExportDebugLogsLauncher(activity = this)
@@ -132,7 +134,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         isActivityLive = true
         when {
             // 判断是否为小米系统
-            isNotMiSystem ->
+            isNotMiSystem -> afterStartup {
                 showDialog {
                     title = getString(R.string.common_not_miui)
                     msg = getString(R.string.main_not_miui_msg)
@@ -143,8 +145,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = getString(R.string.common_exit)) { finish() }
                     noCancelable()
                 }
+            }
             // 判断最低 Android 系统版本
-            AndroidVersion.isLessThan(AndroidVersion.P) ->
+            AndroidVersion.isLessThan(AndroidVersion.P) -> afterStartup {
                 showDialog {
                     title = getString(R.string.main_android_too_low_title)
                     msg = getString(R.string.main_android_too_low_msg)
@@ -155,8 +158,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = getString(R.string.common_exit)) { finish() }
                     noCancelable()
                 }
+            }
             // 判断支持的系统版本
-            isNotSupportMiSystemVersion ->
+            isNotSupportMiSystemVersion -> afterStartup {
                 showDialog {
                     title = getString(R.string.main_unsupported_version_title)
                     msg = (if (miSystemVersion.isNotBlank())
@@ -169,10 +173,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     cancelButton(text = getString(R.string.common_exit)) { finish() }
                     noCancelable()
                 }
+            }
             else -> {
                 // 判断是否激活
                 if (available && YukiHook.Status.isModuleActive) {
-                    if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix)
+                    if (isNotNoificationEnabled && ConfigData.isEnableNotifyIconFix) afterStartup {
                         showDialog {
                             title = getString(R.string.main_notify_permission_off)
                             msg = getString(R.string.main_notify_permission_off_msg)
@@ -180,28 +185,33 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                             cancelButton()
                             noCancelable()
                         }
-                    if (AndroidVersion.isLessThan(AndroidVersion.R) && ConfigData.isIgnoredAndroidVersionToLow.not())
+                    }
+                    if (AndroidVersion.isLessThan(AndroidVersion.R) && ConfigData.isIgnoredAndroidVersionToLow.not()) afterStartup {
                         showDialog {
                             title = getString(R.string.main_android_low_title)
                             msg = getString(R.string.main_android_low_msg)
                             confirmButton(text = getString(R.string.common_got_it)) { ConfigData.isIgnoredAndroidVersionToLow = true }
                             noCancelable()
                         }
+                    }
                     // 推广、恰饭
-                    if (ConfigData.isShowProjectPromotion) ProjectPromote.show(activity = this, ModuleVersion.toString())
+                    if (ConfigData.isShowProjectPromotion) afterStartup { ProjectPromote.show(activity = this, ModuleVersion.toString()) }
                 } else {
                     homeBinding.mainOptimizeListSummaryText.text = getString(R.string.config_module_unavailable)
-                    showDialog {
-                        title = getString(R.string.main_module_not_active)
-                        msg = getString(R.string.main_module_not_active_msg)
-                        confirmButton(text = getString(R.string.common_got_it))
-                        noCancelable()
+                    afterStartup {
+                        showDialog {
+                            title = getString(R.string.main_module_not_active)
+                            msg = getString(R.string.main_module_not_active_msg)
+                            confirmButton(text = getString(R.string.common_got_it))
+                            noCancelable()
+                        }
                     }
                 }
             }
         }
         // 框架服务状态确定后同步刷新模块状态，否则需要切换后台触发 onResume 才会更新
         checkModuleStatus()
+        callStartupReady()
     }
 
     /** 初始化主页的版本文本、CI 自动构建标识、检查更新和各项设置的初始状态，它们不依赖模块是否激活 */

@@ -38,6 +38,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="Theme.MIUINativeNotifyIcon.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/colorThemeBackground</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.MIUINativeNotifyIcon</item>
+    </style>
+
     <style name="Widget.MIUINativeNotifyIcon.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/colorNavIndicator</item>
     </style>
@@ -57,6 +63,7 @@
         <item name="colorOnSurface">@color/colorTextGray</item>
         <item name="colorOnSurfaceVariant">@color/colorTextDark</item>
     </style>
+
     <!-- Popup menu. -->
     <style name="Widget.MIUINativeNotifyIcon.PopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:dropDownSelector">@android:color/transparent</item>
