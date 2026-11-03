@@ -24,6 +24,7 @@ package com.fankes.miui.notify.ui.activity.base
 
 import android.os.Bundle
 import androidx.viewbinding.ViewBinding
+import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.betterandroid.ui.component.activity.AppBindingActivity
 import com.highcapable.betterandroid.ui.extension.component.base.DisplayDensity
 
@@ -33,6 +34,11 @@ abstract class BaseActivity<VB : ViewBinding> : AppBindingActivity<VB>(), Displa
         super.onCreate(savedInstanceState)
         // 装载子类
         onCreate()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        SystemUITool.dismissActivationPrompt(this)
     }
 
     /** 回调 [onCreate] 方法 */

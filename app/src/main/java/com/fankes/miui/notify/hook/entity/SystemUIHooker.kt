@@ -1148,6 +1148,10 @@ object SystemUIHooker : YukiBaseHooker() {
                     ActivationPromptTool.prompt(application, BuildConfigWrapper.APPLICATION_ID, isReloaded = true, resources = module.resources)
             }
         }
+        // 模块页面进入前台后移除更新激活提醒通知
+        SystemUITool.Host.onDismissActivationPrompt(param = this) {
+            globalContext?.let { ActivationPromptTool.dismiss(it) }
+        }
         // 刷新图标缓存
         SystemUITool.Host.onRefreshSystemUI(param = this) { recachingPrefs(it) }
         // 模块获取资源并写入共享文件后发送刷新命令，SystemUI 从共享文件重新装载

@@ -65,6 +65,12 @@ object ActivationPromptTool {
         }
 
     /**
+     * 移除模块更新激活提醒通知
+     * @param context 发布通知的系统界面上下文
+     */
+    fun dismiss(context: Context) = context.notificationManager.cancel(MODULE_PACKAGE_NAME.hashCode())
+
+    /**
      * 推送提醒通知
      * @param context 当前实例
      * @param packageName 当前 APP 包名

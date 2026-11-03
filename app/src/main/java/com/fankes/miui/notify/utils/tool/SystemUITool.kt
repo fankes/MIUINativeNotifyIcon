@@ -60,6 +60,7 @@ object SystemUITool {
     private val CALL_MODULE_REFRESH_RESULT = ChannelData("call_module_refresh_result", false)
     private val CALL_HOST_REFRESH_ICON_DATA = ChannelData("call_host_refresh_icon_data", "" to 0L)
     private val CALL_MODULE_REFRESH_ICON_DATA_RESULT = ChannelData("call_module_refresh_icon_data_result", false)
+    private const val CALL_HOST_DISMISS_ACTIVATION_PROMPT = "call_host_dismiss_activation_prompt"
     private const val CALL_HOST_ICON_RULE_UPDATE_STARTED = "call_host_icon_rule_update_started"
     private const val CALL_HOST_INSTALLED_APPS_GET = "call_host_installed_apps_get"
     private val CALL_MODULE_INSTALLED_APPS_RESULT = ChannelData<ArrayList<InstalledAppBean>>("call_module_installed_apps_result")
@@ -97,6 +98,15 @@ object SystemUITool {
                     refresh(version) { put(CALL_MODULE_REFRESH_ICON_DATA_RESULT, it) }
                 }
             }
+        }
+
+        /**
+         * 监听模块移除更新激活提醒通知的请求
+         * @param param 当前宿主参数
+         * @param callback 回调
+         */
+        fun onDismissActivationPrompt(param: PackageParam, callback: () -> Unit) {
+            param.dataChannel.wait(CALL_HOST_DISMISS_ACTIVATION_PROMPT, callback = callback)
         }
 
         /**
@@ -160,6 +170,14 @@ object SystemUITool {
             wait(CALL_MODULE_INSTALLED_APPS_RESULT) { result(it) }
             put(CALL_HOST_INSTALLED_APPS_GET)
         }
+    }
+
+    /**
+     * 请求系统界面移除模块更新激活提醒通知
+     * @param context 模块上下文
+     */
+    fun dismissActivationPrompt(context: Context) {
+        context.dataChannel(PackageName.SYSTEMUI).put(CALL_HOST_DISMISS_ACTIVATION_PROMPT)
     }
 
     /**
