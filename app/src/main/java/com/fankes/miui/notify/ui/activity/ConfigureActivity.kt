@@ -446,16 +446,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     } else applyChangesAndRefresh()
                 }
             }
-            dialogBinding.notifyIconFixNotifySwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_NOTIFY) {
-                onChanged { SystemUITool.refreshSystemUI(context = this@ConfigureActivity, isRefreshCacheOnly = true) }
-            }
+            dialogBinding.notifyIconFixNotifySwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_NOTIFY)
             dialogBinding.notifyIconAutoSyncText.text = ConfigData.notifyIconFixAutoTime
             dialogBinding.notifyIconAutoSyncSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FIX_AUTO) {
                 onInitialize { dialogBinding.notifyIconAutoSyncChildItem.isVisible = it }
-                onChanged {
-                    reinitialize()
-                    SystemUITool.refreshSystemUI(context = this@ConfigureActivity, isRefreshCacheOnly = true)
-                }
+                onChanged { reinitialize() }
             }
             dialogBinding.notifyIconAutoSyncButton.setOnClickListener {
                 showTimePicker(ConfigData.notifyIconFixAutoTime) { time ->
@@ -465,7 +460,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         confirmButton(text = getString(R.string.main_save_settings)) {
                             ConfigData.notifyIconFixAutoTime = time
                             dialogBinding.notifyIconAutoSyncText.text = time
-                            SystemUITool.refreshSystemUI(context, isRefreshCacheOnly = true)
                         }
                         cancelButton()
                         noCancelable()

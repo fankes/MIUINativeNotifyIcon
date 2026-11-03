@@ -251,16 +251,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.statusIconCountItem.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R)
         homeBinding.moduleEnableLogSwitch.bind(ConfigData.ENABLE_MODULE_LOG) {
             onInitialize { homeBinding.expAllDebugLogButton.isVisible = it }
-            onChanged {
-                reinitialize()
-                SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true)
-            }
+            onChanged { reinitialize() }
         }
         configBinding.statusIconCountSwitch.bind(ConfigData.ENABLE_LIFTED_STATUS_ICON_COUNT) {
             onInitialize { configBinding.statusIconCountChildItem.isVisible = it }
             onChanged {
                 reinitialize()
-                SystemUITool.refreshSystemUI(context = this@MainActivity) { snake(msg = getString(R.string.main_setting_apply_later)) }
+                snake(msg = getString(R.string.main_setting_apply_later))
             }
         }
         configBinding.colorIconCompatSwitch.bind(ConfigData.ENABLE_COLOR_ICON_COMPAT) {
@@ -283,9 +280,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.miuiNotifyIconReplacementSwitch.bind(ConfigData.ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
-        configBinding.miuiFocusNotifyIconFixSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFICATION_FIX) {
-            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
-        }
+        configBinding.miuiFocusNotifyIconFixSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFICATION_FIX)
         configBinding.notifyIconForceSystemColorSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR) {
             isAutoApplyChanges = false
             onChanged {
@@ -364,7 +359,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         binding.iconCountEdit.textToString().isNotBlank() -> runCatching {
                             ConfigData.liftedStatusIconCount = binding.iconCountEdit.textToString().trim().toInt()
                             this@MainActivity.configBinding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
-                            SystemUITool.refreshSystemUI(context) { context.snake(msg = getString(R.string.main_setting_apply_later)) }
+                            context.snake(msg = getString(R.string.main_setting_apply_later))
                         }.onFailure { snake(msg = getString(R.string.main_invalid_number_format)) }
                         else -> snake(msg = getString(R.string.common_enter_valid_value))
                     }
