@@ -62,7 +62,7 @@
     <string name="main_placeholder_icon">启用占位符图标</string>
     <string name="main_placeholder_icon_desc">此选项默认关闭，当发现未收录的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。</string>
     <string name="main_force_focus_invert">是否强制启用焦点通知反色</string>
-    <string name="main_force_focus_invert_desc">是否强制启用焦点通知反色，由于无法准确判断反色，所以给了个强制开关。(默认关闭)</string>
+    <string name="main_force_focus_invert_desc">是否强制启用焦点通知反色，默认关闭。</string>
     <string name="main_remind_new_app">提醒未收录的应用</string>
     <string name="main_remind_new_app_desc">此选项默认开启，在通知图标优化名单有数据时将自动检查新安装的应用是否已被收录，若未收录将会发送通知提醒，如果你了解日后新安装的应用通知图标是遵守原生单色图标规范的，可以关闭此提醒。</string>
     <string name="main_auto_update">每天自动同步</string>
@@ -138,8 +138,8 @@
     <string name="config_back_to_main">要返回模块主页吗？</string>
     <string name="common_prompt">提示</string>
     <string name="common_cancel">取消</string>
-    <string name="config_copy_name_package">复制名称+包名</string>
-    <string name="config_new_app_msg">你已安装 %1$s (%2$s)\n\n此应用尚未被通知图标优化名单收录，若此应用发送的通知为彩色图标，可随时点击本页面下方的 “为 ANIP 做出贡献” 按钮提交贡献或请求适配。\n\n若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n你可以现在立即同步适配列表，以获取最新的适配数据。</string>
+    <string name="config_copy_name_package">复制名称 + 包名</string>
+    <string name="config_new_app_msg">你已安装 %1$s (%2$s)\n\n此应用尚未被通知图标优化名单收录，若此应用发送的通知为彩色图标，可随时提交贡献或请求适配。\n\n若你已知晓此应用会遵守原生通知图标规范，可忽略此提示。\n\n你可以现在立即同步适配列表，以获取最新的适配数据。</string>
     <string name="config_new_app_title">新安装应用通知图标适配</string>
     <string name="config_not_now">暂时不用</string>
     <string name="config_request_adaptation">请求适配</string>

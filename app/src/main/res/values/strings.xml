@@ -62,7 +62,7 @@
     <string name="main_placeholder_icon">Enable placeholder icons</string>
     <string name="main_placeholder_icon_desc">This option is off by default. When a colored notification icon not included in the optimization list is found, the status bar shows a built-in placeholder icon instead, and the icon in the notification shade stays unchanged.</string>
     <string name="main_force_focus_invert">Force invert Focus notifications</string>
-    <string name="main_force_focus_invert_desc">Forces color inversion for Focus notifications. Since the inversion cannot be determined accurately, this is a manual override. (Off by default)</string>
+    <string name="main_force_focus_invert_desc">Forces color inversion for Focus notifications. Off by default.</string>
     <string name="main_remind_new_app">Remind about apps not included</string>
     <string name="main_remind_new_app_desc">This option is on by default. When the notification icon optimization list contains data, newly installed apps are checked automatically, and you are notified if they are not included. If you know that the notification icons of the apps you install follow the native monochrome specification, you can turn this reminder off.</string>
     <string name="main_auto_update">Sync automatically every day</string>
@@ -139,7 +139,7 @@
     <string name="common_prompt">Tip</string>
     <string name="common_cancel">Cancel</string>
     <string name="config_copy_name_package">Copy Name + Package Name</string>
-    <string name="config_new_app_msg">You installed %1$s (%2$s)\n\nThis app is not yet included in the notification icon optimization list. If its notifications use colored icons, you can tap the \"Contribute to ANIP\" button at the bottom of this page at any time to submit an icon or request adaptation.\n\nIf you know this app follows the native notification icon specification, you can ignore this message.\n\nYou can also sync the list now to get the latest adaptation data.</string>
+    <string name="config_new_app_msg">You installed %1$s (%2$s)\n\nThis app is not yet included in the notification icon optimization list. If its notifications use colored icons, you can submit a contribution or request adaptation at any time.\n\nIf you know this app follows the native notification icon specification, you can ignore this message.\n\nYou can also sync the list now to get the latest adaptation data.</string>
     <string name="config_new_app_title">Icon Adaptation for Newly Installed App</string>
     <string name="config_not_now">Not Now</string>
     <string name="config_request_adaptation">Request Adaptation</string>
