@@ -132,6 +132,14 @@ object IconRuleManagerTool {
         hostSharedFiles = sharedFiles
     }
 
+    /** 宿主任务结束后释放当前模块实例的规则快照和 SDK 引用，不删除磁盘缓存 */
+    fun release() {
+        state = null
+        mainAnip = null
+        extraAnip = null
+        hostSharedFiles = null
+    }
+
     /**
      * 从当前进程的私有缓存恢复 ANIP 快照
      * @param context 当前进程上下文

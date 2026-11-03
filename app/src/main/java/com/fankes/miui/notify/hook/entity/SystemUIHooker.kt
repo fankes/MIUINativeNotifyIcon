@@ -99,14 +99,17 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.HookParam
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.defaults.drawabletoolbox.DrawableBuilder
+import kotlin.concurrent.thread
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -1191,11 +1194,26 @@ object SystemUIHooker : YukiBaseHooker() {
         if (settingsManager == null) YLog.warn("Failed to restore settings manager after reloaded")
     }
 
-    /** 释放当前模块实例在宿主中启动的协程和监听 */
+    /** 释放当前模块实例的宿主任务、监听和私有协程线程 */
     fun release() {
-        iconRuleScope.cancel()
         wallpaperColorsListener?.let { (manager, listener) -> manager.removeOnColorsChangedListener(listener) }
         wallpaperColorsListener = null
+        val job = iconRuleScope.coroutineContext.job
+        job.invokeOnCompletion {
+            IconRuleManagerTool.release()
+            iconRuleUpdateFallbackJob = null
+            notificationIconContainer = null
+            notificationPresenter = null
+            settingsManager = null
+            // 完成回调可能运行在调度线程上，另起普通线程关闭，避免阻塞主线程或等待自己退出
+            thread(name = "MIUINativeNotifyIcon-dispose") {
+                // 只能关闭当前模块加载的协程副本，不能关闭宿主共用的运行时
+                @OptIn(DelicateCoroutinesApi::class)
+                if (classOf<Dispatchers>().classLoader === classOf<SystemUIHooker>().classLoader) Dispatchers.shutdown()
+                else YLog.warn("Skipping coroutine shutdown: the runtime is shared with the host")
+            }
+        }
+        job.cancel()
     }
 
     /**
@@ -1257,6 +1275,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
                 result(isAvailable && (requestedVersion == null || IconRuleManagerTool.hasSnapshotVersion(requestedVersion)))
             }.onFailure {
+                if (it is CancellationException) throw it
                 YLog.error("Failed to reload ANIP icon resources", it)
                 result(false)
             }
@@ -1294,6 +1313,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         (requestedVersion == null || IconRuleManagerTool.hasSnapshotVersion(requestedVersion)))
                 }
             }.getOrElse {
+                if (it is CancellationException) throw it
                 YLog.error("Failed to refresh ANIP icon resources", it)
                 result(false)
                 Anip.FetchResult(it.message ?: "Failed to get ANIP icon resources", Anip.FetchResult.Status.FAILED)
