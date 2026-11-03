@@ -269,6 +269,7 @@
     <string name="sync_settings">Sync Settings</string>
     <string name="sync_source_hint">Sync Source</string>
     <string name="sync_additional">Additional Source</string>
+    <string name="sync_additional_desc">Resources from the additional source will override content from the main repository. Configure your own rule source below.</string>
     <string name="sync_additional_template">Additional Source</string>
     <string name="sync_additional_github">GitHub Releases</string>
     <string name="sync_additional_gitlab">GitLab Releases</string>

@@ -269,6 +269,7 @@
     <string name="sync_settings">同步设置</string>
     <string name="sync_source_hint">同步来源</string>
     <string name="sync_additional">附加来源</string>
+    <string name="sync_additional_desc">附加来源的资源将优先覆盖主存储库的内容，在下方自定义你自己的规则来源。</string>
     <string name="sync_additional_template">附加来源</string>
     <string name="sync_additional_github">GitHub Releases</string>
     <string name="sync_additional_gitlab">GitLab Releases</string>
