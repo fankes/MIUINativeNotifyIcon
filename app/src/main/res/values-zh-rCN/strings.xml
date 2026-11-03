@@ -89,7 +89,7 @@
     <string name="sync_source_desc">通知图标优化名单的资源资源托管在 GitHub 的官方 ANIP 存储库上，建议定期同步以获取对最新应用的适配。</string>
     <string name="sync_source_cdn_1">中国大陆 CDN 代理 #1</string>
     <string name="sync_source_cdn_2">中国大陆 CDN 代理 #2</string>
-    <string name="sync_source_github">GitHub (海外直连)</string>
+    <string name="sync_source_github">GitHub (直连)</string>
     <string name="sync_repository_hint">使用的 GitHub 存储库</string>
     <string name="sync_restore_default">恢复默认</string>
     <string name="sync_repository_helper">如有自定义需求可以更改为你的存储库。</string>
