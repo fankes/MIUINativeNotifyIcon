@@ -263,22 +263,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 snake(msg = getString(R.string.main_setting_apply_later))
             }
         }
-        configBinding.colorIconCompatSwitch.bind(ConfigData.ENABLE_COLOR_ICON_COMPAT) {
-            isAutoApplyChanges = false
-            onChanged {
-                /** 应用更改并刷新系统界面 */
-                fun applyChangesAndRefresh() {
-                    applyChanges()
-                    SystemUITool.refreshSystemUI(context = this@MainActivity)
-                }
-                if (it) showDialog {
-                    title = getString(R.string.main_compat_mode_title)
-                    msg = getString(R.string.main_compat_mode_msg)
-                    confirmButton { applyChangesAndRefresh() }
-                    cancelButton { cancelChanges() }
-                    noCancelable()
-                } else applyChangesAndRefresh()
-            }
+        configBinding.systemIconInversionSwitch.bind(ConfigData.USE_SYSTEM_ICON_INVERSION) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
+        }
+        configBinding.notifyIconResamplingSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_RESAMPLING) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
         configBinding.miuiNotifyIconReplacementSwitch.bind(ConfigData.ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }

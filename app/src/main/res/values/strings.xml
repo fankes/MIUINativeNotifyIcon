@@ -36,8 +36,10 @@
     <string name="main_count_unit">icons</string>
     <string name="main_change_count">Change Count</string>
     <string name="main_group_icon">Icon Adjustments</string>
-    <string name="common_enable_compat_mode">Enable compatibility mode</string>
-    <string name="main_compat_mode_desc">Enable compatibility mode if the module detects the notification icon color incorrectly. It is generally not recommended. If any problem occurs, turn it off.</string>
+    <string name="main_use_system_icon_inversion">Use the system implementation for icon color inversion</string>
+    <string name="main_system_icon_inversion_desc">To ensure compatibility, the module uses an algorithm to determine whether notification icons are grayscale. If icon color inversion behaves incorrectly, try enabling this option to use the system implementation instead.</string>
+    <string name="main_enable_icon_resampling">Enable monochrome icon resampling</string>
+    <string name="main_icon_resampling_desc">This option is off by default. When enabled, it resamples monochrome bitmaps to the notification icon display size and sharpens them when enlarged. This may change stroke thickness and spacing. Vector icons are not affected.</string>
     <string name="main_status_icon_alpha">Status bar icon opacity</string>
     <string name="main_dark">Dark</string>
     <string name="main_light">Light</string>
@@ -61,8 +63,8 @@
     <string name="main_enable_icon_optimize">Enable icon optimization</string>
     <string name="main_placeholder_icon">Enable placeholder icons</string>
     <string name="main_placeholder_icon_desc">This option is off by default. When a colored notification icon not included in the optimization list is found, the status bar shows a built-in placeholder icon instead, and the icon in the notification shade stays unchanged.</string>
-    <string name="main_force_focus_invert">Force invert Focus notifications</string>
-    <string name="main_force_focus_invert_desc">Forces color inversion for Focus notifications. Off by default.</string>
+    <string name="main_force_focus_invert">Force invert Focus notification icons</string>
+    <string name="main_force_focus_invert_desc">Forces color inversion for Focus notification icons. Off by default.</string>
     <string name="main_remind_new_app">Remind about apps not included</string>
     <string name="main_remind_new_app_desc">This option is on by default. When the notification icon optimization list contains data, newly installed apps are checked automatically, and you are notified if they are not included. If you know that the notification icons of the apps you install follow the native monochrome specification, you can turn this reminder off.</string>
     <string name="main_auto_update">Sync automatically every day</string>
@@ -107,8 +109,6 @@
     <string name="main_force_app_icon_msg">When enabled, all notification icons in the notification shade are forcibly replaced with the icon of the app that posted the notification. Some system app notification icons may be displayed incorrectly or go missing. Do you still want to enable it?</string>
     <string name="main_destructive_warn">Destructive Feature Warning</string>
     <string name="main_system_default_tint_msg">When enabled, all notification icons in the notification shade ignore their own tint attribute and are tinted with the system default color (the uniform color provided by the system). Do you still want to enable it?</string>
-    <string name="main_compat_mode_msg">Compatibility mode can fix notification icon inversion not being detected correctly on some system versions, but it may also cause new problems. It is generally not recommended. Are you sure you want to continue?\n\nIf the notification icon colors are wrong after System UI refreshes, try restarting System UI once.</string>
-    <string name="main_compat_mode_title">Enable Compatibility Mode</string>
     <string name="main_system_version_detail">[%1$s] %2$s</string>
     <string name="common_got_it">Got It</string>
     <string name="main_ci_msg">You are using a CI build with Commit ID %1$s.\n\nCI builds are triggered, built and released automatically after each code commit, without any stability testing. Use at your own risk.</string>

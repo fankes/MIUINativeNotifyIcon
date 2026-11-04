@@ -31,6 +31,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
@@ -71,7 +72,7 @@ import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.stampToDate
 import com.fankes.miui.notify.utils.factory.systemAccentColor
 import com.fankes.miui.notify.utils.tool.ActivationPromptTool
-import com.fankes.miui.notify.utils.tool.BitmapCompatTool
+import com.fankes.miui.notify.utils.tool.ContrastBitmapTool
 import com.fankes.miui.notify.utils.tool.IconAdaptationTool
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
@@ -82,6 +83,7 @@ import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.betterandroid.ui.extension.component.base.getDrawableCompat
 import com.highcapable.betterandroid.ui.extension.component.base.toPx
 import com.highcapable.betterandroid.ui.extension.graphics.round
+import com.highcapable.betterandroid.ui.extension.view.ViewLayoutParams
 import com.highcapable.betterandroid.ui.extension.view.outlineProvider
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -439,13 +441,13 @@ object SystemUIHooker : YukiBaseHooker() {
     /**
      * - 这个是修复彩色图标的关键核心代码判断
      *
-     * 判断是否为灰度图标 - 反射执行系统方法
+     * 判断是否为灰度图标，默认使用模块算法，可切换到系统方案
      * @param context 实例
      * @param drawable 要判断的图标
      * @return [Boolean]
      */
     private fun isGrayscaleIcon(context: Context, drawable: Drawable) =
-        if (ConfigData.isEnableColorIconCompat.not()) safeOfFalse {
+        if (ConfigData.isUseSystemIconInversion) safeOfFalse {
             ContrastColorUtilClass.resolve()
                 .optional(silent = true)
                 .let {
@@ -459,7 +461,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         }?.invoke(context)
                     )?.invokeQuietly<Boolean>(drawable) == true
                 }
-        } else BitmapCompatTool.isGrayscaleDrawable(drawable)
+        } else ContrastBitmapTool.isGrayscale(drawable)
 
     /**
      * 按系统状态栏图标尺寸生成位图，保留宽高比，不放大小图标
@@ -474,9 +476,9 @@ object SystemUIHooker : YukiBaseHooker() {
         }.maxOrNull()?.takeIf { it > 0 } ?: 24.toPx(context)
         val width = intrinsicWidth
         val height = intrinsicHeight
-        if (width <= 0 || height <= 0) return@run BitmapCompatTool.rasterizeDrawable(this, size, size)
+        if (width <= 0 || height <= 0) return@run ContrastBitmapTool.rasterize(this, size, size)
         val scale = minOf(1.0, size.toDouble() / maxOf(width, height))
-        BitmapCompatTool.rasterizeDrawable(this, (width * scale).toInt().coerceAtLeast(1), (height * scale).toInt().coerceAtLeast(1))
+        ContrastBitmapTool.rasterize(this, (width * scale).toInt().coerceAtLeast(1), (height * scale).toInt().coerceAtLeast(1))
     }
 
     /**
@@ -712,6 +714,21 @@ object SystemUIHooker : YukiBaseHooker() {
             val isUsePromotedOngoingComposedIcon =
                 notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
 
+            val horizontalPadding = when {
+                isMIOS && isMiuiPanel -> 7.toPx(context) * 2
+                isUseMaterial3Style -> 4.toPx(context) * 2
+                else -> iconView.paddingLeft + iconView.paddingRight
+            }
+
+            /** 按图标实际内容尺寸处理单色位图 */
+            fun Drawable.optimizeForPanel(horizontalPadding: Int): Drawable {
+                if (ConfigData.isEnableNotifyIconResampling.not()) return this
+                val bitmap = (this as? BitmapDrawable)?.bitmap ?: return this
+                val viewSizePx = iconView.layoutParams?.width?.takeIf { it > 0 } ?: iconView.width.takeIf { it > 0 } ?: 0
+                val contentPx = if (viewSizePx > 0) (viewSizePx - horizontalPadding).coerceAtLeast(1) else 0
+                return ContrastBitmapTool.resampling(bitmap, contentPx).toDrawable(context.resources)
+            }
+
             /**
              * OS4 的焦点通知会忽略 RemoteViews 中 android:id/icon 的 background，
              * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
@@ -723,7 +740,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                     .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
                     .build()
-                val foregroundDrawable = (drawable.constantState?.newDrawable(context.resources) ?: drawable).mutate()
+                val glyph = drawable.optimizeForPanel(inset * 2)
+                val foregroundDrawable = (glyph.constantState?.newDrawable(context.resources) ?: glyph).mutate()
                 val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
                     setLayerInset(1, inset, inset, inset, inset)
                 }
@@ -775,7 +793,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         // 设置不要裁切到边界
                         clipToOutline = false
                         // 设置自定义小图标
-                        setImageDrawable(drawable)
+                        setImageDrawable(drawable.optimizeForPanel(horizontalPadding))
                         // 上色
                         setColorFilter(if (isUseMaterial3Style || customIconColor == 0) supportColor else customIconColor)
                         // 设置图标外圈颜色
@@ -801,7 +819,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             setPromotedOngoingComposedIcon(iconDrawable, supportColor, backgroundColor)
                         else iconView.apply {
                             // 重新设置图标 - 防止系统更改它
-                            setImageDrawable(iconDrawable)
+                            setImageDrawable(iconDrawable.optimizeForPanel(horizontalPadding))
                             // 设置不要裁切到边界
                             clipToOutline = false
                             // 设置图标着色
@@ -832,7 +850,9 @@ object SystemUIHooker : YukiBaseHooker() {
         val isMiuiPanel = isShowMiuiStyle
         if (isMiuiPanel && ConfigData.isEnableReplaceMiuiStyleNotifyIcon.not())
             return@safeOfNull null
-        val iconView = ImageView(context)
+        val iconView = ImageView(context).apply {
+            layoutParams = ViewLayoutParams(size, size)
+        }
         compatNotifyIcon(
             context = context,
             nf = this,

@@ -36,8 +36,10 @@
     <string name="main_count_unit">个</string>
     <string name="main_change_count">修改个数</string>
     <string name="main_group_icon">图标调整</string>
-    <string name="common_enable_compat_mode">启用兼容模式</string>
-    <string name="main_compat_mode_desc">如果发现通知图标颜色判定不正常可启用兼容模式，一般情况下不建议启用兼容模式，发生问题请关闭兼容模式。</string>
+    <string name="main_use_system_icon_inversion">图标反色使用系统方案</string>
+    <string name="main_system_icon_inversion_desc">为了确保兼容，模块会使用算法判断通知图标颜色是否为灰度，如果你发现图标反色异常，可以尝试启用此选项，开启后将交由系统方案接管。</string>
+    <string name="main_enable_icon_resampling">启用单色图标重采样</string>
+    <string name="main_icon_resampling_desc">此选项默认关闭，开启后，会按通知图标的显示尺寸重新采样单色位图，并在放大时进行锐化。这可能改变笔画粗细和间隙，矢量图标不受影响。</string>
     <string name="main_status_icon_alpha">调整状态栏中的通知图标透明度</string>
     <string name="main_dark">暗色</string>
     <string name="main_light">亮色</string>
@@ -61,8 +63,8 @@
     <string name="main_enable_icon_optimize">启用通知图标优化</string>
     <string name="main_placeholder_icon">启用占位符图标</string>
     <string name="main_placeholder_icon_desc">此选项默认关闭，当发现未收录的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。</string>
-    <string name="main_force_focus_invert">是否强制启用焦点通知反色</string>
-    <string name="main_force_focus_invert_desc">是否强制启用焦点通知反色，默认关闭。</string>
+    <string name="main_force_focus_invert">强制启用焦点通知图标反色</string>
+    <string name="main_force_focus_invert_desc">是否强制启用焦点通知图标反色，默认关闭。</string>
     <string name="main_remind_new_app">提醒未收录的应用</string>
     <string name="main_remind_new_app_desc">此选项默认开启，在通知图标优化名单有数据时将自动检查新安装的应用是否已被收录，若未收录将会发送通知提醒，如果你了解日后新安装的应用通知图标是遵守原生单色图标规范的，可以关闭此提醒。</string>
     <string name="main_auto_update">每天自动同步</string>
@@ -107,8 +109,6 @@
     <string name="main_force_app_icon_msg">开启这个功能后，任何通知栏中的通知图标都会被强制替换为当前推送通知的应用的图标，某些系统级别的应用通知图标可能会显示异常或发生图标丢失，仍然继续开启吗？</string>
     <string name="main_destructive_warn">破坏性功能警告</string>
     <string name="main_system_default_tint_msg">开启这个功能后，任何通知栏中的通知图标都会忽略图标自身的着色属性，全部使用系统默认颜色 (系统提供的统一色调) 着色，仍然继续开启吗？</string>
-    <string name="main_compat_mode_msg">启用兼容模式可修复部分系统版本可能出现无法判定通知图标反色的问题，但是这也可能会导致新的问题，一般情况下不建议开启，确定要继续吗？\n\n如果系统界面刷新后通知图标颜色发生错误，请尝试重启一次系统界面。</string>
-    <string name="main_compat_mode_title">启用兼容模式</string>
     <string name="main_system_version_detail">[%1$s] %2$s</string>
     <string name="common_got_it">我知道了</string>
     <string name="main_ci_msg">你正在使用的是 CI 自动构建版本，Commit ID 为 %1$s。\n\n它是由代码提交后自动触发并构建、自动编译发布的，并未经任何稳定性测试，使用风险自负。</string>
