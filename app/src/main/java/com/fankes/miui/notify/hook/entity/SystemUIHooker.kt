@@ -723,9 +723,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                     .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
                     .build()
-                val foregroundDrawable = (drawable.constantState?.newDrawable(context.resources) ?: drawable).mutate().apply {
-                    setTint(foregroundColor)
-                }
+                val foregroundDrawable = (drawable.constantState?.newDrawable(context.resources) ?: drawable).mutate()
                 val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
                     setLayerInset(1, inset, inset, inset, inset)
                 }
@@ -736,6 +734,8 @@ object SystemUIHooker : YukiBaseHooker() {
                     colorFilter = null
                     imageTintList = null
                     setImageDrawable(composedDrawable)
+                    // ImageView 写入 Drawable 时会向所有图层重放空 Tint，前景需在写入后着色
+                    composedDrawable.getDrawable(1).setTint(foregroundColor)
                 }
             }
 
