@@ -152,6 +152,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private val MiuiDozeServiceClass by lazyClassOrNull("com.android.keyguard.doze.MiuiDozeService")
 
+    /** Android 15 的 AOD 插件加载入口 */
+    private val DozeServiceClass by lazyClassOrNull("com.android.systemui.doze.DozeService")
+
     /** 原生存在的类 */
     private val NotificationChildrenContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
 
@@ -1757,51 +1760,55 @@ object SystemUIHooker : YukiBaseHooker() {
                 sbn.packageName == PackageName.SYSTEMUI && sbn.tag == "UNIMPORTANT"
             } ?: false
         }
-        @Suppress("LocalVariableName")
-        MiuiDozeServiceClass?.resolve()?.optional()?.apply {
-            firstMethodOrNull { name = "onPluginConnected" }?.hook()?.before {
-                val plugin = arg(0).get()
-                    ?: return@before YLog.warn("AOD got null plugin")
+        listOfNotNull(MiuiDozeServiceClass, DozeServiceClass).distinct().forEach { dozeServiceClass ->
+            dozeServiceClass.resolve().optional(silent = true).firstMethodOrNull {
+                name = "onPluginConnected"
+                parameterCount { it in 1..2 }
+            }?.hook()?.before {
+                val plugin = firstArg().get() ?: return@before YLog.warn("AOD got null plugin")
                 val pluginClassLoader = plugin::class.java.classLoader
+                val notificationControllerClass = "com.miui.aod.notification.NotificationController".toClassOrNull(pluginClassLoader)
+                val notificationDataClass = $$"com.miui.aod.notification.NotificationController$NotificationData".toClassOrNull(pluginClassLoader)
 
-                // AOD 是插件，用传入的 ClassLoader 去解析
-                val NotificationControllerClass = "com.miui.aod.notification.NotificationController".toClassOrNull(pluginClassLoader)
-                val NotificationDataClass = $$"com.miui.aod.notification.NotificationController$NotificationData".toClassOrNull(pluginClassLoader)
-                val NotificationDataIconDrawableField = NotificationDataClass?.resolve()?.firstFieldOrNull { name = "mIconDrawable" }
-
-                if (NotificationControllerClass == null || NotificationDataClass == null || NotificationDataIconDrawableField == null)
+                if (notificationControllerClass == null || notificationDataClass == null)
                     return@before YLog.warn("AOD got null NotificationControllerClass or NotificationDataClass")
 
-                NotificationControllerClass.resolve().firstMethodOrNull {
+                notificationControllerClass.resolve().optional(silent = true).firstMethodOrNull {
                     name = "fillNotificationData"
+                    parameterCount = 5
                     parameters(
-                        NotificationDataClass,
+                        notificationDataClass,
                         StatusBarNotification::class,
                         Boolean::class,
                         Boolean::class,
                         Boolean::class,
                     )
                 }?.hook()?.after {
-                    val context = instance.asResolver().firstFieldOrNull { name = "mContext" }?.get<Context>()
-                        ?: return@after YLog.warn("fillNotificationData got null context")
-
-                    val notificationData = arg(0).get()
-                        ?: return@after YLog.warn("fillNotificationData got null notificationData")
-                    val notifyInstance = arg(1).get<StatusBarNotification>()
-                        ?: return@after YLog.warn("fillNotificationData got null notifyInstance")
-
-                    val iconDrawableField = notificationData.asResolver().firstFieldOrNull { name = "mIconDrawable" }
-                        ?: return@after YLog.warn("fillNotificationData got null iconDrawableField")
-
-                    val smallIconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
-
-                    compatStatusIcon(context, notifyInstance, smallIconDrawable, "AOD Icon").also { pair ->
-                        if (pair.second) 
-                            iconDrawableField.set(pair.first)
-                        else iconDrawableField.set(smallIconDrawable)
-                    }
-                }
+                    updateAodNotificationIcon(instance, arg(0).get(), arg(1).get<StatusBarNotification>())
+                } ?: notificationControllerClass.resolve().optional(silent = true).firstMethodOrNull {
+                    name = "fillNotificationData"
+                    parameterCount = 2
+                    parameters(notificationDataClass, StatusBarNotification::class)
+                }?.hook()?.after {
+                    updateAodNotificationIcon(instance, arg(0).get(), arg(1).get<StatusBarNotification>())
+                } ?: YLog.warn("AOD fillNotificationData method not found")
             }
+        }
+    }
+
+    private fun updateAodNotificationIcon(controller: Any?, notificationData: Any?, notifyInstance: StatusBarNotification?) {
+        if (controller == null || notificationData == null || notifyInstance == null)
+            return YLog.warn("AOD fillNotificationData got null arguments")
+
+        val context = controller.asResolver().firstFieldOrNull { name = "mContext" }?.get<Context>()
+            ?: return YLog.warn("fillNotificationData got null context")
+        val iconDrawableField = notificationData.asResolver().firstFieldOrNull { name = "mIconDrawable" }
+            ?: return YLog.warn("fillNotificationData got null iconDrawableField")
+        val smallIconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
+
+        compatStatusIcon(context, notifyInstance, smallIconDrawable, "AOD Icon").also { pair ->
+            if (pair.second) iconDrawableField.set(pair.first)
+            else iconDrawableField.set(smallIconDrawable)
         }
     }
 }
