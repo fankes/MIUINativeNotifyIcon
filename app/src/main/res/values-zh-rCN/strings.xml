@@ -279,6 +279,5 @@
     <string name="sync_additional_static_hint">填写静态托管基础 URL</string>
     <string name="sync_additional_custom_hint">填写资源清单 URL</string>
     <string name="sync_additional_invalid">请填写有效的附加来源参数</string>
-    <string name="config_additional_badge">附加</string>
     <string name="common_save">保存</string>
 </resources>

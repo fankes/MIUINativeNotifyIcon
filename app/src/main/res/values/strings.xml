@@ -279,6 +279,6 @@
     <string name="sync_additional_static_hint">Enter static hosting base URL</string>
     <string name="sync_additional_custom_hint">Enter resource manifest URL</string>
     <string name="sync_additional_invalid">Enter a valid additional source parameter</string>
-    <string name="config_additional_badge">Extra</string>
+    <string name="config_additional_badge" translatable="false">3P</string>
     <string name="common_save">Save</string>
 </resources>
