@@ -30,7 +30,6 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.VectorDrawable
 import android.util.LruCache
 import androidx.annotation.Px
 import androidx.core.graphics.createBitmap
@@ -123,7 +122,7 @@ object ContrastBitmapTool {
         when (drawable) {
             is BitmapDrawable -> isGrayscale(drawable.bitmap)
             is AnimationDrawable -> drawable.numberOfFrames > 0 && isGrayscale(drawable.getFrame(0))
-            is VectorDrawable -> true
+            // VectorDrawable 也可能包含彩色渐变，不能按类型直接判定为灰度图标
             // 包装图标按固有尺寸的画布缩放后采样，临时位图不进入灰度缓存
             else -> {
                 val width = drawable.intrinsicWidth.takeIf { it > 0 }?.coerceAtMost(64) ?: 64
