@@ -66,7 +66,6 @@ import com.fankes.miui.notify.utils.factory.isSystemInDarkMode
 import com.fankes.miui.notify.utils.factory.miosVersionCode
 import com.fankes.miui.notify.utils.factory.miuiIncrementalVersion
 import com.fankes.miui.notify.utils.factory.runInSafe
-import com.fankes.miui.notify.utils.factory.safeOf
 import com.fankes.miui.notify.utils.factory.safeOfFalse
 import com.fankes.miui.notify.utils.factory.safeOfNull
 import com.fankes.miui.notify.utils.factory.stampToDate
@@ -482,17 +481,6 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     /**
-     * 处理为圆角图标
-     * @return [Drawable]
-     */
-    private fun Drawable.rounded(context: Context) = safeOf(default = this) {
-        val bitmap = toStatusIconBitmap(context)
-        // 位图缩小时同步缩放圆角半径，保留原图的圆角比例
-        val scale = if (intrinsicWidth > 0) bitmap.width.toFloat() / intrinsicWidth else 1f
-        bitmap.round(10.toPx(context) * scale).toDrawable(context.resources)
-    }
-
-    /**
      * 注册主题壁纸改变颜色监听
      *
      *  - 仅限在 Android 12 以下注册
@@ -591,8 +579,8 @@ object SystemUIHooker : YukiBaseHooker() {
         when {
             // 处理自定义通知图标优化
             customTriple.first != null -> Pair(customTriple.first, true)
-            // 若不是灰度图标自动处理为圆角
-            isGrayscaleIcon.not() -> Pair(iconDrawable.rounded(context), true)
+            // 未适配的彩色图标保持原始形状
+            isGrayscaleIcon.not() -> Pair(iconDrawable, true)
             // 否则返回原始小图标
             else -> Pair(notifyInstance.notification.smallIcon.loadDrawable(context), false)
         }
