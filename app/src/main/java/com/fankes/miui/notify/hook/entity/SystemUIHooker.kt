@@ -504,7 +504,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 val nf = result.of(it).get<StatusBarNotification>() ?: return
                 // 刷新状态栏图标
                 compatStatusIcon(it.context, nf, nf.notification.smallIcon.loadDrawable(it.context)).also { pair ->
-                    pair.first.let { e -> (it as? ImageView?)?.setImageDrawable(e) }
+                    pair.first.let { drawable ->
+                        // 与系统回调中的替换路径保持相同尺寸，不在刷新时写回原尺寸图标
+                        val icon = if (pair.second) drawable?.toStatusIconBitmap(it.context)?.toDrawable(it.resources) else drawable
+                        (it as? ImageView)?.setImageDrawable(icon)
+                    }
                 }
             }
         }
