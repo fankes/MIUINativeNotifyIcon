@@ -921,22 +921,21 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param container 当前 [NotificationIconContainerClass] 的实例
      */
     private fun updateStatusBarIconsAlpha(container: ViewGroup) {
+        if (isMIOS && miosVersionCode >= 3) {
+            // 超级岛通过 View 和 Folme 的 alpha 隐藏图标，模块只调整图标内容的透明度
+            container.children.filterIsInstance<ImageView>().forEach { iconView ->
+                iconView.imageAlpha = ((if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f) * 255).toInt()
+            }
+            return
+        }
         val iconStatesMap = container.asResolver().optional().firstFieldOrNull { name = "mIconStates" }?.get<HashMap<View, Any>>()
-        if (container.isNotEmpty()) container.children.forEach { iconView ->
-            if (iconView !is ImageView) return@forEach
+        if (container.isNotEmpty()) container.children.filterIsInstance<ImageView>().forEach { iconView ->
             val iconAlpha = if (iconView.isGrayscaleIcon()) statusBarIconAlpha else 1f
             iconView.alpha = iconAlpha
-            val iconStateResolver = iconStatesMap?.get(iconView)?.asResolver()?.optional()
-            iconStateResolver?.firstFieldOrNull {
+            iconStatesMap?.get(iconView)?.asResolver()?.optional()?.firstFieldOrNull {
                 name { it == "alpha" || it == "mAlpha" }
                 superclass()
             }?.set(iconAlpha)
-            // OS3、OS4 还需要同步 Folme 状态；OS2 只有 ViewState，不存在 mIconState
-            if (isMIOS && miosVersionCode >= 3) iconStateResolver?.firstFieldOrNull { name = "mIconState" }?.get<Any>()
-                ?.asResolver()?.optional()?.firstFieldOrNull {
-                    name = "alpha"
-                    superclass()
-                }?.set(iconAlpha)
         }
     }
 
