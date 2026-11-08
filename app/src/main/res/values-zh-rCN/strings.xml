@@ -40,6 +40,8 @@
     <string name="main_system_icon_inversion_desc">为了确保兼容，模块会使用算法判断通知图标颜色是否为灰度，如果你发现图标反色异常，可以尝试启用此选项，开启后将交由系统方案接管。</string>
     <string name="main_enable_icon_resampling">启用单色图标重采样</string>
     <string name="main_icon_resampling_desc">此选项默认关闭，开启后，会按通知图标的显示尺寸重新采样单色位图，并在放大时进行锐化。这可能改变笔画粗细和间隙，矢量图标不受影响。</string>
+    <string name="main_enable_focus_notify_icon">替换焦点通知图标</string>
+    <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 3 及以上系统中，焦点通知胶囊的主图标和展开卡片的应用角标将同样应用替换后的通知图标，在不支持此功能的低版本系统中将无作用。</string>
     <string name="main_status_icon_alpha">调整状态栏中的通知图标透明度</string>
     <string name="main_dark">暗色</string>
     <string name="main_light">亮色</string>
@@ -63,8 +65,8 @@
     <string name="main_enable_icon_optimize">启用通知图标优化</string>
     <string name="main_placeholder_icon">启用占位符图标</string>
     <string name="main_placeholder_icon_desc">此选项默认关闭，当发现未收录的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。</string>
-    <string name="main_force_focus_invert">强制启用焦点通知图标反色</string>
-    <string name="main_force_focus_invert_desc">是否强制启用焦点通知图标反色，默认关闭。</string>
+    <string name="main_force_focus_invert">强制启用旧版焦点通知图标反色</string>
+    <string name="main_force_focus_invert_desc">此选项默认关闭，开启后在支持旧版焦点通知的 HyperOS 1.x 或 2.x 系统中，将强制启用状态栏中的旧版焦点通知图标反色，在不支持此功能的系统中将无作用。</string>
     <string name="main_remind_new_app">提醒未收录的应用</string>
     <string name="main_remind_new_app_desc">此选项默认开启，在通知图标优化名单有数据时将自动检查新安装的应用是否已被收录，若未收录将会发送通知提醒，如果你了解日后新安装的应用通知图标是遵守原生单色图标规范的，可以关闭此提醒。</string>
     <string name="main_auto_update">每天自动同步</string>

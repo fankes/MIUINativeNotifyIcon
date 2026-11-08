@@ -251,6 +251,61 @@
                     android:textColor="@color/colorTextDark"
                     android:textSize="12sp" />
 
+                <com.fankes.miui.notify.ui.widget.AppSwitch
+                    android:id="@+id/focus_notify_icon_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="5dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/main_enable_focus_notify_icon"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:text="@string/main_focus_notify_icon_desc"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:id="@+id/miui_focus_notify_icon_fix_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.fankes.miui.notify.ui.widget.AppSwitch
+                        android:id="@+id/miui_focus_notify_icon_fix_switch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingTop="5dp"
+                        android:paddingRight="15dp"
+                        android:paddingBottom="8dp"
+                        android:text="@string/main_force_focus_invert"
+                        android:textColor="@color/colorTextGray"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="0.6"
+                        android:lineSpacingExtra="6dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp"
+                        android:text="@string/main_force_focus_invert_desc"
+                        android:textColor="@color/colorTextDark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -404,36 +459,6 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/miui_focus_notify_icon_fix_item"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <com.fankes.miui.notify.ui.widget.AppSwitch
-                        android:id="@+id/miui_focus_notify_icon_fix_switch"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="15dp"
-                        android:paddingTop="5dp"
-                        android:paddingRight="15dp"
-                        android:paddingBottom="8dp"
-                        android:text="@string/main_force_focus_invert"
-                        android:textColor="@color/colorTextGray"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:alpha="0.6"
-                        android:lineSpacingExtra="6dp"
-                        android:paddingLeft="15dp"
-                        android:paddingRight="15dp"
-                        android:text="@string/main_force_focus_invert_desc"
-                        android:textColor="@color/colorTextDark"
-                        android:textSize="12sp" />
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

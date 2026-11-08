@@ -269,6 +269,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.notifyIconResamplingSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_RESAMPLING) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
+        configBinding.focusNotifyIconSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFY_ICON) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
+        }
         configBinding.miuiNotifyIconReplacementSwitch.bind(ConfigData.ENABLE_REPLACE_MIUI_STYLE_NOTIFY_ICON) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }

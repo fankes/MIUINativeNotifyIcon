@@ -35,6 +35,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
+import android.os.Bundle
 import android.os.SystemClock
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -525,6 +526,7 @@ object SystemUIHooker : YukiBaseHooker() {
             firstFieldOrNull { name = "notifStyle" }?.set(-100)
             firstMethodOrNull { name = "onNotifStyleChanged" }?.invoke()
         }
+        iconRuleScope.launch { refreshFocusNotificationIcons() }
     }
 
     /**
@@ -860,6 +862,179 @@ object SystemUIHooker : YukiBaseHooker() {
         createBitmap(size, size).also { iconView.draw(Canvas(it)) }
             .round(ConfigData.notifyIconCornerSize.toPx(context).toFloat())
             .toDrawable(context.resources)
+    }
+
+    /** 将通知栏图标和外圈一起绘制，供焦点通知胶囊和应用角标缩放使用 */
+    private fun compatFocusIcon(iconView: ImageView, nf: StatusBarNotification) {
+        if (ConfigData.isEnableFocusNotifyIcon.not()) return
+        val size = 40.toPx(iconView.context)
+        val panelIcon = ImageView(iconView.context).apply {
+            layoutParams = ViewLayoutParams(size, size)
+        }
+        compatNotifyIcon(iconView.context, nf, panelIcon, isUseMaterial3Style = true)
+        if (panelIcon.drawable == null) return
+        panelIcon.clipToOutline = false
+        val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
+        panelIcon.measure(sizeSpec, sizeSpec)
+        panelIcon.layout(0, 0, size, size)
+        val bitmap = createBitmap(size, size).also { panelIcon.draw(Canvas(it)) }
+        iconView.apply {
+            background = null
+            colorFilter = null
+            imageTintList = null
+            clipToOutline = false
+            setPadding(0)
+            setImageDrawable(bitmap.toDrawable(resources))
+        }
+    }
+
+    /** 从插件已有的通知数据适配胶囊主图标，不替换右侧进度、动画或展开卡片的大图 */
+    private fun hookFocusNotificationIcons(loader: ClassLoader, hookedClasses: MutableSet<Class<*>>) {
+        val holderClass = "miui.systemui.dynamicisland.module.IslandIconViewHolder".toClassOrNull(loader)
+        if (holderClass != null && hookedClasses.add(holderClass)) holderClass.resolve().optional().apply {
+            mapOf("setAppIcon" to "appIcon", "setFixIcon" to "fixIcon", "setIcon" to "icon", "setSmallIcon" to "smallIcon")
+                .forEach { (methodName, fieldName) ->
+                    firstMethodOrNull {
+                        name = methodName
+                        parameterCount = 1
+                    }?.hook()?.after {
+                        val resolver = instance.asResolver().optional(silent = true)
+                        val module = resolver.firstMethodOrNull {
+                            name = "getModule"
+                            superclass()
+                        }?.invoke<String>()
+                        if (module != "moduleImageText_1" && module != "moduleImageText_3" &&
+                            module != "modulePicSmallIsland" && module != "moduleCombinePic")
+                            return@after
+                        val data = firstArg().get() ?: return@after
+                        if (methodName != "setAppIcon") {
+                            val picInfo = resolver.firstFieldOrNull { name = "picInfo" }?.get() ?: return@after
+                            val pic = picInfo.asResolver().optional(silent = true).firstMethodOrNull {
+                                name = "getPic"
+                                emptyParameters()
+                            }?.invoke<String>() ?: return@after
+                            if (pic != "miui.focus.pic_app_icon_big_island" && pic != "miui.focus.pic_app_icon_small_island")
+                                return@after
+                        }
+                        val extras = data.asResolver().optional(silent = true).firstMethodOrNull {
+                            name = "getExtras"
+                            emptyParameters()
+                        }?.invoke<Bundle>() ?: return@after
+                        val nf = extras.getParcelableCompat<StatusBarNotification>("miui.sbn") ?: return@after
+                        val icon = resolver.firstFieldOrNull { name = fieldName }?.get<ImageView>() ?: return@after
+                        if (icon.isVisible) compatFocusIcon(icon, nf)
+                    }
+                }
+        }
+        // 部分 OS3 图文模板直接写入应用角标，不经过 showAppIcon，需在头像绑定完成后单独适配
+        val badgeId = $$"com.android.systemui.miui.notification.R$id".toClassOrNull(loader)?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "focus_app_icon" }?.get<Int>()
+        if (badgeId != null) listOf("ModuleImageTextImViewHolder", "ModuleTinyImageTextImViewHolder").forEach { className ->
+            val imageTextClass = "miui.systemui.notification.focus.moduleV3.$className".toClassOrNull(loader) ?: return@forEach
+            if (hookedClasses.add(imageTextClass).not()) return@forEach
+            imageTextClass.resolve().optional(silent = true).firstMethodOrNull {
+                name = "showProfilePicture"
+                parameterCount = 2
+            }?.hook()?.after {
+                val nf = arg(1).get<StatusBarNotification>() ?: return@after
+                val root = instance.asResolver().optional(silent = true).firstMethodOrNull {
+                    name = "getView"
+                    emptyParameters()
+                    superclass()
+                }?.invoke<View>() ?: return@after
+                val icon = root.findViewById<ImageView>(badgeId) ?: return@after
+                if (icon.isVisible) compatFocusIcon(icon, nf)
+            }
+        }
+        // OS3、OS4 保留的旧进度模板使用独立的应用图标绑定入口
+        val templateClass = "miui.systemui.notification.focus.template.FocusTemplate".toClassOrNull(loader)
+        if (templateClass != null && hookedClasses.add(templateClass)) templateClass.resolve().optional(silent = true).firstMethodOrNull {
+            name = "showAppIcon"
+            parameters(Context::class, ImageView::class, StatusBarNotification::class)
+        }?.hook()?.after {
+            val icon = arg(1).get<ImageView>() ?: return@after
+            val nf = arg(2).get<StatusBarNotification>() ?: return@after
+            if (icon.isVisible) compatFocusIcon(icon, nf)
+        }
+        val badgeClass = "miui.systemui.notification.focus.moduleV3.ext.ModuleViewHolderExtKt".toClassOrNull(loader)
+        if (badgeClass != null && hookedClasses.add(badgeClass)) {
+            badgeClass.resolve().optional().firstMethodOrNull {
+                name = "showAppIcon"
+                parameters { it.firstOrNull() == classOf<ImageView>() && it.size == 3 }
+            }?.hook()?.after {
+                val icon = firstArg().get<ImageView>() ?: return@after
+                val nf = arg(1).get<StatusBarNotification>() ?: return@after
+                if (icon.isVisible) compatFocusIcon(icon, nf)
+            }
+            badgeClass.resolve().optional().firstMethodOrNull {
+                name = "showAppIcon"
+                parameters {
+                    it.firstOrNull() == classOf<ImageView>() && it.size == 4 &&
+                        it[1] == classOf<StatusBarNotification>() && it[2] == classOf<String>()
+                }
+            }?.hook()?.after {
+                val icon = firstArg().get<ImageView>() ?: return@after
+                val nf = arg(1).get<StatusBarNotification>() ?: return@after
+                if (icon.isVisible) compatFocusIcon(icon, nf)
+            }
+        }
+    }
+
+    /** 从当前插件的作用域获取焦点控制器，重新绑定已有通知，不保存插件或视图实例 */
+    private fun refreshFocusNotificationIcons() = runInSafe(msg = "Refresh focus notification icons") {
+        val loader = "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
+            ?.get("miui.systemui.plugin") ?: return@runInSafe
+        val component = "miui.systemui.dagger.PluginComponentInitializer".toClassOrNull(loader)?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "_pluginComponent" }?.get() ?: return@runInSafe
+        val provider = component.asResolver().optional(silent = true)
+            .firstFieldOrNull { name = "focusNotificationControllerProvider" }?.get() ?: return@runInSafe
+        val controller = provider.asResolver().firstMethod {
+            name = "get"
+            emptyParameters()
+        }.invoke<Any>() ?: return@runInSafe
+        val resolver = controller.asResolver()
+        val notifications = resolver.firstField { name = "sbnMap" }.get<Map<String, StatusBarNotification>>()
+            ?.values?.toList().orEmpty()
+        if (notifications.isEmpty()) return@runInSafe
+        val pluginContext = resolver.firstField { name = "pluginCtx" }.get<Context>() ?: return@runInSafe
+        val sysuiContext = resolver.firstField { name = "sysuiCtx" }.get<Context>() ?: return@runInSafe
+        val notificationProvider = resolver.firstField { name = "mProvider" }.get() ?: return@runInSafe
+        val utils = resolver.firstField { name = "focusNotifUtils" }.get() ?: return@runInSafe
+        val maxSeq = utils.asResolver().firstMethod {
+            name = "getMaxSeq"
+            emptyParameters()
+        }.invoke<MutableMap<String, Long>>() ?: return@runInSafe
+        val repost = resolver.firstMethod {
+            name = "onNotificationPosted"
+            parameterCount = 4
+        }
+        notifications.forEach { nf ->
+            // 与宿主配置变化刷新一致：允许当前序号重新绑定，且不因图标设置变化再次弹出悬浮卡片
+            maxSeq.remove(nf.key)
+            nf.notification.extras.putBoolean("miui.island.updateNoFloat", true)
+            repost.invoke(nf, pluginContext, sysuiContext, notificationProvider)
+        }
+    }
+
+    /** 使用宿主已有的插件加载器，兼顾首次加载和模块热重载，不创建另一份插件实例 */
+    private fun hookFocusNotificationPlugin() {
+        val hookedClasses = mutableSetOf<Class<*>>()
+        fun hookLoadedPlugin() {
+            "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()?.resolve()?.optional(silent = true)
+                ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
+                ?.get("miui.systemui.plugin")?.let { hookFocusNotificationIcons(it, hookedClasses) }
+        }
+        // OS3 在 Supplier 内创建加载器，OS4 改为 createClassLoader；两者都会返回插件 Context
+        $$"com.android.systemui.shared.plugins.PluginInstance$PluginFactory".toClassOrNull()?.resolve()?.optional(silent = true)
+            ?.firstMethodOrNull {
+                name = "createPluginContext"
+                emptyParameters()
+            }?.hook()?.after {
+                result<Context>()?.takeIf { it.packageName == "miui.systemui.plugin" }
+                    ?.let { hookFocusNotificationIcons(it.classLoader, hookedClasses) }
+            }
+        hookLoadedPlugin()
     }
 
     /**
@@ -1361,6 +1536,8 @@ object SystemUIHooker : YukiBaseHooker() {
         if (isSharedCacheAvailable) IconRuleManagerTool.attachHost(sharedFiles)
         // 注册生命周期
         registerLifecycle()
+        // OS3、OS4 焦点通知的胶囊主图标和展开应用角标
+        hookFocusNotificationPlugin()
         // Android 16、17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标；
         // OS3、OS4 的参数类型及顺序不同，统一按方法语义拦截，让折叠和展开模板继续使用通知 smallIcon
         NotificationIconStyleProviderImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {

@@ -55,6 +55,9 @@ object ConfigData {
     /** 启用单色图标重采样 */
     val ENABLE_NOTIFY_ICON_RESAMPLING = PreferenceData("_notify_icon_resampling", false)
 
+    /** 替换焦点通知图标 */
+    val ENABLE_FOCUS_NOTIFY_ICON = PreferenceData("_enable_focus_notify_icon", true)
+
     /** 状态栏中的通知图标暗色透明度 */
     val STATUS_ICON_DARK_ALPHA_LEVEL = PreferenceData("_status_icon_dark_alpha", 95)
 
@@ -253,6 +256,16 @@ object ConfigData {
         get() = getBoolean(ENABLE_NOTIFY_ICON_RESAMPLING)
         set(value) {
             putBoolean(ENABLE_NOTIFY_ICON_RESAMPLING, value)
+        }
+
+    /**
+     * 是否替换焦点通知图标
+     * @return [Boolean]
+     */
+    var isEnableFocusNotifyIcon
+        get() = getBoolean(ENABLE_FOCUS_NOTIFY_ICON)
+        set(value) {
+            putBoolean(ENABLE_FOCUS_NOTIFY_ICON, value)
         }
 
     /**
