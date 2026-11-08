@@ -22,6 +22,7 @@
  */
 package com.fankes.miui.notify.service
 
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -29,6 +30,7 @@ import com.fankes.miui.notify.R
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
 import com.highcapable.anip.sdk.Anip
+import com.highcapable.betterandroid.system.extension.component.Intent
 import com.highcapable.betterandroid.ui.component.notification.factory.Notification
 import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
 import com.highcapable.betterandroid.ui.component.notification.factory.startForeground
@@ -36,10 +38,12 @@ import com.highcapable.betterandroid.ui.component.notification.type.Notification
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.runtime.YukiHookRuntime
 import com.highcapable.yukihookapi.runtime.bridge.FrameworkServiceBridge
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
@@ -60,6 +64,7 @@ class IconRuleUpdateService : Service() {
 
         const val NOTIFY_CHANNEL = "iconRuleUpdatingId"
         const val NOTIFY_ID = 1
+        const val ACTION_CANCEL = "cancelIconRuleUpdate"
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -70,21 +75,33 @@ class IconRuleUpdateService : Service() {
     override fun onBind(intent: Intent?) = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_CANCEL) {
+            scope.cancel()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
+        }
         startForeground()
         // 告知 SystemUI 已收到更新请求，取消它的兜底提醒
         SystemUITool.notifyIconRuleUpdateStarted(context = this)
         if (isUpdating) return START_NOT_STICKY
         isUpdating = true
         scope.launch {
-            val result = if (awaitFrameworkService())
-                runCatching { IconRuleManagerTool.fetch(context = this@IconRuleUpdateService) }.getOrElse {
-                    Anip.FetchResult(it.message ?: getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
-                }
-            else Anip.FetchResult(getString(R.string.service_hook_not_connected), Anip.FetchResult.Status.FAILED)
-            IconRuleManagerTool.notifyFetchResult(context = this@IconRuleUpdateService, result)
-            if (result.status == Anip.FetchResult.Status.SUCCESS)
-                SystemUITool.refreshSystemUI(context = this@IconRuleUpdateService, isRefreshIconData = true)
-            stopSelf()
+            try {
+                val result = if (awaitFrameworkService())
+                    runCatching { IconRuleManagerTool.fetch(context = this@IconRuleUpdateService) }.getOrElse {
+                        if (it is CancellationException) throw it
+                        Anip.FetchResult(it.message ?: getString(R.string.anip_fetch_failed), Anip.FetchResult.Status.FAILED)
+                    }
+                else Anip.FetchResult(getString(R.string.service_hook_not_connected), Anip.FetchResult.Status.FAILED)
+                coroutineContext.ensureActive()
+                IconRuleManagerTool.notifyFetchResult(context = this@IconRuleUpdateService, result)
+                if (result.status == Anip.FetchResult.Status.SUCCESS)
+                    SystemUITool.refreshSystemUI(context = this@IconRuleUpdateService, isRefreshIconData = true)
+            } finally {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
         }
         return START_NOT_STICKY
     }
@@ -105,6 +122,15 @@ class IconRuleUpdateService : Service() {
             smallIcon(R.drawable.ic_nf_icon_update)
             contentTitle = getString(R.string.sync_syncing)
             contentText = getString(R.string.sync_fetching_anip)
+            addAction(
+                icon = 0,
+                title = getString(R.string.common_cancel),
+                intent = PendingIntent.getService(
+                    this@IconRuleUpdateService, 0,
+                    Intent<IconRuleUpdateService>(this@IconRuleUpdateService).setAction(ACTION_CANCEL),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
         }
         @Suppress("InlinedApi")
         startForeground(NOTIFY_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)

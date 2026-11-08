@@ -57,6 +57,8 @@ import com.highcapable.anip.sdk.type.SystemVariant
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.betterandroid.ui.component.notification.factory.NotificationChannel
 import com.highcapable.betterandroid.ui.component.notification.factory.createNotification
+import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
+import com.highcapable.betterandroid.ui.component.notification.type.NotificationImportance
 import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.view.layoutInflater
 import com.highcapable.betterandroid.ui.extension.view.textToString
@@ -84,6 +86,11 @@ object IconRuleManagerTool {
 
     /** ANIP 仓库地址 */
     const val ANIP_REPOSITORY_URL = "https://github.com/BetterAndroid/android-notification-icon-project"
+
+    /** 取消旧版宿主内的后台同步 */
+    const val ACTION_CANCEL_SYNC = "${BuildConfigWrapper.APPLICATION_ID}.CANCEL_ICON_RULE_SYNC"
+
+    private const val SYNC_NOTIFY_CHANNEL = "iconRuleUpdatingId"
 
     /** 更新通知携带的仓库清单地址键 */
     const val EXTRA_ICON_RULE_SOURCE = "iconRuleSource"
@@ -231,6 +238,40 @@ object IconRuleManagerTool {
             current.extra?.icons?.forEach { merged[it.packageName] = it }
             merged.values.toList()
         }.orEmpty()
+
+    /**
+     * 显示旧版宿主内的后台同步通知，取消操作交给宿主接收
+     * @param context 发布通知的宿主上下文
+     * @param resources 模块资源
+     */
+    fun notifySyncing(context: Context, resources: Resources) {
+        @Suppress("MissingPermission")
+        context.createNotification(
+            channel = NotificationChannel(SYNC_NOTIFY_CHANNEL, importance = NotificationImportance.LOW) {
+                name = resources.getString(R.string.sync_service_channel)
+            }
+        ) {
+            @Suppress("RestrictedApi")
+            smallIcon = IconCompat.createWithResource(resources, BuildConfigWrapper.APPLICATION_ID, R.drawable.ic_nf_icon_update)
+            contentTitle = resources.getString(R.string.sync_syncing)
+            contentText = resources.getString(R.string.sync_fetching_anip)
+            isOngoing = true
+            addAction(
+                icon = 0,
+                title = resources.getString(R.string.common_cancel),
+                intent = PendingIntent.getBroadcast(
+                    context, 0, Intent(ACTION_CANCEL_SYNC).setPackage(context.packageName),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+        }.post(id = 0, tag = SYNC_NOTIFY_CHANNEL)
+    }
+
+    /**
+     * 移除旧版宿主内的后台同步通知
+     * @param context 发布通知的宿主上下文
+     */
+    fun dismissSyncing(context: Context) = context.notificationManager.cancel(SYNC_NOTIFY_CHANNEL, 0)
 
     /**
      * 发送后台同步结果提醒；资源已是最新时不发送通知
