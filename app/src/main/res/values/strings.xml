@@ -38,11 +38,11 @@
     <string name="main_count_unit">icons</string>
     <string name="main_change_count">Change Count</string>
     <string name="main_group_icon">Icon Adjustments</string>
-    <string name="main_use_system_icon_inversion">Use the system implementation for icon color inversion</string>
+    <string name="main_use_system_icon_inversion">Use system icon color inversion</string>
     <string name="main_system_icon_inversion_desc">To ensure compatibility, the module uses an algorithm to determine whether notification icons are grayscale. If icon color inversion behaves incorrectly, try enabling this option to use the system implementation instead.</string>
     <string name="main_enable_icon_resampling">Enable monochrome icon resampling</string>
     <string name="main_icon_resampling_desc">This option is off by default. When enabled, it resamples monochrome bitmaps to the notification icon display size and sharpens them when enlarged. This may change stroke thickness and spacing. Vector icons are not affected.</string>
-    <string name="main_notify_group_summary_icon">Use system summary icons for notification groups</string>
+    <string name="main_notify_group_summary_icon">Use system group summary icon</string>
     <string name="main_notify_group_summary_icon_desc">This option is enabled by default on Android 14 and above. When enabled, the system summary icon is used as the first icon for a notification group. When disabled, the icon of the last notification sent is used instead.</string>
     <string name="main_enable_focus_notify_icon">Replace focus notification icons</string>
     <string name="main_focus_notify_icon_desc">This option is enabled by default. When enabled, the main icon in focus notification capsules and the app badge on expanded cards on HyperOS 3 and above also use the replaced notification icons. It has no effect on older systems without this feature.</string>
