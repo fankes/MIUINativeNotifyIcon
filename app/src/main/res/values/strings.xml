@@ -7,6 +7,8 @@
     <string name="config_item_contributors_placeholder">Contributors: noname</string>
     <string name="config_item_enable">Enable</string>
     <string name="config_item_override">Override</string>
+    <string name="config_bulk_disable">Disable</string>
+    <string name="config_bulk_no_override">Preserve</string>
     <string name="config_title">Icon Optimization List</string>
     <string name="config_list_loading">Loading the list…</string>
     <string name="config_scroll_top">Scroll to Top</string>
@@ -137,6 +139,11 @@
     <string name="config_empty_no_data">No data available, tap the top right to sync</string>
     <string name="config_filter_result">Matches for \"%1$s\": %2$d</string>
     <string name="config_included_count">%1$d apps</string>
+    <string name="config_selected_count">%1$d apps selected</string>
+    <string name="config_select_mode">Multi-select</string>
+    <string name="config_select_all">Select All</string>
+    <string name="config_deselect_all">Deselect All</string>
+    <string name="config_invert_selection">Invert Selection</string>
     <string name="config_back_to_main">Go back to the module\'s home page?</string>
     <string name="common_prompt">Tip</string>
     <string name="common_cancel">Cancel</string>
@@ -149,6 +156,7 @@
     <string name="config_contribute_anip_msg">ANIP (Android Notification Icon Project) is a community-maintained project.\nYou can contribute new icons or request adaptation for apps that are not yet included.</string>
     <string name="config_override_msg">This function only needs to be enabled for apps whose notification icons seriously violate the specification, for example, black and white block icons that cannot be recognized after the app posts a notification.\n\nIn general, keep it off and follow the configuration provided by the list. Do not change it casually. Once enabled, the app\'s notification icons may be broken by the rules. Are you sure you want to enable it?</string>
     <string name="config_override">Override</string>
+    <string name="config_bulk_override_title">Override %1$d apps</string>
     <string name="config_contributors">Contributors: %1$s</string>
     <string name="config_filter_clear">Clear Condition</string>
     <string name="config_options">Options</string>

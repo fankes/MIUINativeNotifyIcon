@@ -4,146 +4,173 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_permotion_round"
+    android:animateLayoutChanges="true"
     android:baselineAligned="false"
     android:descendantFocusability="blocksDescendants"
     android:gravity="center|start"
     android:orientation="horizontal"
-    android:padding="15dp"
-    tools:ignore="HardcodedText,SmallSp">
+    tools:ignore="HardcodedText,SmallSp,NestedWeights">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:orientation="vertical">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp">
-
-            <androidx.constraintlayout.utils.widget.ImageFilterView
-                android:id="@+id/adp_app_icon"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="8dp"
-                android:tint="@color/colorTextGray"
-                app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
-                app:layout_constraintEnd_toStartOf="@id/adp_app_name"
-                app:layout_constraintHorizontal_bias="0"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/adp_app_name" />
-
-            <TextView
-                android:id="@+id/adp_app_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:includeFontPadding="false"
-                android:singleLine="true"
-                android:text="@string/config_item_app_name"
-                android:textColor="@color/colorTextGray"
-                android:textSize="14sp"
-                app:layout_constrainedWidth="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/adp_additional_badge"
-                app:layout_constraintStart_toEndOf="@id/adp_app_icon"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/adp_additional_badge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_additional_badge"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:paddingStart="4dp"
-                android:paddingTop="1dp"
-                android:paddingEnd="4dp"
-                android:paddingBottom="1dp"
-                android:singleLine="true"
-                android:text="@string/config_additional_badge"
-                android:textColor="@color/white"
-                android:textSize="9sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/adp_app_name"
-                app:layout_constraintTop_toTopOf="@id/adp_app_name" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:id="@+id/adp_app_pkg_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:alpha="0.75"
-            android:singleLine="true"
-            android:text="com.xxx.xxx"
-            android:textColor="@color/colorTextDark"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/adp_cbr_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="@string/config_item_contributors_placeholder"
-            android:textColor="@color/colorTextDark"
-            android:textSize="13sp" />
-    </LinearLayout>
-
-    <LinearLayout
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/adp_app_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginEnd="5dp"
+        android:clickable="true"
+        android:focusable="false"
+        android:minWidth="24dp"
+        android:minHeight="24dp"
+        android:padding="0dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/adp_app_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bg_permotion_round"
+        android:baselineAligned="false"
+        android:duplicateParentState="true"
+        android:foreground="@drawable/fg_permotion_ripple"
+        android:gravity="center|start"
+        android:orientation="horizontal"
+        android:padding="15dp">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginBottom="5dp"
-            android:gravity="center|end">
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_weight="1"
+            android:gravity="center|start"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
+
+                <androidx.constraintlayout.utils.widget.ImageFilterView
+                    android:id="@+id/adp_app_icon"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginEnd="8dp"
+                    android:tint="@color/colorTextGray"
+                    app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
+                    app:layout_constraintEnd_toStartOf="@id/adp_app_name"
+                    app:layout_constraintHorizontal_bias="0"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/adp_app_name" />
+
+                <TextView
+                    android:id="@+id/adp_app_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:includeFontPadding="false"
+                    android:singleLine="true"
+                    android:text="@string/config_item_app_name"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="14sp"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/adp_additional_badge"
+                    app:layout_constraintStart_toEndOf="@id/adp_app_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/adp_additional_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_additional_badge"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:paddingStart="4dp"
+                    android:paddingTop="1dp"
+                    android:paddingEnd="4dp"
+                    android:paddingBottom="1dp"
+                    android:singleLine="true"
+                    android:text="@string/config_additional_badge"
+                    android:textColor="@color/white"
+                    android:textSize="9sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/adp_app_name"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/adp_app_name"
+                    app:layout_constraintTop_toTopOf="@id/adp_app_name" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/adp_app_pkg_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/config_item_enable"
-                android:textColor="@color/colorTextGray"
-                android:textSize="13sp" />
+                android:layout_marginBottom="10dp"
+                android:alpha="0.75"
+                android:singleLine="true"
+                android:text="com.xxx.xxx"
+                android:textColor="@color/colorTextDark"
+                android:textSize="12sp" />
 
-            <com.fankes.miui.notify.ui.widget.AppSwitch
-                android:id="@+id/adp_app_open_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="4dp" />
+            <TextView
+                android:id="@+id/adp_cbr_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/config_item_contributors_placeholder"
+                android:textColor="@color/colorTextDark"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/adp_app_overlay_row"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center|end">
+            android:id="@+id/adp_app_switches"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/adp_app_overlay_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/config_item_override"
-                android:textColor="@color/colorTextGray"
-                android:textSize="13sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginBottom="5dp"
+                android:gravity="center|end">
 
-            <com.fankes.miui.notify.ui.widget.AppSwitch
-                android:id="@+id/adp_app_all_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/config_item_enable"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="13sp" />
+
+                <com.fankes.miui.notify.ui.widget.AppSwitch
+                    android:id="@+id/adp_app_open_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/adp_app_overlay_row"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center|end">
+
+                <TextView
+                    android:id="@+id/adp_app_overlay_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/config_item_override"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="13sp" />
+
+                <com.fankes.miui.notify.ui.widget.AppSwitch
+                    android:id="@+id/adp_app_all_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

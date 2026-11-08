@@ -7,6 +7,8 @@
     <string name="config_item_contributors_placeholder">贡献者：noname</string>
     <string name="config_item_enable">启用</string>
     <string name="config_item_override">覆盖</string>
+    <string name="config_bulk_disable">禁用</string>
+    <string name="config_bulk_no_override">保留</string>
     <string name="config_title">通知图标优化名单</string>
     <string name="config_list_loading">适配列表正在等待装载</string>
     <string name="config_scroll_top">滚动到顶部</string>
@@ -137,6 +139,11 @@
     <string name="config_empty_no_data">暂无数据，点击右上角进行同步</string>
     <string name="config_filter_result">“%1$s” 匹配到 %2$d 个结果</string>
     <string name="config_included_count">共 %1$d 个应用</string>
+    <string name="config_selected_count">已选 %1$d 个应用</string>
+    <string name="config_select_mode">多选</string>
+    <string name="config_select_all">全选</string>
+    <string name="config_deselect_all">取消全选</string>
+    <string name="config_invert_selection">反选</string>
     <string name="config_back_to_main">要返回模块主页吗？</string>
     <string name="common_prompt">提示</string>
     <string name="common_cancel">取消</string>
@@ -149,6 +156,7 @@
     <string name="config_contribute_anip_msg">ANIP 全名为 Android 通知图标适配计划，由社区共同维护。\n你可以参与贡献新图标，也可以为未收录的应用请求适配。</string>
     <string name="config_override_msg">此功能仅针对严重不遵守规范的应用通知图标才需要开启，例如：应用推送通知后无法识别出现的黑白块图标。\n\n此功能在一般情况下请保持关闭并跟随名单提供的配置，并不要随意改变此配置，开启后应用的通知图标可能会被规则破坏，你确定还要开启吗？</string>
     <string name="config_override">覆盖</string>
+    <string name="config_bulk_override_title">覆盖 %1$d 个应用</string>
     <string name="config_contributors">贡献者：%1$s</string>
     <string name="config_filter_clear">清除条件</string>
     <string name="config_options">选项</string>

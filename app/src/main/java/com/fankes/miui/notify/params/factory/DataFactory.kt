@@ -55,6 +55,16 @@ fun Context.putAppNotifyEnabledOf(icon: NotificationIcon, isEnabled: Boolean) =
     preferences().edit { putBoolean(icon.preferenceName(ENABLE_SUFFIX), isEnabled) }
 
 /**
+ * 一次提交多个 APP 的通知图标启用状态
+ * @param icons 要修改的图标名单
+ * @param isEnabled 是否启用
+ */
+fun Context.putAppNotifyEnabledOf(icons: List<NotificationIcon>, isEnabled: Boolean) =
+    preferences().edit {
+        icons.forEach { putBoolean(it.preferenceName(ENABLE_SUFFIX), isEnabled) }
+    }
+
+/**
  * 获取此 APP 的 ANIP 通知图标是否覆盖原有单色图标
  * @param icon ANIP 图标实体
  */
@@ -73,6 +83,16 @@ fun Context.isAppNotifyOverlayOf(icon: NotificationIcon) = preferences().getBool
  */
 fun Context.putAppNotifyOverlayOf(icon: NotificationIcon, isOverlay: Boolean) =
     preferences().edit { putBoolean(icon.preferenceName(OVERLAY_SUFFIX), isOverlay) }
+
+/**
+ * 一次提交多个 APP 的通知图标覆盖状态
+ * @param icons 要修改的图标名单
+ * @param isOverlay 是否覆盖
+ */
+fun Context.putAppNotifyOverlayOf(icons: List<NotificationIcon>, isOverlay: Boolean) =
+    preferences().edit {
+        icons.forEach { putBoolean(it.preferenceName(OVERLAY_SUFFIX), isOverlay) }
+    }
 
 /**
  * 清除名单中的本地覆盖设置，恢复跟随云端规则，保留启用状态

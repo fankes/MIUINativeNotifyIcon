@@ -84,15 +84,18 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
+        <!-- 允许数量栏的无边界水波纹越过 AppBar 底部，父布局链均不裁剪子视图 -->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clipChildren="false">
 
             <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/config_app_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorThemeBackground"
+                android:clipChildren="false"
                 app:elevation="0dp"
                 app:liftOnScroll="false"
                 app:liftOnScrollColor="@color/colorThemeBackground">
@@ -133,6 +136,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:clipChildren="false"
                     android:orientation="vertical">
 
                     <com.fankes.miui.notify.ui.widget.AppSwitch
@@ -156,6 +160,7 @@
                         android:id="@+id/config_list_controls"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:clipChildren="false"
                         android:orientation="vertical">
 
                         <HorizontalScrollView
@@ -247,7 +252,9 @@
                             android:layout_marginLeft="25dp"
                             android:layout_marginTop="12dp"
                             android:layout_marginRight="25dp"
+                            android:animateLayoutChanges="true"
                             android:baselineAligned="false"
+                            android:clipChildren="false"
                             android:gravity="center">
 
                             <TextView
@@ -267,11 +274,35 @@
                                 app:autoSizeStepGranularity="1sp"
                                 app:autoSizeTextType="uniform" />
 
+                            <!-- 水波纹放在前景，避免向 AppBar 背景投影后在底部被裁剪 -->
+                            <androidx.constraintlayout.utils.widget.ImageFilterView
+                                android:id="@+id/config_select_all"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@string/config_select_mode"
+                                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                                android:src="@drawable/ic_select_all"
+                                android:tint="@color/colorTextGray"
+                                android:tooltipText="@string/config_select_mode" />
+
+                            <androidx.constraintlayout.utils.widget.ImageFilterView
+                                android:id="@+id/config_invert_selection"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@string/config_invert_selection"
+                                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                                android:src="@drawable/ic_invert_selection"
+                                android:tint="@color/colorTextGray"
+                                android:tooltipText="@string/config_invert_selection"
+                                android:visibility="gone" />
+
                             <androidx.constraintlayout.utils.widget.ImageFilterView
                                 android:id="@+id/config_title_filter"
                                 android:layout_width="18dp"
                                 android:layout_height="18dp"
-                                android:background="?android:attr/selectableItemBackgroundBorderless"
+                                android:foreground="?android:attr/selectableItemBackgroundBorderless"
                                 android:src="@drawable/ic_filter"
                                 android:tint="@color/colorTextGray"
                                 android:tooltipText="@string/config_filter" />
@@ -345,6 +376,94 @@
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/config_selection_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/config_bulk_enable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@drawable/bg_button_round"
+            android:enabled="false"
+            android:gravity="center"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/config_item_enable"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp"
+            app:autoSizeMaxTextSize="15sp"
+            app:autoSizeMinTextSize="8sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform" />
+
+        <TextView
+            android:id="@+id/config_bulk_disable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@drawable/bg_button_round"
+            android:enabled="false"
+            android:gravity="center"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/config_bulk_disable"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp"
+            app:autoSizeMaxTextSize="15sp"
+            app:autoSizeMinTextSize="8sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform" />
+
+        <TextView
+            android:id="@+id/config_bulk_override"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@drawable/bg_button_round"
+            android:enabled="false"
+            android:gravity="center"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/config_item_override"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp"
+            app:autoSizeMaxTextSize="15sp"
+            app:autoSizeMinTextSize="8sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform" />
+
+        <TextView
+            android:id="@+id/config_bulk_no_override"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@drawable/bg_button_round"
+            android:enabled="false"
+            android:gravity="center"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/config_bulk_no_override"
+            android:textColor="@color/colorTextGray"
+            android:textSize="15sp"
+            app:autoSizeMaxTextSize="15sp"
+            app:autoSizeMinTextSize="8sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/config_bottom_bar"
