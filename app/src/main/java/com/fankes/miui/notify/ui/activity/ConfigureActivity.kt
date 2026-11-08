@@ -371,7 +371,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             msg = getString(R.string.config_override_msg)
                             confirmButton { saveState() }
                             cancelButton { btn.isChecked = btn.isChecked.not() }
-                            noCancelable()
+                            onCancel { btn.isChecked = btn.isChecked.not() }
                         } else saveState()
                     }
                 }
@@ -414,7 +414,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                     confirmButton(text = getString(R.string.config_sync_list)) { startSync() }
                     cancelButton(text = getString(R.string.config_copy_name_package)) { copyToClipboard(content = "$appName($pkgName)") }
                     neutralButton(text = getString(R.string.common_cancel))
-                    noCancelable()
+                    noCancelableOnTouchOutside()
                 }
             intent?.getBooleanExtra("isDirectUpdate", false) == true -> startSync()
             requestedSource.isNotBlank() && requestedVersion > 0L -> launch {
@@ -484,7 +484,6 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
             msg = getString(R.string.config_override_msg)
             confirmButton { saveState() }
             cancelButton()
-            noCancelable()
         } else saveState()
     }
 
@@ -588,7 +587,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                         msg = getString(R.string.main_placeholder_icon_msg)
                         confirmButton { applyChangesAndRefresh() }
                         cancelButton { cancelChanges() }
-                        noCancelable()
+                        onCancel { cancelChanges() }
                     } else applyChangesAndRefresh()
                 }
             }
@@ -608,7 +607,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
                             dialogBinding.notifyIconAutoSyncText.text = time
                         }
                         cancelButton()
-                        noCancelable()
+                        noCancelableOnTouchOutside()
                     }
                 }
             }

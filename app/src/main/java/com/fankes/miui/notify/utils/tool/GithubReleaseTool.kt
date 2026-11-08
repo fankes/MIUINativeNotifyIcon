@@ -113,7 +113,7 @@ object GithubReleaseTool {
                             msg = context.getString(R.string.release_network_unavailable_msg)
                             confirmButton(text = context.getString(R.string.release_enable)) { context.openSelfSetting() }
                             cancelButton()
-                            noCancelable()
+                            noCancelableOnTouchOutside()
                         }
                     }
                 }

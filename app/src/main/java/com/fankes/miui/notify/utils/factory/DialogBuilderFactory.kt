@@ -103,6 +103,9 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
     /** 自定义布局 */
     private var customLayoutView: View? = null
 
+    /** 是否允许点击对话框外部取消 */
+    private var isCanceledOnTouchOutside = true
+
     /**
      * 获取 [DialogBuilder] 绑定布局对象
      * @return [VB]
@@ -123,6 +126,11 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
     /** 设置对话框不可关闭 */
     fun noCancelable() {
         instance?.setCancelable(false)
+    }
+
+    /** 禁止点击对话框外部取消，仍允许按返回键取消 */
+    fun noCancelableOnTouchOutside() {
+        isCanceledOnTouchOutside = false
     }
 
     /** 设置对话框标题 */
@@ -217,6 +225,7 @@ class DialogBuilder<VB : ViewBinding>(val context: Context, private val bindingC
         instance?.create()?.apply {
             customLayoutView?.let { setView(it) }
             dialogInstance = this
+            if (!isCanceledOnTouchOutside) setCanceledOnTouchOutside(false)
             setOnCancelListener { onCancel?.invoke() }
             neutralButtonKeepOpenCallback?.let { callback ->
                 setOnShowListener { dialog ->
