@@ -53,10 +53,12 @@
     <string name="main_open_notify_display_settings">打开系统通知显示设置</string>
     <string name="main_open_notify_display_settings_desc">点击上方按钮可以直接打开系统的通知显示设置界面，可以调整当前通知栏显示的通知样式为 MIUI 经典样式或原生样式，如果无法打开则是当前系统不支持此功能。</string>
     <string name="main_open_notify_display_settings_root">⚠️ 在 MIUI 11 上可能需要 Root 权限才能打开。</string>
+    <string name="main_enable_material3">启用 Material 3 通知图标风格</string>
+    <string name="main_enable_material3_desc">此选项在 Android 12 及以上系统默认开启，开启后将使用 Material 3 通知图标设计方式为通知栏的通知图标增加外部轮廓，同时目标为 Android 12 及以上的系统将自动使用系统主题色着色。</string>
     <string name="main_notify_icon_radius">调整通知栏中的图标边框圆角大小</string>
     <string name="main_current">当前</string>
     <string name="main_notify_icon_radius_desc">你可以拖拽滑动条来调整通知栏中的图标边框圆角大小。</string>
-    <string name="main_notify_icon_radius_support">此功能仅支持 Android 12 及以上系统的 Material 3 通知图标风格以及 HyperOS/MIUI 后期的经典样式通知图标风格。</string>
+    <string name="main_notify_icon_radius_support">此功能仅在启用 Material 3 通知图标风格时生效。</string>
     <string name="main_replace_classic_icon">替换经典样式通知栏的通知图标</string>
     <string name="main_replace_classic_icon_desc">此选项默认开启，开启后经典 (MIUI) 样式的下拉通知栏中的通知图标将同样应用替换后的通知图标，否则将保持系统自己设置的图标。(此功能无法对所有系统版本兼容)</string>
     <string name="main_system_default_tint">通知栏中的图标使用系统默认着色</string>

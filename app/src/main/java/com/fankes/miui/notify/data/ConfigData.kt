@@ -27,6 +27,7 @@ package com.fankes.miui.notify.data
 import android.content.Context
 import com.fankes.miui.notify.const.AdditionalSourceTemplate
 import com.fankes.miui.notify.const.IconRuleSourceSyncType
+import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
 import com.highcapable.yukihookapi.hook.factory.preferences
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.PackageParam
@@ -63,6 +64,9 @@ object ConfigData {
 
     /** 状态栏中的通知图标亮色透明度 */
     val STATUS_ICON_LIGHT_ALPHA_LEVEL = PreferenceData("_status_icon_light_alpha", 95)
+
+    /** 启用 Material 3 通知图标风格 */
+    val ENABLE_MD3_NOTIFY_ICON_STYLE = PreferenceData("_notify_icon_md3_style", AndroidVersion.isAtLeast(AndroidVersion.S))
 
     /** 通知栏中的通知图标圆角程度 */
     val NOTIFY_ICON_CORNER_SIZE = PreferenceData("_notify_icon_corner", 15)
@@ -286,6 +290,16 @@ object ConfigData {
         get() = getInt(STATUS_ICON_LIGHT_ALPHA_LEVEL)
         set(value) {
             putInt(STATUS_ICON_LIGHT_ALPHA_LEVEL, value)
+        }
+
+    /**
+     * 是否启用 Material 3 通知图标风格
+     * @return [Boolean]
+     */
+    var isEnableMd3NotifyIconStyle
+        get() = getBoolean(ENABLE_MD3_NOTIFY_ICON_STYLE)
+        set(value) {
+            putBoolean(ENABLE_MD3_NOTIFY_ICON_STYLE, value)
         }
 
     /**

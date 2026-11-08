@@ -53,10 +53,12 @@
     <string name="main_open_notify_display_settings">Notification Display Settings</string>
     <string name="main_open_notify_display_settings_desc">Tap the button above to open the system\'s notification display settings, where you can switch between the classic MIUI style and the native style. If it does not open, your system does not support this function.</string>
     <string name="main_open_notify_display_settings_root">⚠️ On MIUI 11, opening it may require root access.</string>
+    <string name="main_enable_material3">Material 3 notification icons</string>
+    <string name="main_enable_material3_desc">This option is enabled by default on Android 12 and above. When enabled, it uses the Material 3 design for notification icons, adding an outer outline to the icons. On Android 12 and above, the system theme color is used for tinting automatically.</string>
     <string name="main_notify_icon_radius">Notification icon corner radius</string>
     <string name="main_current">Current</string>
     <string name="main_notify_icon_radius_desc">Drag the slider to adjust the corner radius of the icon border in the notification shade.</string>
-    <string name="main_notify_icon_radius_support">This function only works with the Material 3 notification icon style on Android 12 and above, and with the classic notification icon style on later versions of HyperOS/MIUI.</string>
+    <string name="main_notify_icon_radius_support">This function only works when Material 3 notification icons are enabled.</string>
     <string name="main_replace_classic_icon">Replace icons in classic panel</string>
     <string name="main_replace_classic_icon_desc">This option is on by default. When enabled, the notification icons in the classic (MIUI-style) notification shade also use the replaced icons. Otherwise the icons set by the system are kept. (Not compatible with every system version)</string>
     <string name="main_system_default_tint">Use system default icon tint</string>

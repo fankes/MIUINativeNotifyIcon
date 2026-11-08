@@ -537,6 +537,31 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <com.fankes.miui.notify.ui.widget.AppSwitch
+                    android:id="@+id/md3_style_config_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="5dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/main_enable_material3"
+                    android:textAllCaps="false"
+                    android:textColor="@color/colorTextGray"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.6"
+                    android:lineSpacingExtra="6dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:text="@string/main_enable_material3_desc"
+                    android:textColor="@color/colorTextDark"
+                    android:textSize="12sp" />
+
                 <LinearLayout
                     android:id="@+id/notify_icon_custom_corner_item"
                     android:layout_width="match_parent"
@@ -562,7 +587,7 @@
                         android:layout_marginLeft="5dp"
                         android:layout_marginTop="5dp"
                         android:layout_marginRight="5dp"
-                        android:max="15"
+                        android:max="30"
                         android:min="0"
                         android:progress="15" />
 

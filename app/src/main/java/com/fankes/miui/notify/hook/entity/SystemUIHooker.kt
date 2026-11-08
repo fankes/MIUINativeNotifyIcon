@@ -37,6 +37,7 @@ import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.SystemClock
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.view.View
@@ -628,7 +629,6 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param nf 通知实例
      * @param iconView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
-     * @param isUseMaterial3Style 是否使用 Material 3 通知图标风格 - 默认跟随系统版本决定
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
      */
     private fun compatNotifyIcon(
@@ -636,9 +636,10 @@ object SystemUIHooker : YukiBaseHooker() {
         nf: StatusBarNotification?,
         iconView: ImageView,
         isExpanded: Boolean = true,
-        isUseMaterial3Style: Boolean = AndroidVersion.isAtLeast(AndroidVersion.S),
         isMiuiPanel: Boolean = false
     ) = runInSafe(msg = "compatNotifyIcon") {
+        val isUseMaterial3Style = ConfigData.isEnableMd3NotifyIconStyle
+
         /**
          * 设置默认通知图标
          * @param drawable 通知图标
@@ -656,27 +657,29 @@ object SystemUIHooker : YukiBaseHooker() {
                         view.width, view.height, 5.toPx(context).toFloat()
                     )
                 }
-                if (isUseMaterial3Style) {
-                    // 清除原生的背景边距
-                    setPadding(0, 0, 0, 0)
-                    // 清除原生的主题色背景圆圈颜色
-                    background = null
-                }
+                // 清除原生或 Material 3 风格留下的背景和边距
+                setPadding(0)
+                background = null
                 // 清除遮罩颜色
                 colorFilter = null
+                imageTintList = null
             }
         }
         // 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的
         nf?.let { notifyInstance ->
 
             // OS4 的通知 View 使用强制夜间 Context，统一读取 SystemUI Application 的真实日夜配置
-            val isDarkMode = globalContext?.isSystemInDarkMode ?: context.isSystemInDarkMode
+            val systemContext = globalContext ?: context
+            val isDarkMode = systemContext.isSystemInDarkMode
+            // 柔光玻璃为 1，轻透磨砂为 0；仅非 Material 3 风格按玻璃材质使用夜间着色
+            val isSoftLightGlass = isUseMaterial3Style.not() && isMIOS && miosVersionCode >= 4 &&
+                Settings.Secure.getInt(systemContext.contentResolver, "material_style", -1) == 1
 
             // 新版风格反色
             val newStyle = if (isDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE
 
             // 旧版风格反色
-            val oldStyle = if (isDarkMode.not()) 0xFF707070.toInt() else Color.WHITE
+            val oldStyle = if (isSoftLightGlass || isDarkMode) 0xFFDCDCDC.toInt() else 0xFF707173.toInt()
 
             // 通知图标原始颜色
             val iconColor = notifyInstance.notification.color
@@ -713,9 +716,9 @@ object SystemUIHooker : YukiBaseHooker() {
                 notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
 
             val horizontalPadding = when {
-                isMIOS && isMiuiPanel -> 7.toPx(context) * 2
+                isUseMaterial3Style && isMIOS && isMiuiPanel -> 7.toPx(context) * 2
                 isUseMaterial3Style -> 4.toPx(context) * 2
-                else -> iconView.paddingLeft + iconView.paddingRight
+                else -> 0
             }
 
             /** 按图标实际内容尺寸处理单色位图 */
@@ -790,6 +793,10 @@ object SystemUIHooker : YukiBaseHooker() {
                     else iconView.apply {
                         // 设置不要裁切到边界
                         clipToOutline = false
+                        // 清除切换风格前的背景、边距和系统着色
+                        background = null
+                        setPadding(0)
+                        imageTintList = null
                         // 设置自定义小图标
                         setImageDrawable(drawable.optimizeForPanel(horizontalPadding))
                         // 上色
@@ -803,25 +810,33 @@ object SystemUIHooker : YukiBaseHooker() {
                                 .build()
                         when {
                             // 缩小 HyperOS 的通知图标
-                            isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
+                            isUseMaterial3Style && isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
                             // 设置原生的背景边距
                             isUseMaterial3Style -> setPadding(4.toPx(context))
                         }
                     }
                 }
                 else -> {
-                    // 判断如果是灰度图标就给他设置一个白色颜色遮罩
+                    // 处理原生单色通知图标
                     if (isMonochromePanelIcon) {
-                        val backgroundColor = if (hasIconColor) iconColor else context.systemAccentColor
+                        val backgroundColor = when {
+                            hasIconColor -> iconColor
+                            isUseMaterial3Style -> context.systemAccentColor
+                            else -> oldStyle
+                        }
                         if (isUsePromotedOngoingComposedIcon)
                             setPromotedOngoingComposedIcon(iconDrawable, supportColor, backgroundColor)
                         else iconView.apply {
+                            // 清除切换风格前的背景、边距和系统着色
+                            background = null
+                            setPadding(0)
+                            imageTintList = null
                             // 重新设置图标 - 防止系统更改它
                             setImageDrawable(iconDrawable.optimizeForPanel(horizontalPadding))
                             // 设置不要裁切到边界
                             clipToOutline = false
-                            // 设置图标着色
-                            setColorFilter(supportColor)
+                            // 非 Material 3 使用通知自身颜色，无颜色时使用旧版灰度色
+                            setColorFilter(if (isUseMaterial3Style) supportColor else backgroundColor)
                             // 设置图标外圈颜色
                             if (isUseMaterial3Style)
                                 background = DrawableBuilder()
@@ -831,7 +846,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                     .build()
                             when {
                                 // 缩小 HyperOS 的通知图标
-                                isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
+                                isUseMaterial3Style && isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
                                 // 设置原生的背景边距
                                 isUseMaterial3Style -> setPadding(4.toPx(context))
                             }
@@ -875,7 +890,7 @@ object SystemUIHooker : YukiBaseHooker() {
         val panelIcon = ImageView(iconView.context).apply {
             layoutParams = ViewLayoutParams(size, size)
         }
-        compatNotifyIcon(iconView.context, nf, panelIcon, isUseMaterial3Style = true)
+        compatNotifyIcon(iconView.context, nf, panelIcon)
         if (panelIcon.drawable == null) return
         panelIcon.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
@@ -1194,7 +1209,7 @@ object SystemUIHooker : YukiBaseHooker() {
         resolver.firstFieldOrNull { name = "mAppImIcon" }?.of(wrapper)?.get<ImageView>()?.isVisible = false
         val iconView = resolver.firstFieldOrNull { name = "mAppIcon" }?.of(wrapper)?.get<ImageView>() ?: return
         if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
-            compatNotifyIcon(iconView.context, nf, iconView, isUseMaterial3Style = true, isMiuiPanel = true)
+            compatNotifyIcon(iconView.context, nf, iconView, isMiuiPanel = true)
         else iconView.setImageDrawable(nf.miuiAppIcon?.loadDrawable(iconView.context) ?: iconView.context.appIconOf(nf.nfPkgName))
     }
 
@@ -1890,7 +1905,7 @@ object SystemUIHooker : YukiBaseHooker() {
             @Suppress("DiscouragedApi")
             val frameworkIconId = rootView.resources.getIdentifier("icon", "id", "android")
             val rootIcon = focusIcon ?: rootView.findViewById(frameworkIconId) ?: return@after
-            compatNotifyIcon(rootIcon.context, nf, rootIcon, isUseMaterial3Style = true)
+            compatNotifyIcon(rootIcon.context, nf, rootIcon)
         }
         // 修改 MIUI 风格通知栏的通知图标
         MiuiNotificationViewWrapperClass?.resolve()?.optional()?.apply {
@@ -1912,7 +1927,7 @@ object SystemUIHooker : YukiBaseHooker() {
                         name = "mContainingNotification"
                     }?.of(instance)?.get()?.getSbn() ?: return@after
                     if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
-                        compatNotifyIcon(context, nf, iconView = this, isUseMaterial3Style = true, isMiuiPanel = true)
+                        compatNotifyIcon(context, nf, iconView = this, isMiuiPanel = true)
                     else setImageDrawable(nf.miuiAppIcon?.loadDrawable(context) ?: context.appIconOf(nf.packageName))
                 }
             }
@@ -1930,7 +1945,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     name = "mContainingNotification"
                 }?.of(container)?.get()?.getSbn() ?: return@after
                 if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
-                    compatNotifyIcon(iconView.context, nf, iconView, isUseMaterial3Style = true, isMiuiPanel = true)
+                    compatNotifyIcon(iconView.context, nf, iconView, isMiuiPanel = true)
                 else iconView.setImageDrawable(nf.miuiAppIcon?.loadDrawable(iconView.context) ?: iconView.context.appIconOf(nf.packageName))
             }
         }

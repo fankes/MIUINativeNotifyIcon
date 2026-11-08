@@ -275,6 +275,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
         configBinding.miuiFocusNotifyIconFixSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFICATION_FIX)
+        configBinding.md3StyleConfigSwitch.bind(ConfigData.ENABLE_MD3_NOTIFY_ICON_STYLE) {
+            onInitialize { configBinding.notifyIconCustomCornerItem.isVisible = it && ConfigData.isEnableNotifyIconForceAppIcon.not() }
+            onChanged {
+                reinitialize()
+                SystemUITool.refreshSystemUI(context = this@MainActivity)
+            }
+        }
         configBinding.notifyIconForceSystemColorSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_SYSTEM_COLOR) {
             isAutoApplyChanges = false
             onChanged {
@@ -295,10 +302,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.notifyIconForceAppIconSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_FORCE_APP_ICON) {
             isAutoApplyChanges = false
             onInitialize {
-                arrayOf(
-                    configBinding.notifyIconCustomCornerItem,
-                    configBinding.notifyIconForceSystemColorItem
-                ).forEach { e -> e.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R) && it.not() }
+                configBinding.notifyIconCustomCornerItem.isVisible = it.not() && ConfigData.isEnableMd3NotifyIconStyle
+                configBinding.notifyIconForceSystemColorItem.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R) && it.not()
                 configBinding.miuiNotifyIconReplacementItem.isVisible = it.not()
             }
             onChanged {
