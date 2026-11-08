@@ -268,6 +268,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.notifyIconResamplingSwitch.bind(ConfigData.ENABLE_NOTIFY_ICON_RESAMPLING) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
+        configBinding.notifyGroupSummaryIconSwitch.bind(ConfigData.ENABLE_NOTIFY_GROUP_SUMMARY_ICON) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
+        }
         configBinding.focusNotifyIconSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFY_ICON) {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }

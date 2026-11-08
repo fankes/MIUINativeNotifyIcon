@@ -42,6 +42,8 @@
     <string name="main_system_icon_inversion_desc">为了确保兼容，模块会使用算法判断通知图标颜色是否为灰度，如果你发现图标反色异常，可以尝试启用此选项，开启后将交由系统方案接管。</string>
     <string name="main_enable_icon_resampling">启用单色图标重采样</string>
     <string name="main_icon_resampling_desc">此选项默认关闭，开启后，会按通知图标的显示尺寸重新采样单色位图，并在放大时进行锐化。这可能改变笔画粗细和间隙，矢量图标不受影响。</string>
+    <string name="main_notify_group_summary_icon">通知组使用系统摘要图标</string>
+    <string name="main_notify_group_summary_icon_desc">此选项在 Android 14 及以上系统默认开启，开启后将使用系统提供的摘要图标作为这组通知的首个图标，关闭后，将改用最后发送的通知图标。</string>
     <string name="main_enable_focus_notify_icon">替换焦点通知图标</string>
     <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 3 及以上系统中，焦点通知胶囊的主图标和展开卡片的应用角标将同样应用替换后的通知图标，在不支持此功能的低版本系统中将无作用。</string>
     <string name="main_status_icon_alpha">调整状态栏中的通知图标透明度</string>

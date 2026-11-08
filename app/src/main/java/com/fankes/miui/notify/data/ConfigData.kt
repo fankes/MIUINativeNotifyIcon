@@ -56,6 +56,9 @@ object ConfigData {
     /** 启用单色图标重采样 */
     val ENABLE_NOTIFY_ICON_RESAMPLING = PreferenceData("_notify_icon_resampling", false)
 
+    /** 通知组使用系统摘要图标 */
+    val ENABLE_NOTIFY_GROUP_SUMMARY_ICON = PreferenceData("_notify_group_summary_icon", AndroidVersion.isAtLeast(AndroidVersion.U))
+
     /** 替换焦点通知图标 */
     val ENABLE_FOCUS_NOTIFY_ICON = PreferenceData("_enable_focus_notify_icon", true)
 
@@ -260,6 +263,16 @@ object ConfigData {
         get() = getBoolean(ENABLE_NOTIFY_ICON_RESAMPLING)
         set(value) {
             putBoolean(ENABLE_NOTIFY_ICON_RESAMPLING, value)
+        }
+
+    /**
+     * 是否为通知组使用系统摘要图标
+     * @return [Boolean]
+     */
+    var isEnableNotifyGroupSummaryIcon
+        get() = getBoolean(ENABLE_NOTIFY_GROUP_SUMMARY_ICON)
+        set(value) {
+            putBoolean(ENABLE_NOTIFY_GROUP_SUMMARY_ICON, value)
         }
 
     /**
