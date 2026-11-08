@@ -28,6 +28,7 @@ import android.animation.ObjectAnimator
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.text.TextPaint
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
@@ -161,6 +162,11 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     }
 
     private fun continueOnCreate() {
+        // 保留最大字号的行高，避免 wrap_content 缩小后 AutoSize 因高度不足无法恢复字号
+        binding.configTitleCountText.apply {
+            val metrics = TextPaint(paint).apply { textSize = autoSizeMaxTextSize.toFloat() }.fontMetricsInt
+            minHeight = metrics.bottom - metrics.top + compoundPaddingTop + compoundPaddingBottom
+        }
         // 布局动画只作用于自身，避免改写 AppBar 的位置，与 Behavior 保存的偏移不一致
         binding.root.walkThroughChildren().filterIsInstance<ViewGroup>().forEach {
             it.layoutTransition?.setAnimateParentHierarchy(false)
