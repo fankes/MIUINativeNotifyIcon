@@ -92,6 +92,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     /** 已安装的应用 - 系统界面没有返回时为空 */
     private var installedApps = emptyList<InstalledAppBean>()
 
+    /** 已安装包名，查看已安装范围时避免逐项扫描安装名单 */
+    private var installedPackages = emptySet<String>()
+
     /** 查看范围按钮 */
     private val viewPills get() = mapOf(
         binding.configViewAll to ViewMode.ALL,
@@ -556,6 +559,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private fun loadInstalledApps() = SystemUITool.obtainInstalledApps(context = this) { apps ->
         if (apps.isEmpty()) return@obtainInstalledApps
         installedApps = apps
+        installedPackages = apps.map { it.packageName }.toSet()
         refreshAdapterResult()
     }
 
@@ -705,9 +709,9 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
         // 列表为空时没有可滚动的内容
         binding.configTitleUp.isVisible = icons.isNotEmpty()
         binding.configTitleDown.isVisible = icons.isNotEmpty()
-        // 没有名单数据时查看范围和数量栏没有意义
+        // 操作栏隐藏时保留占位，避免改变 AppBar 高度打断列表移除动画；文本筛选无匹配时仍显示
         binding.configViewPills.isVisible = iconAllDatas.isNotEmpty()
-        binding.configCountBar.isVisible = iconAllDatas.isNotEmpty()
+        binding.configCountBar.visibility = if (viewModeIcons.isEmpty()) View.INVISIBLE else View.VISIBLE
         binding.configViewInstalled.isVisible = installedApps.isNotEmpty()
         viewPills.forEach { (pill, mode) -> pill.isSelected = mode == viewMode }
         /** 已安装但名单中没有的应用，名单为空时无法判断 */
@@ -729,7 +733,7 @@ class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
     private val viewModeIcons
         get() = iconAllDatas.filter { icon ->
             when (viewMode) {
-                ViewMode.INSTALLED -> installedApps.any { it.packageName == icon.packageName }
+                ViewMode.INSTALLED -> icon.packageName in installedPackages
                 ViewMode.DISABLED -> !iconItems.getValue(icon.packageName).enabled
                 ViewMode.OVERRIDDEN -> iconItems.getValue(icon.packageName).overlay
                 else -> true
