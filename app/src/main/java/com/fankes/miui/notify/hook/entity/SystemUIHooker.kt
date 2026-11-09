@@ -34,6 +34,7 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.Looper
@@ -696,6 +697,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
      * @param isMediaIcon 是否为媒体角标，非 M3 时始终使用夜间配色
      * @param isUseMaterial3Style 是否使用 M3 风格，默认跟随设置
+     * @param isNativePanel 是否来自原生通知面板
      */
     private fun compatNotifyIcon(
         context: Context,
@@ -704,7 +706,8 @@ object SystemUIHooker : YukiBaseHooker() {
         isExpanded: Boolean = true,
         isMiuiPanel: Boolean = false,
         isMediaIcon: Boolean = false,
-        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle
+        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle,
+        isNativePanel: Boolean = false
     ): Unit = runInSafe(msg = "compatNotifyIcon") {
         /**
          * 设置默认通知图标
@@ -735,7 +738,7 @@ object SystemUIHooker : YukiBaseHooker() {
         nf?.let { notifyInstance ->
             val groupIcon = notifyInstance.notificationGroupIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
-                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon, isUseMaterial3Style)
+                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon, isUseMaterial3Style, isNativePanel)
                 return@let
             }
             val isSystemSummaryIcon = groupIcon != null
@@ -787,11 +790,15 @@ object SystemUIHooker : YukiBaseHooker() {
             val isUsePromotedOngoingComposedIcon =
                 notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
 
-            val horizontalPadding = when {
-                isUseMaterial3Style && isMIOS && isMiuiPanel -> 7.toPx(context) * 2
-                isUseMaterial3Style -> 4.toPx(context) * 2
+            // OS4 原生图标为 40dp，经典为 38dp；原生每边内缩 1dp，并将前景统一为 24dp
+            val isOs4NativePanel = isUseMaterial3Style && isMIOS && miosVersionCode >= 4 && isNativePanel
+            val iconPadding = when {
+                isOs4NativePanel -> 8.toPx(context)
+                isUseMaterial3Style && isMIOS && isMiuiPanel -> 7.toPx(context)
+                isUseMaterial3Style -> 4.toPx(context)
                 else -> 0
             }
+            val horizontalPadding = iconPadding * 2
 
             /** 按图标实际内容尺寸处理单色位图 */
             fun Drawable.optimizeForPanel(horizontalPadding: Int): Drawable {
@@ -807,7 +814,7 @@ object SystemUIHooker : YukiBaseHooker() {
              * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
              */
             fun setPromotedOngoingComposedIcon(drawable: Drawable, foregroundColor: Int, backgroundColor: Int) {
-                val inset = 7.toPx(context)
+                val inset = if (isOs4NativePanel) iconPadding else 7.toPx(context)
                 val backgroundDrawable = DrawableBuilder()
                     .rectangle()
                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
@@ -816,6 +823,10 @@ object SystemUIHooker : YukiBaseHooker() {
                 val glyph = drawable.optimizeForPanel(inset * 2)
                 val foregroundDrawable = (glyph.constantState?.newDrawable(context.resources) ?: glyph).mutate()
                 val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
+                    if (isOs4NativePanel) {
+                        val backgroundInset = 1.toPx(context)
+                        setLayerInset(0, backgroundInset, backgroundInset, backgroundInset, backgroundInset)
+                    }
                     setLayerInset(1, inset, inset, inset, inset)
                 }
                 iconView.apply {
@@ -880,12 +891,7 @@ object SystemUIHooker : YukiBaseHooker() {
                                 .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                                 .solidColor(if (isDarkMode) customIconColor.brighterColor else customIconColor)
                                 .build()
-                        when {
-                            // 缩小 HyperOS 的通知图标
-                            isUseMaterial3Style && isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
-                            // 设置原生的背景边距
-                            isUseMaterial3Style -> setPadding(4.toPx(context))
-                        }
+                        setPadding(iconPadding)
                     }
                 }
                 else -> {
@@ -918,15 +924,15 @@ object SystemUIHooker : YukiBaseHooker() {
                                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
                                     .solidColor(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
                                     .build()
-                            when {
-                                // 缩小 HyperOS 的通知图标
-                                isUseMaterial3Style && isMIOS && isMiuiPanel -> setPadding(7.toPx(context))
-                                // 设置原生的背景边距
-                                isUseMaterial3Style -> setPadding(4.toPx(context))
-                            }
+                            setPadding(iconPadding)
                         }
                     } else setDefaultNotifyIcon(iconDrawable)
                 }
+            }
+            if (isOs4NativePanel && iconView.background != null) iconView.apply {
+                background = InsetDrawable(background, 1.toPx(context))
+                // InsetDrawable 会提供背景 padding，写入后恢复前景所需的边距
+                setPadding(iconPadding)
             }
         }
     }
@@ -1318,7 +1324,7 @@ object SystemUIHooker : YukiBaseHooker() {
         // 非最小化优先级的通知全部设置为展开状态
         if (importance != NotificationManager.IMPORTANCE_MIN) isExpanded = true
         // 执行 Hook
-        compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
+        compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded, isNativePanel = true)
     }
 
     /** 聊天通知保留系统头像，应用角标固定使用 M3 风格，普通通知继续适配主图标 */
