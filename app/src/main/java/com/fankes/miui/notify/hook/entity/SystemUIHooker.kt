@@ -2044,12 +2044,13 @@ object SystemUIHooker : YukiBaseHooker() {
         NotificationChildrenContainerClass.resolve().optional(silent = true).method {
             name { it == "setGroupHeader" || it == "setLowPriorityGroupHeader" || it == "onNotificationUpdated" }
         }.hookAll().after { updateGroupIcons(instance) }
-        // 单个布局重用时会先写回原图标，不能等所有布局完成后才重新适配
+        // 原生和经典布局重用时都会先写回原图标，不能等所有布局完成后才重新适配
         NotificationViewWrapperClass.resolve().optional(silent = true).firstMethodOrNull {
             name = "onReinflated"
             emptyParameters()
         }?.hook()?.after {
             if (NotificationHeaderViewWrapperClass.isInstance(instance)) hookNotificationViewWrapper(instance)
+            else if (MiuiNotificationViewWrapperClass?.isInstance(instance) == true) hookMiuiNotificationViewWrapper(instance)
         }
         // OS3 会丢失降级焦点通知的 promoted 标记，OS4 经典面板也可能按普通模板创建焦点通知，
         // 在系统选定最终包装类后统一处理根布局中的可见图标
