@@ -599,9 +599,10 @@ object SystemUIHooker : YukiBaseHooker() {
         if (ConfigData.isEnableNotifyIconFix) run {
             val icon = IconRuleManagerTool.getIcon(packageName)
             if (icon != null) {
-                if (isAppNotifyEnabledOf(icon) && (isGrayscaleIcon.not() || isAppNotifyOverlayOf(icon)))
+                if (isAppNotifyEnabledOf(icon))
                     customPair = Triple(
-                        IconRuleManagerTool.getBitmap(icon)?.toDrawable(context.resources),
+                        if (isGrayscaleIcon.not() || isAppNotifyOverlayOf(icon))
+                            IconRuleManagerTool.getBitmap(icon)?.toDrawable(context.resources) else null,
                         icon.color ?: 0,
                         false
                     )
@@ -839,7 +840,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 // 不处理占位符图标
                 if (it.third) return@also
                 customIcon = it.first
-                customIconColor = if (isUseMaterial3Style || isExpanded)
+                customIconColor = if (customIcon == null || isUseMaterial3Style || isExpanded)
                     (it.second.takeIf { e -> e != 0 && ConfigData.isEnableNotifyIconForceSystemColor.not() }
                         ?: (if (isUseMaterial3Style) context.systemAccentColor else 0)) else 0
             }
@@ -887,8 +888,10 @@ object SystemUIHooker : YukiBaseHooker() {
                 else -> {
                     // 处理原生单色通知图标
                     if (isMonochromePanelIcon) {
+                        // 保留原生单色图标，通知未提供颜色时使用已启用规则的颜色
                         val backgroundColor = when {
                             hasIconColor -> iconColor
+                            customIconColor != 0 -> customIconColor
                             isUseMaterial3Style -> context.systemAccentColor
                             else -> oldStyle
                         }
@@ -903,7 +906,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             setImageDrawable(iconDrawable.optimizeForPanel(horizontalPadding))
                             // 设置不要裁切到边界
                             clipToOutline = false
-                            // 非 Material 3 使用通知自身颜色，无颜色时使用旧版灰度色
+                            // 非 Material 3 使用通知或规则颜色，无颜色时使用旧版灰度色
                             setColorFilter(if (isUseMaterial3Style) supportColor else backgroundColor)
                             // 设置图标外圈颜色
                             if (isUseMaterial3Style)
