@@ -131,6 +131,9 @@ object SystemUIHooker : YukiBaseHooker() {
     /** MIUI 新版本存在的类 */
     private val MiuiNotificationViewWrapperClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.MiuiNotificationViewWrapper")
 
+    /** HyperOS 2 起的聊天通知类型判断入口 */
+    private val MiuiBaseNotifUtilClass by lazyClassOrNull("com.miui.systemui.notification.MiuiBaseNotifUtil")
+
     /** MIUI 新版本存在的类 */
     private val MiuiNotificationChildrenContainerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.MiuiNotificationChildrenContainer")
 
@@ -692,6 +695,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
      * @param isMediaIcon 是否为媒体角标，非 M3 时始终使用夜间配色
+     * @param isUseMaterial3Style 是否使用 M3 风格，默认跟随设置
      */
     private fun compatNotifyIcon(
         context: Context,
@@ -699,10 +703,9 @@ object SystemUIHooker : YukiBaseHooker() {
         iconView: ImageView,
         isExpanded: Boolean = true,
         isMiuiPanel: Boolean = false,
-        isMediaIcon: Boolean = false
+        isMediaIcon: Boolean = false,
+        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle
     ): Unit = runInSafe(msg = "compatNotifyIcon") {
-        val isUseMaterial3Style = ConfigData.isEnableMd3NotifyIconStyle
-
         /**
          * 设置默认通知图标
          * @param drawable 通知图标
@@ -732,7 +735,7 @@ object SystemUIHooker : YukiBaseHooker() {
         nf?.let { notifyInstance ->
             val groupIcon = notifyInstance.notificationGroupIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
-                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon)
+                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon, isUseMaterial3Style)
                 return@let
             }
             val isSystemSummaryIcon = groupIcon != null
@@ -995,13 +998,18 @@ object SystemUIHooker : YukiBaseHooker() {
         if (ConfigData.isEnableFocusNotifyIcon) compatComposedNotifyIcon(iconView, nf)
     }
 
-    /** 将通知图标和外圈合成一张位图，供胶囊和媒体角标缩放、复制使用 */
-    private fun compatComposedNotifyIcon(iconView: ImageView, nf: StatusBarNotification, isMediaIcon: Boolean = false) {
+    /** 将通知图标和外圈合成一张位图，供胶囊、媒体和聊天角标缩放、复制使用 */
+    private fun compatComposedNotifyIcon(
+        iconView: ImageView,
+        nf: StatusBarNotification,
+        isMediaIcon: Boolean = false,
+        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle
+    ) {
         val size = 40.toPx(iconView.context)
         val panelIcon = ImageView(iconView.context).apply {
             layoutParams = ViewLayoutParams(size, size)
         }
-        compatNotifyIcon(iconView.context, nf, panelIcon, isMediaIcon = isMediaIcon)
+        compatNotifyIcon(iconView.context, nf, panelIcon, isMediaIcon = isMediaIcon, isUseMaterial3Style = isUseMaterial3Style)
         if (panelIcon.drawable == null) return
         panelIcon.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
@@ -1313,15 +1321,24 @@ object SystemUIHooker : YukiBaseHooker() {
         compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded)
     }
 
-    /**
-     * OS3、OS4 的 IM 私有通知模板会额外向 mAppImIcon 写入右下角徽标；经典面板统一只保留并处理
-     * mAppIcon，在系统每次刷新内容后隐藏次要徽标，避免 OS3 将普通模板的占位 View 误判为主图标。
-     */
+    /** 聊天通知保留系统头像，应用角标固定使用 M3 风格，普通通知继续适配主图标 */
     private fun hookMiuiNotificationViewWrapper(wrapper: Any) {
         val resolver = MiuiNotificationViewWrapperClass?.resolve()?.optional(silent = true) ?: return
         val nf = wrapper.getRowPair().second.getSbn() ?: return
-        resolver.firstFieldOrNull { name = "mAppImIcon" }?.of(wrapper)?.get<ImageView>()?.isVisible = false
         val iconView = resolver.firstFieldOrNull { name = "mAppIcon" }?.of(wrapper)?.get<ImageView>() ?: return
+        val imType = MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "getNotificationTypeForIm"
+        }?.let {
+            // OS2 仅接收通知，OS3 起额外接收 Context 以读取应用名单
+            if (it.self.parameterCount == 1) it.invoke<Int>(nf.notification)
+            else it.invoke<Int>(nf.notification, iconView.context)
+        }
+        if (imType != null && imType != -1) {
+            // 公开布局由系统清空角标，不在锁屏上补画；私有布局与媒体角标共用合成画法
+            val badgeView = resolver.firstFieldOrNull { name = "mAppImIcon" }?.of(wrapper)?.get<ImageView>()
+            if (badgeView?.drawable != null) compatComposedNotifyIcon(badgeView, nf, isUseMaterial3Style = true)
+            return
+        }
         if (ConfigData.isEnableReplaceMiuiStyleNotifyIcon || ConfigData.isEnableNotifyIconForceAppIcon)
             compatNotifyIcon(iconView.context, nf, iconView, isMiuiPanel = true)
         else iconView.setImageDrawable(nf.miuiAppIcon?.loadDrawable(iconView.context) ?: iconView.context.appIconOf(nf.nfPkgName))
