@@ -239,6 +239,12 @@ object SystemUIHooker : YukiBaseHooker() {
         )
     )
 
+    /** HyperOS 媒体卡片的图标绑定入口 */
+    private val MiuiMediaViewControllerImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.mediacontrol.MiuiMediaViewControllerImpl")
+
+    /** HyperOS 胶囊媒体卡片的图标绑定入口 */
+    private val MiuiIslandMediaViewBinderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.mediaisland.MiuiIslandMediaViewBinderImpl")
+
     /** HyperOS 焦点通知的用到的 API */
     private val FocusUtilsClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.utils.FocusUtils")
 
@@ -535,11 +541,14 @@ object SystemUIHooker : YukiBaseHooker() {
             firstFieldOrNull { name = "notifStyle" }?.set(-100)
             firstMethodOrNull { name = "onNotifStyleChanged" }?.invoke()
         }
-        iconRuleScope.launch { refreshFocusNotificationIcons() }
+        iconRuleScope.launch {
+            refreshMediaNotificationIcons()
+            refreshFocusNotificationIcons()
+        }
     }
 
-    /** 获取同一通知组最后发送的子通知，不保存通知集合以免跨热重载持有宿主数据 */
-    private fun StatusBarNotification.latestGroupChild(): StatusBarNotification? {
+    /** 读取当前通知，不保存通知集合以免跨热重载持有宿主数据 */
+    private fun currentNotifications(): Sequence<StatusBarNotification>? {
         // NotifPipeline.getAllNotifs 只允许主线程访问，后台图标加载保留原有图标
         if (Looper.myLooper() != Looper.getMainLooper()) return null
         val dependency = DependencyClass?.resolve()?.optional(silent = true)
@@ -552,11 +561,14 @@ object SystemUIHooker : YukiBaseHooker() {
             ?.invoke<Collection<Any?>>() ?: return null
         return entries.asSequence().mapNotNull { entry ->
             entry?.asResolver()?.optional(silent = true)?.firstFieldOrNull { name = "mSbn" }?.get<StatusBarNotification>()
-        }.filter {
-            it.key != key && it.groupKey == groupKey && it.user == user && it.packageName == packageName &&
-                it.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
-        }.maxByOrNull { it.postTime }
+        }
     }
+
+    /** 获取同一通知组最后发送的子通知 */
+    private fun StatusBarNotification.latestGroupChild() = currentNotifications()?.filter {
+        it.key != key && it.groupKey == groupKey && it.user == user && it.packageName == packageName &&
+            it.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
+    }?.maxByOrNull { it.postTime }
 
     /** 为通知组选择系统摘要图标或最后一条子通知图标，不修改原通知 */
     private fun StatusBarNotification.notificationGroupIcon(context: Context): Pair<StatusBarNotification, Drawable>? {
@@ -678,13 +690,15 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param iconView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
+     * @param isMediaIcon 是否为媒体角标，非 M3 时始终使用夜间配色
      */
     private fun compatNotifyIcon(
         context: Context,
         nf: StatusBarNotification?,
         iconView: ImageView,
         isExpanded: Boolean = true,
-        isMiuiPanel: Boolean = false
+        isMiuiPanel: Boolean = false,
+        isMediaIcon: Boolean = false
     ): Unit = runInSafe(msg = "compatNotifyIcon") {
         val isUseMaterial3Style = ConfigData.isEnableMd3NotifyIconStyle
 
@@ -717,14 +731,14 @@ object SystemUIHooker : YukiBaseHooker() {
         nf?.let { notifyInstance ->
             val groupIcon = notifyInstance.notificationGroupIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
-                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel)
+                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon)
                 return@let
             }
             val isSystemSummaryIcon = groupIcon != null
 
             // OS4 的通知 View 使用强制夜间 Context，统一读取 SystemUI Application 的真实日夜配置
             val systemContext = globalContext ?: context
-            val isDarkMode = systemContext.isSystemInDarkMode
+            val isDarkMode = systemContext.isSystemInDarkMode || (isMediaIcon && isUseMaterial3Style.not())
             // 柔光玻璃为 1，轻透磨砂为 0；仅非 Material 3 风格按玻璃材质使用夜间着色
             val isSoftLightGlass = isUseMaterial3Style.not() && isMIOS && miosVersionCode >= 4 &&
                 Settings.Secure.getInt(systemContext.contentResolver, "material_style", -1) == 1
@@ -937,14 +951,54 @@ object SystemUIHooker : YukiBaseHooker() {
             .toDrawable(context.resources)
     }
 
-    /** 将通知栏图标和外圈一起绘制，供焦点通知胶囊和应用角标缩放使用 */
+    /** 更新媒体卡片的当前角标和翻转时复制的图标，不重新绑定播放数据 */
+    private fun compatMediaNotificationIcons(controller: Any) {
+        val resolver = controller.asResolver().optional(silent = true)
+        val data = resolver.firstFieldOrNull { name = "mediaData" }?.get() ?: return
+        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "notificationKey"
+        }?.get<String>() ?: return
+        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
+        val drawableField = resolver.firstFieldOrNull { name = "appIconDrawable" } ?: return
+        // OS4 将 setAlbumImage 内联进翻转回调，直接更新它读取的图标及主视图、过渡副本
+        listOf("holder", "dummyHolder").forEach { fieldName ->
+            val holder = resolver.firstFieldOrNull { name = fieldName }?.get() ?: return@forEach
+            val iconView = holder.asResolver().optional(silent = true).firstFieldOrNull {
+                name = "appIcon"
+            }?.get<ImageView>() ?: return@forEach
+            compatComposedNotifyIcon(iconView, nf, isMediaIcon = true)
+            drawableField.set(iconView.drawable)
+        }
+    }
+
+    /** 从系统组件取得现有媒体控制器，主动刷新角标，不保存控制器或视图 */
+    private fun refreshMediaNotificationIcons() = runInSafe(msg = "Refresh media notification icons") {
+        val component = globalContext?.asResolver()?.optional(silent = true)?.firstFieldOrNull {
+            name = "mSysUIComponent"
+            superclass()
+        }?.get<Any>()?.asResolver()?.optional(silent = true) ?: return@runInSafe
+        listOf("miuiMediaViewControllerImplProvider", "miuiIslandMediaViewBinderImplProvider").forEach { fieldName ->
+            val provider = component.firstFieldOrNull { name = fieldName }?.get() ?: return@forEach
+            val controller = provider.asResolver().optional(silent = true).firstMethodOrNull {
+                name = "get"
+                emptyParameters()
+            }?.invoke<Any>() ?: return@forEach
+            compatMediaNotificationIcons(controller)
+        }
+    }
+
+    /** 按焦点通知开关适配胶囊图标 */
     private fun compatFocusIcon(iconView: ImageView, nf: StatusBarNotification) {
-        if (ConfigData.isEnableFocusNotifyIcon.not()) return
+        if (ConfigData.isEnableFocusNotifyIcon) compatComposedNotifyIcon(iconView, nf)
+    }
+
+    /** 将通知图标和外圈合成一张位图，供胶囊和媒体角标缩放、复制使用 */
+    private fun compatComposedNotifyIcon(iconView: ImageView, nf: StatusBarNotification, isMediaIcon: Boolean = false) {
         val size = 40.toPx(iconView.context)
         val panelIcon = ImageView(iconView.context).apply {
             layoutParams = ViewLayoutParams(size, size)
         }
-        compatNotifyIcon(iconView.context, nf, panelIcon)
+        compatNotifyIcon(iconView.context, nf, panelIcon, isMediaIcon = isMediaIcon)
         if (panelIcon.drawable == null) return
         panelIcon.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
@@ -1961,6 +2015,13 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethodOrNull {
                 name = "onContentUpdated"
             }?.hook()?.after { hookNotificationViewWrapper(instance) }
+        }
+        // 通知栏和胶囊媒体卡片使用独立控制器，绑定后与立即刷新共用角标处理
+        listOfNotNull(MiuiMediaViewControllerImplClass, MiuiIslandMediaViewBinderImplClass).forEach { controllerClass ->
+            controllerClass.resolve().optional(silent = true).firstMethodOrNull {
+                name = "bindMediaData"
+                parameterCount = 1
+            }?.hook()?.after { compatMediaNotificationIcons(instance) }
         }
         // 组成员和内容变化后同步首图标
         ExpandableNotificationRowClass.resolve().optional(silent = true).method {
