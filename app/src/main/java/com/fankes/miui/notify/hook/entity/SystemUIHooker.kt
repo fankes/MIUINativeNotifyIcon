@@ -527,7 +527,17 @@ object SystemUIHooker : YukiBaseHooker() {
                     pair.first.let { drawable ->
                         // 与系统回调中的替换路径保持相同尺寸，不在刷新时写回原尺寸图标
                         val icon = if (pair.second) drawable?.toStatusIconBitmap(it.context)?.toDrawable(it.resources) else drawable
-                        (it as? ImageView)?.setImageDrawable(icon)
+                        (it as? ImageView)?.also { view ->
+                            val previous = view.drawable
+                            view.setImageDrawable(icon)
+                            // HyperOS 2 按 Drawable 的固有尺寸计算绘制缩放，手动换图后也要更新
+                            if (isMIOS && miosVersionCode.toInt() == 2 && icon != null &&
+                                (previous?.intrinsicWidth != icon.intrinsicWidth || previous.intrinsicHeight != icon.intrinsicHeight))
+                                view.asResolver().optional(silent = true).firstMethodOrNull {
+                                    name = "maybeUpdateIconScaleDimens"
+                                    emptyParameters()
+                                }?.invoke()
+                        }
                     }
                 }
             }
@@ -1767,7 +1777,7 @@ object SystemUIHooker : YukiBaseHooker() {
             after { foldEntranceIconContext.remove() }
         }
         // 注入 MIUI 自己增加的一个工具类
-        NotificationUtilClass.apply {
+        val usesOs2StatusIconLoader = NotificationUtilClass.run {
             // 强制回写系统的状态栏图标样式为原生
             resolve().optional().method {
                 name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
@@ -1812,21 +1822,30 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameters { it[0] == classOf<Context>() && it[1] isSubclassOf StatusBarNotification::class }
             }
             val getSmallIconResolver = resolve().optional(silent = true)
-            val getSmallIcon = getSmallIconResolver.firstMethodOrNull(getSmallIconCondition1)
+            val os2GetSmallIcon = if (isMIOS && miosVersionCode.toInt() == 2) getSmallIconResolver.firstMethodOrNull {
+                name = "getSmallIcon"
+                parameters(Context::class, StatusBarNotification::class, Int::class, Boolean::class)
+            } else null
+            val getSmallIcon = os2GetSmallIcon ?: getSmallIconResolver.firstMethodOrNull(getSmallIconCondition1)
                 ?: getSmallIconResolver.firstMethodOrNull(getSmallIconCondition2)
                 ?: getSmallIconResolver.firstMethodOrNull(getSmallIconCondition3)
                     ?.also { isUseLegacy = true }
             getSmallIcon?.hook()?.after {
                 (globalContext ?: firstArg().get<Context?>())?.also { context ->
-                    val expandedNf = arg(if (isUseLegacy) 1 else 0).get<StatusBarNotification?>()
-                    // Hook 状态栏小图标
+                    val expandedNf = arg(if (os2GetSmallIcon != null || isUseLegacy) 1 else 0).get<StatusBarNotification?>()
+                    // OS2 在系统绑定图标之前确定最终小图标，系统会用它的尺寸计算缩放
+                    val smallIcon = if (os2GetSmallIcon != null) expandedNf?.notification?.smallIcon else result<Icon>()
                     compatStatusIcon(
                         context = context,
                         nf = expandedNf,
-                        iconDrawable = result<Icon>()?.loadDrawable(context)
-                    ).also { pair -> if (pair.second) result = Icon.createWithBitmap(pair.first?.toStatusIconBitmap(context)) }
+                        iconDrawable = smallIcon?.loadDrawable(context)
+                    ).also { (drawable, replaced) ->
+                        if (replaced && drawable != null) result = Icon.createWithBitmap(drawable.toStatusIconBitmap(context))
+                        else if (os2GetSmallIcon != null && smallIcon != null) result = smallIcon
+                    }
                 }
             }
+            os2GetSmallIcon != null
         }
         if (miosVersionCode < 3) {
             // 焦点通知深色模式切换点
@@ -1889,7 +1908,11 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethodOrNull {
                 name = "updateIconColor"
                 emptyParameters()
-            }?.hook()?.after { refreshStatusBarIconView(instance()) }
+            }?.hook()?.after {
+                // OS2 的图标由系统绑定，颜色更新只调整着色
+                if (usesOs2StatusIconLoader) updateStatusBarIconColor(instance())
+                else refreshStatusBarIconView(instance())
+            }
             if (isMIOS && miosVersionCode >= 4) {
                 // HyperOS 4 会在 updateIconColor 后再次更新 Drawable，需要在最终写入后重新应用图标
                 firstMethodOrNull {
