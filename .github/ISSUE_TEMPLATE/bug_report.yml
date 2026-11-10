@@ -122,9 +122,12 @@ body:
     attributes:
       label: Provide module problem logs or necessary logs / 提供模块问题 Log 或必要 Log
       description: |
-        You can view and filter the logs containing `MIUINativeNotifyIcon` in the module logs of your Xposed manager.
+        Find the "Debug Page" icon in the upper right corner of the module, enable debug logging,
+        then reproduce the notification/behavior that caused the problem, and then export the debug log.
+        Paste the content here or paste the file. If possible, you can also attach the scope application.
+        You can directly extract the APK in the debug page.
 
-        你可以在 Xposed 管理器的模块日志中查看并筛选包含 `MIUINativeNotifyIcon` 的日志。
+        在模块右上角找到 “调试页面” 图标，启用调试日志，然后复现出现问题的通知/行为，然后导出调试日志，粘贴内容至此或粘贴文件，如果可以，可同时附上作用域应用，在调试页面可以直接提取 APK。
       value: |
         <details><summary>Click to expand / 展开查看</summary><pre><code>
 
