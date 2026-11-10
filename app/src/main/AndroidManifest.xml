@@ -17,6 +17,11 @@
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         tools:node="remove" />
 
+    <queries>
+        <package android:name="com.android.systemui" />
+        <package android:name="com.miui.aod" />
+    </queries>
+
     <application
         android:name=".application.MNNApplication"
         android:allowBackup="true"
@@ -60,6 +65,11 @@
         <activity
             android:name=".ui.activity.ConfigureActivity"
             android:exported="true"
+            android:screenOrientation="behind" />
+
+        <activity
+            android:name=".ui.activity.DebugActivity"
+            android:exported="false"
             android:screenOrientation="behind" />
 
         <service

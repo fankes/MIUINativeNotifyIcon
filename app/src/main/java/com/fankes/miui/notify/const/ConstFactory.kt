@@ -34,6 +34,9 @@ object PackageName {
 
     /** 系统界面 (系统 UI) */
     const val SYSTEMUI = "com.android.systemui"
+
+    /** 小米息屏显示，Hook 点位依赖的应用 */
+    const val AOD = "com.miui.aod"
 }
 
 /**
@@ -79,6 +82,9 @@ enum class AdditionalSourceTemplate {
  * MIME 类型常量定义类
  */
 object MimeType {
+
+    /** Android 安装包 */
+    const val APK = "application/vnd.android.package-archive"
 
     /**
      * 日志文件

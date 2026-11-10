@@ -113,8 +113,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     override val showSplashScreen = true
 
     override fun onCreate() {
-        // 注册导出调试日志启动器，必须在 STARTED 之前，不能放进框架服务回调里
-        SystemUITool.registerExportDebugLogsLauncher(activity = this)
         initPager()
         initHomeInfo()
         initListeners()
@@ -251,10 +249,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun initConfigBindings() {
         configBinding.statusIconCountText.text = ConfigData.liftedStatusIconCount.toString()
         configBinding.statusIconCountItem.isVisible = AndroidVersion.isAtLeast(AndroidVersion.R)
-        homeBinding.moduleEnableLogSwitch.bind(ConfigData.ENABLE_MODULE_LOG) {
-            onInitialize { homeBinding.expAllDebugLogButton.isVisible = it }
-            onChanged { reinitialize() }
-        }
         configBinding.statusIconCountSwitch.bind(ConfigData.ENABLE_LIFTED_STATUS_ICON_COUNT) {
             onInitialize { configBinding.statusIconCountChildItem.isVisible = it }
             onChanged {
@@ -338,8 +332,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     /** 初始化按钮的点击事件，它们不依赖模块是否激活 */
     private fun initListeners() {
-        // 导出全部日志按钮点击事件
-        homeBinding.expAllDebugLogButton.setOnClickListener { SystemUITool.obtainAndExportDebugLogs(context = this) }
+        // 调试页面入口
+        binding.titleLoggerIcon.setOnClickListener { startActivity<DebugActivity>() }
         // MIUI 通知显示设置按钮点击事件
         configBinding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
         // 通知图标优化名单卡片点击事件

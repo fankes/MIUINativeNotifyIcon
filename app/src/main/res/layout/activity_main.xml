@@ -37,6 +37,16 @@
             app:autoSizeTextType="uniform" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:id="@+id/title_logger_icon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="15dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_debug"
+            android:tint="@color/colorTextGray"
+            android:tooltipText="@string/debug_title" />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/title_restart_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
