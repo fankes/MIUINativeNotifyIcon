@@ -35,13 +35,13 @@ import com.fankes.miui.notify.bean.InstalledAppBean
 import com.fankes.miui.notify.const.MimeType
 import com.fankes.miui.notify.const.PackageName
 import com.fankes.miui.notify.ui.activity.MainActivity
-import com.fankes.miui.notify.utils.factory.delayedRun
 import com.fankes.miui.notify.utils.factory.execShell
 import com.fankes.miui.notify.utils.factory.isMIOS
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.graphics.decodeToBitmapOrNull
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.hook.factory.dataChannel
@@ -49,7 +49,11 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.log.data.YLogData
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.channel.data.ChannelData
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * 系统界面工具
@@ -339,30 +343,34 @@ object SystemUITool {
                 context.showDialog {
                     title = context.getString(R.string.tool_please_wait)
                     progressContent = context.getString(R.string.tool_waiting_system_ui_refresh)
-                    /** 是否等待成功 */
-                    var isWaited = false
-                    // 设置等待延迟
-                    delayedRun(ms = 5000) {
-                        if (isWaited) return@delayedRun
-                        cancel()
-                        context.snake(msg = context.getString(R.string.tool_refresh_timeout), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
-                    }
-                    checkingActivated(context) { isValied ->
+                    noCancelable()
+                    // 等待随页面销毁一起取消，在系统移除页面窗口之前关闭对话框
+                    context.launch {
+                        var isValid = false
+                        val result = try {
+                            withTimeoutOrNull(5000.milliseconds) {
+                                isValid = suspendCancellableCoroutine { continuation ->
+                                    checkingActivated(context) { valid ->
+                                        if (continuation.isActive) continuation.resume(valid)
+                                    }
+                                }
+                                if (!isValid) false
+                                else suspendCancellableCoroutine { continuation ->
+                                    doRefresh { success ->
+                                        if (continuation.isActive) continuation.resume(success)
+                                    }
+                                }
+                            }
+                        } finally {
+                            cancel()
+                        }
                         when {
-                            isValied.not() -> {
-                                cancel()
-                                isWaited = true
-                                context.snake(msg = context.getString(R.string.tool_restart_to_apply_update), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
-                            }
-                            else -> doRefresh {
-                                cancel()
-                                isWaited = true
-                                if (it) callback()
-                                if (it.not()) context.snake(msg = context.getString(R.string.tool_refresh_failed), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
-                            }
+                            result == null -> context.snake(msg = context.getString(R.string.tool_refresh_timeout), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
+                            !isValid -> context.snake(msg = context.getString(R.string.tool_restart_to_apply_update), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
+                            result -> callback()
+                            else -> context.snake(msg = context.getString(R.string.tool_refresh_failed), actionText = context.getString(R.string.tool_restart_now)) { restartSystemUI(context) }
                         }
                     }
-                    noCancelable()
                 }
             YukiHook.Status.isModuleActive.not() && context is AppCompatActivity -> context.snake(msg = context.getString(R.string.tool_module_not_active_no_effect))
             else -> doRefresh { if (it) callback() }
