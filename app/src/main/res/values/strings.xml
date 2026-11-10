@@ -174,9 +174,31 @@
     <string name="config_view_overridden">Overridden</string>
     <string name="config_uncovered_count">%1$d apps not included</string>
     <string name="config_uncovered_title">Apps Not Included (%1$d)</string>
-    <string name="main_optimize_list_summary">%1$d included · %2$d not included</string>
-    <string name="main_optimize_list_total">%1$d included</string>
-    <string name="main_optimize_list_not_synced">No data yet. Tap to configure</string>
+    <string name="main_optimize_list_sync">Sync List</string>
+    <string name="main_optimize_list_last_sync">Last sync: %1$s</string>
+    <string name="time_never">Never</string>
+    <string name="time_just_now">Just now</string>
+    <string name="time_few_seconds_ago">A few seconds ago</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">%d minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">%d hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <plurals name="time_months_ago">
+        <item quantity="one">%d month ago</item>
+        <item quantity="other">%d months ago</item>
+    </plurals>
+    <string name="main_optimize_list_disabled">Feature disabled</string>
+    <string name="main_optimize_rules_count">Total rules</string>
+    <string name="main_optimize_installed_included">Included</string>
+    <string name="main_optimize_installed_uncovered">Not included</string>
     <string name="notify_icon_optimization_disabled">Notification icon optimization is turned off</string>
     <string name="common_close">Close</string>
     <string name="config_filter_empty">The condition cannot be empty</string>

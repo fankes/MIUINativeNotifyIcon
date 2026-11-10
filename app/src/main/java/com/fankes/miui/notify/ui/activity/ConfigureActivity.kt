@@ -32,6 +32,7 @@ import android.text.TextPaint
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import com.fankes.miui.notify.R
@@ -65,6 +66,7 @@ import com.highcapable.betterandroid.ui.component.adapter.factory.bindAdapter
 import com.highcapable.betterandroid.ui.component.adapter.recycler.cosmetic.RecyclerCosmetic
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.scrollToFirstPosition
 import com.highcapable.betterandroid.ui.component.adapter.recycler.factory.smoothScrollToFirstPosition
+import com.highcapable.betterandroid.ui.extension.component.addObserver
 import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import com.highcapable.betterandroid.ui.extension.component.launch
 import com.highcapable.betterandroid.ui.extension.component.runDelayed
@@ -80,6 +82,61 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 
 class ConfigureActivity : BaseActivity<ActivityConfigBinding>() {
+
+    companion object {
+
+        /**
+         * 将配置页的同步能力绑定到其他页面，返回按钮可用状态的刷新入口
+         * @param activity 当前页面，销毁时停止同步图标动画
+         * @param syncIcon 同步按钮
+         * @param entryView 配置页入口，同步期间禁止进入
+         * @param onSyncFinished 同步结束后刷新页面数据，包含已是最新的情况
+         */
+        fun bindSyncAction(activity: AppCompatActivity, syncIcon: View, entryView: View, onSyncFinished: () -> Unit): () -> Unit {
+            var animator: ObjectAnimator? = null
+
+            fun updateState() {
+                val isEnabled = YukiHook.Status.isModuleActive && ConfigData.isEnableNotifyIconFix
+                syncIcon.isEnabled = isEnabled && animator?.isRunning != true
+                syncIcon.alpha = if (isEnabled) 1f else 0.5f
+            }
+
+            fun setSyncing(isSyncing: Boolean) {
+                entryView.isEnabled = !isSyncing
+                if (isSyncing) {
+                    if (animator?.isRunning != true)
+                        animator = ObjectAnimator.ofFloat(syncIcon, View.ROTATION, 0f, 360f).apply {
+                            duration = 800L
+                            interpolator = LinearInterpolator()
+                            repeatCount = ObjectAnimator.INFINITE
+                            start()
+                        }
+                } else {
+                    animator?.cancel()
+                    animator = null
+                    syncIcon.rotation = 0f
+                }
+                updateState()
+                if (!isSyncing) onSyncFinished()
+            }
+
+            fun startSync() {
+                if (!YukiHook.Status.isModuleActive || !ConfigData.isEnableNotifyIconFix) return
+                IconRuleManagerTool.sync(context = activity, onSyncStateChange = ::setSyncing)
+            }
+
+            syncIcon.setOnClickListener {
+                if (IconRuleManagerTool.icons.isEmpty())
+                    IconRuleManagerTool.showSyncSettings(context = activity, syncOnConfirm = true) { startSync() }
+                else startSync()
+            }
+            activity.lifecycle.addObserver(onDestroy = {
+                animator?.cancel()
+                animator = null
+            })
+            return ::updateState
+        }
+    }
 
     /** 图标及当前本地开关状态，用于比较列表项变化 */
     private data class IconItem(val icon: NotificationIcon, val enabled: Boolean, val overlay: Boolean)

@@ -174,9 +174,27 @@
     <string name="config_view_overridden">已覆盖</string>
     <string name="config_uncovered_count">%1$d 个未收录的应用</string>
     <string name="config_uncovered_title">未收录的应用 (%1$d)</string>
-    <string name="main_optimize_list_summary">已收录 %1$d 个 · 未收录 %2$d 个</string>
-    <string name="main_optimize_list_total">共收录 %1$d 个</string>
-    <string name="main_optimize_list_not_synced">暂无数据，点击进行配置</string>
+    <string name="main_optimize_list_sync">同步名单</string>
+    <string name="main_optimize_list_last_sync">上次同步：%1$s</string>
+    <string name="time_never">从未</string>
+    <string name="time_just_now">刚刚</string>
+    <string name="time_few_seconds_ago">几秒前</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="other">%d 分钟前</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="other">%d 小时前</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="other">%d 天前</item>
+    </plurals>
+    <plurals name="time_months_ago">
+        <item quantity="other">%d 月前</item>
+    </plurals>
+    <string name="main_optimize_list_disabled">功能已关闭</string>
+    <string name="main_optimize_rules_count">规则总数</string>
+    <string name="main_optimize_installed_included">本机已收录</string>
+    <string name="main_optimize_installed_uncovered">本机未收录</string>
     <string name="notify_icon_optimization_disabled">通知图标优化功能已关闭</string>
     <string name="common_close">关闭</string>
     <string name="config_filter_empty">条件不能为空</string>

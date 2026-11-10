@@ -58,6 +58,7 @@ import com.fankes.miui.notify.utils.factory.openNotifySetting
 import com.fankes.miui.notify.utils.factory.showDialog
 import com.fankes.miui.notify.utils.factory.snake
 import com.fankes.miui.notify.utils.factory.systemFullVersion
+import com.fankes.miui.notify.utils.factory.toRelativeTime
 import com.fankes.miui.notify.utils.tool.GithubReleaseTool
 import com.fankes.miui.notify.utils.tool.IconRuleManagerTool
 import com.fankes.miui.notify.utils.tool.SystemUITool
@@ -109,6 +110,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private val homeBinding by lazy { PageHomeBinding.inflate(layoutInflater, binding.mainViewPager, false) }
     private val configBinding by lazy { PageConfigBinding.inflate(layoutInflater, binding.mainViewPager, false) }
     private val aboutBinding by lazy { PageAboutBinding.inflate(layoutInflater, binding.mainViewPager, false) }
+
+    /** 配置页提供的首页同步按钮状态刷新入口 */
+    private var refreshSyncState: (() -> Unit)? = null
 
     override val showSplashScreen = true
 
@@ -338,6 +342,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         configBinding.miuiNotifyStyleButton.setOnClickListener { SystemUITool.openMiuiNotificationDisplaySettings(context = this) }
         // 通知图标优化名单卡片点击事件
         homeBinding.mainOptimizeListItem.setOnClickListener { startActivity<ConfigureActivity>() }
+        // 同步能力由配置页提供，首页只更新概览
+        refreshSyncState = ConfigureActivity.bindSyncAction(this, homeBinding.mainOptimizeListSync, homeBinding.mainOptimizeListItem) { refreshOptimizeListSummary() }
         // 修改状态栏通知图标个数按钮点击事件
         configBinding.statusIconCountButton.setOnClickListener {
             showDialog<DiaStatusIconCountBinding> {
@@ -439,14 +445,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         binding.mainViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 binding.mainBottomNav.selectedItemId = navIds[position]
+                if (position == 0) refreshOptimizeListSyncTime()
             }
         })
         binding.mainBottomNav.setOnItemSelectedListener {
             binding.mainViewPager.currentItem = navIds.indexOf(it.itemId)
             true
         }
-        // 重复点击当前页面的底栏图标时平滑回到顶部
-        binding.mainBottomNav.setOnItemReselectedListener { pages[navIds.indexOf(it.itemId)].smoothScrollTo(0, 0) }
+        // 重复点击当前页面时平滑回到顶部，主页同时更新时间文案
+        binding.mainBottomNav.setOnItemReselectedListener {
+            val position = navIds.indexOf(it.itemId)
+            pages[position].smoothScrollTo(0, 0)
+            if (position == 0) refreshOptimizeListSyncTime()
+        }
     }
 
     /** 前往项目地址 */
@@ -481,35 +492,58 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         homeBinding.mainTextApiWay.text = "Activated by ${YukiHook.Status.Executor.name} API ${YukiHook.Status.Executor.apiVersion}"
     }
 
-    /** 刷新通知图标优化名单卡片的摘要 */
+    /** 开启时显示上次成功同步时间，关闭时保留功能关闭提示 */
+    private fun refreshOptimizeListSyncTime() {
+        if (!YukiHook.Status.isModuleActive) return
+        homeBinding.mainOptimizeListSummaryText.text = if (ConfigData.isEnableNotifyIconFix)
+            getString(R.string.main_optimize_list_last_sync, ConfigData.lastIconRuleSyncTime.toRelativeTime(this))
+        else getString(R.string.main_optimize_list_disabled)
+    }
+
+    /** 刷新优化名单的开启状态、规则总数和本机收录数量 */
     private fun refreshOptimizeListSummary() = launch {
+        refreshSyncState?.invoke()
+        val isActive = YukiHook.Status.isModuleActive
+        if (!isActive || !ConfigData.isEnableNotifyIconFix) {
+            listOf(homeBinding.mainOptimizeListTotalText, homeBinding.mainOptimizeListIncludedText, homeBinding.mainOptimizeListUncoveredText)
+                .forEach { it.text = "—" }
+            homeBinding.mainOptimizeListSummaryText.text = getString(
+                if (isActive) R.string.main_optimize_list_disabled else R.string.config_module_unavailable
+            )
+            return@launch
+        }
+        // 刷新时保留已有数字，新数据返回后直接替换，首次加载沿用布局中的占位符
+        refreshOptimizeListSyncTime()
         if (IconRuleManagerTool.icons.isEmpty()) IconRuleManagerTool.reload(this@MainActivity)
         val icons = IconRuleManagerTool.icons
-        homeBinding.mainOptimizeListSummaryText.text = when {
-            ConfigData.isEnableNotifyIconFix.not() -> getString(R.string.notify_icon_optimization_disabled)
-            IconRuleManagerTool.hasCachedResources(context = this@MainActivity).not() -> getString(R.string.main_optimize_list_not_synced)
-            else -> getString(R.string.main_optimize_list_total, icons.size)
-        }
-        if (ConfigData.isEnableNotifyIconFix && icons.isNotEmpty())
+        val hasRules = IconRuleManagerTool.hasCachedResources(context = this@MainActivity) && icons.isNotEmpty()
+        if (hasRules && YukiHook.Status.isModuleActive && ConfigData.isEnableNotifyIconFix) {
+            homeBinding.mainOptimizeListTotalText.text = icons.size.toString()
+            // 统计本机已安装应用的名单收录情况
             SystemUITool.obtainInstalledApps(context = this@MainActivity) { apps ->
-                if (apps.isEmpty()) return@obtainInstalledApps
+                if (!YukiHook.Status.isModuleActive || !ConfigData.isEnableNotifyIconFix || apps.isEmpty()) return@obtainInstalledApps
                 val includedPackages = icons.map { it.packageName }.toSet()
-                val installedIncluded = apps.count { it.packageName in includedPackages }
-                val notIncluded = apps.count { it.isCandidate && it.packageName !in includedPackages }
-                homeBinding.mainOptimizeListSummaryText.text = getString(R.string.main_optimize_list_summary, installedIncluded, notIncluded)
+                homeBinding.mainOptimizeListIncludedText.text = apps.count { it.packageName in includedPackages }.toString()
+                homeBinding.mainOptimizeListUncoveredText.text = apps.count { it.isCandidate && it.packageName !in includedPackages }.toString()
             }
+        }
     }
 
     /** 刷新并检查模块状态 */
     private fun checkModuleStatus() {
         // 刷新模块状态
         refreshModuleStatus()
+        // modern 激活状态依赖框架服务连接，未就绪时不请求宿主或读取偏好
+        if (!YukiHook.Status.isModuleActive) {
+            refreshOptimizeListSummary()
+            return
+        }
         // 检查模块激活状态
         SystemUITool.checkingActivated(context = this) { isValied ->
             isModuleRegular = true
             isModuleValied = isValied
             refreshModuleStatus()
-            if (YukiHook.Status.isModuleActive) refreshOptimizeListSummary()
+            refreshOptimizeListSummary()
         }
     }
 

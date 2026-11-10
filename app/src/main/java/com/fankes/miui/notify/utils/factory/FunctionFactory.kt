@@ -63,9 +63,17 @@ import com.highcapable.kavaref.extension.toClassOrNull
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 import com.topjohnwu.superuser.Shell
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * 系统深色模式是否开启
@@ -544,6 +552,29 @@ fun Context.copyToClipboard(content: String) = runInSafe {
  */
 fun Long.stampToDate(format: String = "yyyy-MM-dd HH:mm:ss") =
     safeOfNothing { SimpleDateFormat(format, Locale.CHINA).format(Date(this)) ?: "" }
+
+/**
+ * 将毫秒时间戳转为相对时间，0 显示从未，超过一个日历年显示本地日期
+ * @param context 用于读取本地化文案
+ * @param now 当前毫秒时间戳；未来时间按刚刚处理
+ */
+fun Long.toRelativeTime(context: Context, now: Long = System.currentTimeMillis()): String {
+    if (this == 0L) return context.getString(R.string.time_never)
+    val zone = ZoneId.systemDefault()
+    val date = Instant.ofEpochMilli(this).atZone(zone)
+    val current = Instant.ofEpochMilli(now).atZone(zone)
+    val elapsed = (now - this).milliseconds
+    val months = ChronoUnit.MONTHS.between(date, current)
+    return when {
+        date.isBefore(current.minusYears(1)) -> stampToDate(format = "yyyy-MM-dd HH:mm")
+        elapsed < 5.seconds -> context.getString(R.string.time_just_now)
+        elapsed < 1.minutes -> context.getString(R.string.time_few_seconds_ago)
+        elapsed < 1.hours -> context.resources.getQuantityString(R.plurals.time_minutes_ago, elapsed.inWholeMinutes.toInt(), elapsed.inWholeMinutes)
+        elapsed < 1.days -> context.resources.getQuantityString(R.plurals.time_hours_ago, elapsed.inWholeHours.toInt(), elapsed.inWholeHours)
+        months > 0 -> context.resources.getQuantityString(R.plurals.time_months_ago, months.toInt(), months)
+        else -> context.resources.getQuantityString(R.plurals.time_days_ago, elapsed.inWholeDays.toInt(), elapsed.inWholeDays)
+    }
+}
 
 /**
  * 延迟执行

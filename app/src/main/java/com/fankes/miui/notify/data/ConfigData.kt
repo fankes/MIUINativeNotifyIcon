@@ -20,7 +20,7 @@
  *
  * This file is created by fankes on 2023/2/2.
  */
-@file:Suppress("MemberVisibilityCanBePrivate")
+@file:Suppress("MemberVisibilityCanBePrivate", "SameParameterValue")
 
 package com.fankes.miui.notify.data
 
@@ -104,6 +104,9 @@ object ConfigData {
     /** 通知图标优化名单同步方式 */
     val ICON_RULE_SOURCE_SYNC_TYPE = PreferenceData("_rule_source_sync_way", IconRuleSourceSyncType.GITHUB_PROXY_1)
 
+    /** 模块本地名单上次成功同步的时间 */
+    val LAST_ICON_RULE_SYNC_TIME = PreferenceData("_last_icon_rule_sync_time", 0L)
+
     /** 启用附加来源 */
     val ENABLE_ADDITIONAL_SOURCE = PreferenceData("_enable_additional_source", false)
 
@@ -174,6 +177,22 @@ object ConfigData {
      * @param value 键值内容
      */
     internal fun putInt(data: PreferenceData<Int>, value: Int) {
+        when (instance) {
+            is Context -> (instance as Context).preferences().edit { put(data, value) }
+            is PackageParam -> YLog.warn("Not support for this method")
+            else -> error("Unknown type for put preferences data")
+        }
+    }
+
+    /** 读取 [Long] 数据 */
+    internal fun getLong(data: PreferenceData<Long>) = when (instance) {
+        is Context -> (instance as Context).preferences().get(data)
+        is PackageParam -> (instance as PackageParam).preferences.get(data)
+        else -> error("Unknown type for get preferences data")
+    }
+
+    /** 存入 [Long] 数据 */
+    internal fun putLong(data: PreferenceData<Long>, value: Long) {
         when (instance) {
             is Context -> (instance as Context).preferences().edit { put(data, value) }
             is PackageParam -> YLog.warn("Not support for this method")
@@ -422,6 +441,13 @@ object ConfigData {
         get() = getInt(ICON_RULE_SOURCE_SYNC_TYPE)
         set(value) {
             putInt(ICON_RULE_SOURCE_SYNC_TYPE, value)
+        }
+
+    /** 模块本地名单上次成功同步的时间，0 表示从未同步 */
+    var lastIconRuleSyncTime
+        get() = getLong(LAST_ICON_RULE_SYNC_TIME)
+        set(value) {
+            putLong(LAST_ICON_RULE_SYNC_TIME, value)
         }
 
     /**

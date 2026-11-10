@@ -180,6 +180,8 @@ object IconRuleManagerTool {
         val changed = mainResult.status == Anip.FetchResult.Status.SUCCESS ||
             extraResult?.status == Anip.FetchResult.Status.SUCCESS || state?.version != next.version
         if (changed) state = next
+        // 记录模块本地名单的成功同步，已是最新也计入；legacy 宿主使用自己的独立缓存
+        if (context.packageName == BuildConfigWrapper.APPLICATION_ID) ConfigData.lastIconRuleSyncTime = System.currentTimeMillis()
         Anip.FetchResult(mainResult.message, if (changed) Anip.FetchResult.Status.SUCCESS else Anip.FetchResult.Status.UP_TO_DATE)
     }
 
@@ -417,7 +419,7 @@ object IconRuleManagerTool {
         sourceType: Int = ConfigData.iconRuleSourceSyncType,
         isAuto: Boolean = false,
         onSyncStateChange: ((Boolean) -> Unit)? = null,
-        callback: () -> Unit
+        callback: () -> Unit = {}
     ) {
         ConfigData.iconRuleSourceSyncType = sourceType.normalizedSourceType
         onSyncStateChange?.invoke(true)
