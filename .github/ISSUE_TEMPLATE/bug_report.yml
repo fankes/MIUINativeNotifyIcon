@@ -1,5 +1,5 @@
 name: Bug Report / 问题反馈
-description: 反馈模块问题必须使用此模板进行提交 / Bug reports must be submitted using this template
+description: Bug reports must be submitted using this template / 反馈模块问题必须使用此模板进行提交
 labels: [ bug ]
 title: "[Bug Report / 问题反馈] "
 body:
