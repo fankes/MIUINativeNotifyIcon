@@ -527,21 +527,23 @@ object SystemUIHooker : YukiBaseHooker() {
                     pair.first.let { drawable ->
                         // 与系统回调中的替换路径保持相同尺寸，不在刷新时写回原尺寸图标
                         val icon = if (pair.second) drawable?.toStatusIconBitmap(it.context)?.toDrawable(it.resources) else drawable
-                        (it as? ImageView)?.also { view ->
-                            val previous = view.drawable
-                            view.setImageDrawable(icon)
-                            // HyperOS 2 按 Drawable 的固有尺寸计算绘制缩放，手动换图后也要更新
-                            if (isMIOS && miosVersionCode.toInt() == 2 && icon != null &&
-                                (previous?.intrinsicWidth != icon.intrinsicWidth || previous.intrinsicHeight != icon.intrinsicHeight))
-                                view.asResolver().optional(silent = true).firstMethodOrNull {
-                                    name = "maybeUpdateIconScaleDimens"
-                                    emptyParameters()
-                                }?.invoke()
-                        }
+                        (it as? ImageView)?.setStatusBarIconDrawable(icon)
                     }
                 }
             }
         }
+    }
+
+    private fun ImageView.setStatusBarIconDrawable(icon: Drawable?) {
+        val previous = drawable
+        setImageDrawable(icon)
+        // HyperOS 2 按 Drawable 的固有尺寸计算绘制缩放，手动换图后也要更新
+        if (isMIOS && miosVersionCode.toInt() == 2 && icon != null &&
+            (previous?.intrinsicWidth != icon.intrinsicWidth || previous.intrinsicHeight != icon.intrinsicHeight))
+            asResolver().optional(silent = true).firstMethodOrNull {
+                name = "maybeUpdateIconScaleDimens"
+                emptyParameters()
+            }?.invoke()
     }
 
     /** 刷新通知小图标 */
@@ -578,22 +580,32 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
-    /** 获取同一通知组最后发送的子通知 */
-    private fun StatusBarNotification.latestGroupChild() = currentNotifications()?.filter {
-        it.key != key && it.groupKey == groupKey && it.user == user && it.packageName == packageName &&
-            it.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
-    }?.maxByOrNull { it.postTime }
-
     /** 为通知组选择系统摘要图标或最后一条子通知图标，不修改原通知 */
     private fun StatusBarNotification.notificationGroupIcon(context: Context): Pair<StatusBarNotification, Drawable>? {
         if (notification.flags and Notification.FLAG_GROUP_SUMMARY == 0) return null
+        val children = currentNotifications()?.filter {
+            it.key != key && it.groupKey == groupKey && it.user == user && it.packageName == packageName &&
+                it.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
+        } ?: return null
         if (ConfigData.isEnableNotifyGroupSummaryIcon) {
             // 早期 Android 14 及更低版本没有此资源，沿用最后一条通知图标
             @Suppress("DiscouragedApi")
             val iconId = context.resources.getIdentifier("ic_notification_summary_auto", "drawable", "android")
-            if (iconId != 0) return this to context.resources.getDrawableCompat(iconId)
+            if (iconId != 0) {
+                val icons = children.mapNotNull { it.notification.smallIcon }.iterator()
+                if (!icons.hasNext()) return null
+                val firstIcon = icons.next()
+                if (!icons.hasNext()) return null
+                // GroupHelper 也用 Icon.sameAs 比较原始图标，渠道 ID 不参与比较
+                val sameAs = Icon::class.resolve().optional(silent = true).firstMethodOrNull {
+                    name = "sameAs"
+                    parameters(Icon::class)
+                }?.of(firstIcon) ?: return null
+                return if (icons.asSequence().any { sameAs.invokeQuietly<Boolean>(it) == false })
+                    this to context.resources.getDrawableCompat(iconId) else null
+            }
         }
-        val child = latestGroupChild() ?: return null
+        val child = children.maxByOrNull { it.postTime } ?: return null
         val icon = child.notification.smallIcon ?: return null
         val drawable = icon.loadDrawable(context) ?: safeOfNull {
             icon.loadDrawable(context.createPackageContext(child.nfPkgName, Context.CONTEXT_IGNORE_SECURITY))
@@ -673,7 +685,7 @@ object SystemUIHooker : YukiBaseHooker() {
     } ?: Pair(null, false)
 
     /** 在 SystemUI 更新 Drawable 或颜色后重新应用状态栏通知图标 */
-    private fun refreshStatusBarIconView(iconView: ImageView) {
+    private fun refreshStatusBarIconView(iconView: ImageView, isGroupRefresh: Boolean = false) {
         val expandedNf = iconView.asResolver().optional()
             .firstFieldOrNull { name = "mNotification" }?.get<StatusBarNotification>()
         compatStatusIcon(
@@ -682,16 +694,16 @@ object SystemUIHooker : YukiBaseHooker() {
             iconDrawable = expandedNf?.notification?.smallIcon?.loadDrawable(iconView.context)
         ).also { pair ->
             if (pair.second) pair.first?.also { drawable ->
-                iconView.setImageDrawable(drawable.toStatusIconBitmap(iconView.context).toDrawable(iconView.resources))
+                iconView.setStatusBarIconDrawable(drawable.toStatusIconBitmap(iconView.context).toDrawable(iconView.resources))
                 // HyperOS 3 起会保留系统着色，彩色图标写入后需要同时清除两层 Tint
                 if (isGrayscaleIcon(iconView.context, drawable).not()) {
                     iconView.imageTintList = null
                     iconView.colorFilter = null
                 }
             }
-            // HyperOS 1/2 的 getSmallIcon 已被 Hook 换成 APP 图标或规则图标，
-            // 灰度小图标没有被替换时需要写回原始 smallIcon，否则会一直停留在彩色图标上被染成白块
-            else if (miosVersionCode < 3) pair.first?.also { iconView.setImageDrawable(it) }
+            // 组内图标恢复一致时，写回原始图标以清除上一次写入的通用摘要图标
+            // HyperOS 1/2 也需要写回灰度小图标，避免继续显示之前替换的彩色图标
+            else if (isGroupRefresh || miosVersionCode < 3) pair.first?.also { iconView.setStatusBarIconDrawable(it) }
         }
         updateStatusBarIconColor(iconView)
     }
@@ -1379,7 +1391,7 @@ object SystemUIHooker : YukiBaseHooker() {
             val source = iconView.asResolver().optional(silent = true).firstFieldOrNull {
                 name = "mNotification"
             }?.get<StatusBarNotification>()
-            if (source?.key == nf.key) refreshStatusBarIconView(iconView)
+            if (source?.key == nf.key) refreshStatusBarIconView(iconView, isGroupRefresh = true)
         }
     }
 
