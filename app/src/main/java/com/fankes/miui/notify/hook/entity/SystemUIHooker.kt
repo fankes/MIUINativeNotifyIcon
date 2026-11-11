@@ -737,7 +737,8 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
      * @param isUseMaterial3Style 是否使用 M3 风格，默认跟随设置
-     * @param isNativePanel 是否来自原生通知面板
+     * @param isStockPanel 是否来自原生通知面板
+     * @param isDarkMode 是否使用夜间配色，AOD 固定为是；OS4 通知 View 使用强制夜间 Context，默认读取 SystemUI Application 的真实日夜配置
      */
     private fun compatNotifyIcon(
         context: Context,
@@ -746,7 +747,8 @@ object SystemUIHooker : YukiBaseHooker() {
         isExpanded: Boolean = true,
         isMiuiPanel: Boolean = false,
         isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle,
-        isNativePanel: Boolean = false
+        isStockPanel: Boolean = false,
+        isDarkMode: Boolean = (globalContext ?: context).isSystemInDarkMode
     ): Unit = runInSafe(msg = "compatNotifyIcon") {
         /**
          * 设置默认通知图标
@@ -777,14 +779,12 @@ object SystemUIHooker : YukiBaseHooker() {
         nf?.let { notifyInstance ->
             val groupIcon = notifyInstance.notificationGroupIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
-                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isUseMaterial3Style, isNativePanel)
+                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isUseMaterial3Style, isStockPanel, isDarkMode)
                 return@let
             }
             val isSystemSummaryIcon = groupIcon != null
 
-            // OS4 的通知 View 使用强制夜间 Context，统一读取 SystemUI Application 的真实日夜配置
             val systemContext = globalContext ?: context
-            val isDarkMode = systemContext.isSystemInDarkMode
             // 柔光玻璃为 1，轻透磨砂为 0；仅非 Material 3 风格按玻璃材质使用夜间着色
             val isSoftLightGlass = isUseMaterial3Style.not() && isMIOS && miosVersionCode >= 4 &&
                 Settings.Secure.getInt(systemContext.contentResolver, "material_style", -1) == 1
@@ -830,10 +830,10 @@ object SystemUIHooker : YukiBaseHooker() {
                 notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
 
             // Android 17 起原生图标为 40dp，外圈每边内缩 1dp，前景为 24dp
-            val isNativePanelRowIcon = isUseMaterial3Style && isNativePanel &&
+            val isStockPanelRowIcon = isUseMaterial3Style && isStockPanel &&
                 AndroidVersion.isAtLeast(AndroidVersion.CINNAMON_BUN)
             val iconPadding = when {
-                isNativePanelRowIcon -> 8.toPx(context)
+                isStockPanelRowIcon -> 8.toPx(context)
                 isUseMaterial3Style && isMIOS && isMiuiPanel -> 7.toPx(context)
                 isUseMaterial3Style -> 4.toPx(context)
                 else -> 0
@@ -854,7 +854,7 @@ object SystemUIHooker : YukiBaseHooker() {
              * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
              */
             fun setPromotedOngoingComposedIcon(drawable: Drawable, foregroundColor: Int, backgroundColor: Int) {
-                val inset = if (isNativePanelRowIcon) iconPadding else 7.toPx(context)
+                val inset = if (isStockPanelRowIcon) iconPadding else 7.toPx(context)
                 val backgroundDrawable = DrawableBuilder()
                     .rectangle()
                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
@@ -863,7 +863,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val glyph = drawable.optimizeForPanel(inset * 2)
                 val foregroundDrawable = (glyph.constantState?.newDrawable(context.resources) ?: glyph).mutate()
                 val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
-                    if (isNativePanelRowIcon) {
+                    if (isStockPanelRowIcon) {
                         val backgroundInset = 1.toPx(context)
                         setLayerInset(0, backgroundInset, backgroundInset, backgroundInset, backgroundInset)
                     }
@@ -969,7 +969,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     } else setDefaultNotifyIcon(iconDrawable)
                 }
             }
-            if (isNativePanelRowIcon && iconView.background != null) iconView.apply {
+            if (isStockPanelRowIcon && iconView.background != null) iconView.apply {
                 background = InsetDrawable(background, 1.toPx(context))
                 // InsetDrawable 会提供背景 padding，写入后恢复前景所需的边距
                 setPadding(iconPadding)
@@ -1073,18 +1073,19 @@ object SystemUIHooker : YukiBaseHooker() {
         if (ConfigData.isEnableFocusNotifyIcon) compatComposedNotifyIcon(iconView, nf)
     }
 
-    /** 将通知图标和外圈合成一张位图，供胶囊、媒体和聊天角标缩放、复制使用；媒体角标固定使用 M3 */
+    /** 将通知图标和外圈合成一张位图，供胶囊、媒体、聊天角标和 AOD 使用；媒体角标固定使用 M3 */
     private fun compatComposedNotifyIcon(
         iconView: ImageView,
         nf: StatusBarNotification,
         isMediaIcon: Boolean = false,
-        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle
+        isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle,
+        isDarkMode: Boolean = (globalContext ?: iconView.context).isSystemInDarkMode
     ) {
         val size = 40.toPx(iconView.context)
         val panelIcon = ImageView(iconView.context).apply {
             layoutParams = ViewLayoutParams(size, size)
         }
-        compatNotifyIcon(iconView.context, nf, panelIcon, isUseMaterial3Style = isMediaIcon || isUseMaterial3Style)
+        compatNotifyIcon(iconView.context, nf, panelIcon, isUseMaterial3Style = isMediaIcon || isUseMaterial3Style, isDarkMode = isDarkMode)
         if (panelIcon.drawable == null) return
         panelIcon.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
@@ -1490,7 +1491,7 @@ object SystemUIHooker : YukiBaseHooker() {
         // 非最小化优先级的通知全部设置为展开状态
         if (importance != NotificationManager.IMPORTANCE_MIN) isExpanded = true
         // 执行 Hook
-        compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded, isNativePanel = true)
+        compatNotifyIcon(iconImageView.context, expandedNf, iconImageView, isExpanded, isStockPanel = true)
     }
 
     /** 聊天通知保留系统头像，应用角标固定使用 M3 风格，普通通知继续适配主图标 */
@@ -2456,11 +2457,9 @@ object SystemUIHooker : YukiBaseHooker() {
             ?: return YLog.warn("fillNotificationData got null context")
         val iconDrawableField = notificationData.asResolver().firstFieldOrNull { name = "mIconDrawable" }
             ?: return YLog.warn("fillNotificationData got null iconDrawableField")
-        val smallIconDrawable = notifyInstance.notification?.smallIcon?.loadDrawable(context)
-
-        compatStatusIcon(context, notifyInstance, smallIconDrawable, "AOD Icon").also { pair ->
-            if (pair.second) iconDrawableField.set(pair.first)
-            else iconDrawableField.set(smallIconDrawable)
-        }
+        // AOD 只接收 Drawable，将外圈和前景一起合成，并固定使用夜间配色
+        val iconView = ImageView(context)
+        compatComposedNotifyIcon(iconView, notifyInstance, isDarkMode = true)
+        iconView.drawable?.also { iconDrawableField.set(it) }
     }
 }
