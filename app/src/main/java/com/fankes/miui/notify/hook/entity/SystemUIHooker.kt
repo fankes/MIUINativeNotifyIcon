@@ -818,10 +818,11 @@ object SystemUIHooker : YukiBaseHooker() {
             val isUsePromotedOngoingComposedIcon =
                 notifyInstance.isFocusNotificationCompat && isUseMaterial3Style
 
-            // OS4 原生图标为 40dp，经典为 38dp；原生每边内缩 1dp，并将前景统一为 24dp
-            val isOs4NativePanel = isUseMaterial3Style && isMIOS && miosVersionCode >= 4 && isNativePanel
+            // Android 17 起原生图标为 40dp，外圈每边内缩 1dp，前景为 24dp
+            val isNativePanelRowIcon = isUseMaterial3Style && isNativePanel &&
+                AndroidVersion.isAtLeast(AndroidVersion.CINNAMON_BUN)
             val iconPadding = when {
-                isOs4NativePanel -> 8.toPx(context)
+                isNativePanelRowIcon -> 8.toPx(context)
                 isUseMaterial3Style && isMIOS && isMiuiPanel -> 7.toPx(context)
                 isUseMaterial3Style -> 4.toPx(context)
                 else -> 0
@@ -842,7 +843,7 @@ object SystemUIHooker : YukiBaseHooker() {
              * 将外圈与前景合成一个 Drawable，避免绘制阶段只剩下 smallIcon。
              */
             fun setPromotedOngoingComposedIcon(drawable: Drawable, foregroundColor: Int, backgroundColor: Int) {
-                val inset = if (isOs4NativePanel) iconPadding else 7.toPx(context)
+                val inset = if (isNativePanelRowIcon) iconPadding else 7.toPx(context)
                 val backgroundDrawable = DrawableBuilder()
                     .rectangle()
                     .cornerRadius(ConfigData.notifyIconCornerSize.toPx(context))
@@ -851,7 +852,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val glyph = drawable.optimizeForPanel(inset * 2)
                 val foregroundDrawable = (glyph.constantState?.newDrawable(context.resources) ?: glyph).mutate()
                 val composedDrawable = LayerDrawable(arrayOf(backgroundDrawable, foregroundDrawable)).apply {
-                    if (isOs4NativePanel) {
+                    if (isNativePanelRowIcon) {
                         val backgroundInset = 1.toPx(context)
                         setLayerInset(0, backgroundInset, backgroundInset, backgroundInset, backgroundInset)
                     }
@@ -957,7 +958,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     } else setDefaultNotifyIcon(iconDrawable)
                 }
             }
-            if (isOs4NativePanel && iconView.background != null) iconView.apply {
+            if (isNativePanelRowIcon && iconView.background != null) iconView.apply {
                 background = InsetDrawable(background, 1.toPx(context))
                 // InsetDrawable 会提供背景 padding，写入后恢复前景所需的边距
                 setPadding(iconPadding)
