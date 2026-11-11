@@ -556,8 +556,8 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun ImageView.setStatusBarIconDrawable(icon: Drawable?) {
         val previous = drawable
         setImageDrawable(icon)
-        // HyperOS 2 按 Drawable 的固有尺寸计算绘制缩放，手动换图后也要更新
-        if (isMIOS && miosVersionCode.toInt() == 2 && icon != null &&
+        // HyperOS 2、3 按 Drawable 的固有尺寸计算绘制缩放，手动换图后也要更新
+        if (isMIOS && miosVersionCode.toInt() in 2..3 && icon != null &&
             (previous?.intrinsicWidth != icon.intrinsicWidth || previous.intrinsicHeight != icon.intrinsicHeight))
             asResolver().optional(silent = true).firstMethodOrNull {
                 name = "maybeUpdateIconScaleDimens"
