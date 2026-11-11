@@ -249,6 +249,12 @@ object SystemUIHooker : YukiBaseHooker() {
         )
     )
 
+    /** HyperOS 2 媒体卡片的图标绑定入口 */
+    private val MiuiMediaControlPanelClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.mediacontrol.MiuiMediaControlPanel")
+
+    /** HyperOS 2 的现有媒体播放器集合 */
+    private val MediaPlayerDataClass by lazyClassOrNull("${PackageName.SYSTEMUI}.media.controls.ui.controller.MediaPlayerData")
+
     /** HyperOS 媒体卡片的图标绑定入口 */
     private val MiuiMediaViewControllerImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.mediacontrol.MiuiMediaViewControllerImpl")
 
@@ -992,6 +998,26 @@ object SystemUIHooker : YukiBaseHooker() {
             .toDrawable(context.resources)
     }
 
+    /** 更新 HyperOS 2 媒体卡片的角标，不重新绑定播放数据 */
+    private fun compatOs2MediaNotificationIcon(panel: Any) {
+        val resolver = panel.asResolver().optional(silent = true)
+        val data = resolver.firstFieldOrNull { name = "mMediaData" }?.get() ?: return
+        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "notificationKey"
+        }?.get<String>() ?: return
+        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
+        val holder = resolver.firstFieldOrNull {
+            name = "mMediaViewHolder"
+            superclass()
+        }?.get() ?: return
+        val iconView = holder.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "appIcon"
+        }?.get<ImageView>() ?: return
+        // 系统的轮廓回调会重新开启固定圆角裁切，合成图标改用模块设置的圆角
+        iconView.outlineProvider = null
+        compatComposedNotifyIcon(iconView, nf, isMediaIcon = true)
+    }
+
     /** 更新媒体卡片的当前角标和翻转时复制的图标，不重新绑定播放数据 */
     private fun compatMediaNotificationIcons(controller: Any) {
         val resolver = controller.asResolver().optional(silent = true)
@@ -1014,6 +1040,15 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 从系统组件取得现有媒体控制器，主动刷新角标，不保存控制器或视图 */
     private fun refreshMediaNotificationIcons() = runInSafe(msg = "Refresh media notification icons") {
+        if (isMIOS && miosVersionCode.toInt() == 2) {
+            val players = MediaPlayerDataClass?.resolve()?.optional(silent = true)?.firstFieldOrNull {
+                name = "mediaPlayers"
+            }?.get<Map<*, *>>() ?: return@runInSafe
+            players.values.filterNotNull().forEach { panel ->
+                if (MiuiMediaControlPanelClass?.isInstance(panel) == true) compatOs2MediaNotificationIcon(panel)
+            }
+            return@runInSafe
+        }
         val component = globalContext?.asResolver()?.optional(silent = true)?.firstFieldOrNull {
             name = "mSysUIComponent"
             superclass()
@@ -2114,6 +2149,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "onContentUpdated"
             }?.hook()?.after { hookNotificationViewWrapper(instance) }
         }
+        // OS2 使用旧播放器入口，OS1 也有同名类，因此只在 OS2 绑定后处理角标
+        if (isMIOS && miosVersionCode.toInt() == 2)
+            MiuiMediaControlPanelClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+                name = "bindPlayer"
+                parameterCount = 2
+            }?.hook()?.after { compatOs2MediaNotificationIcon(instance) }
         // 通知栏和胶囊媒体卡片使用独立控制器，绑定后与立即刷新共用角标处理
         listOfNotNull(MiuiMediaViewControllerImplClass, MiuiIslandMediaViewBinderImplClass).forEach { controllerClass ->
             controllerClass.resolve().optional(silent = true).firstMethodOrNull {
