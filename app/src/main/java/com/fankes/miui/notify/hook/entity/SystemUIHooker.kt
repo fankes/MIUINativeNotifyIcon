@@ -1632,11 +1632,9 @@ object SystemUIHooker : YukiBaseHooker() {
                 legacyIconRuleUpdateJob?.cancel()
                 IconRuleManagerTool.dismissSyncing(context)
             }
-            // 解锁后重新刷新状态栏图标防止系统重新设置它
+            // 解锁后只刷新缓存路径的状态栏图标；面板图标由绑定回调处理，避免重建全部通知
             registerReceiver(Intent.ACTION_USER_PRESENT) { _, _ ->
                 if (isUsingCachingMethod) refreshStatusBarIcons()
-                // 每次解锁时都对通知栏的图标进行刷新以响应 [RemoteViews] 阶段的图标改变
-                refreshNotificationIcons()
             }
             // 注册定时监听
             registerReceiver(Intent.ACTION_TIME_TICK) { context, _ ->
