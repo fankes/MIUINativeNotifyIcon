@@ -177,8 +177,14 @@ object SystemUIHooker : YukiBaseHooker() {
     /** Android 16、17 原生通知图标样式提供器 */
     private val NotificationIconStyleProviderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.icon.NotificationIconStyleProviderImpl")
 
+    /** HyperOS 2 的更多通知入口控制器 */
+    private val FoldNotifControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.history.FoldNotifController")
+
     /** HyperOS 3、4 的更多通知入口控制器 */
     private val FoldNotifControllerImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.history.FoldNotifControllerImpl")
+
+    /** MIUI 的 APP 图标管理器 */
+    private val AppIconsManagerClass by lazyClassOrNull("com.miui.systemui.graphics.AppIconsManager")
 
     /** HyperOS 新版本的通知样式设置工具 */
     private val NotificationSettingsHelperClass by lazyClassOrNull("com.miui.systemui.notification.NotificationSettingsHelper")
@@ -1926,12 +1932,13 @@ object SystemUIHooker : YukiBaseHooker() {
             parameterCount = 2
             returnType = Boolean::class
         }?.hook()?.intercept(false)
-        // OS3、OS4 的更多通知入口只接收 Drawable 并在控制器内立即合成 Bitmap，没有可单独处理的
-        // ImageView；而 getCustomAppIcon 同时还被其它通知区域调用。用 ThreadLocal 仅标记同步生成入口
-        // 的这段调用，并保存 Notification 到 StatusBarNotification 的映射，随后复用通知面板方案离屏绘制
-        FoldNotifControllerImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+        // 更多通知入口在控制器内立即合成 Bitmap，没有可单独处理的 ImageView。
+        // 用 ThreadLocal 仅标记同步生成入口的这段调用，随后复用通知面板方案离屏绘制。
+        val isOs2FoldEntrance = isMIOS && miosVersionCode.toInt() == 2
+        val foldControllerClass = if (isOs2FoldEntrance) FoldNotifControllerClass else FoldNotifControllerImplClass
+        foldControllerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "sendFoldNotification"
-            parameterCount = 2
+            parameterCount = if (isOs2FoldEntrance) 1 else 2
         }?.hook()?.apply {
             before {
                 foldEntranceIconContext.remove()
@@ -1951,6 +1958,25 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
             }
             after { foldEntranceIconContext.remove() }
+        }
+        // OS2 不调用 getCustomAppIcon，而是直接从 AppIconsManager 读取桌面图标
+        // 只替换入口生成期间的返回值，不将合成图标写入系统的 APP 图标缓存
+        if (isOs2FoldEntrance) AppIconsManagerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "getAppIconInner"
+            parameterCount = 4
+        }?.hook()?.after {
+            val (notifications, iconSize) = foldEntranceIconContext.get() ?: return@after
+            val packageName = firstArg().get<String>() ?: return@after
+            val userId = arg(index = 1).get<Int>() ?: return@after
+            // 与系统入口一样，按应用和用户选择时间最新的折叠通知。
+            val nf = notifications.filter {
+                it.packageName == packageName && it.user.asResolver().optional(silent = true)
+                    .firstMethodOrNull { name = "getIdentifier"; emptyParameters() }?.invoke<Int>() == userId &&
+                    it.notification.extras.getBoolean("miui.unimportant", false)
+            }.maxByOrNull { it.notification.`when` } ?: return@after
+            val context = instance.asResolver().optional(silent = true)
+                .firstFieldOrNull { name = "mContext" }?.get<Context>() ?: return@after
+            nf.createFoldEntranceIcon(context, iconSize)?.also { result = it }
         }
         // 注入 MIUI 自己增加的一个工具类
         val usesOs2StatusIconLoader = NotificationUtilClass.run {
