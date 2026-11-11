@@ -88,6 +88,7 @@ import com.highcapable.betterandroid.ui.extension.component.base.toPx
 import com.highcapable.betterandroid.ui.extension.graphics.round
 import com.highcapable.betterandroid.ui.extension.view.ViewLayoutParams
 import com.highcapable.betterandroid.ui.extension.view.outlineProvider
+import com.highcapable.betterandroid.ui.extension.view.parentOrNull
 import com.highcapable.kavaref.KavaRef.Companion.asResolver
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.condition.MethodCondition
@@ -1225,22 +1226,119 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
-    /** 使用宿主已有的插件加载器，兼顾首次加载和模块热重载，不创建另一份插件实例 */
-    private fun hookFocusNotificationPlugin() {
-        val hookedClasses = mutableSetOf<Class<*>>()
-        fun hookLoadedPlugin() {
-            "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()?.resolve()?.optional(silent = true)
-                ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
-                ?.get("miui.systemui.plugin")?.let { hookFocusNotificationIcons(it, hookedClasses) }
+    /** 读取控制中心当前播放应用对应的媒体通知，不保存通知或插件实例 */
+    private fun controlCenterMediaNotification(loader: ClassLoader, packageName: String? = null): StatusBarNotification? {
+        val viewModel = "com.android.systemui.MiPlayDetailViewModel".toClassOrNull(loader)?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "INSTANCE" }?.get() ?: return null
+        val metadata = viewModel.asResolver().optional(silent = true).firstMethodOrNull {
+            name = "getMAppMetadata"
+            emptyParameters()
+        }?.invoke<Any>()?.asResolver()?.optional(silent = true)?.firstMethodOrNull {
+            name = "getValue"
+            emptyParameters()
+            superclass()
+        }?.invoke<Any>()?.asResolver()?.optional(silent = true) ?: return null
+        val activePackage = metadata.firstMethodOrNull { name = "getPackageName"; emptyParameters() }?.invoke<String>() ?: return null
+        if (packageName != null && activePackage != packageName) return null
+        val uid = metadata.firstMethodOrNull { name = "getUid"; emptyParameters() }?.invoke<Int>() ?: return null
+        // 图标加载也在 IO 协程调用，使用通知监听器快照，不读取仅限主线程的 NotifPipeline。
+        val component = globalContext?.asResolver()?.optional(silent = true)?.firstFieldOrNull {
+            name = "mSysUIComponent"
+            superclass()
+        }?.get() ?: return null
+        val provider = component.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "provideNotificationListenerProvider"
+        }?.get() ?: return null
+        val listener = provider.asResolver().optional(silent = true).firstMethodOrNull {
+            name = "get"
+            emptyParameters()
+        }?.invoke<NotificationListenerService>() ?: return null
+        // 带 keys 的重载直接读取系统快照，不经过插件可变的通知过滤器集合
+        return listener.getActiveNotifications(null)?.filter {
+            it.packageName == activePackage && AndroidVersion.require(AndroidVersion.Q, false) { it.uid == uid } &&
+                it.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION) &&
+                it.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0
+        }?.maxByOrNull { it.postTime }
+    }
+
+    /** 清除展开角标自身及圆形底板的裁切，保留封面、角标尺寸和动画布局 */
+    private fun clearControlCenterMediaIconStyle(header: View) {
+        val iconView = header.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "appIcon"
+        }?.get<ImageView>() ?: return
+        iconView.apply {
+            background = null
+            colorFilter = null
+            imageTintList = null
+            outlineProvider = null
+            clipToOutline = false
+            setPadding(0)
         }
-        // OS3 在 Supplier 内创建加载器，OS4 改为 createClassLoader；两者都会返回插件 Context
+        iconView.parentOrNull()?.apply {
+            // app_icon_container 的 CardView 圆形底板会继续裁切已合成的模块图标
+            background = null
+            outlineProvider = null
+            clipToOutline = false
+        }
+    }
+
+    /** 控制中心展开媒体面板的应用角标，与通知媒体卡片共用绘制，不修改封面和布局 */
+    private fun hookControlCenterMediaIcon(loader: ClassLoader, hookedClasses: MutableSet<Class<*>>) {
+        if (isMIOS.not() || miosVersionCode < 2) return
+        val headerClass = "com.android.systemui.QSControlMiPlayDetailHeader".toClassOrNull(loader) ?: return
+        if (hookedClasses.add(headerClass).not()) return
+        headerClass.resolve().optional(silent = true).firstMethodOrNull {
+            name = "getApplicationIconSafely"
+            parameters(String::class)
+        }?.hook()?.after {
+            val packageName = firstArg().get<String>() ?: return@after
+            val nf = controlCenterMediaNotification(loader, packageName) ?: return@after
+            val header = instance<View>()
+            val iconView = ImageView(header.context)
+            compatComposedNotifyIcon(iconView, nf, isMediaIcon = true)
+            iconView.drawable?.let {
+                result = it
+                if (Looper.myLooper() == Looper.getMainLooper()) clearControlCenterMediaIconStyle(header)
+                else header.post { clearControlCenterMediaIconStyle(header) }
+            }
+        }
+        headerClass.resolve().optional(silent = true).firstMethodOrNull {
+            name = "prepareShowPanel"
+            emptyParameters()
+        }?.hook()?.after {
+            val nf = controlCenterMediaNotification(loader) ?: return@after
+            val header = instance<View>()
+            val iconView = header.asResolver().optional(silent = true).firstFieldOrNull {
+                name = "appIcon"
+            }?.get<ImageView>() ?: return@after
+            // 在系统写入结束后适配真实 View，不只替换中间的 Drawable 返回值。
+            compatComposedNotifyIcon(iconView, nf, isMediaIcon = true)
+            clearControlCenterMediaIconStyle(header)
+        }
+    }
+
+    /** 使用宿主已有的插件加载器，兼顾首次加载和模块热重载，不创建另一份插件实例 */
+    private fun hookNotificationPluginIcons() {
+        val hookedClasses = mutableSetOf<Class<*>>()
+        fun hookPlugin(loader: ClassLoader) {
+            hookFocusNotificationIcons(loader, hookedClasses)
+            hookControlCenterMediaIcon(loader, hookedClasses)
+        }
+        fun hookLoadedPlugin() {
+            val loaderClass = "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()
+                ?: "com.android.systemui.shared.plugins.PluginInstance".toClassOrNull()
+            loaderClass?.resolve()?.optional(silent = true)
+                ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
+                ?.get("miui.systemui.plugin")?.let { hookPlugin(it) }
+        }
+        // OS2、OS3 在 Supplier 内创建加载器，OS4 改为 createClassLoader；都会返回插件 Context
         $$"com.android.systemui.shared.plugins.PluginInstance$PluginFactory".toClassOrNull()?.resolve()?.optional(silent = true)
             ?.firstMethodOrNull {
                 name = "createPluginContext"
                 emptyParameters()
             }?.hook()?.after {
                 result<Context>()?.takeIf { it.packageName == "miui.systemui.plugin" }
-                    ?.let { hookFocusNotificationIcons(it.classLoader, hookedClasses) }
+                    ?.let { hookPlugin(it.classLoader) }
             }
         hookLoadedPlugin()
     }
@@ -1821,8 +1919,8 @@ object SystemUIHooker : YukiBaseHooker() {
         if (isSharedCacheAvailable) IconRuleManagerTool.attachHost(sharedFiles)
         // 注册生命周期
         registerLifecycle()
-        // OS3、OS4 焦点通知的胶囊主图标和展开应用角标
-        hookFocusNotificationPlugin()
+        // 插件内的焦点通知图标和控制中心展开媒体角标
+        hookNotificationPluginIcons()
         // Android 16、17 的 NotificationRowIconView 会通过此提供器在 RemoteViews 应用阶段重新加载 APP 图标；
         // OS3、OS4 的参数类型及顺序不同，统一按方法语义拦截，让折叠和展开模板继续使用通知 smallIcon
         NotificationIconStyleProviderImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
