@@ -730,7 +730,6 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param iconView 通知图标实例
      * @param isExpanded 通知是否展开 - 可做最小化通知处理 - 默认：是
      * @param isMiuiPanel 是否来自 MIUI 自己的通知面板
-     * @param isMediaIcon 是否为媒体角标，非 M3 时始终使用夜间配色
      * @param isUseMaterial3Style 是否使用 M3 风格，默认跟随设置
      * @param isNativePanel 是否来自原生通知面板
      */
@@ -740,7 +739,6 @@ object SystemUIHooker : YukiBaseHooker() {
         iconView: ImageView,
         isExpanded: Boolean = true,
         isMiuiPanel: Boolean = false,
-        isMediaIcon: Boolean = false,
         isUseMaterial3Style: Boolean = ConfigData.isEnableMd3NotifyIconStyle,
         isNativePanel: Boolean = false
     ): Unit = runInSafe(msg = "compatNotifyIcon") {
@@ -773,14 +771,14 @@ object SystemUIHooker : YukiBaseHooker() {
         nf?.let { notifyInstance ->
             val groupIcon = notifyInstance.notificationGroupIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
-                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isMediaIcon, isUseMaterial3Style, isNativePanel)
+                compatNotifyIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isUseMaterial3Style, isNativePanel)
                 return@let
             }
             val isSystemSummaryIcon = groupIcon != null
 
             // OS4 的通知 View 使用强制夜间 Context，统一读取 SystemUI Application 的真实日夜配置
             val systemContext = globalContext ?: context
-            val isDarkMode = systemContext.isSystemInDarkMode || (isMediaIcon && isUseMaterial3Style.not())
+            val isDarkMode = systemContext.isSystemInDarkMode
             // 柔光玻璃为 1，轻透磨砂为 0；仅非 Material 3 风格按玻璃材质使用夜间着色
             val isSoftLightGlass = isUseMaterial3Style.not() && isMIOS && miosVersionCode >= 4 &&
                 Settings.Secure.getInt(systemContext.contentResolver, "material_style", -1) == 1
@@ -1069,7 +1067,7 @@ object SystemUIHooker : YukiBaseHooker() {
         if (ConfigData.isEnableFocusNotifyIcon) compatComposedNotifyIcon(iconView, nf)
     }
 
-    /** 将通知图标和外圈合成一张位图，供胶囊、媒体和聊天角标缩放、复制使用 */
+    /** 将通知图标和外圈合成一张位图，供胶囊、媒体和聊天角标缩放、复制使用；媒体角标固定使用 M3 */
     private fun compatComposedNotifyIcon(
         iconView: ImageView,
         nf: StatusBarNotification,
@@ -1080,7 +1078,7 @@ object SystemUIHooker : YukiBaseHooker() {
         val panelIcon = ImageView(iconView.context).apply {
             layoutParams = ViewLayoutParams(size, size)
         }
-        compatNotifyIcon(iconView.context, nf, panelIcon, isMediaIcon = isMediaIcon, isUseMaterial3Style = isUseMaterial3Style)
+        compatNotifyIcon(iconView.context, nf, panelIcon, isUseMaterial3Style = isMediaIcon || isUseMaterial3Style)
         if (panelIcon.drawable == null) return
         panelIcon.clipToOutline = false
         val sizeSpec = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
