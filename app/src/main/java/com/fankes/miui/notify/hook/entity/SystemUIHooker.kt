@@ -186,6 +186,12 @@ object SystemUIHooker : YukiBaseHooker() {
     private val DependencyClass by lazyClassOrNull("${PackageName.SYSTEMUI}.Dependency")
 
     /** 原生存在的类 */
+    private val DarkIconDispatcherClass by lazyClassOrNull("${PackageName.SYSTEMUI}.plugins.DarkIconDispatcher")
+
+    /** 原生存在的类 */
+    private val StatusBarWindowControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.window.StatusBarWindowController")
+
+    /** 原生存在的类 */
     private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
 
     /** 原生存在的类 */
@@ -1540,6 +1546,7 @@ object SystemUIHooker : YukiBaseHooker() {
             moduleLastUpdateTime = application.appLastUpdateTimeOf(BuildConfigWrapper.APPLICATION_ID)
             iconRuleScope.launch {
                 restoreSettingsManager()
+                if (isMIOS && miosVersionCode.toInt() == 2) restoreOs2StatusBarIconTint(application)
                 // 从模块共享文件恢复 ANIP 快照
                 globalContext?.let { refreshIconData(it) }
                 if (ActivationPromptTool.isPrompting(application))
@@ -1570,6 +1577,31 @@ object SystemUIHooker : YukiBaseHooker() {
             iconRuleUpdateFallbackJob?.cancel()
             iconRuleUpdateFallbackJob = null
         }
+    }
+
+    /** OS2 热重载时，系统不会再次分发当前颜色，直接读取状态栏已有的状态 */
+    private fun restoreOs2StatusBarIconTint(context: Context) {
+        val dispatcherClass = DarkIconDispatcherClass ?: return
+        val windowControllerClass = StatusBarWindowControllerClass ?: return
+        val dependency = DependencyClass?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "sDependency" }?.getQuietly<Any>() ?: return
+        val getDependency = dependency.asResolver().optional(silent = true).firstMethodOrNull {
+            name = "getDependencyInner"
+            parameters(Any::class)
+        } ?: return
+        val dispatcher = getDependency.invokeQuietly<Any>(dispatcherClass)?.asResolver()?.optional(silent = true) ?: return
+        val intensity = dispatcher.firstFieldOrNull { name = "mDarkIntensity" }?.getQuietly<Float>() ?: return
+        isDarkIconMode = intensity == 1f
+        val window = getDependency.invokeQuietly<Any>(windowControllerClass)?.asResolver()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "mStatusBarWindowView" }?.getQuietly<View>() ?: return
+
+        @Suppress("DiscouragedApi")
+        val iconsId = context.resources.getIdentifier("notificationIcons", "id", PackageName.SYSTEMUI)
+        val icons = window.findViewById<ViewGroup>(iconsId) ?: return
+        notificationIconContainer = icons
+        val animColor = if (intensity > 0f && intensity < 1f)
+            dispatcher.firstFieldOrNull { name = "mIconTint" }?.getQuietly<Int>() else null
+        updateStatusBarIconsColor(icons, animColor = animColor)
     }
 
     /**
@@ -1976,8 +2008,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "onDarkChanged"
                 parameterCount { it >= 3 }
             }.hookAll().after {
+                val intensity = arg(index = 1).get<Float>()
+                // OS2 首次分发颜色时，通知图标容器可能还未绑定
+                if (isMIOS && miosVersionCode.toInt() == 2 && (intensity == 0f || intensity == 1f))
+                    isDarkIconMode = intensity == 1f
                 notificationIconContainer?.let {
-                    when (arg(index = 1).get<Float>()) {
+                    when (intensity) {
                         1.0f -> {
                             isDarkIconMode = true
                             updateStatusBarIconsColor(it, isDarkIconMode = true)
