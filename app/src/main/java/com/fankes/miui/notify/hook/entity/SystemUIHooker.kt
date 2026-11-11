@@ -2448,6 +2448,7 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun updateAodNotificationIcon(controller: Any?, notificationData: Any?, notifyInstance: StatusBarNotification?) {
+        if (ConfigData.isEnableAodNotifyIcon.not()) return
         if (controller == null || notificationData == null || notifyInstance == null)
             return YLog.warn("AOD fillNotificationData got null arguments")
 

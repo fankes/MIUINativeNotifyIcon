@@ -276,6 +276,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity) }
         }
         configBinding.miuiFocusNotifyIconFixSwitch.bind(ConfigData.ENABLE_FOCUS_NOTIFICATION_FIX)
+        configBinding.aodNotifyIconSwitch.bind(ConfigData.ENABLE_AOD_NOTIFY_ICON) {
+            onChanged { SystemUITool.refreshSystemUI(context = this@MainActivity, isRefreshCacheOnly = true) }
+        }
         configBinding.md3StyleConfigSwitch.bind(ConfigData.ENABLE_MD3_NOTIFY_ICON_STYLE) {
             onInitialize { configBinding.notifyIconCustomCornerItem.isVisible = it && ConfigData.isEnableNotifyIconForceAppIcon.not() }
             onChanged {
