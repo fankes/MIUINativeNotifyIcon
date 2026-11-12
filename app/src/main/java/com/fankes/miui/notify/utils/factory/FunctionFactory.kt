@@ -54,12 +54,11 @@ import com.highcapable.betterandroid.system.extension.component.hasPackage
 import com.highcapable.betterandroid.system.extension.component.isComponentEnabled
 import com.highcapable.betterandroid.system.extension.component.versionCodeCompat
 import com.highcapable.betterandroid.system.extension.utils.AndroidVersion
+import com.highcapable.betterandroid.system.extension.utils.SystemProperties
 import com.highcapable.betterandroid.ui.component.notification.factory.notificationManager
 import com.highcapable.betterandroid.ui.extension.component.base.getColorCompat
 import com.highcapable.betterandroid.ui.extension.view.toast
-import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.kavaref.extension.hasClass
-import com.highcapable.kavaref.extension.toClassOrNull
 import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 import com.topjohnwu.superuser.Shell
 import java.text.SimpleDateFormat
@@ -391,9 +390,9 @@ val Context.isNetWorkSuccess
  */
 val Context.systemAccentColor
     @SuppressLint("InlinedApi")
-    get() = safeOf(wallpaperColor) {
-        if (AndroidVersion.isAtLeast(AndroidVersion.S)) resources.getColorCompat(android.R.color.system_accent1_600) else wallpaperColor
-    }
+    get() = safeOfNull {
+        if (AndroidVersion.isAtLeast(AndroidVersion.S)) resources.getColorCompat(android.R.color.system_accent1_600) else null
+    } ?: wallpaperColor
 
 /**
  * 获取系统壁纸颜色
@@ -441,15 +440,7 @@ val String.base64: String get() = Base64.encodeToString(toByteArray(), Base64.DE
  * @param default 默认值
  * @return [String]
  */
-fun findPropString(key: String, default: String = "") = safeOf(default) {
-    "android.os.SystemProperties".toClassOrNull()
-        ?.resolve()
-        ?.optional(silent = true)
-        ?.firstMethodOrNull {
-            name = "get"
-            parameters(String::class, String::class)
-        }?.invokeQuietly<String>(key, default) ?: default
-}
+fun findPropString(key: String, default: String = "") = SystemProperties.get(key, default)
 
 /**
  * 是否有 Root 权限
