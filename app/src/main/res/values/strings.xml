@@ -49,7 +49,7 @@
     <string name="main_notify_group_summary_icon">Use system group summary icon</string>
     <string name="main_notify_group_summary_icon_desc">This option is enabled by default on Android 14 and above. When enabled, the system summary icon is used as the first icon for a notification group. When disabled, the icon of the last notification sent is used instead.</string>
     <string name="main_enable_focus_notify_icon">Replace focus notification icons</string>
-    <string name="main_focus_notify_icon_desc">This option is enabled by default. When enabled, the main icon in focus notification capsules and the app badge on expanded cards on HyperOS 3 and above also use the replaced notification icons. It has no effect on older systems without this feature.</string>
+    <string name="main_focus_notify_icon_desc">This option is enabled by default. When enabled, focus notification icons in the status bar and app badges on expanded cards on HyperOS also use the replaced notification icons. When disabled, system icons are used.</string>
     <string name="main_status_icon_alpha">Status bar icon opacity</string>
     <string name="main_dark">Dark</string>
     <string name="main_light">Light</string>

@@ -49,7 +49,7 @@
     <string name="main_notify_group_summary_icon">通知组使用系统摘要图标</string>
     <string name="main_notify_group_summary_icon_desc">此选项在 Android 14 及以上系统默认开启，开启后将使用系统提供的摘要图标作为这组通知的首个图标，关闭后，将改用最后发送的通知图标。</string>
     <string name="main_enable_focus_notify_icon">替换焦点通知图标</string>
-    <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 3 及以上系统中，焦点通知胶囊的主图标和展开卡片的应用角标将同样应用替换后的通知图标，在不支持此功能的低版本系统中将无作用。</string>
+    <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 系统中，状态栏中的焦点通知图标和展开卡片的应用角标将同样应用替换后的通知图标，关闭后使用系统原有图标。</string>
     <string name="main_status_icon_alpha">调整状态栏中的通知图标透明度</string>
     <string name="main_dark">暗色</string>
     <string name="main_light">亮色</string>

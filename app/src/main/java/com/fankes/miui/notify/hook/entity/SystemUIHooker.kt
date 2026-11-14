@@ -1338,7 +1338,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val root = resolver.firstField { name = "mView"; superclass() }.get<View>() ?: return
                 val iconId = nf.notification.extras.getInt("miui.focus.iconId")
                 val icon = iconId.takeIf { it != 0 }?.let { root.findViewById<ImageView>(it) }
-                    ?: root.findViewById(root.resources.getIdentifier("icon", "id", "android"))
+                    ?: root.findViewById(root.resources.getIdentifier("icon", "id", "android")) ?: return
                 bindComposedNotificationIcon(icon, nf)
             }
             NotificationViewWrapperClass.resolve().optional(silent = true).apply {
@@ -2798,6 +2798,7 @@ object SystemUIHooker : YukiBaseHooker() {
             val iconField = firstField { name = "mIcon" }
             val textField = firstField { name = "mContentText" }
             fun updateTint(view: Any) {
+                if (ConfigData.isEnableFocusNotifyIcon.not()) return
                 val icon = iconField.copy().of(view).get<ImageView>() ?: return
                 val text = textField.copy().of(view).get<TextView>() ?: return
                 icon.colorFilter = null
@@ -2811,6 +2812,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameterCount = 1
             }.hook().apply {
                 before {
+                    if (ConfigData.isEnableFocusNotifyIcon.not()) return@before
                     val icon = iconField.copy().of(instance).get<ImageView>() ?: return@before
                     val data = firstArg().get() ?: return@before
                     val resolver = data.asResolver()
@@ -2835,6 +2837,7 @@ object SystemUIHooker : YukiBaseHooker() {
         // 旧版移除焦点通知彩色图标
         FocusUtilsClass?.resolve()?.optional()?.apply {
             fun HookParam.bindFocusTickerIcon(isDark: Boolean) {
+                if (ConfigData.isEnableFocusNotifyIcon.not()) return
                 (globalContext ?: firstArg().get<Context?>())?.also { context ->
                     val expandedNf = firstArg().get<StatusBarNotification?>()
                     val small = expandedNf?.notification?.smallIcon
