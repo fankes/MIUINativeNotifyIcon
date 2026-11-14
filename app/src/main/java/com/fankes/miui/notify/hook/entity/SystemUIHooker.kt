@@ -323,6 +323,26 @@ object SystemUIHooker : YukiBaseHooker() {
     private val notificationWrapperRowField by lazy {
         NotificationViewWrapperClass.resolve().optional().firstFieldOrNull { name = "mRow" }
     }
+    private val notificationBuilderNotificationField by lazy {
+        Notification.Builder::class.resolve().firstField { name = "mN" }
+    }
+    private val remoteViewsActionsField by lazy {
+        RemoteViews::class.resolve().firstField { name = "mActions" }
+    }
+    private val remoteViewsActionIdField by lazy {
+        $$"android.widget.RemoteViews$Action".toClass().resolve().firstField { name = "mViewId" }
+    }
+    private val remoteViewsBitmapActionClass by lazyClass($$"android.widget.RemoteViews$BitmapReflectionAction")
+    private val remoteViewsBitmapMethodField by lazy {
+        remoteViewsBitmapActionClass.resolve().firstField { name = "mMethodName" }
+    }
+    private val remoteViewsReflectionActionClass by lazyClass($$"android.widget.RemoteViews$BaseReflectionAction")
+    private val remoteViewsReflectionMethodField by lazy {
+        remoteViewsReflectionActionClass.resolve().firstField { name = "mMethodName" }
+    }
+    private val notificationChatTypeMethod by lazy {
+        MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getNotificationTypeForIm" }
+    }
     private val notificationRowExpandedMethod by lazy {
         ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
             name = "isExpanded"
@@ -2189,8 +2209,28 @@ object SystemUIHooker : YukiBaseHooker() {
             injectorClass.resolve().optional(silent = true).method {
                 name { it == "handleAppIcon" || it == "handleAppIconInternal" }
                 parameterCount { it in 2..5 }
-            }.hookAll().before {
-                if (lastArg().get() != true) result = null
+            }.hookAll().apply {
+                before {
+                    if (lastArg().get() != true) result = null
+                }
+                after {
+                    if (isMIOS.not() || miosVersionCode < 2 || lastArg().get() != true) return@after
+                    val views = firstArg().get<RemoteViews>() ?: return@after
+                    val notification = arg(1).get<Notification>() ?: return@after
+                    val context = arg(2).get<Context>() ?: return@after
+                    removeClassicAppIconActions(views, notification, context)
+                }
+            }
+            if (isMIOS && miosVersionCode >= 2) injectorClass.resolve().optional(silent = true).firstMethodOrNull {
+                name = "createMiuiPublicView"
+                parameters(Notification.Builder::class, Context::class)
+            }?.hook()?.after {
+                val views = result<RemoteViews>() ?: return@after
+                val builder = firstArg().get<Notification.Builder>() ?: return@after
+                val context = lastArg().get<Context>() ?: return@after
+                // 公开模板在 handleAppIcon 之后还会直接写入一次 APP 图标
+                val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
+                removeClassicAppIconActions(views, notification, context)
             }
         }
         NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
@@ -2225,6 +2265,27 @@ object SystemUIHooker : YukiBaseHooker() {
             else target.setImageDrawable(notification.miuiAppIcon?.loadDrawable(target.context)
                 ?: target.context.appIconOf(notification.notificationPackageName))
             result = null
+        }
+    }
+
+    private fun removeClassicAppIconActions(views: RemoteViews, notification: Notification, context: Context) {
+        val chatType = notificationChatTypeMethod?.let {
+            if (it.self.parameterCount == 1) it.invoke<Int>(notification)
+            else it.invoke<Int>(notification, context)
+        }
+        if (notification.flags and Notification.FLAG_GROUP_SUMMARY == 0 && chatType != null && chatType != -1) return
+        val iconId = context.resources.getIdentifier("app_icon", "id", PackageName.SYSTEMUI)
+        if (iconId == 0) return
+        // 系统模板先清空再写 APP 图标；在布局应用前移除这两类指令，保留聊天头像、角标和其它内容
+        val actions = remoteViewsActionsField.copy().of(views).get<MutableList<Any>>() ?: return
+        actions.removeAll { action ->
+            if (remoteViewsActionIdField.copy().of(action).get<Int>() != iconId) return@removeAll false
+            val method = when {
+                remoteViewsBitmapActionClass.isInstance(action) -> remoteViewsBitmapMethodField.copy().of(action).get<String>()
+                remoteViewsReflectionActionClass.isInstance(action) -> remoteViewsReflectionMethodField.copy().of(action).get<String>()
+                else -> null
+            }
+            method == "setImageBitmap" || method == "setImageIcon"
         }
     }
 
