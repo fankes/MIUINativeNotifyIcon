@@ -317,6 +317,19 @@ object SystemUIHooker : YukiBaseHooker() {
     private val statusIconNotificationField by lazy {
         StatusBarIconViewClass.resolve().optional(silent = true).firstFieldOrNull { name = "mNotification" }
     }
+    private val os1NotificationIconObserverClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.policy.NotificationIconObserver")
+    private val os1NotificationIconLimitField by lazy {
+        os1NotificationIconObserverClass.resolve().firstField { name = "mShowNotificationIcons" }
+    }
+    private val os1DependencyGetMethod by lazy {
+        DependencyClass?.resolve()?.firstMethod { name = "get"; parameters(Class::class) }
+    }
+    private val statusIconStaticLayoutField by lazy {
+        NotificationIconContainerClass.resolve().firstField { name = "mIsStaticLayout" }
+    }
+    private val statusIconLockScreenField by lazy {
+        NotificationIconContainerClass.resolve().firstField { name = "mOnLockScreen" }
+    }
     private val notificationWrapperIconField by lazy {
         NotificationHeaderViewWrapperClass.resolve().optional().firstFieldOrNull { name = "mIcon" }
     }
@@ -1311,9 +1324,9 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installRemoteFocusNotificationBindings() {
-        if (isMIOS.not() || miosVersionCode < 2) return
-        if (miosVersionCode >= 3) {
-            // 插件可能先生成自定义 View，既不经过 handleFocusAppIcon，也没有原生 HeaderWrapper
+        if (isMIOS.not()) return
+        if (miosVersionCode.toInt() != 2) {
+            // OS1 和新版插件的自定义 View 没有原生 HeaderWrapper，在自身绑定点适配
             fun bindCustomFocusIcon(wrapper: Any) {
                 if (NotificationHeaderViewWrapperClass.isInstance(wrapper)) return
                 if (ConfigData.isEnableFocusNotifyIcon.not()) return
@@ -1715,7 +1728,14 @@ object SystemUIHooker : YukiBaseHooker() {
                 oldVersion || oldVersion2 || newVersion
             }
         }?.of(instance) ?: return
-        if (statusBarMaxStaticIcons == -1 ||
+        if (isMIOS && miosVersionCode < 2) {
+            if (statusIconStaticLayoutField.copy().of(instance).get<Boolean>() != true ||
+                statusIconLockScreenField.copy().of(instance).get<Boolean>() == true) return
+            // 系统观察器保留真实设置，容器字段可能已经是模块覆盖的值
+            val observer = os1DependencyGetMethod?.invoke(os1NotificationIconObserverClass) ?: return
+            statusBarMaxStaticIcons = os1NotificationIconLimitField.copy().of(observer).get<Int>() ?: return
+            isShowNotificationIcons = statusBarMaxStaticIcons > 0
+        } else if (statusBarMaxStaticIcons == -1 ||
             // 系统设置内修改，模块同步更新
             moduleLastSetStatusBarMaxStaticIcons != maxStaticIconsResolver.get<Int>()) {
             statusBarMaxStaticIcons = maxStaticIconsResolver.get<Int>() ?: return
@@ -2175,6 +2195,10 @@ object SystemUIHooker : YukiBaseHooker() {
             refreshNotificationIcons()
             notificationIconContainer?.let { container ->
                 if (isMIOS && miosVersionCode >= 2) restoreStatusBarIconLimit(container)
+                else {
+                    applyStatusBarIconLimit(container)
+                    container.requestLayout()
+                }
                 updateStatusBarIconsAlpha(container)
             }
         }
@@ -2657,7 +2681,7 @@ object SystemUIHooker : YukiBaseHooker() {
         val amount = container.getTag<Int>(R.id.status_icon_system_limit) ?: run {
             // 首次从无 tag 的模块热重载时，字段可能已被覆盖，必须读取当前用户的系统设置
             val manager = currentIconManager() ?: return
-            val user = manager.asResolver().firstField { name = "userTracker" }.get() ?: return
+            val user = manager.asResolver().firstField { name = "userTracker"; superclass() }.get() ?: return
             val userId = user.asResolver().firstMethod { name = "getUserId"; emptyParameters() }.invoke<Int>() ?: return
             var limit = Settings.System::class.resolve().firstMethod {
                 name = "getIntForUser"
@@ -2716,8 +2740,18 @@ object SystemUIHooker : YukiBaseHooker() {
             resolve().optional().firstMethodOrNull {
                 name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
             }?.hook()?.after {
-                // 缓存实例
-                notificationIconContainer = instance<ViewGroup>()
+                val isStatusBar = isMIOS.not() || miosVersionCode >= 2 ||
+                    (statusIconStaticLayoutField.copy().of(instance).get<Boolean>() == true &&
+                        statusIconLockScreenField.copy().of(instance).get<Boolean>() != true)
+                if (isStatusBar) notificationIconContainer = instance<ViewGroup>()
+                if (isMIOS && miosVersionCode < 2 && isStatusBar && isShowNotificationIcons &&
+                    ConfigData.isEnableLiftedStatusIconCount && ConfigData.liftedStatusIconCount == 0) {
+                    // OS1 在溢出位置为 0 时隐藏全部图标，模块的 0 个设置仍需显示省略号
+                    val container = instance<ViewGroup>()
+                    val firstIcon = container.children.firstOrNull()
+                    val states = instance.asResolver().firstField { name = "mIconStates" }.get<HashMap<View, Any>>()
+                    firstIcon?.let { states?.get(it) }?.asResolver()?.firstField { name = "visibleState" }?.set(1)
+                }
                 // 修复部分开发版状态栏图标只能显示一个的问题
                 when (miuiIncrementalVersion.lowercase()) {
                     "22.3.14", "22.3.15", "22.3.16", "v13.0.1.1.16.dev", "22.3.18" ->
@@ -2903,9 +2937,10 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun installAodNotificationIcons() {
         val installed = mutableSetOf<Class<*>>()
         fun install(loader: ClassLoader?) {
-            val controller = "com.miui.aod.notification.NotificationController".toClassOrNull(loader) ?: return
+            val controller = "com.miui.aod.notification.NotificationController".toClassOrNull(loader)
+                ?: "com.miui.aod.util.NotificationController".toClassOrNull(loader) ?: return
             if (!installed.add(controller)) return
-            val data = $$"com.miui.aod.notification.NotificationController$NotificationData".toClassOrNull(loader) ?: return
+            val data = $$"$${controller.name}$NotificationData".toClassOrNull(loader) ?: return
             controller.resolve().optional(silent = true).method {
                 name = "fillNotificationData"
                 parameters { it.size in listOf(2, 5) && it[0] == data && it[1] == classOf<StatusBarNotification>() }
