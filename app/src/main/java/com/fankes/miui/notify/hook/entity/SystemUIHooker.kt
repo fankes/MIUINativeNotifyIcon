@@ -433,12 +433,18 @@ object SystemUIHooker : YukiBaseHooker() {
     }
     private val iconManagerProviderField by lazy {
         globalContext?.let { systemUIComponentField?.copy()?.of(it)?.get() }
-            ?.javaClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "iconManagerProvider" }
+            ?.javaClass?.resolve()?.optional(silent = true)?.firstFieldOrNull {
+                name = if (isMIOS && miosVersionCode < 2) "notificationRowBinderImplProvider" else "iconManagerProvider"
+            }
     }
     private val iconManagerProviderGetMethod by lazy {
         val component = globalContext?.let { systemUIComponentField?.copy()?.of(it)?.get() }
         component?.let { iconManagerProviderField?.copy()?.of(it)?.get() }
             ?.javaClass?.resolve()?.firstMethod { name = "get"; emptyParameters() }
+    }
+    private val notificationBinderIconManagerField by lazy {
+        "${PackageName.SYSTEMUI}.statusbar.notification.collection.inflation.NotificationRowBinderImpl".toClassOrNull()
+            ?.resolve()?.firstField { name = "mIconManager" }
     }
     private val iconManagerUpdateIconsMethod by lazy {
         "${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager".toClassOrNull()
@@ -713,14 +719,13 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 刷新状态栏小图标 */
     private fun refreshStatusBarIcons(): Unit = runInSafe {
-        if (isMIOS && miosVersionCode >= 2) {
+        if (isMIOS) {
             val manager = currentIconManager() ?: return@runInSafe
             val resolver = manager.asResolver()
             val collection = resolver.firstField { name = "notifCollection" }.get() ?: return@runInSafe
             val entries = collection.asResolver().firstMethod { name = "getAllNotifs"; emptyParameters() }
                 .invoke<Collection<Any>>() ?: return@runInSafe
-            val update = resolver.firstMethod { name = "updateIconsSafe"; parameterCount = 1 }
-            entries.forEach { update.invoke(it) }
+            entries.forEach { iconManagerUpdateIconsMethod?.copy()?.of(manager)?.invoke(it) }
             return@runInSafe
         }
         StatusBarIconViewClass.resolve().optional(silent = true).firstFieldOrNull { name = "mNotification" }?.also { result ->
@@ -1657,7 +1662,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param animColor 动画过渡颜色
      */
     private fun updateStatusBarIconColor(iconView: ImageView, isDarkIconMode: Boolean = this.isDarkIconMode, animColor: Int? = null) {
-        if (isMIOS && miosVersionCode >= 2) {
+        if (isMIOS) {
             applyPreparedStatusBarTint(iconView)
             return
         }
@@ -1677,7 +1682,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param container 当前 [NotificationIconContainerClass] 的实例
      */
     private fun updateStatusBarIconsAlpha(container: ViewGroup) {
-        if (isMIOS && miosVersionCode >= 2) {
+        if (isMIOS) {
             container.children.filterIsInstance<ImageView>().forEach { applyPreparedStatusBarTint(it) }
             return
         }
@@ -1795,7 +1800,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 ?: groupIconField?.copy()?.of(container)?.get<ImageView>()
             iconView?.let { bindNotificationIcon(it.context, nf, it, isMiuiPanel = true) }
         }
-        if (isMIOS && miosVersionCode >= 2) {
+        if (isMIOS) {
             val manager = currentIconManager() ?: return
             val entry = row.getNotificationEntry() ?: return
             iconManagerUpdateIconsMethod?.copy()?.of(manager)?.invoke(entry)
@@ -2006,7 +2011,10 @@ object SystemUIHooker : YukiBaseHooker() {
         }?.invokeQuietly(SettingsManagerClass) ?: MiuiDependencyClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "get"
             parameters(Class::class)
-        }?.invokeQuietly(SettingsManagerClass)
+        }?.invokeQuietly(SettingsManagerClass) ?: if (isMIOS && miosVersionCode < 2) DependencyClass?.resolve()?.firstMethod {
+            name = "get"
+            parameters(Class::class)
+        }?.invoke(SettingsManagerClass) else null
         if (settingsManager == null) YLog.warn("Failed to restore settings manager after reloaded")
     }
 
@@ -2193,6 +2201,13 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installNativeIconPolicies() {
+        if (isMIOS && miosVersionCode < 2) NotificationUtilClass.resolve().firstMethod {
+            name = "getSmallIcon"
+            parameters(ExpandedNotificationClass, Int::class, Boolean::class)
+        }.hook().before {
+            // OS1 在这里按系统样式改选 APP 图标，原生绑定前只允许传递通知原图
+            result = firstArg().get<StatusBarNotification>()?.notification?.smallIcon
+        }
         NotificationUtilClass.resolve().optional().method {
             name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
             parameters { it.firstOrNull()?.isSubclassOf(StatusBarNotification::class) == true }
@@ -2326,7 +2341,8 @@ object SystemUIHooker : YukiBaseHooker() {
         val context = globalContext ?: return null
         val component = systemUIComponentField?.copy()?.of(context)?.get() ?: return null
         val provider = iconManagerProviderField?.copy()?.of(component)?.get() ?: return null
-        return iconManagerProviderGetMethod?.copy()?.of(provider)?.invoke()
+        val provided = iconManagerProviderGetMethod?.copy()?.of(provider)?.invoke() ?: return null
+        return if (isMIOS && miosVersionCode < 2) notificationBinderIconManagerField?.copy()?.of(provided)?.get() else provided
     }
 
     private fun applyPreparedStatusBarTint(view: ImageView) {
@@ -2340,30 +2356,36 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installStatusBarNotificationBindings() {
-        if (isMIOS.not() || miosVersionCode < 2) return
+        if (isMIOS.not()) return
         val managerClass = "${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager".toClassOrNull() ?: return
         managerClass.resolve().apply {
             val important = firstMethod { name = "isImportantConversation"; parameterCount = 1 }
-            val createDescriptor = firstMethod { name = "toStatusBarIcon"; parameterCount = 3 }
-            val iconType = createDescriptor.self.parameterTypes[2]?.enumConstants?.first { (it as Enum<*>).name == "NotifSmallIcon" }
-            firstMethod { name = "getIconDescriptor"; parameterCount = 2 }.hook().before {
-                val entry = firstArg().get() ?: return@before
-                if (important.copy().of(instance).invoke<Boolean>(entry) == true) return@before
-                val entryResolver = entry.asResolver()
-                val notification = entryResolver.firstField { name = "mSbn" }.get<StatusBarNotification>() ?: return@before
-                val icons = entryResolver.firstField { name = "mIcons" }.get() ?: return@before
-                val cached = icons.asResolver().firstField { name = "mSmallIconDescriptor" }
-                result = cached.get() ?: createDescriptor.copy().of(instance).invoke(notification.notification.smallIcon, entry, iconType)
-                    ?.also { cached.set(it) }
+            if (miosVersionCode >= 2) {
+                val createDescriptor = firstMethod { name = "toStatusBarIcon"; parameterCount = 3 }
+                val iconType = createDescriptor.self.parameterTypes[2]?.enumConstants?.first { (it as Enum<*>).name == "NotifSmallIcon" }
+                firstMethod { name = "getIconDescriptor"; parameterCount = 2 }.hook().before {
+                    val entry = firstArg().get() ?: return@before
+                    if (important.copy().of(instance).invoke<Boolean>(entry) == true) return@before
+                    val entryResolver = entry.asResolver()
+                    val notification = entryResolver.firstField { name = "mSbn" }.get<StatusBarNotification>() ?: return@before
+                    val icons = entryResolver.firstField { name = "mIcons" }.get() ?: return@before
+                    val cached = icons.asResolver().firstField { name = "mSmallIconDescriptor" }
+                    result = cached.get() ?: createDescriptor.copy().of(instance).invoke(notification.notification.smallIcon, entry, iconType)
+                        ?.also { cached.set(it) }
+                }
             }
+            // OS1 的参数顺序为 descriptor、view、entry，OS2 起为 entry、descriptor、view
+            val entryIndex = if (miosVersionCode < 2) 2 else 0
+            val descriptorIndex = if (miosVersionCode < 2) 0 else 1
+            val viewIndex = if (miosVersionCode < 2) 1 else 2
             firstMethod { name = "setIcon"; parameterCount = 3 }.hook {
                 before {
-                    val entry = firstArg().get() ?: return@before
-                    val view = lastArg().get<ImageView>() ?: return@before
+                    val entry = arg(entryIndex).get() ?: return@before
+                    val view = arg(viewIndex).get<ImageView>() ?: return@before
                     view.parentOrNull()?.takeIf { NotificationIconContainerClass.isInstance(it) }
                         ?.also { notificationIconContainer = it }
-                    // OS2 无准备状态的旧图标可能仍保留 View.alpha，首次接管时移交给容器动画
-                    if (miosVersionCode.toInt() == 2 && view.getTag<Int>(R.id.status_icon_render_state) == null) view.alpha = 1f
+                    // OS1/2 无准备状态的旧图标可能仍保留 View.alpha，首次接管时移交给容器动画
+                    if (miosVersionCode < 3 && view.getTag<Int>(R.id.status_icon_render_state) == null) view.alpha = 1f
                     if (important.copy().of(instance).invoke<Boolean>(entry) == true) {
                         if (view.getTag<Int>(R.id.status_icon_render_state) != null) view.imageAlpha = 255
                         view.setTag(R.id.status_icon_render_state, null)
@@ -2372,7 +2394,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     val notification = entry.asResolver().firstField { name = "mSbn" }.get<StatusBarNotification>() ?: return@before
                     val original = notification.notification.smallIcon
                     val (drawable, replaced) = resolveStatusBarIcon(view.context, notification, original.loadDrawable(view.context))
-                    val descriptor = arg(1).get() ?: return@before
+                    val descriptor = arg(descriptorIndex).get() ?: return@before
                     val descriptorResolver = descriptor.asResolver()
                     descriptorResolver.firstField { name = "icon" }.set(
                         if (replaced && drawable != null) Icon.createWithBitmap(drawable.toStatusBarIconBitmap(view.context)) else original
@@ -2382,7 +2404,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     view.setTag(R.id.status_icon_render_state, (if (!colored) 1 else 0) or (if (colored) 2 else 0))
                     registerWallpaperColorChanged(view)
                 }
-                after { lastArg().get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
+                after { arg(viewIndex).get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
             }
         }
         StatusBarIconViewClass.resolve().optional(silent = true).apply {
@@ -2471,7 +2493,7 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installLegacyStatusBarIcons() {
-        if (isMIOS && miosVersionCode >= 2) return
+        if (isMIOS) return
         // 注入 MIUI 自己增加的一个工具类
         NotificationUtilClass.run {
             var hasLeadingContext = false
@@ -2725,6 +2747,19 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installFocusTickerIcons() {
         if (miosVersionCode >= 3) return
+        if (isMIOS && miosVersionCode < 2) FocusedNotifPromptViewClass?.resolve()?.firstMethod {
+            name = "setData"
+            parameterCount = 1
+        }?.hook()?.before {
+            val data = firstArg().get() ?: return@before
+            val resolver = data.asResolver()
+            val notification = resolver.firstField { name = "sbn" }.get<StatusBarNotification>() ?: return@before
+            val context = instance<View>().context
+            // OS1 焦点胶囊是独立 View，在数据绑定时准备图标，颜色变化只处理现有图标
+            val (drawable, replaced) = resolveStatusBarIcon(context, notification, notification.notification.smallIcon.loadDrawable(context))
+            focusedIcon = replaced
+            resolver.firstField { name = "drawable" }.set(drawable)
+        }
         // 旧版焦点通知深色模式切换点
         FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
             firstMethodOrNull {
