@@ -1399,7 +1399,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     val alreadyBound = boundBadge.get() == true
                     boundBadge.remove()
                     if (alreadyBound) return@after
-                    val nf = arg(1).get<StatusBarNotification>() ?: return@after
+                    val nf = lastArg().get<StatusBarNotification>() ?: return@after
                     val root = instance.asResolver().optional(silent = true).firstMethodOrNull {
                         name = "getView"
                         emptyParameters()
@@ -1417,7 +1417,7 @@ object SystemUIHooker : YukiBaseHooker() {
             parameters(Context::class, ImageView::class, StatusBarNotification::class)
         }?.hook()?.after {
             val icon = arg(1).get<ImageView>() ?: return@after
-            val nf = arg(2).get<StatusBarNotification>() ?: return@after
+            val nf = lastArg().get<StatusBarNotification>() ?: return@after
             if (icon.isVisible) bindFocusNotificationIcon(icon, nf)
         }
         val badgeClass = "miui.systemui.notification.focus.moduleV3.ext.ModuleViewHolderExtKt".toClassOrNull(loader)
@@ -2190,10 +2190,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name { it == "handleAppIcon" || it == "handleAppIconInternal" }
                 parameterCount { it in 2..5 }
             }.hookAll().before {
-                val types = method.parameterTypes
-                if (types.lastOrNull() == classOf<Boolean>()) {
-                    if (arg(types.lastIndex).get<Boolean>() == false) result = null
-                } else result = null
+                if (lastArg().get() != true) result = null
             }
         }
         NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
@@ -2301,7 +2298,7 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethod { name = "setIcon"; parameterCount = 3 }.hook().apply {
                 before {
                     val entry = firstArg().get() ?: return@before
-                    val view = arg(2).get<ImageView>() ?: return@before
+                    val view = lastArg().get<ImageView>() ?: return@before
                     view.parentOrNull()?.takeIf { NotificationIconContainerClass.isInstance(it) }
                         ?.also { notificationIconContainer = it }
                     // OS2 无准备状态的旧图标可能仍保留 View.alpha，首次接管时移交给容器动画
@@ -2324,7 +2321,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     view.setTag(R.id.status_icon_render_state, (if (!colored) 1 else 0) or (if (colored) 2 else 0))
                     registerWallpaperColorChanged(view)
                 }
-                after { arg(2).get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
+                after { lastArg().get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
             }
         }
         StatusBarIconViewClass.resolve().optional(silent = true).apply {
@@ -2424,7 +2421,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameters(Notification::class, Context::class)
             }?.hook()?.after {
                 val nf = firstArg().get<Notification>() ?: return@after
-                val context = arg(index = 1).get<Context>() ?: return@after
+                val context = lastArg().get<Context>() ?: return@after
                 if (foldEntranceIconContext.get() != null) return@after
                 val appName = nf.extras?.getString("miui.opPkg")
                 if (appName != null) {
@@ -2774,7 +2771,7 @@ object SystemUIHooker : YukiBaseHooker() {
             parameters(Notification::class, Context::class)
         }?.hook()?.after {
             val nf = firstArg().get<Notification>() ?: return@after
-            val context = arg(index = 1).get<Context>() ?: return@after
+            val context = lastArg().get<Context>() ?: return@after
             foldEntranceIconContext.get()?.also { (notifications, iconSize) ->
                 notifications.firstOrNull { it.notification === nf }
                     ?.createFoldEntranceIcon(context, iconSize)
@@ -2817,7 +2814,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 name = "fillNotificationData"
                 parameters { it.size in listOf(2, 5) && it[0] == data && it[1] == classOf<StatusBarNotification>() }
             }.hookAll().after {
-                updateAodNotificationIcon(instance, arg(0).get(), arg(1).get<StatusBarNotification>())
+                updateAodNotificationIcon(instance, firstArg().get(), arg(1).get<StatusBarNotification>())
             }
         }
         listOfNotNull(MiuiDozeServiceClass, DozeServiceClass).distinct().forEach { service ->
