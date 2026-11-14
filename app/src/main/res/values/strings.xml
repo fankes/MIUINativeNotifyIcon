@@ -75,8 +75,6 @@
     <string name="main_enable_icon_optimize">Enable icon optimization</string>
     <string name="main_placeholder_icon">Enable placeholder icons</string>
     <string name="main_placeholder_icon_desc">This option is off by default. When a colored notification icon not included in the optimization list is found, the status bar shows a built-in placeholder icon instead, and the icon in the notification shade stays unchanged.</string>
-    <string name="main_force_focus_invert">Force invert legacy Focus notification icons</string>
-    <string name="main_force_focus_invert_desc">This option is off by default. When enabled, it forces color inversion for legacy Focus notification icons in the status bar on HyperOS 1.x or 2.x systems that support legacy Focus notifications. It has no effect on older systems without this feature.</string>
     <string name="main_enable_aod_notify_icon">Replace AOD notification icons</string>
     <string name="main_aod_notify_icon_desc">This option is enabled by default. When enabled, it replaces Always-On Display (AOD) notification icons on supported system versions. It has no effect on unsupported system versions.</string>
     <string name="main_remind_new_app">Remind about apps not included</string>

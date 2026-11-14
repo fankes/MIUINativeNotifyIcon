@@ -75,8 +75,6 @@
     <string name="main_enable_icon_optimize">启用通知图标优化</string>
     <string name="main_placeholder_icon">启用占位符图标</string>
     <string name="main_placeholder_icon_desc">此选项默认关闭，当发现未收录的彩色通知图标时，状态栏中显示的通知图标将会使用预置的占位符图标进行修补，通知栏中显示的通知图标保持原始图标不变。</string>
-    <string name="main_force_focus_invert">强制启用旧版焦点通知图标反色</string>
-    <string name="main_force_focus_invert_desc">此选项默认关闭，开启后在支持旧版焦点通知的 HyperOS 1.x 或 2.x 系统中，将强制启用状态栏中的旧版焦点通知图标反色，在不支持此功能的系统中将无作用。</string>
     <string name="main_enable_aod_notify_icon">替换 AOD 通知图标</string>
     <string name="main_aod_notify_icon_desc">此选项默认开启，开启后将在可用的系统版本中替换息屏 (AOD) 通知图标，在不支持的系统版本中将无作用。</string>
     <string name="main_remind_new_app">提醒未收录的应用</string>

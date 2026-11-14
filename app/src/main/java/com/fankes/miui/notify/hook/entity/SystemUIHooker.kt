@@ -31,9 +31,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -49,8 +51,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RemoteViews
+import android.widget.TextView
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
 import androidx.core.view.children
@@ -121,6 +123,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import top.defaults.drawabletoolbox.DrawableBuilder
+import java.util.WeakHashMap
 import kotlin.concurrent.thread
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -516,9 +519,6 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 当前模块实例加载时模块 APK 的最后更新时间 */
     private var moduleLastUpdateTime: Long? = null
-
-    /** 用来同步是否需要焦点图标染色 */
-    private var focusedIcon = false
 
     /** 只复用资源 ID，像素尺寸仍按当前配置读取 */
     private val statusBarIconSizeIds by lazy {
@@ -2779,35 +2779,58 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
+    private fun Drawable.toFocusIconDrawable(resources: Resources): BitmapDrawable {
+        // BitmapDrawable 的原始 Bitmap 不包含自身 Tint，先绘制实际输出再判断和着色
+        val bitmap = createBitmap(intrinsicWidth.coerceAtLeast(1), intrinsicHeight.coerceAtLeast(1))
+        val originalBounds = Rect(bounds)
+        try {
+            setBounds(0, 0, bitmap.width, bitmap.height)
+            draw(Canvas(bitmap))
+        } finally {
+            bounds = originalBounds
+        }
+        return bitmap.toDrawable(resources)
+    }
+
     private fun installFocusTickerIcons() {
         if (miosVersionCode >= 3) return
-        if (isMIOS && miosVersionCode < 2) FocusedNotifPromptViewClass?.resolve()?.firstMethod {
-            name = "setData"
-            parameterCount = 1
-        }?.hook()?.before {
-            val data = firstArg().get() ?: return@before
-            val resolver = data.asResolver()
-            val notification = resolver.firstField { name = "sbn" }.get<StatusBarNotification>() ?: return@before
-            val context = instance<View>().context
-            // OS1 焦点胶囊是独立 View，在数据绑定时准备图标，颜色变化只处理现有图标
-            val (drawable, replaced) = resolveStatusBarIcon(context, notification, notification.notification.smallIcon.loadDrawable(context))
-            focusedIcon = replaced
-            resolver.firstField { name = "drawable" }.set(drawable)
-        }
-        // 旧版焦点通知深色模式切换点
-        FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
-            firstMethodOrNull {
+        if (isMIOS && miosVersionCode < 2) FocusedNotifPromptViewClass?.resolve()?.apply {
+            val iconField = firstField { name = "mIcon" }
+            val textField = firstField { name = "mContentText" }
+            fun updateTint(view: Any) {
+                val icon = iconField.copy().of(view).get<ImageView>() ?: return
+                val text = textField.copy().of(view).get<TextView>() ?: return
+                icon.colorFilter = null
+                // 每张图保留自己的着色资格，动画延迟换图或系统跳过绑定时不会串到另一张图
+                icon.getTag<WeakHashMap<Drawable, Boolean>>(R.id.focus_icon_monochrome)?.forEach { (drawable, monochrome) ->
+                    drawable.setTintList(if (monochrome) ColorStateList.valueOf(text.currentTextColor) else null)
+                }
+            }
+            firstMethod {
+                name = "setData"
+                parameterCount = 1
+            }.hook().apply {
+                before {
+                    val icon = iconField.copy().of(instance).get<ImageView>() ?: return@before
+                    val data = firstArg().get() ?: return@before
+                    val resolver = data.asResolver()
+                    val notification = resolver.firstField { name = "sbn" }.get<StatusBarNotification>() ?: return@before
+                    val context = icon.context
+                    val drawable = resolveStatusBarIcon(context, notification, notification.notification.smallIcon.loadDrawable(context)).first
+                        ?.toFocusIconDrawable(context.resources)
+                    resolver.firstField { name = "drawable" }.set(drawable)
+                    val icons = icon.getTag<WeakHashMap<Drawable, Boolean>>(R.id.focus_icon_monochrome)
+                        ?: WeakHashMap<Drawable, Boolean>().also { icon.setTag(R.id.focus_icon_monochrome, it) }
+                    // 只在绑定时检查最终像素，颜色回调不重新查规则或生成位图
+                    if (drawable != null) icons[drawable] = isGrayscaleIcon(context, drawable)
+                    updateTint(instance)
+                }
+                after { updateTint(instance) }
+            }
+            firstMethod {
                 name = "onDarkChanged"
                 parameters(ArrayList::class, Float::class, Int::class, Int::class, Int::class, Boolean::class)
-            }?.hook()?.after {
-                val isDark = arg(index = 1).get<Float>() ?: 0f
-                val mIcon = firstFieldOrNull { name = "mIcon" }?.of(instance)?.get()
-                if (focusedIcon || ConfigData.isEnableFocusNotificationFix)
-                    mIcon?.asResolver()?.optional()?.firstMethodOrNull {
-                        name = "setColorFilter"
-                        superclass()
-                    }?.invoke(if (isDark <= 0.5f) Color.WHITE else Color.BLACK)
-            }
+            }.hook().after { updateTint(instance) }
         }
         // 旧版移除焦点通知彩色图标
         FocusUtilsClass?.resolve()?.optional()?.apply {
@@ -2820,13 +2843,10 @@ object SystemUIHooker : YukiBaseHooker() {
                         context = context,
                         nf = expandedNf,
                         iconDrawable = small?.loadDrawable(context)
-                    ).also { pair ->
-                        focusedIcon = pair.second
-                        val originalBitmap = pair.first?.toBitmap()
-                        val bitmap = originalBitmap?.scale(50, 50)
+                    ).first?.toFocusIconDrawable(context.resources)?.also { drawable ->
+                        val bitmap = drawable.bitmap.scale(50, 50)
                         result = Icon.createWithBitmap(bitmap).apply {
-                            if (pair.second || ConfigData.isEnableFocusNotificationFix)
-                                setTint(if (isDark) Color.BLACK else Color.WHITE)
+                            if (isGrayscaleIcon(context, drawable)) setTint(if (isDark) Color.BLACK else Color.WHITE)
                         }
                     }
                 }

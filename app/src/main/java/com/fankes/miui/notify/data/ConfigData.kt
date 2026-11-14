@@ -86,9 +86,6 @@ object ConfigData {
     /** 启用通知图标优化 */
     val ENABLE_NOTIFY_ICON_FIX = PreferenceData("_notify_icon_fix", true)
 
-    /** 强制启用焦点通知反色 */
-    val ENABLE_FOCUS_NOTIFICATION_FIX = PreferenceData("_enable_focus_notification_fix", false)
-
     /** 替换 AOD 通知图标 */
     val ENABLE_AOD_NOTIFY_ICON = PreferenceData("_enable_aod_notify_icon", true)
 
@@ -385,15 +382,6 @@ object ConfigData {
         get() = getBoolean(ENABLE_NOTIFY_ICON_FIX)
         set(value) {
             putBoolean(ENABLE_NOTIFY_ICON_FIX, value)
-        }
-
-    /**
-     * 强制启用焦点通知反色
-     * @return [Boolean]*/
-    var isEnableFocusNotificationFix
-        get() = getBoolean(ENABLE_FOCUS_NOTIFICATION_FIX)
-        set(value) {
-            putBoolean(ENABLE_FOCUS_NOTIFICATION_FIX, value)
         }
 
     /**
