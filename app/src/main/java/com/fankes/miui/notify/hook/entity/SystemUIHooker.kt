@@ -2209,7 +2209,7 @@ object SystemUIHooker : YukiBaseHooker() {
             injectorClass.resolve().optional(silent = true).method {
                 name { it == "handleAppIcon" || it == "handleAppIconInternal" }
                 parameterCount { it in 2..5 }
-            }.hookAll().apply {
+            }.hookAll {
                 before {
                     if (lastArg().get() != true) result = null
                 }
@@ -2356,7 +2356,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 result = cached.get() ?: createDescriptor.copy().of(instance).invoke(notification.notification.smallIcon, entry, iconType)
                     ?.also { cached.set(it) }
             }
-            firstMethod { name = "setIcon"; parameterCount = 3 }.hook().apply {
+            firstMethod { name = "setIcon"; parameterCount = 3 }.hook {
                 before {
                     val entry = firstArg().get() ?: return@before
                     val view = lastArg().get<ImageView>() ?: return@before
