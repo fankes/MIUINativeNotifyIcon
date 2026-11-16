@@ -284,6 +284,33 @@ object SystemUIHooker : YukiBaseHooker() {
     /** HyperOS 焦点通知的用到的 API */
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
 
+    /** 原生窗口管理器，用于读取当前窗口中的媒体面板 */
+    private val WindowManagerGlobalClass by lazyClass("android.view.WindowManagerGlobal")
+
+    /** 通知图标管理器 */
+    private val IconManagerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager")
+
+    /** 旧版通知行绑定器 */
+    private val NotificationRowBinderImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.collection.inflation.NotificationRowBinderImpl")
+
+    /** HyperOS 通知内容绑定入口 */
+    private val NotificationRowContentBinderInjectorImplClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationRowContentBinderInjectorImpl")
+
+    /** 通知行移动入口 */
+    private val ExpandableNotificationRowControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.ExpandableNotificationRowController")
+
+    /** RemoteViews 的 Action 类 */
+    private val RemoteViewsActionClass by lazyClass($$"android.widget.RemoteViews$Action")
+
+    /** 插件加载器记录入口 */
+    private val PluginInstanceInjectorClass by lazyClassOrNull("com.miui.systemui.plugin.PluginInstanceInjector")
+
+    /** 原生插件实例入口 */
+    private val PluginInstanceClass by lazyClassOrNull("${PackageName.SYSTEMUI}.shared.plugins.PluginInstance")
+
+    /** 原生插件 Context 创建入口 */
+    private val PluginFactoryClass by lazyClassOrNull($$"com.android.systemui.shared.plugins.PluginInstance$PluginFactory")
+
     private val groupContainingRowMethod by lazy {
         NotificationChildrenContainerClass.resolve().optional(silent = true).firstMethodOrNull {
             name = "getContainingNotification"; emptyParameters()
@@ -348,7 +375,7 @@ object SystemUIHooker : YukiBaseHooker() {
         RemoteViews::class.resolve().firstField { name = "mActions" }
     }
     private val remoteViewsActionIdField by lazy {
-        $$"android.widget.RemoteViews$Action".toClass().resolve().firstField { name = "mViewId" }
+        RemoteViewsActionClass.resolve().firstField { name = "mViewId" }
     }
     private val remoteViewsBitmapActionClass by lazyClass($$"android.widget.RemoteViews$BitmapReflectionAction")
     private val remoteViewsBitmapMethodField by lazy {
@@ -461,12 +488,10 @@ object SystemUIHooker : YukiBaseHooker() {
             ?.javaClass?.resolve()?.firstMethod { name = "get"; emptyParameters() }
     }
     private val notificationBinderIconManagerField by lazy {
-        "${PackageName.SYSTEMUI}.statusbar.notification.collection.inflation.NotificationRowBinderImpl".toClassOrNull()
-            ?.resolve()?.firstField { name = "mIconManager" }
+        NotificationRowBinderImplClass?.resolve()?.firstField { name = "mIconManager" }
     }
     private val iconManagerUpdateIconsMethod by lazy {
-        "${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager".toClassOrNull()
-            ?.resolve()?.firstMethod { name = "updateIconsSafe"; parameterCount = 1 }
+        IconManagerClass?.resolve()?.firstMethod { name = "updateIconsSafe"; parameterCount = 1 }
     }
 
     private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
@@ -1555,7 +1580,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 从当前插件的作用域获取焦点控制器，重新绑定已有通知，不保存插件或视图实例 */
     private fun refreshFocusNotificationIcons() = runInSafe(msg = "Refresh focus notification icons") {
-        val loader = "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()?.resolve()?.optional(silent = true)
+        val loader = PluginInstanceInjectorClass?.resolve()?.optional(silent = true)
             ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
             ?.get("miui.systemui.plugin") ?: return@runInSafe
         val component = "miui.systemui.dagger.PluginComponentInitializer".toClassOrNull(loader)?.resolve()?.optional(silent = true)
@@ -1627,7 +1652,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 从当前窗口查找控制中心媒体面板，不保存插件 View 或实例 */
     private fun refreshControlCenterMediaIcons() {
-        val manager = "android.view.WindowManagerGlobal".toClass().resolve().firstMethod {
+        val manager = WindowManagerGlobalClass.resolve().firstMethod {
             name = "getInstance"
             emptyParameters()
         }.invoke() ?: return
@@ -1717,14 +1742,13 @@ object SystemUIHooker : YukiBaseHooker() {
             installControlCenterMediaIcon(loader, hookedClasses)
         }
         fun hookLoadedPlugin() {
-            val loaderClass = "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()
-                ?: "com.android.systemui.shared.plugins.PluginInstance".toClassOrNull()
+            val loaderClass = PluginInstanceInjectorClass ?: PluginInstanceClass
             loaderClass?.resolve()?.optional(silent = true)
                 ?.firstFieldOrNull { name = "sClassLoaders" }?.get<Map<String, ClassLoader>>()
                 ?.get("miui.systemui.plugin")?.let { hookPlugin(it) }
         }
         // OS2、OS3 在 Supplier 内创建加载器，OS4 改为 createClassLoader；都会返回插件 Context
-        $$"com.android.systemui.shared.plugins.PluginInstance$PluginFactory".toClassOrNull()?.resolve()?.optional(silent = true)
+        PluginFactoryClass?.resolve()?.optional(silent = true)
             ?.firstMethodOrNull {
                 name = "createPluginContext"
                 emptyParameters()
@@ -2357,7 +2381,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         listOfNotNull(
             NotificationContentInflaterInjectorClass,
-            "${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationRowContentBinderInjectorImpl".toClassOrNull()
+            NotificationRowContentBinderInjectorImplClass
         ).forEach { injectorClass ->
             injectorClass.resolve().optional(silent = true).method {
                 name { it == "handleAppIcon" || it == "handleAppIconInternal" }
@@ -2498,7 +2522,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installStatusBarNotificationBindings() {
         if (isMIOS.not()) return
-        val managerClass = "${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager".toClassOrNull() ?: return
+        val managerClass = IconManagerClass ?: return
         managerClass.resolve().apply {
             val important = firstMethod { name = "isImportantConversation"; parameterCount = 1 }
             if (miosVersionCode >= 2) {
@@ -2564,19 +2588,18 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installGroupNotificationUpdates() {
         val movingChild = ThreadLocal<Boolean>()
-        "${PackageName.SYSTEMUI}.statusbar.notification.row.ExpandableNotificationRowController".toClassOrNull()
-            ?.resolve()?.optional(silent = true)?.firstMethodOrNull {
-                name = "moveChildTo"
-                parameterCount = 2
-            }?.hook()?.apply {
-                before { movingChild.set(true) }
-                after {
-                    movingChild.remove()
-                    val row = instance.asResolver().firstField { name = "mView" }.get() ?: return@after
-                    val container = rowChildrenContainerMethod?.copy()?.of(row)?.invoke() ?: return@after
-                    refreshGroupNotificationIcons(container)
-                }
+        ExpandableNotificationRowControllerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "moveChildTo"
+            parameterCount = 2
+        }?.hook()?.apply {
+            before { movingChild.set(true) }
+            after {
+                movingChild.remove()
+                val row = instance.asResolver().firstField { name = "mView" }.get() ?: return@after
+                val container = rowChildrenContainerMethod?.copy()?.of(row)?.invoke() ?: return@after
+                refreshGroupNotificationIcons(container)
             }
+        }
         ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
             name = "onAttachedChildrenCountChanged"
             emptyParameters()
@@ -2927,7 +2950,7 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethod {
                 name = "setData"
                 parameterCount = 1
-            }.hook().apply {
+            }.hook {
                 before {
                     if (ConfigData.isEnableFocusNotifyIcon.not()) return@before
                     val icon = iconField.copy().of(instance).get<ImageView>() ?: return@before
@@ -3094,8 +3117,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameterCount { it in 1..2 }
             }?.hook()?.before { firstArg().get()?.javaClass?.classLoader?.let { install(it) } }
         }
-        val loaderClass = "com.miui.systemui.plugin.PluginInstanceInjector".toClassOrNull()
-            ?: "com.android.systemui.shared.plugins.PluginInstance".toClassOrNull()
+        val loaderClass = PluginInstanceInjectorClass ?: PluginInstanceClass
         loaderClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "sClassLoaders" }
             ?.get<Map<String, ClassLoader>>()?.values?.forEach { install(it) }
     }
