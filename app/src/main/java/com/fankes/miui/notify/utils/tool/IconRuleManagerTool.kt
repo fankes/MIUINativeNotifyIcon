@@ -178,8 +178,9 @@ object IconRuleManagerTool {
         val next = createRuleState(main, extra)
             ?: return@withLock Anip.FetchResult(resources.getString(R.string.anip_no_icons), Anip.FetchResult.Status.FAILED)
         val changed = mainResult.status == Anip.FetchResult.Status.SUCCESS ||
-            extraResult?.status == Anip.FetchResult.Status.SUCCESS || state?.version != next.version
-        if (changed) state = next
+            extraResult?.status == Anip.FetchResult.Status.SUCCESS
+        // 从缓存加载快照不代表云端资源有更新，同步结果以 SDK 返回状态为准
+        state = next
         // 记录模块本地名单的成功同步，已是最新也计入；legacy 宿主使用自己的独立缓存
         if (context.packageName == BuildConfigWrapper.APPLICATION_ID) ConfigData.lastIconRuleSyncTime = System.currentTimeMillis()
         Anip.FetchResult(mainResult.message, if (changed) Anip.FetchResult.Status.SUCCESS else Anip.FetchResult.Status.UP_TO_DATE)
