@@ -35,6 +35,7 @@ import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -49,6 +50,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.RemoteViews
 import android.widget.TextView
@@ -989,6 +991,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         // 获取通知对象 - 由于 MIUI 的版本迭代不规范性可能是空的
         nf?.let { notifyInstance ->
+            if ((isStockPanel || isMiuiPanel) && notifyInstance.notification.isMediaNotifyIconDisabled) return@let
             val groupIcon = notifyInstance.selectGroupNotificationIcon(context)
             if (groupIcon != null && groupIcon.first.key != notifyInstance.key) {
                 bindNotificationIcon(context, groupIcon.first, iconView, isExpanded, isMiuiPanel, isUseMaterial3Style, isStockPanel, isDarkMode)
@@ -1216,14 +1219,56 @@ object SystemUIHooker : YukiBaseHooker() {
             .toDrawable(context.resources)
     }
 
+    private val Notification.isMediaNotifyIconDisabled
+        get() = extras.containsKey(Notification.EXTRA_MEDIA_SESSION) && ConfigData.isEnableMediaNotifyIcon.not()
+
+    private fun View.saveMediaIconStyle() {
+        if (getTag(R.id.media_icon_native_style) != null) return
+        // 只在 View 上保存系统对象，避免标签持有热重载前的模块类和 ClassLoader
+        setTag(R.id.media_icon_native_style, arrayOf(
+            background, outlineProvider, clipToOutline,
+            paddingLeft, paddingTop, paddingRight, paddingBottom,
+            if (this is ImageView) imageTintList else null, if (this is ImageView) colorFilter else null
+        ))
+    }
+
+    private fun View.restoreMediaIconStyle() {
+        val style = getTag<Array<Any?>>(R.id.media_icon_native_style) ?: return
+        background = style[0] as Drawable?
+        outlineProvider = style[1] as ViewOutlineProvider?
+        clipToOutline = style[2] as Boolean
+        setPadding(style[3] as Int, style[4] as Int, style[5] as Int, style[6] as Int)
+        if (this is ImageView) {
+            imageTintList = style[7] as ColorStateList?
+            colorFilter = style[8] as ColorFilter?
+        }
+        setTag(R.id.media_icon_native_style, null)
+    }
+
+    private fun nativeMediaIcon(context: Context, data: Any, controller: Any? = null): Drawable? {
+        val resolver = data.asResolver().optional(silent = true)
+        val icon = resolver.firstFieldOrNull { name = "appIcon" }?.get<Icon>()
+        val userId = resolver.firstFieldOrNull { name = "userId" }?.get<Int>()
+        val drawable = if (icon != null && userId != null)
+            icon.asResolver().firstMethod { name = "loadDrawableAsUser"; parameters(Context::class, Int::class) }
+                .invoke<Drawable>(context, userId)
+        else icon?.loadDrawable(context)
+        if (drawable != null) return drawable
+        val acquireIcon = controller?.asResolver()?.optional(silent = true)?.firstMethodOrNull {
+            name = "acquireApplicationIcon"
+            parameterCount = 1
+        }
+        return if (acquireIcon != null) acquireIcon.invoke<Drawable>(data)
+        else NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
+            name = "acquireApplicationIcon"
+            parameterCount = 2
+        }?.invoke<Drawable>(context, data)
+    }
+
     /** 更新 HyperOS 2 媒体卡片的角标，不重新绑定播放数据 */
     private fun bindLegacyMediaNotificationIcon(panel: Any) {
         val resolver = panel.asResolver().optional(silent = true)
         val data = resolver.firstFieldOrNull { name = "mMediaData" }?.get() ?: return
-        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
-            name = "notificationKey"
-        }?.get<String>() ?: return
-        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
         val holder = resolver.firstFieldOrNull {
             name = "mMediaViewHolder"
             superclass()
@@ -1231,6 +1276,17 @@ object SystemUIHooker : YukiBaseHooker() {
         val iconView = holder.asResolver().optional(silent = true).firstFieldOrNull {
             name = "appIcon"
         }?.get<ImageView>() ?: return
+        if (ConfigData.isEnableMediaNotifyIcon.not()) {
+            val drawable = nativeMediaIcon(iconView.context, data) ?: return
+            iconView.restoreMediaIconStyle()
+            iconView.setImageDrawable(drawable)
+            return
+        }
+        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "notificationKey"
+        }?.get<String>() ?: return
+        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
+        iconView.saveMediaIconStyle()
         // 系统的轮廓回调会重新开启固定圆角裁切，合成图标改用模块设置的圆角
         iconView.outlineProvider = null
         bindComposedNotificationIcon(iconView, nf, isMediaIcon = true)
@@ -1240,16 +1296,27 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun bindMediaNotificationIcons(controller: Any) {
         val resolver = controller.asResolver().optional(silent = true)
         val data = resolver.firstFieldOrNull { name = "mediaData" }?.get() ?: return
-        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
-            name = "notificationKey"
-        }?.get<String>() ?: return
-        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
         val drawableField = resolver.firstFieldOrNull { name = "appIconDrawable" } ?: return
         val views = listOf("holder", "dummyHolder").mapNotNull { fieldName ->
             val holder = resolver.firstFieldOrNull { name = fieldName }?.get() ?: return@mapNotNull null
             holder.asResolver().optional(silent = true).firstFieldOrNull { name = "appIcon" }?.get<ImageView>()
         }
         val first = views.firstOrNull() ?: return
+        if (ConfigData.isEnableMediaNotifyIcon.not()) {
+            val drawable = nativeMediaIcon(first.context, data, controller) ?: return
+            // 翻转动画会再次读取此字段，必须与当前和备用 View 一起恢复
+            drawableField.set(drawable)
+            views.forEach { view ->
+                view.restoreMediaIconStyle()
+                view.setImageDrawable(drawable.constantState?.newDrawable(view.resources)?.mutate() ?: drawable)
+            }
+            return
+        }
+        val key = data.asResolver().optional(silent = true).firstFieldOrNull {
+            name = "notificationKey"
+        }?.get<String>() ?: return
+        val nf = currentNotifications()?.firstOrNull { it.key == key } ?: return
+        views.forEach { it.saveMediaIconStyle() }
         bindComposedNotificationIcon(first, nf, isMediaIcon = true)
         val drawable = first.drawable ?: return
         val bitmap = (drawable as BitmapDrawable).bitmap
@@ -1266,6 +1333,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 从系统组件取得现有媒体控制器，主动刷新角标，不保存控制器或视图 */
     private fun refreshMediaNotificationIcons() = runInSafe(msg = "Refresh media notification icons") {
+        refreshControlCenterMediaIcons()
         if (isMIOS && miosVersionCode.toInt() == 2) {
             val players = MediaPlayerDataClass?.resolve()?.optional(silent = true)?.firstFieldOrNull {
                 name = "mediaPlayers"
@@ -1557,11 +1625,46 @@ object SystemUIHooker : YukiBaseHooker() {
         }?.maxByOrNull { it.postTime }
     }
 
+    /** 从当前窗口查找控制中心媒体面板，不保存插件 View 或实例 */
+    private fun refreshControlCenterMediaIcons() {
+        val manager = "android.view.WindowManagerGlobal".toClass().resolve().firstMethod {
+            name = "getInstance"
+            emptyParameters()
+        }.invoke() ?: return
+        val roots = manager.asResolver().firstMethod {
+            name = "getWindowViews"
+            emptyParameters()
+        }.invoke<List<View>>() ?: return
+        fun refresh(view: View) {
+            if (view.javaClass.name == "com.android.systemui.QSControlMiPlayDetailHeader") {
+                val packageName = controlCenterMediaNotification(view.javaClass.classLoader!!)?.packageName ?: return
+                val resolver = view.asResolver().optional(silent = true)
+                val iconView = resolver.firstFieldOrNull { name = "appIcon" }?.get<ImageView>() ?: return
+                val drawable = resolver.firstMethodOrNull {
+                    name = "getApplicationIconSafely"
+                    parameters(String::class)
+                }?.invoke<Drawable>(packageName) ?: return
+                iconView.setImageDrawable(drawable)
+                if (ConfigData.isEnableMediaNotifyIcon.not()) {
+                    iconView.restoreMediaIconStyle()
+                    iconView.parentOrNull()?.restoreMediaIconStyle()
+                }
+            } else if (view is ViewGroup) view.children.forEach { refresh(it) }
+        }
+        roots.forEach { refresh(it) }
+    }
+
     /** 清除展开角标自身及圆形底板的裁切，保留封面、角标尺寸和动画布局 */
     private fun clearControlCenterMediaIconStyle(header: View) {
         val iconView = header.asResolver().optional(silent = true).firstFieldOrNull {
             name = "appIcon"
         }?.get<ImageView>() ?: return
+        if (ConfigData.isEnableMediaNotifyIcon.not()) {
+            iconView.restoreMediaIconStyle()
+            iconView.parentOrNull()?.restoreMediaIconStyle()
+            return
+        }
+        iconView.saveMediaIconStyle()
         iconView.apply {
             background = null
             colorFilter = null
@@ -1571,6 +1674,7 @@ object SystemUIHooker : YukiBaseHooker() {
             setPadding(0)
         }
         iconView.parentOrNull()?.apply {
+            saveMediaIconStyle()
             // app_icon_container 的 CardView 圆形底板会继续裁切已合成的模块图标
             background = null
             outlineProvider = null
@@ -1587,6 +1691,7 @@ object SystemUIHooker : YukiBaseHooker() {
             name = "getApplicationIconSafely"
             parameters(String::class)
         }?.hook()?.after {
+            if (ConfigData.isEnableMediaNotifyIcon.not()) return@after
             val packageName = firstArg().get<String>() ?: return@after
             val nf = controlCenterMediaNotification(loader, packageName) ?: return@after
             val header = instance<View>()
@@ -1786,6 +1891,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun bindClassicNotificationIcon(wrapper: Any) {
         val resolver = MiuiNotificationViewWrapperClass?.resolve()?.optional(silent = true) ?: return
         val nf = wrapper.getNotificationRow().second.getNotification() ?: return
+        if (nf.notification.isMediaNotifyIconDisabled) return
         val iconView = resolver.firstFieldOrNull { name = "mAppIcon" }?.of(wrapper)?.get<ImageView>() ?: return
         val imType = MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getNotificationTypeForIm"
@@ -2229,18 +2335,26 @@ object SystemUIHooker : YukiBaseHooker() {
             name = "getSmallIcon"
             parameters(ExpandedNotificationClass, Int::class, Boolean::class)
         }.hook().before {
+            val notification = firstArg().get<StatusBarNotification>()?.notification
+            if (notification?.isMediaNotifyIconDisabled == true) return@before
             // OS1 在这里按系统样式改选 APP 图标，原生绑定前只允许传递通知原图
-            result = firstArg().get<StatusBarNotification>()?.notification?.smallIcon
+            result = notification?.smallIcon
         }
         NotificationUtilClass.resolve().optional().method {
             name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
             parameters { it.firstOrNull()?.isSubclassOf(StatusBarNotification::class) == true }
-        }.hookAll().intercept(false)
+        }.hookAll().before {
+            if (firstArg().get<StatusBarNotification>()?.notification?.isMediaNotifyIconDisabled == true) return@before
+            result = false
+        }
         NotificationIconStyleProviderImplClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "shouldShowAppIcon"
             parameterCount = 2
             returnType = Boolean::class
-        }?.hook()?.intercept(false)
+        }?.hook()?.before {
+            if (lastArg().get<StatusBarNotification>()?.notification?.isMediaNotifyIconDisabled == true) return@before
+            result = false
+        }
         listOfNotNull(
             NotificationContentInflaterInjectorClass,
             "${PackageName.SYSTEMUI}.statusbar.notification.row.NotificationRowContentBinderInjectorImpl".toClassOrNull()
@@ -2250,6 +2364,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameterCount { it in 2..5 }
             }.hookAll {
                 before {
+                    if (arg(1).get<Notification>()?.isMediaNotifyIconDisabled == true) return@before
                     if (lastArg().get() != true) result = null
                 }
                 after {
@@ -2276,6 +2391,8 @@ object SystemUIHooker : YukiBaseHooker() {
             name = "applyAppIconAllowCustom"
             parameterCount = 4
         }?.hook()?.before {
+            val notification = arg(1).get<StatusBarNotification>() ?: return@before
+            if (notification.notification.isMediaNotifyIconDisabled) return@before
             val target = arg(2).get<ImageView>() ?: return@before
             val nativeIconId = target.resources.getIdentifier("icon", "id", "android")
             if (target.id == nativeIconId && target.isNotificationPanelIcon()) {
@@ -2286,7 +2403,6 @@ object SystemUIHooker : YukiBaseHooker() {
             val resourceName = if (target.id != View.NO_ID && target.id != 0) target.resources.getResourceEntryName(target.id) else null
             if (resourceName != "app_icon" && resourceName != "app_im_icon") return@before
             if (!target.isNotificationPanelIcon()) return@before
-            val notification = arg(1).get<StatusBarNotification>() ?: return@before
             if (resourceName == "app_icon" && notification.notification.flags and Notification.FLAG_GROUP_SUMMARY == 0) {
                 val chatType = MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
                     name = "getNotificationTypeForIm"
@@ -2308,6 +2424,7 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun removeClassicAppIconActions(views: RemoteViews, notification: Notification, context: Context) {
+        if (notification.isMediaNotifyIconDisabled) return
         val chatType = notificationChatTypeMethod?.let {
             if (it.self.parameterCount == 1) it.invoke<Int>(notification)
             else it.invoke<Int>(notification, context)

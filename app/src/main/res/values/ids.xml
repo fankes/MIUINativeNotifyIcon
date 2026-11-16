@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="focus_icon_monochrome" type="id" />
+    <item name="media_icon_native_style" type="id" />
     <item name="status_icon_render_state" type="id" />
     <item name="status_icon_system_limit" type="id" />
 </resources>
