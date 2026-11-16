@@ -51,7 +51,7 @@
     <string name="main_enable_media_notify_icon">Replace media notification icons</string>
     <string name="main_media_notify_icon_desc">This option is enabled by default. When enabled, media notifications and standalone playback controllers use the replaced notification icons. When disabled, system-provided icons are used.</string>
     <string name="main_enable_focus_notify_icon">Replace focus notification icons</string>
-    <string name="main_focus_notify_icon_desc">This option is enabled by default. When enabled, focus notification icons in the status bar and app badges on expanded cards on HyperOS also use the replaced notification icons. When disabled, system icons are used.</string>
+    <string name="main_focus_notify_icon_desc">This option is enabled by default. When enabled, focus notification icons in the status bar and app badges on expanded cards on HyperOS also use the replaced notification icons. When disabled, system icons are used. It has no effect on older systems without this feature.</string>
     <string name="main_status_icon_alpha">Status bar icon opacity</string>
     <string name="main_dark">Dark</string>
     <string name="main_light">Light</string>

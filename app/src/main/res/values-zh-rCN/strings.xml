@@ -51,7 +51,7 @@
     <string name="main_enable_media_notify_icon">替换媒体通知图标</string>
     <string name="main_media_notify_icon_desc">此选项默认开启，开启后媒体通知及独立播放控制器中的通知图标将应用替换后的通知图标，关闭后使用系统提供的图标。</string>
     <string name="main_enable_focus_notify_icon">替换焦点通知图标</string>
-    <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 系统中，状态栏中的焦点通知图标和展开卡片的应用角标将同样应用替换后的通知图标，关闭后使用系统原有图标。</string>
+    <string name="main_focus_notify_icon_desc">此选项默认开启，开启后在 HyperOS 系统中，状态栏中的焦点通知图标和展开卡片的应用角标将同样应用替换后的通知图标，关闭后使用系统原有图标，在不支持此功能的低版本系统中将无作用。</string>
     <string name="main_status_icon_alpha">调整状态栏中的通知图标透明度</string>
     <string name="main_dark">暗色</string>
     <string name="main_light">亮色</string>
