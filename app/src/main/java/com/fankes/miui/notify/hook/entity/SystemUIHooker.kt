@@ -1460,7 +1460,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
         val badgeClass = "miui.systemui.notification.focus.moduleV3.ext.ModuleViewHolderExtKt".toClassOrNull(loader)
         if (badgeClass != null && hookedClasses.add(badgeClass)) {
-            badgeClass.resolve().optional().firstMethodOrNull {
+            badgeClass.resolve().optional(silent = true).firstMethodOrNull {
                 name = "showAppIcon"
                 parameters { it.firstOrNull() == classOf<ImageView>() && it.size == 3 }
             }?.hook()?.after {
@@ -1468,7 +1468,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 val nf = arg(1).get<StatusBarNotification>() ?: return@after
                 if (icon.isVisible) bindFocusNotificationIcon(icon, nf)
             }
-            badgeClass.resolve().optional().firstMethodOrNull {
+            badgeClass.resolve().optional(silent = true).firstMethodOrNull {
                 name = "showAppIcon"
                 parameters {
                     it.firstOrNull() == classOf<ImageView>() && it.size == 4 &&
