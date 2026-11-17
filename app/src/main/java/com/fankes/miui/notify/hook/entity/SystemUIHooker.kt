@@ -249,6 +249,14 @@ object SystemUIHooker : YukiBaseHooker() {
         )
     )
 
+    private val NotificationConversationTemplateViewWrapperClass by lazyClassOrNull(
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationConversationTemplateViewWrapper"
+    )
+
+    private val MiuiNotificationConversationTemplateViewWrapperClass by lazyClassOrNull(
+        "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.MiuiNotificationConversationTemplateViewWrapper"
+    )
+
     /** 根据多个版本存在不同的包名相同的类 */
     private val NotificationUtilClass by lazyClass(
         VariousClass(
@@ -367,6 +375,12 @@ object SystemUIHooker : YukiBaseHooker() {
     }
     private val notificationWrapperRowField by lazy {
         NotificationViewWrapperClass.resolve().optional().firstFieldOrNull { name = "mRow" }
+    }
+    private val conversationBadgeBackgroundField by lazy {
+        NotificationConversationTemplateViewWrapperClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "conversationBadgeBg" }
+    }
+    private val miuiConversationLayoutField by lazy {
+        MiuiNotificationConversationTemplateViewWrapperClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "conversationLayout" }
     }
     private val notificationBuilderNotificationField by lazy {
         Notification.Builder::class.resolve().firstField { name = "mN" }
@@ -1900,6 +1914,12 @@ object SystemUIHooker : YukiBaseHooker() {
         // 获取 [StatusBarNotification]
         val expandedNf = rowPair.second.getNotification()
 
+        if (NotificationConversationTemplateViewWrapperClass?.isInstance(wrapper) == true) {
+            val badgeBackground = conversationBadgeBackgroundField?.copy()?.of(wrapper)?.get<ImageView>() ?: return
+            if (expandedNf != null) bindNativeConversationIcon(iconImageView, badgeBackground, expandedNf)
+            return
+        }
+
         // 通知是否展开
         var isExpanded = rowPair.first
 
@@ -1909,6 +1929,33 @@ object SystemUIHooker : YukiBaseHooker() {
         if (importance != NotificationManager.IMPORTANCE_MIN) isExpanded = true
         // 执行 Hook
         bindNotificationIcon(iconImageView.context, expandedNf, iconImageView, isExpanded, isStockPanel = true)
+    }
+
+    private fun bindNativeConversationIcon(iconView: ImageView, badgeBackground: ImageView, nf: StatusBarNotification) {
+        val context = iconView.context
+        val smallIcon = nf.notification.smallIcon.loadDrawable(context) ?: return
+        if (isGrayscaleIcon(context, smallIcon).not()) return
+        val packageName = nf.notification.extras.getString("app_package")?.takeIf { it.isNotBlank() } ?: nf.notificationPackageName
+        val rule = resolveRuleIcon(context, true, packageName)
+        val customIcon = rule.first.takeIf { rule.third.not() }
+        val ruleColor = rule.second.takeIf { ConfigData.isEnableNotifyIconForceSystemColor.not() } ?: 0
+        val notificationColor = nf.notification.color.takeIf { ConfigData.isEnableNotifyIconForceSystemColor.not() } ?: 0
+        val backgroundColor = when {
+            customIcon != null -> ruleColor.takeIf { it != 0 } ?: context.systemAccentColor
+            notificationColor != 0 -> notificationColor
+            ruleColor != 0 -> ruleColor
+            else -> context.systemAccentColor
+        }
+        val isDarkMode = (globalContext ?: context).isSystemInDarkMode
+        // 使用原生独立底板，只替换前景并着色，保留底板形状及重要会话动画
+        iconView.apply {
+            // Android 17 起原生边距只有 2dp，再补 2dp 前景内边距
+            if (AndroidVersion.isAtLeast(AndroidVersion.CINNAMON_BUN)) setPadding(2.toPx(context))
+            setImageDrawable(customIcon ?: smallIcon)
+            colorFilter = null
+            imageTintList = ColorStateList.valueOf(if (isDarkMode) 0xFF2D2D2D.toInt() else Color.WHITE)
+        }
+        badgeBackground.imageTintList = ColorStateList.valueOf(if (isDarkMode) backgroundColor.brighterColor else backgroundColor)
     }
 
     /** 聊天通知保留系统头像，应用角标固定使用 M3 风格，普通通知继续适配主图标 */
@@ -2480,6 +2527,19 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installNativeNotificationBindings() {
+        // OS1-3 经典样式的会话仍用原生布局，但独立 wrapper 不经过通知头的绑定回调
+        MiuiNotificationConversationTemplateViewWrapperClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
+            name = "onContentUpdated"
+            parameterCount = 1
+        }?.hook {
+            after {
+                val layout = miuiConversationLayoutField?.copy()?.of(instance)?.get<View>() ?: return@after
+                val icon = layout.findViewById<ImageView>(layout.resources.getIdentifier("icon", "id", "android")) ?: return@after
+                val background = layout.findViewById<ImageView>(layout.resources.getIdentifier("conversation_icon_badge_bg", "id", "android")) ?: return@after
+                val nf = instance.getNotificationRow().second.getNotification() ?: return@after
+                bindNativeConversationIcon(icon, background, nf)
+            }
+        }
         NotificationHeaderViewWrapperClass.resolve().optional().apply {
             val resolveHeader = firstMethodOrNull {
                 name { it == "resolveHeaderViews" || it == "handleHeaderViews" || it == "resolveViews" }
