@@ -385,19 +385,26 @@ object SystemUIHooker : YukiBaseHooker() {
     private val notificationBuilderNotificationField by lazy {
         Notification.Builder::class.resolve().firstField { name = "mN" }
     }
+    private val collapsedBaseLayoutMethod by lazy {
+        Notification.Builder::class.resolve().optional(silent = true).firstMethodOrNull {
+            name { it == "getCollapsedBaseLayoutResource" || it == "getBaseLayoutResource" }
+            emptyParameters()
+            returnType = Int::class
+        }
+    }
     private val remoteViewsActionsField by lazy {
         RemoteViews::class.resolve().firstField { name = "mActions" }
     }
     private val remoteViewsActionIdField by lazy {
-        RemoteViewsActionClass.resolve().firstField { name = "mViewId" }
+        RemoteViewsActionClass.resolve().firstField { name { it == "mViewId" || it == "viewId" } }
     }
     private val remoteViewsBitmapActionClass by lazyClass($$"android.widget.RemoteViews$BitmapReflectionAction")
     private val remoteViewsBitmapMethodField by lazy {
-        remoteViewsBitmapActionClass.resolve().firstField { name = "mMethodName" }
+        remoteViewsBitmapActionClass.resolve().firstField { name { it == "mMethodName" || it == "methodName" } }
     }
     private val remoteViewsReflectionActionClass by lazyClass($$"android.widget.RemoteViews$BaseReflectionAction")
     private val remoteViewsReflectionMethodField by lazy {
-        remoteViewsReflectionActionClass.resolve().firstField { name = "mMethodName" }
+        remoteViewsReflectionActionClass.resolve().firstField { name { it == "mMethodName" || it == "methodName" } }
     }
     private val notificationChatTypeMethod by lazy {
         MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getNotificationTypeForIm" }
@@ -2426,6 +2433,7 @@ object SystemUIHooker : YukiBaseHooker() {
             if (lastArg().get<StatusBarNotification>()?.notification?.isMediaNotifyIconDisabled == true) return@before
             result = false
         }
+        if (isMIOS) installNativeProgressIconPolicy()
         listOfNotNull(
             NotificationContentInflaterInjectorClass,
             NotificationRowContentBinderInjectorImplClass
@@ -2494,6 +2502,28 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
+    private fun installNativeProgressIconPolicy() {
+        val collapsedLayout = collapsedBaseLayoutMethod ?: return
+        val iconId = Resources.getSystem().getIdentifier("icon", "id", "android")
+        if (iconId == 0) return
+        Notification.Builder::class.resolve().optional(silent = true).firstMethodOrNull {
+            name = "applyStandardTemplate"
+            parameterCount = 3
+            returnType = RemoteViews::class
+        }?.hook()?.after {
+            if (isShowMiuiStyle) return@after
+            val views = result<RemoteViews>() ?: return@after
+            val builder = instance<Notification.Builder>()
+            val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
+            if (notification.isMediaNotifyIconDisabled) return@after
+            val extras = notification.extras
+            if (extras.getInt(Notification.EXTRA_PROGRESS_MAX) == 0 && !extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE)) return@after
+            if (views.layoutId != collapsedLayout.copy().of(builder).invoke<Int>()) return@after
+            // 折叠进度条重用时会先应用模板原图及着色，导致已绑定的图标闪回系统样式
+            removeRemoteViewsIconActions(views, iconId, removeOriginalColor = true)
+        }
+    }
+
     private fun removeClassicAppIconActions(views: RemoteViews, notification: Notification, context: Context) {
         if (notification.isMediaNotifyIconDisabled) return
         val chatType = notificationChatTypeMethod?.let {
@@ -2504,6 +2534,10 @@ object SystemUIHooker : YukiBaseHooker() {
         val iconId = context.resources.getIdentifier("app_icon", "id", PackageName.SYSTEMUI)
         if (iconId == 0) return
         // 系统模板先清空再写 APP 图标；在布局应用前移除这两类指令，保留聊天头像、角标和其它内容
+        removeRemoteViewsIconActions(views, iconId)
+    }
+
+    private fun removeRemoteViewsIconActions(views: RemoteViews, iconId: Int, removeOriginalColor: Boolean = false) {
         val actions = remoteViewsActionsField.copy().of(views).get<MutableList<Any>>() ?: return
         actions.removeAll { action ->
             if (remoteViewsActionIdField.copy().of(action).get<Int>() != iconId) return@removeAll false
@@ -2512,7 +2546,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 remoteViewsReflectionActionClass.isInstance(action) -> remoteViewsReflectionMethodField.copy().of(action).get<String>()
                 else -> null
             }
-            method == "setImageBitmap" || method == "setImageIcon"
+            method == "setImageBitmap" || method == "setImageIcon" || (removeOriginalColor && method == "setOriginalIconColor")
         }
     }
 
