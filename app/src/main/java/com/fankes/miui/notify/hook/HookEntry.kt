@@ -33,16 +33,22 @@ import com.highcapable.yukihookapi.hook.factory.configure
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.xposed.YukiHookXposedModule
+import com.highcapable.yukihookapi.hook.xposed.reload.lifecycle.registerModuleLifecycle
 
 object HookEntry : YukiHookXposedModule {
 
-    override fun onInit() = configure {
-        logging {
-            tag = "MIUINativeNotifyIcon"
-            recording = true
-            elements(PRIORITY)
+    override fun onInit() {
+        configure {
+            logging {
+                tag = "MIUINativeNotifyIcon"
+                recording = true
+                elements(PRIORITY)
+            }
+            debug = false
         }
-        debug = false
+        registerModuleLifecycle {
+            onDispose { SystemUIHooker.release() }
+        }
     }
 
     override fun onHook() = encase {

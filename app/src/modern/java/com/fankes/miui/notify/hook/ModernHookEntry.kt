@@ -23,10 +23,8 @@
 package com.fankes.miui.notify.hook
 
 import com.fankes.miui.notify.const.PackageName
-import com.fankes.miui.notify.hook.entity.SystemUIHooker
 import com.highcapable.yukihookapi.annotation.xposed.YukiHookLibXposedEntry
 import com.highcapable.yukihookapi.hook.xposed.YukiHookXposedModule
-import com.highcapable.yukihookapi.hook.xposed.reload.lifecycle.registerModuleLifecycle
 
 @YukiHookLibXposedEntry(
     targetApiVersion = 102,
@@ -34,12 +32,4 @@ import com.highcapable.yukihookapi.hook.xposed.reload.lifecycle.registerModuleLi
     staticScope = true,
     hotReload = YukiHookLibXposedEntry.HotReload.AUTO
 )
-object ModernHookEntry : YukiHookXposedModule by HookEntry {
-
-    override fun onInit() {
-        HookEntry.onInit()
-        registerModuleLifecycle {
-            onDispose { SystemUIHooker.release() }
-        }
-    }
-}
+object ModernHookEntry : YukiHookXposedModule by HookEntry
