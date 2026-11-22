@@ -2433,7 +2433,7 @@ object SystemUIHooker : YukiBaseHooker() {
             if (lastArg().get<StatusBarNotification>()?.notification?.isMediaNotifyIconDisabled == true) return@before
             result = false
         }
-        if (isMIOS) installNativeProgressIconPolicy()
+        if (isMIOS) installNativeTemplateIconPolicy()
         listOfNotNull(
             NotificationContentInflaterInjectorClass,
             NotificationRowContentBinderInjectorImplClass
@@ -2502,8 +2502,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
 
-    private fun installNativeProgressIconPolicy() {
-        val collapsedLayout = collapsedBaseLayoutMethod ?: return
+    private fun installNativeTemplateIconPolicy() {
         val iconId = Resources.getSystem().getIdentifier("icon", "id", "android")
         if (iconId == 0) return
         Notification.Builder::class.resolve().optional(silent = true).firstMethodOrNull {
@@ -2516,10 +2515,15 @@ object SystemUIHooker : YukiBaseHooker() {
             val builder = instance<Notification.Builder>()
             val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
             if (notification.isMediaNotifyIconDisabled) return@after
-            val extras = notification.extras
-            if (extras.getInt(Notification.EXTRA_PROGRESS_MAX) == 0 && !extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE)) return@after
-            if (views.layoutId != collapsedLayout.copy().of(builder).invoke<Int>()) return@after
-            // 折叠进度条重用时会先应用模板原图及着色，导致已绑定的图标闪回系统样式
+            // 会话角标有独立绑定逻辑，彩色原图仍由模板提供
+            if (notification.extras.getString(Notification.EXTRA_TEMPLATE) == Notification.MessagingStyle::class.java.name) return@after
+            if (ConfigData.isEnableNotifyIconForceAppIcon.not()) {
+                val extras = notification.extras
+                if (extras.getInt(Notification.EXTRA_PROGRESS_MAX) == 0 && !extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE)) return@after
+                val collapsedLayout = collapsedBaseLayoutMethod ?: return@after
+                if (views.layoutId != collapsedLayout.copy().of(builder).invoke<Int>()) return@after
+            }
+            // 强制 APP 图标或折叠进度条重用时，模板原图及着色会在绑定前写回，造成闪烁
             removeRemoteViewsIconActions(views, iconId, removeOriginalColor = true)
         }
     }
