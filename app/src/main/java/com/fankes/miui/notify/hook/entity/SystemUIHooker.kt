@@ -1470,7 +1470,7 @@ object SystemUIHooker : YukiBaseHooker() {
         NotificationContentInflaterInjectorClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "createRemoteViews"
             parameters { it.getOrNull(7) == ExpandableNotificationRowClass }
-        }?.hook()?.apply {
+        }?.hook {
             before {
                 notification.remove()
                 arg(7).get<Any>()?.getNotification()?.takeIf {
@@ -1545,7 +1545,7 @@ object SystemUIHooker : YukiBaseHooker() {
             imageTextClass.resolve().optional(silent = true).firstMethodOrNull {
                 name = "showProfilePicture"
                 parameterCount = 2
-            }?.hook()?.apply {
+            }?.hook {
                 before { boundBadge.set(false) }
                 after {
                     val alreadyBound = boundBadge.get() == true
@@ -2516,7 +2516,7 @@ object SystemUIHooker : YukiBaseHooker() {
             val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
             if (notification.isMediaNotifyIconDisabled) return@after
             // 会话角标有独立绑定逻辑，彩色原图仍由模板提供
-            if (notification.extras.getString(Notification.EXTRA_TEMPLATE) == Notification.MessagingStyle::class.java.name) return@after
+            if (notification.extras.getString(Notification.EXTRA_TEMPLATE) == classOf<Notification.MessagingStyle>().name) return@after
             if (ConfigData.isEnableNotifyIconForceAppIcon.not()) {
                 val extras = notification.extras
                 if (extras.getInt(Notification.EXTRA_PROGRESS_MAX) == 0 && !extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE)) return@after
@@ -2689,7 +2689,7 @@ object SystemUIHooker : YukiBaseHooker() {
         ExpandableNotificationRowControllerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "moveChildTo"
             parameterCount = 2
-        }?.hook()?.apply {
+        }?.hook {
             before { movingChild.set(true) }
             after {
                 movingChild.remove()
@@ -3117,7 +3117,7 @@ object SystemUIHooker : YukiBaseHooker() {
         foldControllerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "sendFoldNotification"
             parameterCount = if (isOs2FoldEntrance) 1 else 2
-        }?.hook()?.apply {
+        }?.hook {
             before {
                 foldEntranceIconContext.remove()
                 instance.runInSafe(msg = "Collect fold entrance notifications") {
