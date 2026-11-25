@@ -107,7 +107,6 @@ import com.highcapable.kavaref.extension.toClass
 import com.highcapable.yukihookapi.YukiHook
 import com.highcapable.yukihookapi.extension.kavaref.hook
 import com.highcapable.yukihookapi.extension.kavaref.hookAll
-import com.highcapable.yukihookapi.extension.kavaref.lazyClass
 import com.highcapable.yukihookapi.extension.kavaref.lazyClassOrNull
 import com.highcapable.yukihookapi.extension.kavaref.toClassOrNull
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -179,7 +178,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private val DozeServiceClass by lazyClassOrNull("com.android.systemui.doze.DozeService")
 
     /** 原生存在的类 */
-    private val NotificationChildrenContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
+    private val NotificationChildrenContainerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.stack.NotificationChildrenContainer")
 
     /** 原生存在的类 (A15 HyperOS 已变成 `interface`) */
     private val NotificationIconAreaControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconAreaController")
@@ -209,16 +208,16 @@ object SystemUIHooker : YukiBaseHooker() {
     private val StatusBarWindowControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.window.StatusBarWindowController")
 
     /** 原生存在的类 */
-    private val ContrastColorUtilClass by lazyClass("com.android.internal.util.ContrastColorUtil")
+    private val ContrastColorUtilClass by lazyClassOrNull("com.android.internal.util.ContrastColorUtil")
 
     /** 原生存在的类 */
-    private val StatusBarIconViewClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.StatusBarIconView")
+    private val StatusBarIconViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.StatusBarIconView")
 
     /** 原生存在的类 */
-    private val NotificationIconContainerClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconContainer")
+    private val NotificationIconContainerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.NotificationIconContainer")
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val StatusBarNotificationPresenterClass by lazyClass(
+    private val StatusBarNotificationPresenterClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.phone.StatusBarNotificationPresenter",
             "${PackageName.SYSTEMUI}.statusbar.phone.StatusBar"
@@ -226,7 +225,7 @@ object SystemUIHooker : YukiBaseHooker() {
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val ExpandableNotificationRowClass by lazyClass(
+    private val ExpandableNotificationRowClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.row.ExpandableNotificationRow",
             "${PackageName.SYSTEMUI}.statusbar.ExpandableNotificationRow"
@@ -234,7 +233,7 @@ object SystemUIHooker : YukiBaseHooker() {
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val NotificationViewWrapperClass by lazyClass(
+    private val NotificationViewWrapperClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationViewWrapper",
             "${PackageName.SYSTEMUI}.statusbar.notification.NotificationViewWrapper"
@@ -242,7 +241,7 @@ object SystemUIHooker : YukiBaseHooker() {
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val NotificationHeaderViewWrapperClass by lazyClass(
+    private val NotificationHeaderViewWrapperClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper",
             "${PackageName.SYSTEMUI}.statusbar.notification.NotificationHeaderViewWrapper"
@@ -258,7 +257,7 @@ object SystemUIHooker : YukiBaseHooker() {
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val NotificationUtilClass by lazyClass(
+    private val NotificationUtilClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.NotificationUtil",
             "${PackageName.SYSTEMUI}.miui.statusbar.notification.NotificationUtil",
@@ -267,7 +266,7 @@ object SystemUIHooker : YukiBaseHooker() {
     )
 
     /** 根据多个版本存在不同的包名相同的类 */
-    private val ExpandedNotificationClass by lazyClass(
+    private val ExpandedNotificationClass by lazyClassOrNull(
         VariousClass(
             "${PackageName.SYSTEMUI}.statusbar.notification.ExpandedNotification",
             "${PackageName.SYSTEMUI}.miui.statusbar.ExpandedNotification"
@@ -293,7 +292,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private val FocusedNotifPromptViewClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.phone.FocusedNotifPromptView")
 
     /** 原生窗口管理器，用于读取当前窗口中的媒体面板 */
-    private val WindowManagerGlobalClass by lazyClass("android.view.WindowManagerGlobal")
+    private val WindowManagerGlobalClass by lazyClassOrNull("android.view.WindowManagerGlobal")
 
     /** 通知图标管理器 */
     private val IconManagerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.icon.IconManager")
@@ -308,7 +307,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private val ExpandableNotificationRowControllerClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.notification.row.ExpandableNotificationRowController")
 
     /** RemoteViews 的 Action 类 */
-    private val RemoteViewsActionClass by lazyClass($$"android.widget.RemoteViews$Action")
+    private val RemoteViewsActionClass by lazyClassOrNull($$"android.widget.RemoteViews$Action")
 
     /** 插件加载器记录入口 */
     private val PluginInstanceInjectorClass by lazyClassOrNull("com.miui.systemui.plugin.PluginInstanceInjector")
@@ -320,61 +319,61 @@ object SystemUIHooker : YukiBaseHooker() {
     private val PluginFactoryClass by lazyClassOrNull($$"com.android.systemui.shared.plugins.PluginInstance$PluginFactory")
 
     private val groupContainingRowMethod by lazy {
-        NotificationChildrenContainerClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationChildrenContainerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getContainingNotification"; emptyParameters()
         }
     }
     private val groupHeaderMethod by lazy {
-        NotificationChildrenContainerClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationChildrenContainerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getNotificationHeaderWrapper"; emptyParameters()
         }
     }
     private val groupMinimizedHeaderMethod by lazy {
-        NotificationChildrenContainerClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationChildrenContainerClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getMinimizedGroupHeaderWrapper"; emptyParameters()
         }
     }
     private val groupInjectorField by lazy {
-        NotificationChildrenContainerClass.resolve().optional(silent = true).firstFieldOrNull { name = "mInjector" }
+        NotificationChildrenContainerClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mInjector" }
     }
     private val groupInjectorIconField by lazy {
         NotificationChildrenContainerInjectorImplClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mAppIcon" }
     }
     private val groupIconField by lazy {
-        (MiuiNotificationChildrenContainerClass ?: NotificationChildrenContainerClass).resolve().optional(silent = true)
-            .firstFieldOrNull { name = "mAppIcon"; superclass() }
+        (MiuiNotificationChildrenContainerClass ?: NotificationChildrenContainerClass)?.resolve()?.optional(silent = true)
+            ?.firstFieldOrNull { name = "mAppIcon"; superclass() }
     }
     private val rowParentMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getNotificationParent"; emptyParameters()
         }
     }
     private val rowChildrenContainerMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getChildrenContainer"; emptyParameters()
         }
     }
     private val statusIconNotificationField by lazy {
-        StatusBarIconViewClass.resolve().optional(silent = true).firstFieldOrNull { name = "mNotification" }
+        StatusBarIconViewClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mNotification" }
     }
-    private val os1NotificationIconObserverClass by lazyClass("${PackageName.SYSTEMUI}.statusbar.policy.NotificationIconObserver")
+    private val os1NotificationIconObserverClass by lazyClassOrNull("${PackageName.SYSTEMUI}.statusbar.policy.NotificationIconObserver")
     private val os1NotificationIconLimitField by lazy {
-        os1NotificationIconObserverClass.resolve().firstField { name = "mShowNotificationIcons" }
+        os1NotificationIconObserverClass?.resolve()?.optional()?.firstFieldOrNull { name = "mShowNotificationIcons" }
     }
     private val os1DependencyGetMethod by lazy {
-        DependencyClass?.resolve()?.firstMethod { name = "get"; parameters(Class::class) }
+        DependencyClass?.resolve()?.optional()?.firstMethodOrNull { name = "get"; parameters(Class::class) }
     }
     private val statusIconStaticLayoutField by lazy {
-        NotificationIconContainerClass.resolve().firstField { name = "mIsStaticLayout" }
+        NotificationIconContainerClass?.resolve()?.optional()?.firstFieldOrNull { name = "mIsStaticLayout" }
     }
     private val statusIconLockScreenField by lazy {
-        NotificationIconContainerClass.resolve().firstField { name = "mOnLockScreen" }
+        NotificationIconContainerClass?.resolve()?.optional()?.firstFieldOrNull { name = "mOnLockScreen" }
     }
     private val notificationWrapperIconField by lazy {
-        NotificationHeaderViewWrapperClass.resolve().optional().firstFieldOrNull { name = "mIcon" }
+        NotificationHeaderViewWrapperClass?.resolve()?.optional()?.firstFieldOrNull { name = "mIcon" }
     }
     private val notificationWrapperRowField by lazy {
-        NotificationViewWrapperClass.resolve().optional().firstFieldOrNull { name = "mRow" }
+        NotificationViewWrapperClass?.resolve()?.optional()?.firstFieldOrNull { name = "mRow" }
     }
     private val conversationBadgeBackgroundField by lazy {
         NotificationConversationTemplateViewWrapperClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "conversationBadgeBg" }
@@ -383,7 +382,7 @@ object SystemUIHooker : YukiBaseHooker() {
         MiuiNotificationConversationTemplateViewWrapperClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "conversationLayout" }
     }
     private val notificationBuilderNotificationField by lazy {
-        Notification.Builder::class.resolve().firstField { name = "mN" }
+        Notification.Builder::class.resolve().optional().firstFieldOrNull { name = "mN" }
     }
     private val collapsedBaseLayoutMethod by lazy {
         Notification.Builder::class.resolve().optional(silent = true).firstMethodOrNull {
@@ -393,47 +392,47 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
     private val remoteViewsActionsField by lazy {
-        RemoteViews::class.resolve().firstField { name = "mActions" }
+        RemoteViews::class.resolve().optional().firstFieldOrNull { name = "mActions" }
     }
     private val remoteViewsActionIdField by lazy {
-        RemoteViewsActionClass.resolve().firstField { name { it == "mViewId" || it == "viewId" } }
+        RemoteViewsActionClass?.resolve()?.optional()?.firstFieldOrNull { name { it == "mViewId" || it == "viewId" } }
     }
-    private val remoteViewsBitmapActionClass by lazyClass($$"android.widget.RemoteViews$BitmapReflectionAction")
+    private val remoteViewsBitmapActionClass by lazyClassOrNull($$"android.widget.RemoteViews$BitmapReflectionAction")
     private val remoteViewsBitmapMethodField by lazy {
-        remoteViewsBitmapActionClass.resolve().firstField { name { it == "mMethodName" || it == "methodName" } }
+        remoteViewsBitmapActionClass?.resolve()?.optional()?.firstFieldOrNull { name { it == "mMethodName" || it == "methodName" } }
     }
-    private val remoteViewsReflectionActionClass by lazyClass($$"android.widget.RemoteViews$BaseReflectionAction")
+    private val remoteViewsReflectionActionClass by lazyClassOrNull($$"android.widget.RemoteViews$BaseReflectionAction")
     private val remoteViewsReflectionMethodField by lazy {
-        remoteViewsReflectionActionClass.resolve().firstField { name { it == "mMethodName" || it == "methodName" } }
+        remoteViewsReflectionActionClass?.resolve()?.optional()?.firstFieldOrNull { name { it == "mMethodName" || it == "methodName" } }
     }
     private val notificationChatTypeMethod by lazy {
         MiuiBaseNotifUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getNotificationTypeForIm" }
     }
     private val notificationRowExpandedMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "isExpanded"
             parameters(Boolean::class)
             returnType = Boolean::class
         }
     }
     private val notificationRowExpandedFallbackMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name { it == "isExpanded" || it == $$"isExpanded$1" }
             emptyParameters()
             returnType = Boolean::class
         }
     }
     private val notificationRowEntryMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull { name = "getEntry"; emptyParameters() }
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getEntry"; emptyParameters() }
     }
     private val notificationRowEntryField by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstFieldOrNull { name = "mEntry" }
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mEntry" }
     }
     private val notificationRowEntryAdapterMethod by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull { name = "getEntryAdapter"; emptyParameters() }
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getEntryAdapter"; emptyParameters() }
     }
     private val notificationRowEntryAdapterField by lazy {
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstFieldOrNull { name = "mEntryAdapter" }
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mEntryAdapter" }
     }
 
     private val dependencyInstanceField by lazy {
@@ -448,7 +447,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }
     }
     private val presenterMediaManagerField by lazy {
-        StatusBarNotificationPresenterClass.resolve().optional(silent = true).firstFieldOrNull { name = "mMediaManager" }
+        StatusBarNotificationPresenterClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mMediaManager" }
     }
     private val mediaManagerClass by lazyClassOrNull(
         VariousClass(
@@ -484,10 +483,10 @@ object SystemUIHooker : YukiBaseHooker() {
         Notification::class.resolve().optional(silent = true).firstMethodOrNull { name = "isPromotedOngoing"; emptyParameters() }
     }
     private val focusNotificationField by lazy {
-        ExpandedNotificationClass.resolve().optional(silent = true).firstFieldOrNull { name = "mIsFocusNotification" }
+        ExpandedNotificationClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mIsFocusNotification" }
     }
     private val promotedNotificationField by lazy {
-        ExpandedNotificationClass.resolve().optional(silent = true).firstFieldOrNull { name = "mIsPromotedOngoing" }
+        ExpandedNotificationClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mIsPromotedOngoing" }
     }
     private val globalContextMethod by lazy {
         SystemUIApplicationClass?.resolve()?.optional(silent = true)?.firstMethodOrNull { name = "getContext" }
@@ -506,13 +505,13 @@ object SystemUIHooker : YukiBaseHooker() {
     private val iconManagerProviderGetMethod by lazy {
         val component = globalContext?.let { systemUIComponentField?.copy()?.of(it)?.get() }
         component?.let { iconManagerProviderField?.copy()?.of(it)?.get() }
-            ?.javaClass?.resolve()?.firstMethod { name = "get"; emptyParameters() }
+            ?.javaClass?.resolve()?.optional()?.firstMethodOrNull { name = "get"; emptyParameters() }
     }
     private val notificationBinderIconManagerField by lazy {
-        NotificationRowBinderImplClass?.resolve()?.firstField { name = "mIconManager" }
+        NotificationRowBinderImplClass?.resolve()?.optional()?.firstFieldOrNull { name = "mIconManager" }
     }
     private val iconManagerUpdateIconsMethod by lazy {
-        IconManagerClass?.resolve()?.firstMethod { name = "updateIconsSafe"; parameterCount = 1 }
+        IconManagerClass?.resolve()?.optional()?.firstMethodOrNull { name = "updateIconsSafe"; parameterCount = 1 }
     }
 
     private const val XMSF_PACKAGE_NAME = "com.xiaomi.xmsf"
@@ -589,8 +588,8 @@ object SystemUIHooker : YukiBaseHooker() {
      * @return [Boolean]
      */
     private val isShowMiuiStyle
-        get() = (NotificationUtilClass.resolve().optional(silent = true)
-            .firstMethodOrNull { name = "showMiuiStyle" }
+        get() = (NotificationUtilClass?.resolve()?.optional(silent = true)
+            ?.firstMethodOrNull { name = "showMiuiStyle" }
             ?.invoke<Boolean>() ?: NotificationSettingsHelperClass?.resolve()?.optional(silent = true)
             ?.firstMethodOrNull { name = "showMiuiStyle" }
             ?.invoke<Boolean>()) == true
@@ -608,7 +607,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private val StatusBarNotification.isFocusNotificationCompat
         get() = notification.isPromotedOngoingCompat || notification.isLegacyPromotedOngoingCompat ||
-            (if (ExpandedNotificationClass.isInstance(this))
+            (if (ExpandedNotificationClass?.isInstance(this) == true)
                 focusNotificationField?.copy()?.of(this)?.get<Boolean>() == true ||
                     promotedNotificationField?.copy()?.of(this)?.get<Boolean>() == true
             else asResolver().optional(silent = true).let { resolver ->
@@ -730,9 +729,9 @@ object SystemUIHooker : YukiBaseHooker() {
      */
     private fun isGrayscaleIcon(context: Context, drawable: Drawable) =
         if (ConfigData.isUseSystemIconInversion) safeOfFalse {
-            ContrastColorUtilClass.resolve()
-                .optional(silent = true)
-                .let {
+            ContrastColorUtilClass?.resolve()
+                ?.optional(silent = true)
+                ?.let {
                     it.firstMethodOrNull {
                         name = "isGrayscaleIcon"
                         parameters(Drawable::class)
@@ -742,7 +741,7 @@ object SystemUIHooker : YukiBaseHooker() {
                             parameters(Context::class)
                         }?.invoke(context)
                     )?.invokeQuietly<Boolean>(drawable) == true
-                }
+                } == true
         } else ContrastBitmapTool.isGrayscale(drawable)
 
     /**
@@ -782,14 +781,14 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun refreshStatusBarIcons(): Unit = runInSafe {
         if (isMIOS) {
             val manager = currentIconManager() ?: return@runInSafe
-            val resolver = manager.asResolver()
-            val collection = resolver.firstField { name = "notifCollection" }.get() ?: return@runInSafe
-            val entries = collection.asResolver().firstMethod { name = "getAllNotifs"; emptyParameters() }
-                .invoke<Collection<Any>>() ?: return@runInSafe
+            val resolver = manager.asResolver().optional()
+            val collection = resolver.firstFieldOrNull { name = "notifCollection" }?.get() ?: return@runInSafe
+            val entries = collection.asResolver().optional().firstMethodOrNull { name = "getAllNotifs"; emptyParameters() }
+                ?.invoke<Collection<Any>>() ?: return@runInSafe
             entries.forEach { iconManagerUpdateIconsMethod?.copy()?.of(manager)?.invoke(it) }
             return@runInSafe
         }
-        StatusBarIconViewClass.resolve().optional(silent = true).firstFieldOrNull { name = "mNotification" }?.also { result ->
+        StatusBarIconViewClass?.resolve()?.optional(silent = true)?.firstFieldOrNull { name = "mNotification" }?.also { result ->
             notificationIconContainer?.children?.forEach {
                 // 得到通知实例
                 val nf = result.copy().of(it).get<StatusBarNotification>() ?: return
@@ -1296,8 +1295,8 @@ object SystemUIHooker : YukiBaseHooker() {
         val icon = resolver.firstFieldOrNull { name = "appIcon" }?.get<Icon>()
         val userId = resolver.firstFieldOrNull { name = "userId" }?.get<Int>()
         val drawable = if (icon != null && userId != null)
-            icon.asResolver().firstMethod { name = "loadDrawableAsUser"; parameters(Context::class, Int::class) }
-                .invoke<Drawable>(context, userId)
+            icon.asResolver().optional().firstMethodOrNull { name = "loadDrawableAsUser"; parameters(Context::class, Int::class) }
+                ?.invoke<Drawable>(context, userId)
         else icon?.loadDrawable(context)
         if (drawable != null) return drawable
         val acquireIcon = controller?.asResolver()?.optional(silent = true)?.firstMethodOrNull {
@@ -1305,7 +1304,7 @@ object SystemUIHooker : YukiBaseHooker() {
             parameterCount = 1
         }
         return if (acquireIcon != null) acquireIcon.invoke<Drawable>(data)
-        else NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
+        else NotificationUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "acquireApplicationIcon"
             parameterCount = 2
         }?.invoke<Drawable>(context, data)
@@ -1442,20 +1441,20 @@ object SystemUIHooker : YukiBaseHooker() {
         if (miosVersionCode.toInt() != 2) {
             // OS1 和新版插件的自定义 View 没有原生 HeaderWrapper，在自身绑定点适配
             fun bindCustomFocusIcon(wrapper: Any) {
-                if (NotificationHeaderViewWrapperClass.isInstance(wrapper)) return
+                if (NotificationHeaderViewWrapperClass?.isInstance(wrapper) == true) return
                 if (ConfigData.isEnableFocusNotifyIcon.not()) return
                 val nf = wrapper.getNotificationRow().second.getNotification() ?: return
                 if (nf.isFocusNotificationCompat.not()) return
-                val resolver = wrapper.asResolver()
+                val resolver = wrapper.asResolver().optional()
                 // 基类构造时也调用 onReinflated，此时 wrapper 尚未完成初始化
-                if (resolver.firstField { name = "mContext"; superclass() }.get<Context>() == null) return
-                val root = resolver.firstField { name = "mView"; superclass() }.get<View>() ?: return
+                if (resolver.firstFieldOrNull { name = "mContext"; superclass() }?.get<Context>() == null) return
+                val root = resolver.firstFieldOrNull { name = "mView"; superclass() }?.get<View>() ?: return
                 val iconId = nf.notification.extras.getInt("miui.focus.iconId")
                 val icon = iconId.takeIf { it != 0 }?.let { root.findViewById<ImageView>(it) }
                     ?: root.findViewById(root.resources.getIdentifier("icon", "id", "android")) ?: return
                 bindComposedNotificationIcon(icon, nf)
             }
-            NotificationViewWrapperClass.resolve().optional(silent = true).apply {
+            NotificationViewWrapperClass?.resolve()?.optional(silent = true)?.apply {
                 firstMethodOrNull { name = "wrap"; parameterCount = 3 }?.hook()?.after {
                     result<Any>()?.let { bindCustomFocusIcon(it) }
                 }
@@ -1479,7 +1478,7 @@ object SystemUIHooker : YukiBaseHooker() {
             }
             after { notification.remove() }
         }
-        NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "handleFocusAppIcon"
             parameters(Context::class, RemoteViews::class, Int::class, Notification::class)
         }?.hook()?.before {
@@ -1608,26 +1607,26 @@ object SystemUIHooker : YukiBaseHooker() {
             ?.firstFieldOrNull { name = "_pluginComponent" }?.get() ?: return@runInSafe
         val provider = component.asResolver().optional(silent = true)
             .firstFieldOrNull { name = "focusNotificationControllerProvider" }?.get() ?: return@runInSafe
-        val controller = provider.asResolver().firstMethod {
+        val controller = provider.asResolver().optional().firstMethodOrNull {
             name = "get"
             emptyParameters()
-        }.invoke() ?: return@runInSafe
-        val resolver = controller.asResolver()
-        val notifications = resolver.firstField { name = "sbnMap" }.get<Map<String, StatusBarNotification>>()
+        }?.invoke() ?: return@runInSafe
+        val resolver = controller.asResolver().optional()
+        val notifications = resolver.firstFieldOrNull { name = "sbnMap" }?.get<Map<String, StatusBarNotification>>()
             ?.values?.toList().orEmpty()
         if (notifications.isEmpty()) return@runInSafe
-        val pluginContext = resolver.firstField { name = "pluginCtx" }.get<Context>() ?: return@runInSafe
-        val sysuiContext = resolver.firstField { name = "sysuiCtx" }.get<Context>() ?: return@runInSafe
-        val notificationProvider = resolver.firstField { name = "mProvider" }.get() ?: return@runInSafe
-        val utils = resolver.firstField { name = "focusNotifUtils" }.get() ?: return@runInSafe
-        val maxSeq = utils.asResolver().firstMethod {
+        val pluginContext = resolver.firstFieldOrNull { name = "pluginCtx" }?.get<Context>() ?: return@runInSafe
+        val sysuiContext = resolver.firstFieldOrNull { name = "sysuiCtx" }?.get<Context>() ?: return@runInSafe
+        val notificationProvider = resolver.firstFieldOrNull { name = "mProvider" }?.get() ?: return@runInSafe
+        val utils = resolver.firstFieldOrNull { name = "focusNotifUtils" }?.get() ?: return@runInSafe
+        val maxSeq = utils.asResolver().optional().firstMethodOrNull {
             name = "getMaxSeq"
             emptyParameters()
-        }.invoke<MutableMap<String, Long>>() ?: return@runInSafe
-        val repost = resolver.firstMethod {
+        }?.invoke<MutableMap<String, Long>>() ?: return@runInSafe
+        val repost = resolver.firstMethodOrNull {
             name = "onNotificationPosted"
             parameterCount = 4
-        }
+        } ?: return@runInSafe
         notifications.forEach { nf ->
             // 与宿主配置变化刷新一致：允许当前序号重新绑定，且不因图标设置变化再次弹出悬浮卡片
             maxSeq.remove(nf.key)
@@ -1673,14 +1672,14 @@ object SystemUIHooker : YukiBaseHooker() {
 
     /** 从当前窗口查找控制中心媒体面板，不保存插件 View 或实例 */
     private fun refreshControlCenterMediaIcons() {
-        val manager = WindowManagerGlobalClass.resolve().firstMethod {
+        val manager = WindowManagerGlobalClass?.resolve()?.optional()?.firstMethodOrNull {
             name = "getInstance"
             emptyParameters()
-        }.invoke() ?: return
-        val roots = manager.asResolver().firstMethod {
+        }?.invoke() ?: return
+        val roots = manager.asResolver().optional().firstMethodOrNull {
             name = "getWindowViews"
             emptyParameters()
-        }.invoke<List<View>>() ?: return
+        }?.invoke<List<View>>() ?: return
         fun refresh(view: View) {
             if (view.javaClass.name == "com.android.systemui.QSControlMiPlayDetailHeader") {
                 val packageName = controlCenterMediaNotification(view.javaClass.classLoader!!)?.packageName ?: return
@@ -1865,7 +1864,7 @@ object SystemUIHooker : YukiBaseHooker() {
      * @param instance 被 Hook 的 Method 的实例
      */
     private fun applyStatusBarIconLimit(instance: Any) {
-        val maxStaticIconsResolver = NotificationIconContainerClass.resolve().optional().firstFieldOrNull {
+        val maxStaticIconsResolver = NotificationIconContainerClass?.resolve()?.optional()?.firstFieldOrNull {
             name {
                 /** 旧版名称 */
                 val oldVersion = it == "mMaxStaticIcons"
@@ -1879,11 +1878,13 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }?.of(instance) ?: return
         if (isMIOS && miosVersionCode < 2) {
-            if (statusIconStaticLayoutField.copy().of(instance).get<Boolean>() != true ||
-                statusIconLockScreenField.copy().of(instance).get<Boolean>() == true) return
+            val isStaticLayout = statusIconStaticLayoutField?.copy()?.of(instance)?.get<Boolean>() ?: return
+            val isOnLockScreen = statusIconLockScreenField?.copy()?.of(instance)?.get<Boolean>() ?: return
+            if (!isStaticLayout || isOnLockScreen) return
             // 系统观察器保留真实设置，容器字段可能已经是模块覆盖的值
-            val observer = os1DependencyGetMethod?.invoke(os1NotificationIconObserverClass) ?: return
-            statusBarMaxStaticIcons = os1NotificationIconLimitField.copy().of(observer).get<Int>() ?: return
+            val observerClass = os1NotificationIconObserverClass ?: return
+            val observer = os1DependencyGetMethod?.invoke(observerClass) ?: return
+            statusBarMaxStaticIcons = os1NotificationIconLimitField?.copy()?.of(observer)?.get<Int>() ?: return
             isShowNotificationIcons = statusBarMaxStaticIcons > 0
         } else if (statusBarMaxStaticIcons == -1 ||
             // 系统设置内修改，模块同步更新
@@ -2084,9 +2085,9 @@ object SystemUIHooker : YukiBaseHooker() {
                 }?.invoke<StatusBarNotification>()
                     ?: resolver.firstFieldOrNull { name = "mSbn" }?.get<StatusBarNotification>()
             }
-        } ?: ExpandableNotificationRowClass.resolve()
-            .optional(silent = true)
-            .firstMethodOrNull { name = "getStatusBarNotification" }
+        } ?: ExpandableNotificationRowClass?.resolve()
+            ?.optional(silent = true)
+            ?.firstMethodOrNull { name = "getStatusBarNotification" }
             ?.of(this)?.invoke<StatusBarNotification>()
 
     /** 注册生命周期 */
@@ -2215,7 +2216,7 @@ object SystemUIHooker : YukiBaseHooker() {
         }?.invokeQuietly(SettingsManagerClass) ?: MiuiDependencyClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "get"
             parameters(Class::class)
-        }?.invokeQuietly(SettingsManagerClass) ?: if (isMIOS && miosVersionCode < 2) DependencyClass?.resolve()?.firstMethod {
+        }?.invokeQuietly(SettingsManagerClass) ?: if (isMIOS && miosVersionCode < 2) DependencyClass?.resolve()?.optional()?.firstMethodOrNull {
             name = "get"
             parameters(Class::class)
         }?.invoke(SettingsManagerClass) else null
@@ -2409,19 +2410,21 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun installNativeIconPolicies() {
-        if (isMIOS && miosVersionCode < 2) NotificationUtilClass.resolve().firstMethod {
+        if (isMIOS && miosVersionCode < 2) NotificationUtilClass?.resolve()?.optional()?.firstMethodOrNull {
             name = "getSmallIcon"
-            parameters(ExpandedNotificationClass, Int::class, Boolean::class)
-        }.hook().before {
+            parameters {
+                it.size == 3 && it[0] == ExpandedNotificationClass && it[1] == classOf<Int>() && it[2] == classOf<Boolean>()
+            }
+        }?.hook()?.before {
             val notification = firstArg().get<StatusBarNotification>()?.notification
             if (notification?.isMediaNotifyIconDisabled == true) return@before
             // OS1 在这里按系统样式改选 APP 图标，原生绑定前只允许传递通知原图
             result = notification?.smallIcon
         }
-        NotificationUtilClass.resolve().optional().method {
+        NotificationUtilClass?.resolve()?.optional()?.method {
             name { it == "shouldSubstituteSmallIcon" || it == "shouldSubstituteSmallIconForStatusBarNotification" }
             parameters { it.firstOrNull()?.isSubclassOf(StatusBarNotification::class) == true }
-        }.hookAll().before {
+        }?.hookAll()?.before {
             if (firstArg().get<StatusBarNotification>()?.notification?.isMediaNotifyIconDisabled == true) return@before
             result = false
         }
@@ -2472,11 +2475,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 val builder = firstArg().get<Notification.Builder>() ?: return@after
                 val context = lastArg().get<Context>() ?: return@after
                 // 公开模板在 handleAppIcon 之后还会直接写入一次 APP 图标
-                val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
+                val notification = notificationBuilderNotificationField?.copy()?.of(builder)?.get<Notification>() ?: return@after
                 removeClassicAppIconActions(views, notification, context)
             }
         }
-        NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "applyAppIconAllowCustom"
             parameterCount = 4
         }?.hook()?.before {
@@ -2523,7 +2526,7 @@ object SystemUIHooker : YukiBaseHooker() {
             if (isShowMiuiStyle) return@after
             val views = result<RemoteViews>() ?: return@after
             val builder = instance<Notification.Builder>()
-            val notification = notificationBuilderNotificationField.copy().of(builder).get<Notification>() ?: return@after
+            val notification = notificationBuilderNotificationField?.copy()?.of(builder)?.get<Notification>() ?: return@after
             if (notification.isMediaNotifyIconDisabled) return@after
             // 会话角标有独立绑定逻辑，彩色原图仍由模板提供
             if (notification.extras.getString(Notification.EXTRA_TEMPLATE) == classOf<Notification.MessagingStyle>().name) return@after
@@ -2552,12 +2555,12 @@ object SystemUIHooker : YukiBaseHooker() {
     }
 
     private fun removeRemoteViewsIconActions(views: RemoteViews, iconId: Int, removeOriginalColor: Boolean = false) {
-        val actions = remoteViewsActionsField.copy().of(views).get<MutableList<Any>>() ?: return
+        val actions = remoteViewsActionsField?.copy()?.of(views)?.get<MutableList<Any>>() ?: return
         actions.removeAll { action ->
-            if (remoteViewsActionIdField.copy().of(action).get<Int>() != iconId) return@removeAll false
+            if (remoteViewsActionIdField?.copy()?.of(action)?.get<Int>() != iconId) return@removeAll false
             val method = when {
-                remoteViewsBitmapActionClass.isInstance(action) -> remoteViewsBitmapMethodField.copy().of(action).get<String>()
-                remoteViewsReflectionActionClass.isInstance(action) -> remoteViewsReflectionMethodField.copy().of(action).get<String>()
+                remoteViewsBitmapActionClass?.isInstance(action) == true -> remoteViewsBitmapMethodField?.copy()?.of(action)?.get<String>()
+                remoteViewsReflectionActionClass?.isInstance(action) == true -> remoteViewsReflectionMethodField?.copy()?.of(action)?.get<String>()
                 else -> null
             }
             method == "setImageBitmap" || method == "setImageIcon" || (removeOriginalColor && method == "setOriginalIconColor")
@@ -2567,7 +2570,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun View.isNotificationPanelIcon(): Boolean {
         var current: View? = this
         while (current != null) {
-            if (ExpandableNotificationRowClass.isInstance(current) || NotificationChildrenContainerClass.isInstance(current))
+            if (ExpandableNotificationRowClass?.isInstance(current) == true || NotificationChildrenContainerClass?.isInstance(current) == true)
                 return true
             current = current.parent as? View
         }
@@ -2588,7 +2591,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 bindNativeConversationIcon(icon, background, nf)
             }
         }
-        NotificationHeaderViewWrapperClass.resolve().optional().apply {
+        NotificationHeaderViewWrapperClass?.resolve()?.optional()?.apply {
             val resolveHeader = firstMethodOrNull {
                 name { it == "resolveHeaderViews" || it == "handleHeaderViews" || it == "resolveViews" }
             }
@@ -2598,11 +2601,11 @@ object SystemUIHooker : YukiBaseHooker() {
             }?.hook()?.after { bindNativeNotificationIcon(instance) }
         }
         // 最小化组头重用后不保证收到普通内容回调，只处理容器当前持有的同一个 wrapper
-        NotificationViewWrapperClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationViewWrapperClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "onReinflated"
             emptyParameters()
         }?.hook()?.after {
-            if (!NotificationHeaderViewWrapperClass.isInstance(instance)) return@after
+            if (NotificationHeaderViewWrapperClass?.isInstance(instance) != true) return@after
             val row = notificationWrapperRowField?.copy()?.of(instance)?.get() ?: return@after
             val container = rowChildrenContainerMethod?.copy()?.of(row)?.invoke() ?: return@after
             if (groupMinimizedHeaderMethod?.copy()?.of(container)?.invoke() === instance)
@@ -2630,57 +2633,71 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installStatusBarNotificationBindings() {
         if (isMIOS.not()) return
-        val managerClass = IconManagerClass ?: return
-        managerClass.resolve().apply {
-            val important = firstMethod { name = "isImportantConversation"; parameterCount = 1 }
-            if (miosVersionCode >= 2) {
-                val createDescriptor = firstMethod { name = "toStatusBarIcon"; parameterCount = 3 }
-                val iconType = createDescriptor.self.parameterTypes[2]?.enumConstants?.first { (it as Enum<*>).name == "NotifSmallIcon" }
-                firstMethod { name = "getIconDescriptor"; parameterCount = 2 }.hook().before {
-                    val entry = firstArg().get() ?: return@before
-                    if (important.copy().of(instance).invoke<Boolean>(entry) == true) return@before
-                    val entryResolver = entry.asResolver()
-                    val notification = entryResolver.firstField { name = "mSbn" }.get<StatusBarNotification>() ?: return@before
-                    val icons = entryResolver.firstField { name = "mIcons" }.get() ?: return@before
-                    val cached = icons.asResolver().firstField { name = "mSmallIconDescriptor" }
-                    result = cached.get() ?: createDescriptor.copy().of(instance).invoke(notification.notification.smallIcon, entry, iconType)
-                        ?.also { cached.set(it) }
+        IconManagerClass?.resolve()?.optional()?.apply {
+            val important = firstMethodOrNull {
+                name = "isImportantConversation"
+                parameters { it.size == 1 && it[0] == notificationEntryClass }
+            }
+            val createDescriptor = firstMethodOrNull {
+                name = "toStatusBarIcon"
+                parameters {
+                    it.size == 3 && it[0] == classOf<Icon>() && it[1] == notificationEntryClass && it[2].isEnum
                 }
             }
-            // OS1 的参数顺序为 descriptor、view、entry，OS2 起为 entry、descriptor、view
-            val entryIndex = if (miosVersionCode < 2) 2 else 0
-            val descriptorIndex = if (miosVersionCode < 2) 0 else 1
-            val viewIndex = if (miosVersionCode < 2) 1 else 2
-            firstMethod { name = "setIcon"; parameterCount = 3 }.hook {
-                before {
-                    val entry = arg(entryIndex).get() ?: return@before
-                    val view = arg(viewIndex).get<ImageView>() ?: return@before
-                    view.parentOrNull()?.takeIf { NotificationIconContainerClass.isInstance(it) }
-                        ?.also { notificationIconContainer = it }
-                    // OS1/2 无准备状态的旧图标可能仍保留 View.alpha，首次接管时移交给容器动画
-                    if (miosVersionCode < 3 && view.getTag<Int>(R.id.status_icon_render_state) == null) view.alpha = 1f
-                    if (important.copy().of(instance).invoke<Boolean>(entry) == true) {
-                        if (view.getTag<Int>(R.id.status_icon_render_state) != null) view.imageAlpha = 255
-                        view.setTag(R.id.status_icon_render_state, null)
-                        return@before
+            val iconType = createDescriptor?.self?.parameterTypes?.getOrNull(2)?.enumConstants
+                ?.firstOrNull { (it as Enum<*>).name == "NotifSmallIcon" }
+            // 部分 Android 14 宿主没有描述符转换入口，仍需安装下面的 setIcon 绑定
+            if (important != null && createDescriptor != null && iconType != null) firstMethodOrNull {
+                name = "getIconDescriptor"
+                parameters { it.size == 2 && it[0] == notificationEntryClass && it[1] == classOf<Boolean>() }
+            }?.hook()?.before {
+                val entry = firstArg().get() ?: return@before
+                if (important.copy().of(instance).invoke<Boolean>(entry) == true) return@before
+                val entryResolver = entry.asResolver().optional()
+                val notification = entryResolver.firstFieldOrNull { name = "mSbn" }?.get<StatusBarNotification>() ?: return@before
+                val icons = entryResolver.firstFieldOrNull { name = "mIcons" }?.get() ?: return@before
+                val cached = icons.asResolver().optional().firstFieldOrNull { name = "mSmallIconDescriptor" } ?: return@before
+                result = cached.get() ?: createDescriptor.copy().of(instance).invoke(notification.notification.smallIcon, entry, iconType)
+                    ?.also { cached.set(it) }
+            }
+            method { name = "setIcon"; parameterCount = 3 }.forEach method@{ method ->
+                val types = method.self.parameterTypes
+                val entryIndex = types.indexOf(notificationEntryClass)
+                val descriptorIndex = types.indexOfFirst { it.name == "com.android.internal.statusbar.StatusBarIcon" }
+                val viewIndex = types.indexOf(StatusBarIconViewClass)
+                if (entryIndex < 0 || descriptorIndex < 0 || viewIndex < 0) return@method
+                method.hook {
+                    before {
+                        val entry = arg(entryIndex).get() ?: return@before
+                        val view = arg(viewIndex).get<ImageView>() ?: return@before
+                        val isImportant = important?.copy()?.of(instance)?.invoke<Boolean>(entry) ?: return@before
+                        view.parentOrNull()?.takeIf { NotificationIconContainerClass?.isInstance(it) == true }
+                            ?.also { notificationIconContainer = it }
+                        // OS1/2 无准备状态的旧图标可能仍保留 View.alpha，首次接管时移交给容器动画
+                        if (miosVersionCode < 3 && view.getTag<Int>(R.id.status_icon_render_state) == null) view.alpha = 1f
+                        if (isImportant) {
+                            if (view.getTag<Int>(R.id.status_icon_render_state) != null) view.imageAlpha = 255
+                            view.setTag(R.id.status_icon_render_state, null)
+                            return@before
+                        }
+                        val notification = entry.asResolver().optional().firstFieldOrNull { name = "mSbn" }
+                            ?.get<StatusBarNotification>() ?: return@before
+                        val original = notification.notification.smallIcon
+                        val (drawable, replaced) = resolveStatusBarIcon(view.context, notification, original.loadDrawable(view.context))
+                        val descriptor = arg(descriptorIndex).get() ?: return@before
+                        val descriptorResolver = descriptor.asResolver().optional()
+                        val icon = descriptorResolver.firstFieldOrNull { name = "icon" } ?: return@before
+                        icon.set(if (replaced && drawable != null) Icon.createWithBitmap(drawable.toStatusBarIconBitmap(view.context)) else original)
+                        descriptorResolver.optional(silent = true).firstFieldOrNull { name = "preloadedIcon" }?.set(null)
+                        val colored = drawable?.let { isGrayscaleIcon(view.context, it).not() } == true
+                        view.setTag(R.id.status_icon_render_state, (if (!colored) 1 else 0) or (if (colored) 2 else 0))
+                        registerWallpaperColorChanged(view)
                     }
-                    val notification = entry.asResolver().firstField { name = "mSbn" }.get<StatusBarNotification>() ?: return@before
-                    val original = notification.notification.smallIcon
-                    val (drawable, replaced) = resolveStatusBarIcon(view.context, notification, original.loadDrawable(view.context))
-                    val descriptor = arg(descriptorIndex).get() ?: return@before
-                    val descriptorResolver = descriptor.asResolver()
-                    descriptorResolver.firstField { name = "icon" }.set(
-                        if (replaced && drawable != null) Icon.createWithBitmap(drawable.toStatusBarIconBitmap(view.context)) else original
-                    )
-                    descriptorResolver.optional(silent = true).firstFieldOrNull { name = "preloadedIcon" }?.set(null)
-                    val colored = drawable?.let { isGrayscaleIcon(view.context, it).not() } == true
-                    view.setTag(R.id.status_icon_render_state, (if (!colored) 1 else 0) or (if (colored) 2 else 0))
-                    registerWallpaperColorChanged(view)
+                    after { arg(viewIndex).get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
                 }
-                after { arg(viewIndex).get<ImageView>()?.let { applyPreparedStatusBarTint(it) } }
             }
         }
-        StatusBarIconViewClass.resolve().optional(silent = true).apply {
+        StatusBarIconViewClass?.resolve()?.optional(silent = true)?.apply {
             firstMethodOrNull { name = "updateIconColor"; emptyParameters() }?.hook()?.after {
                 applyPreparedStatusBarTint(instance())
             }
@@ -2703,12 +2720,12 @@ object SystemUIHooker : YukiBaseHooker() {
             before { movingChild.set(true) }
             after {
                 movingChild.remove()
-                val row = instance.asResolver().firstField { name = "mView" }.get() ?: return@after
+                val row = instance.asResolver().optional().firstFieldOrNull { name = "mView" }?.get() ?: return@after
                 val container = rowChildrenContainerMethod?.copy()?.of(row)?.invoke() ?: return@after
                 refreshGroupNotificationIcons(container)
             }
         }
-        ExpandableNotificationRowClass.resolve().optional(silent = true).firstMethodOrNull {
+        ExpandableNotificationRowClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "onAttachedChildrenCountChanged"
             emptyParameters()
         }?.hook()?.after {
@@ -2755,11 +2772,12 @@ object SystemUIHooker : YukiBaseHooker() {
                 ?: icon.context.appIconOf(notification.notificationPackageName))
         }
         NotificationHeaderViewWrapperInjectorClass?.resolve()?.optional(silent = true)?.apply {
-            firstMethodOrNull { name = "setAppIcon"; parameters(Context::class, ImageView::class, ExpandedNotificationClass) }
+            val notificationClass = ExpandedNotificationClass ?: return@apply
+            firstMethodOrNull { name = "setAppIcon"; parameters(Context::class, ImageView::class, notificationClass) }
                 ?.hook()?.intercept()
-            firstMethodOrNull { name = "setAppIcon"; parameters(ImageView::class, ExpandedNotificationClass) }
+            firstMethodOrNull { name = "setAppIcon"; parameters(ImageView::class, notificationClass) }
                 ?.hook()?.intercept()
-            firstMethodOrNull { name = "resetIconBgAndPaddings"; parameters(ImageView::class, ExpandedNotificationClass) }
+            firstMethodOrNull { name = "resetIconBgAndPaddings"; parameters(ImageView::class, notificationClass) }
                 ?.hook()?.intercept()
         }
     }
@@ -2767,7 +2785,7 @@ object SystemUIHooker : YukiBaseHooker() {
     private fun installLegacyStatusBarIcons() {
         if (isMIOS) return
         // 注入 MIUI 自己增加的一个工具类
-        NotificationUtilClass.run {
+        NotificationUtilClass?.run {
             var hasLeadingContext = false
             // 强制修改 getCustomAppIcon 获取的图标为 smallIcon
             // 部分系统没有 "getCustomAppIcon" 这个方法 - 所以直接忽略
@@ -2791,15 +2809,15 @@ object SystemUIHooker : YukiBaseHooker() {
             // 部分系统没有 "getSmallIcon" 这个方法 - 所以直接忽略
             val getSmallIconCondition1 = MethodCondition<Any>().apply {
                 name = "getSmallIcon"
-                parameters { it[0] isSubclassOf StatusBarNotification::class && it[1] == classOf<Int>() }
+                parameters { it.size == 2 && it[0] isSubclassOf StatusBarNotification::class && it[1] == classOf<Int>() }
             }
             val getSmallIconCondition2 = MethodCondition<Any>().apply {
                 name = "getSmallIcon"
-                parameters(ExpandedNotificationClass)
+                parameters { it.size == 1 && it[0] == ExpandedNotificationClass }
             }
             val getSmallIconCondition3 = MethodCondition<Any>().apply {
                 name = "getSmallIcon"
-                parameters { it[0] == classOf<Context>() && it[1] isSubclassOf StatusBarNotification::class }
+                parameters { it.size == 2 && it[0] == classOf<Context>() && it[1] isSubclassOf StatusBarNotification::class }
             }
             val getSmallIconResolver = resolve().optional(silent = true)
             val getSmallIcon = getSmallIconResolver.firstMethodOrNull(getSmallIconCondition1)
@@ -2821,7 +2839,7 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         // 注入状态栏通知图标实例
-        StatusBarIconViewClass.resolve().optional().apply {
+        StatusBarIconViewClass?.resolve()?.optional()?.apply {
             firstMethodOrNull {
                 name = "updateIconColor"
                 emptyParameters()
@@ -2890,12 +2908,12 @@ object SystemUIHooker : YukiBaseHooker() {
             }
         }
         // 注入状态栏通知图标实例
-        StatusBarIconViewClass.resolve().optional().apply {
+        StatusBarIconViewClass?.resolve()?.optional()?.apply {
             firstMethodOrNull {
                 name = "setNotification"
                 parameters {
-                    (it.first() == classOf<StatusBarNotification>() ||
-                        it.first() == ExpandedNotificationClass) && it.size == 1
+                    (it.firstOrNull() == classOf<StatusBarNotification>() ||
+                        it.firstOrNull() == ExpandedNotificationClass) && it.size == 1
                 }
             }?.hook()?.after {
                 // 注册壁纸颜色监听
@@ -2929,36 +2947,36 @@ object SystemUIHooker : YukiBaseHooker() {
         val amount = container.getTag<Int>(R.id.status_icon_system_limit) ?: run {
             // 首次从无 tag 的模块热重载时，字段可能已被覆盖，必须读取当前用户的系统设置
             val manager = currentIconManager() ?: return
-            val user = manager.asResolver().firstField { name = "userTracker"; superclass() }.get() ?: return
-            val userId = user.asResolver().firstMethod { name = "getUserId"; emptyParameters() }.invoke<Int>() ?: return
-            var limit = Settings.System::class.resolve().firstMethod {
+            val user = manager.asResolver().optional().firstFieldOrNull { name = "userTracker"; superclass() }?.get() ?: return
+            val userId = user.asResolver().optional().firstMethodOrNull { name = "getUserId"; emptyParameters() }?.invoke<Int>() ?: return
+            var limit = Settings.System::class.resolve().optional().firstMethodOrNull {
                 name = "getIntForUser"
                 parameterCount = 4
-            }.invoke<Int>(container.context.contentResolver, "status_bar_show_notification_icon", 1, userId) ?: return
+            }?.invoke<Int>(container.context.contentResolver, "status_bar_show_notification_icon", 1, userId) ?: return
             if (miosVersionCode >= 4 && limit == 3) {
-                val component = globalContext?.asResolver()?.firstField { name = "mSysUIComponent"; superclass() }?.get() ?: return
-                val provider = component.asResolver().firstField { name = "notificationIconObserverProvider" }.get() ?: return
-                val observer = provider.asResolver().firstMethod { name = "get"; emptyParameters() }.invoke() ?: return
-                val resolver = observer.asResolver()
-                val region = resolver.firstField { name = "regionFlow" }.get()?.asResolver()
-                    ?.firstMethod { name = "getValue"; emptyParameters() }?.invoke<String>()
-                val policy = resolver.firstField { name = "operatorCustomizedPolicy" }.get() ?: return
-                val resources = policy.asResolver().firstField { name = "mNoMccMncResources" }.get<Resources>() ?: return
+                val component = globalContext?.asResolver()?.optional()?.firstFieldOrNull { name = "mSysUIComponent"; superclass() }?.get() ?: return
+                val provider = component.asResolver().optional().firstFieldOrNull { name = "notificationIconObserverProvider" }?.get() ?: return
+                val observer = provider.asResolver().optional().firstMethodOrNull { name = "get"; emptyParameters() }?.invoke() ?: return
+                val resolver = observer.asResolver().optional()
+                val region = resolver.firstFieldOrNull { name = "regionFlow" }?.get()?.asResolver()?.optional()
+                    ?.firstMethodOrNull { name = "getValue"; emptyParameters() }?.invoke<String>()
+                val policy = resolver.firstFieldOrNull { name = "operatorCustomizedPolicy" }?.get() ?: return
+                val resources = policy.asResolver().optional().firstFieldOrNull { name = "mNoMccMncResources" }?.get<Resources>() ?: return
                 // 与 NotificationIconObserver 的地区/运营商限制保持一致
                 val resourceId = resources.getIdentifier("config_showOperatorNameInStatusBar", "bool", PackageName.SYSTEMUI)
-                if (region == "SA" || resources.getBoolean(resourceId)) limit = 1
+                if (region == "SA" || (resourceId != 0 && resources.getBoolean(resourceId))) limit = 1
             }
             limit
         }
-        container.asResolver().firstMethod { name = "setMaxIconsAmount"; parameters(Int::class) }.invoke(amount)
+        container.asResolver().optional().firstMethodOrNull { name = "setMaxIconsAmount"; parameters(Int::class) }?.invoke(amount)
     }
 
     private fun installStatusBarIconCount() {
         if (isMIOS && miosVersionCode >= 2) {
-            NotificationIconContainerClass.resolve().firstMethod {
+            NotificationIconContainerClass?.resolve()?.optional()?.firstMethodOrNull {
                 name = "setMaxIconsAmount"
                 parameters(Int::class)
-            }.hook().before {
+            }?.hook()?.before {
                 val amount = firstArg().get<Int>() ?: return@before
                 statusBarMaxStaticIcons = amount
                 isShowNotificationIcons = amount > 0
@@ -2973,7 +2991,7 @@ object SystemUIHooker : YukiBaseHooker() {
             return
         }
         // 注入状态栏通知图标容器实例
-        NotificationIconContainerClass.apply {
+        NotificationIconContainerClass?.apply {
             // OS3 起容器只改变 View.alpha，不在每次布局中重读所有通知图标
             if (isMIOS.not() || miosVersionCode < 3) resolve().optional().firstMethodOrNull {
                 name = "applyIconStates"
@@ -2989,16 +3007,16 @@ object SystemUIHooker : YukiBaseHooker() {
                 name { it == "calculateIconTranslations" || it == "calculateIconXTranslations" }
             }?.hook()?.after {
                 val isStatusBar = isMIOS.not() || miosVersionCode >= 2 ||
-                    (statusIconStaticLayoutField.copy().of(instance).get<Boolean>() == true &&
-                        statusIconLockScreenField.copy().of(instance).get<Boolean>() != true)
+                    (statusIconStaticLayoutField?.copy()?.of(instance)?.get<Boolean>() == true &&
+                        statusIconLockScreenField?.copy()?.of(instance)?.get<Boolean>() == false)
                 if (isStatusBar) notificationIconContainer = instance<ViewGroup>()
                 if (isMIOS && miosVersionCode < 2 && isStatusBar && isShowNotificationIcons &&
                     ConfigData.isEnableLiftedStatusIconCount && ConfigData.liftedStatusIconCount == 0) {
                     // OS1 在溢出位置为 0 时隐藏全部图标，模块的 0 个设置仍需显示省略号
                     val container = instance<ViewGroup>()
                     val firstIcon = container.children.firstOrNull()
-                    val states = instance.asResolver().firstField { name = "mIconStates" }.get<HashMap<View, Any>>()
-                    firstIcon?.let { states?.get(it) }?.asResolver()?.firstField { name = "visibleState" }?.set(1)
+                    val states = instance.asResolver().optional().firstFieldOrNull { name = "mIconStates" }?.get<HashMap<View, Any>>()
+                    firstIcon?.let { states?.get(it) }?.asResolver()?.optional()?.firstFieldOrNull { name = "visibleState" }?.set(1)
                 }
                 // 修复部分开发版状态栏图标只能显示一个的问题
                 when (miuiIncrementalVersion.lowercase()) {
@@ -3042,9 +3060,9 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installFocusTickerIcons() {
         if (miosVersionCode >= 3) return
-        if (isMIOS && miosVersionCode < 2) FocusedNotifPromptViewClass?.resolve()?.apply {
-            val iconField = firstField { name = "mIcon" }
-            val textField = firstField { name = "mContentText" }
+        if (isMIOS && miosVersionCode < 2) FocusedNotifPromptViewClass?.resolve()?.optional()?.apply {
+            val iconField = firstFieldOrNull { name = "mIcon" } ?: return@apply
+            val textField = firstFieldOrNull { name = "mContentText" } ?: return@apply
             fun updateTint(view: Any) {
                 if (ConfigData.isEnableFocusNotifyIcon.not()) return
                 val icon = iconField.copy().of(view).get<ImageView>() ?: return
@@ -3055,20 +3073,21 @@ object SystemUIHooker : YukiBaseHooker() {
                     drawable.setTintList(if (monochrome) ColorStateList.valueOf(text.currentTextColor) else null)
                 }
             }
-            firstMethod {
+            firstMethodOrNull {
                 name = "setData"
                 parameterCount = 1
-            }.hook {
+            }?.hook {
                 before {
                     if (ConfigData.isEnableFocusNotifyIcon.not()) return@before
                     val icon = iconField.copy().of(instance).get<ImageView>() ?: return@before
                     val data = firstArg().get() ?: return@before
-                    val resolver = data.asResolver()
-                    val notification = resolver.firstField { name = "sbn" }.get<StatusBarNotification>() ?: return@before
+                    val resolver = data.asResolver().optional()
+                    val notification = resolver.firstFieldOrNull { name = "sbn" }?.get<StatusBarNotification>() ?: return@before
+                    val drawableField = resolver.firstFieldOrNull { name = "drawable" } ?: return@before
                     val context = icon.context
                     val drawable = resolveStatusBarIcon(context, notification, notification.notification.smallIcon.loadDrawable(context)).first
                         ?.toFocusIconDrawable(context.resources)
-                    resolver.firstField { name = "drawable" }.set(drawable)
+                    drawableField.set(drawable)
                     val icons = icon.getTag<WeakHashMap<Drawable, Boolean>>(R.id.focus_icon_monochrome)
                         ?: WeakHashMap<Drawable, Boolean>().also { icon.setTag(R.id.focus_icon_monochrome, it) }
                     // 只在绑定时检查最终像素，颜色回调不重新查规则或生成位图
@@ -3077,10 +3096,10 @@ object SystemUIHooker : YukiBaseHooker() {
                 }
                 after { updateTint(instance) }
             }
-            firstMethod {
+            firstMethodOrNull {
                 name = "onDarkChanged"
                 parameters(ArrayList::class, Float::class, Int::class, Int::class, Int::class, Boolean::class)
-            }.hook().after { updateTint(instance) }
+            }?.hook()?.after { updateTint(instance) }
         }
         // 旧版移除焦点通知彩色图标
         FocusUtilsClass?.resolve()?.optional()?.apply {
@@ -3105,15 +3124,15 @@ object SystemUIHooker : YukiBaseHooker() {
             firstMethodOrNull {
                 name = "getStatusBarTickerDarkIcon"
                 parameters {
-                    (it.first() == classOf<StatusBarNotification>() ||
-                        it.first() == ExpandedNotificationClass) && it.size == 1
+                    (it.firstOrNull() == classOf<StatusBarNotification>() ||
+                        it.firstOrNull() == ExpandedNotificationClass) && it.size == 1
                 }
             }?.hook()?.after { bindFocusTickerIcon(isDark = true) }
             firstMethodOrNull {
                 name = "getStatusBarTickerIcon"
                 parameters {
-                    (it.first() == classOf<StatusBarNotification>() ||
-                        it.first() == ExpandedNotificationClass) && it.size == 1
+                    (it.firstOrNull() == classOf<StatusBarNotification>() ||
+                        it.firstOrNull() == ExpandedNotificationClass) && it.size == 1
                 }
             }?.hook()?.after { bindFocusTickerIcon(isDark = false) }
         }
@@ -3167,7 +3186,7 @@ object SystemUIHooker : YukiBaseHooker() {
             nf.createFoldEntranceIcon(context, iconSize)?.also { result = it }
         }
         // 只替换折叠入口生成期间的图标
-        NotificationUtilClass.resolve().optional(silent = true).firstMethodOrNull {
+        NotificationUtilClass?.resolve()?.optional(silent = true)?.firstMethodOrNull {
             name = "getCustomAppIcon"
             parameters(Notification::class, Context::class)
         }?.hook()?.after {
@@ -3232,7 +3251,7 @@ object SystemUIHooker : YukiBaseHooker() {
 
     private fun installHostReferences() {
         SettingsManagerClass?.resolve()?.optional()?.constructor {}?.hookAll()?.after { settingsManager = instance }
-        StatusBarNotificationPresenterClass.resolve().optional(silent = true).constructor {}.hookAll().after {
+        StatusBarNotificationPresenterClass?.resolve()?.optional(silent = true)?.constructor {}?.hookAll()?.after {
             notificationPresenter = instance
         }
     }
@@ -3242,9 +3261,9 @@ object SystemUIHooker : YukiBaseHooker() {
         if (controller == null || notificationData == null || notifyInstance == null)
             return YLog.warn("AOD fillNotificationData got null arguments")
 
-        val context = controller.asResolver().firstFieldOrNull { name = "mContext" }?.get<Context>()
+        val context = controller.asResolver().optional().firstFieldOrNull { name = "mContext" }?.get<Context>()
             ?: return YLog.warn("fillNotificationData got null context")
-        val iconDrawableField = notificationData.asResolver().firstFieldOrNull { name = "mIconDrawable" }
+        val iconDrawableField = notificationData.asResolver().optional().firstFieldOrNull { name = "mIconDrawable" }
             ?: return YLog.warn("fillNotificationData got null iconDrawableField")
         // AOD 只接收 Drawable，将外圈和前景一起合成，并固定使用夜间配色
         val iconView = ImageView(context)
