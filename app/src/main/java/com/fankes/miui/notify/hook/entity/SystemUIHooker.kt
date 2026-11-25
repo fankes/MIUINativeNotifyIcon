@@ -2441,17 +2441,27 @@ object SystemUIHooker : YukiBaseHooker() {
             injectorClass.resolve().optional(silent = true).method {
                 name { it == "handleAppIcon" || it == "handleAppIconInternal" }
                 parameterCount { it in 2..5 }
-            }.hookAll {
-                before {
-                    if (arg(1).get<Notification>()?.isMediaNotifyIconDisabled == true) return@before
-                    if (lastArg().get() != true) result = null
-                }
-                after {
-                    if (isMIOS.not() || miosVersionCode < 2 || lastArg().get() != true) return@after
-                    val views = firstArg().get<RemoteViews>() ?: return@after
-                    val notification = arg(1).get<Notification>() ?: return@after
-                    val context = arg(2).get<Context>() ?: return@after
-                    removeClassicAppIconActions(views, notification, context)
+            }.forEach method@{ method ->
+                val types = method.self.parameterTypes
+                val notificationIndex = types.indexOf(classOf<Notification>())
+                val viewsIndex = types.indexOf(classOf<RemoteViews>())
+                // 双 Context 签名使用前一个判断聊天类型，后一个用于获取自定义图标
+                val contextIndex = types.indexOf(classOf<Context>())
+                val styleIndex = types.indexOf(classOf<Boolean>())
+                if (notificationIndex < 0 || viewsIndex < 0 || contextIndex < 0) return@method
+                method.hook {
+                    before {
+                        if (arg(notificationIndex).get<Notification>()?.isMediaNotifyIconDisabled == true) return@before
+                        // OS1 没有样式参数，由模块负责后续图标绑定
+                        if (styleIndex < 0 || arg(styleIndex).get() != true) result = null
+                    }
+                    after {
+                        if (isMIOS.not() || miosVersionCode < 2 || styleIndex < 0 || arg(styleIndex).get() != true) return@after
+                        val views = arg(viewsIndex).get<RemoteViews>() ?: return@after
+                        val notification = arg(notificationIndex).get<Notification>() ?: return@after
+                        val context = arg(contextIndex).get<Context>() ?: return@after
+                        removeClassicAppIconActions(views, notification, context)
+                    }
                 }
             }
             if (isMIOS && miosVersionCode >= 2) injectorClass.resolve().optional(silent = true).firstMethodOrNull {
