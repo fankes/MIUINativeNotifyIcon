@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.3"
+agp = "9.5.3"
 kotlin = "2.4.21"
 ksp = "2.3.12"
 project-promote = "1.0.2"
