@@ -522,7 +522,8 @@ object SystemUIHooker : YukiBaseHooker() {
     private val foldEntranceIconContext = ThreadLocal<Pair<List<StatusBarNotification>, Int>>()
 
     /** SystemUI 进程内用于恢复和更新 ANIP 快照的协程作用域 */
-    private val iconRuleScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val iconRuleScopeDelegate = lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
+    private val iconRuleScope by iconRuleScopeDelegate
 
     /** 当前运行时是否提供模块共享文件，不提供时回退为 SystemUI 自行获取资源 */
     private val isSharedCacheAvailable get() = YukiHook.Status.runtime == YukiHookRuntime.LIBXPOSED
@@ -2227,8 +2228,8 @@ object SystemUIHooker : YukiBaseHooker() {
     fun release() {
         wallpaperColorsListener?.let { (manager, listener) -> manager.removeOnColorsChangedListener(listener) }
         wallpaperColorsListener = null
-        val job = iconRuleScope.coroutineContext.job
-        job.invokeOnCompletion {
+        val job = if (iconRuleScopeDelegate.isInitialized()) iconRuleScope.coroutineContext.job else null
+        fun cleanup() {
             IconRuleManagerTool.release()
             iconRuleUpdateFallbackJob = null
             legacyIconRuleUpdateJob = null
@@ -2236,14 +2237,17 @@ object SystemUIHooker : YukiBaseHooker() {
             notificationPresenter = null
             settingsManager = null
             // 完成回调可能运行在调度线程上，另起普通线程关闭，避免阻塞主线程或等待自己退出
-            thread(name = "MIUINativeNotifyIcon-dispose") {
+            if (job != null) thread(name = "MIUINativeNotifyIcon-dispose") {
                 // 只能关闭当前模块加载的协程副本，不能关闭宿主共用的运行时
                 @OptIn(DelicateCoroutinesApi::class)
                 if (classOf<Dispatchers>().classLoader === classOf<SystemUIHooker>().classLoader) Dispatchers.shutdown()
                 else YLog.warn("Skipping coroutine shutdown: the runtime is shared with the host")
             }
         }
-        job.cancel()
+        if (job == null) cleanup() else {
+            job.invokeOnCompletion { cleanup() }
+            job.cancel()
+        }
     }
 
     /**
@@ -2708,7 +2712,7 @@ object SystemUIHooker : YukiBaseHooker() {
                     applyPreparedStatusBarTint(instance())
                 }
         }
-        iconRuleScope.launch { refreshStatusBarIcons() }
+        withApplicationReady { iconRuleScope.launch { refreshStatusBarIcons() } }
     }
 
     private fun installGroupNotificationUpdates() {
@@ -2749,7 +2753,7 @@ object SystemUIHooker : YukiBaseHooker() {
                 parameterCount = 1
             }?.hook()?.after { bindMediaNotificationIcons(instance) }
         }
-        iconRuleScope.launch { refreshMediaNotificationIcons() }
+        withApplicationReady { iconRuleScope.launch { refreshMediaNotificationIcons() } }
     }
 
     private fun installLegacyNotificationPanel() {
@@ -2984,9 +2988,11 @@ object SystemUIHooker : YukiBaseHooker() {
                 if (ConfigData.isEnableLiftedStatusIconCount && amount > 0)
                     firstArg().set(ConfigData.liftedStatusIconCount.let { if (it in 0..100) it else 5 })
             }
-            iconRuleScope.launch {
-                val container = notificationIconContainer ?: return@launch
-                restoreStatusBarIconLimit(container)
+            withApplicationReady {
+                iconRuleScope.launch {
+                    val container = notificationIconContainer ?: return@launch
+                    restoreStatusBarIconLimit(container)
+                }
             }
             return
         }
